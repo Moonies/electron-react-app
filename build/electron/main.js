@@ -68,6 +68,9 @@ electron_1.app.on('activate', function () {
         createWindow();
     }
 });
+electron_1.ipcMain.on('close-app', function () {
+    electron_1.app.quit();
+});
 // Auto-updater events
 electron_updater_1.autoUpdater.on('update-available', function () {
     electron_1.dialog.showMessageBox({

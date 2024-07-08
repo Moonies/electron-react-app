@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import { autoUpdater } from 'electron-updater';
@@ -54,6 +54,9 @@ app.on('activate', () => {
   }
 });
 
+ipcMain.on('close-app', () => {
+  app.quit();
+});
 // Auto-updater events
 autoUpdater.on('update-available', () => {
   dialog.showMessageBox({

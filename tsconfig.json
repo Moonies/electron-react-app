@@ -19,10 +19,14 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "paths": {
       "*": ["node_modules/*", "src/types/*"],
-      "redux/*": ["src/redux/*"] 
+      "store/*": ["./store/*"],
+      "pages/*": ["./pages/*"],
+      "components/*": ["./components/*"],
+      "api/*": ["./api/*"],
+      "hooks/*" :["./hooks/*"],
     },
   },
   "include": [

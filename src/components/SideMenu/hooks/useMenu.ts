@@ -17,7 +17,6 @@ export default function useMenu() {
     ];
 
   const handleListItemClick = (index: number) => {
-    console.log(index)
     setSelectedIndex(index)
   }
 

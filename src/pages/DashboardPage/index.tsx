@@ -16,7 +16,7 @@ export default function DashboardPage() {
 
   return (
     <Box flex={1} padding={3}>
-      <Toolbar />
+      {/* <Toolbar /> */}
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
