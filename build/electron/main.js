@@ -73,24 +73,28 @@ electron_1.ipcMain.on('close-app', function () {
 });
 // Auto-updater events
 electron_updater_1.autoUpdater.on('update-available', function () {
-    electron_1.dialog.showMessageBox({
+    electron_1.dialog
+        .showMessageBox({
         type: 'info',
         title: 'Update Available',
         message: 'A new version of the app is available. Do you want to update now?',
-        buttons: ['Yes', 'No']
-    }).then(function (result) {
+        buttons: ['Yes', 'No'],
+    })
+        .then(function (result) {
         if (result.response === 0) {
             electron_updater_1.autoUpdater.downloadUpdate();
         }
     });
 });
 electron_updater_1.autoUpdater.on('update-downloaded', function () {
-    electron_1.dialog.showMessageBox({
+    electron_1.dialog
+        .showMessageBox({
         type: 'info',
         title: 'Update Ready',
         message: 'Install and restart now?',
-        buttons: ['Yes', 'Later']
-    }).then(function (result) {
+        buttons: ['Yes', 'Later'],
+    })
+        .then(function (result) {
         if (result.response === 0) {
             electron_updater_1.autoUpdater.quitAndInstall(false, true);
         }

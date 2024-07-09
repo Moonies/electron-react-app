@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
   appId: 'sansenshimizu.hayaraku',
@@ -7,10 +7,7 @@ module.exports = {
     output: 'dist',
     buildResources: 'build',
   },
-  files: [
-    'build/**/*',
-    'package.json',
-  ],
+  files: ['build/**/*', 'package.json'],
   extraMetadata: {
     main: 'build/electron/main.js',
   },
@@ -27,13 +24,13 @@ module.exports = {
     installerIcon: 'Untitled-1.ico',
     uninstallerIcon: 'Untitled-1.ico',
     installerHeaderIcon: 'Untitled-1.ico',
-    installerSidebar:"installerSidebar-24.bmp",
+    installerSidebar: 'installerSidebar-24.bmp',
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
     shortcutName: 'Electron React Dashboard',
     deleteAppDataOnUninstall: true,
     differentialPackage: true,
-    include: "installer.nsh",
+    include: 'installer.nsh',
   },
   mac: {
     category: 'public.app-category.utilities',
@@ -47,4 +44,4 @@ module.exports = {
   //   owner: 'your-github-username',
   //   repo: 'your-repo-name'
   // }
-};
+}

@@ -4,10 +4,10 @@ directories:
   output: dist
   buildResources: build
 files:
-  - "build/**/*"
-  - "package.json"
+  - 'build/**/*'
+  - 'package.json'
 extraMetadata:
-  main: "build/electron/main.js"
+  main: 'build/electron/main.js'
 mac:
   category: public.app-category.utilities
 win:
