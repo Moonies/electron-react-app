@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Box,
   TextField,
@@ -5,18 +6,11 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Button,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   InputAdornment,
   IconButton,
 } from '@mui/material'
+import { useGridApiRef } from '@mui/x-data-grid'
 import {
   Delete as DeleteIcon,
   Search as SearchIcon,
@@ -28,21 +22,40 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import useSales from './hooks/useSale'
-import { StyledDivider, StyledButton } from './styles'
+import { StyledDivider, StyledButton, DataGridContainer, StripedDataGrid } from './styles'
 import dayjs, { Dayjs } from 'dayjs'
 
 export default function SalePage() {
-  const { searchCriteria, handleChange, handleSearch, salesSummary, salesData } = useSales()
+  const { searchCriteria, handleChange, handleSearch, salesSummary, salesData, columns } =
+    useSales()
+  const salesDataGridRef = useGridApiRef()
+
+  useEffect(() => {
+    salesDataGridRef.current.autosizeColumns({
+      columns: ['customerName'],
+      includeHeaders: true,
+      includeOutliers: true,
+      expand: true,
+    })
+  }, [salesData])
 
   return (
-    <>
+    <Box display={'flex'} flexDirection={'column'} flexGrow={1}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
           <StyledDivider textAlign='left'>売上管理</StyledDivider>
         </Typography>
       </Box>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+            gap: 2,
+            p: 1,
+          }}
+        >
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
             <Box
               sx={{
@@ -152,28 +165,21 @@ export default function SalePage() {
               </Box>
             </Box>
           </Box>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Product</TableCell>
-                  <TableCell align='right'>Amount</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {salesData.map(row => (
-                  <TableRow key={row.id}>
-                    <TableCell>{row.date}</TableCell>
-                    <TableCell>{row.product}</TableCell>
-                    <TableCell align='right'>${row.amount}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <DataGridContainer>
+            <StripedDataGrid
+              apiRef={salesDataGridRef}
+              getRowId={row => row.saleId}
+              rows={salesData}
+              columns={columns}
+              // autoHeight
+              disableColumnMenu
+              getRowClassName={params =>
+                params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+              }
+            />
+          </DataGridContainer>
         </Box>
       </LocalizationProvider>
-    </>
+    </Box>
   )
 }

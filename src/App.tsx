@@ -46,6 +46,9 @@ export default function App() {
             component={'main'}
             sx={{ backgroundColor: theme => theme.palette.secondary.Main }}
             flexGrow={1}
+            display={'flex'}
+            flexDirection={'column'}
+            overflow={'hidden'}
           >
             <Toolbar />
             <Routes>
