@@ -16,6 +16,7 @@ export interface SalesSummary {
 
 export interface SalesData {
   saleId: number
+  invoiceNumber: number
   customerName: string
   deliveryDate: Date | string
   productId: string

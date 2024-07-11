@@ -5,6 +5,11 @@ import useLoading from 'hooks/useLoading'
 import { GridColDef } from '@mui/x-data-grid'
 import { SalesData, SalesSummary, SearchCriteria } from 'api/sales/saleList'
 
+interface PaginationModel {
+  page: number
+  pageSize: number
+}
+
 export default function useSales() {
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     category: '',
@@ -15,16 +20,21 @@ export default function useSales() {
 
   const [salesSummary, setSalesSummary] = useState<SalesSummary | null>(null)
   const [salesData, setSalesData] = useState<SalesData[]>([])
-
+  const [paginationModel, setPaginationModel] = useState<PaginationModel>({
+    page: 0,
+    pageSize: 10,
+  })
   const { withLoading } = useLoading()
 
   const handleChange = (name: string, value: string | Date) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
+
   const currencyFormatter = new Intl.NumberFormat('ja-JP', {
     style: 'currency',
     currency: 'JPY',
   })
+
   const columns: GridColDef[] = [
     {
       field: 'invoiceNumber',
@@ -60,6 +70,12 @@ export default function useSales() {
     }
   }, [searchCriteria, withLoading])
 
+  const handlePaginationModelChange = (newModel: PaginationModel) => {
+    console.log('change pagination')
+    setPaginationModel(newModel)
+    //call APi
+  }
+
   return {
     searchCriteria,
     handleChange,
@@ -67,5 +83,8 @@ export default function useSales() {
     salesSummary,
     salesData,
     columns,
+    handlePaginationModelChange,
+    paginationModel,
+    currencyFormatter,
   }
 }

@@ -11,10 +11,10 @@ export interface AuthData {
   token: string
 }
 
-export const checkAuth = async (
+export default async function checkAuth(
   username: string,
   password: string
-): Promise<ApiResponse<AuthData>> => {
+): Promise<ApiResponse<AuthData>> {
   // when use real API
   // try {
   //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });
