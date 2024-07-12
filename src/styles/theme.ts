@@ -1,6 +1,5 @@
 import { ThemeOptions, createTheme } from '@mui/material/styles'
 import { jaJP } from '@mui/material/locale'
-import { red } from '@mui/material/colors'
 
 const themeOptions: ThemeOptions = {
   palette: {
@@ -21,9 +20,35 @@ const themeOptions: ThemeOptions = {
     },
   },
   components: {
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          fontSize: '1.2rem',
+          outline: 2,
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          fontSize: '1.2rem',
+        },
+      },
+    },
     MuiDialogTitle: {
-      variants: [{ props: { security: 'error' }, style: { backgroundColor: red[700] } }],
-      styleOverrides: {},
+      styleOverrides: {
+        root: {
+          backgroundColor: '#404040',
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          padding: '24px !important',
+          margin: '16px',
+        },
+      },
     },
     MuiDialogActions: {
       styleOverrides: {
@@ -32,6 +57,9 @@ const themeOptions: ThemeOptions = {
         },
       },
     },
+  },
+  typography: {
+    // fontFamily: 'monospace',
   },
 }
 const theme = createTheme(themeOptions, jaJP)

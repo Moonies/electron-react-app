@@ -25,6 +25,8 @@ const DataGridContainer = styled(Box)(({ theme }) => ({
 }))
 const ODD_OPACITY = 0.2
 const StyledStripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  fontSize: 14,
+  // fontWeight: 'bold',
   '& .MuiDataGrid-columnHeaders': {
     color: theme.palette.text.primary,
     borderBottom: `4px solid ${theme.palette.divider}`,

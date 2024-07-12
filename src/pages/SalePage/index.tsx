@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Box,
   TextField,
@@ -46,28 +46,29 @@ export default function SalePage() {
   const salesDataGridRef = useGridApiRef()
 
   useEffect(() => {
-    salesDataGridRef.current.autosizeColumns({
-      columns: ['customerName'],
-      includeHeaders: true,
-      includeOutliers: true,
-      expand: true,
-    })
+    if (salesDataGridRef.current) {
+      salesDataGridRef.current.autosizeColumns({
+        // columns: ['customerName', 'productName'],
+        includeHeaders: true,
+        includeOutliers: true,
+        expand: true,
+      })
+    }
   }, [salesData])
 
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedSale, setSelectedSale] = useState<SalesData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
-  const [alertOpen, setAlertOpen] = useState(false)
   const dispatch = useDispatch()
 
   const handleAddClick = () => {
-    setModalMode('add')
     setSelectedSale(undefined)
+    setModalMode('add')
     setModalOpen(true)
   }
 
-  const handleEditClick = () => {
+  const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
       const selectedData = salesData.find(sale => sale.saleId === selectedId)
@@ -85,14 +86,10 @@ export default function SalePage() {
         })
       )
     }
-  }
+  }, [selectionModel])
 
   const handleModalClose = () => {
     setModalOpen(false)
-  }
-
-  const handleRowSelectChange = (newSelectionModel: GridRowSelectionModel) => {
-    setSelectionModel(newSelectionModel)
   }
 
   const handleModalConfirm = async (data: SalesData) => {
@@ -147,7 +144,7 @@ export default function SalePage() {
                     size='small'
                     fullWidth
                     name='keyword'
-                    label='Keyword'
+                    label='検索'
                     value={searchCriteria.keyword}
                     onChange={e => handleChange('keyword', e.target.value)}
                     InputProps={{
@@ -193,7 +190,6 @@ export default function SalePage() {
             >
               {salesSummary && (
                 <>
-                  {/* <Typography variant='h6'>Sales Summary</Typography> */}
                   <Typography variant='h6'>
                     売上総合: {currencyFormatter.format(Number(salesSummary.totalSales))}
                   </Typography>
@@ -221,10 +217,10 @@ export default function SalePage() {
                   size='large'
                   onClick={handleAddClick}
                 >
-                  Add
+                  追加
                 </StyledButton>
                 <StyledButton variant='outlined' startIcon={<DeleteIcon />} size='large'>
-                  Delete
+                  削除
                 </StyledButton>
               </Box>
               <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
@@ -234,7 +230,7 @@ export default function SalePage() {
                   size='large'
                   onClick={handleEditClick}
                 >
-                  Edit
+                  編集
                 </StyledButton>
                 <StyledButton
                   variant='outlined'
@@ -242,15 +238,15 @@ export default function SalePage() {
                   size='large'
                   sx={{ visibility: 'hidden' }}
                 >
-                  Edit
+                  visible
                 </StyledButton>
               </Box>
               <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
                 <StyledButton variant='outlined' startIcon={<UploadFileIcon />} size='large'>
-                  Upload
+                  自動アプロード
                 </StyledButton>
                 <StyledButton variant='outlined' startIcon={<PrintIcon />} size='large'>
-                  Export
+                  データ出力
                 </StyledButton>
               </Box>
             </Box>
@@ -263,7 +259,7 @@ export default function SalePage() {
             // checkboxSelection
             apiref={salesDataGridRef}
             getRowId={row => row.saleId}
-            onSelected={handleRowSelectChange}
+            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
           />
         </Box>
         <SalesModal

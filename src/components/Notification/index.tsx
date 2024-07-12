@@ -9,11 +9,13 @@ import {
   DialogActions,
   Button,
   DialogContentText,
+  Slide,
 } from '@mui/material'
 import { RootState } from 'store/index'
 import { clearNotification } from 'store/notificationSlice'
 import { StyledAlert } from './styles'
 import { red } from '@mui/material/colors'
+import { TransitionProps } from '@mui/material/transitions'
 
 const Notification: React.FC = () => {
   const dispatch = useDispatch()
@@ -23,9 +25,28 @@ const Notification: React.FC = () => {
     dispatch(clearNotification())
   }
 
+  const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+      children: React.ReactElement<any, any>
+    },
+    ref: React.Ref<unknown>
+  ) {
+    return <Slide direction='up' ref={ref} {...props} />
+  })
+
   if (type === 'modal') {
     return (
-      <Dialog open={!!message} onClose={handleClose} maxWidth='sm' fullWidth={true}>
+      <Dialog
+        open={!!message}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose()
+          }
+        }}
+        maxWidth='sm'
+        fullWidth={true}
+        TransitionComponent={Transition}
+      >
         <DialogTitle
           sx={theme => ({
             backgroundColor: (() => {
@@ -46,9 +67,7 @@ const Notification: React.FC = () => {
           {severity === 'error' ? 'Error' : 'Notification'}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText p={2} m={2}>
-            {message}
-          </DialogContentText>
+          <DialogContentText>{message}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Close</Button>

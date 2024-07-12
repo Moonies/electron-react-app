@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
 import { mockdata } from './_mockdata'
+import dayjs from 'dayjs'
 
 export interface SearchCriteria {
   category: string
@@ -18,7 +19,7 @@ export interface SalesData {
   saleId: number
   invoiceNumber: number
   customerName: string
-  deliveryDate: Date | string
+  deliveryDate: Date | string | dayjs.ConfigType
   productId: string
   productName: string
   // 注番: string
