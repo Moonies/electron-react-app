@@ -19,9 +19,21 @@ import { TransitionProps } from '@mui/material/transitions'
 
 const Notification: React.FC = () => {
   const dispatch = useDispatch()
-  const { message, type, severity } = useSelector((state: RootState) => state.notification)
+  const { message, type, severity, onConfirm, onCancel } = useSelector(
+    (state: RootState) => state.notification
+  )
 
   const handleClose = () => {
+    if (onCancel) {
+      onCancel()
+    }
+    dispatch(clearNotification())
+  }
+
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm()
+    }
     dispatch(clearNotification())
   }
 

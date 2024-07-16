@@ -1,5 +1,7 @@
 import React from 'react'
 import {
+  GridAutosizeOptions,
+  GridCellParams,
   GridColDef,
   GridPaginationModel,
   GridRowIdGetter,
@@ -19,6 +21,7 @@ interface TableProps {
   checkboxSelection?: boolean
   disableRowSelectionOnClick?: boolean
   onSelected: (newModel: GridRowSelectionModel) => void
+  autosizeOption?: GridAutosizeOptions
 }
 
 const DataTable = React.memo<TableProps>(
@@ -32,6 +35,7 @@ const DataTable = React.memo<TableProps>(
     checkboxSelection = false,
     disableRowSelectionOnClick = false,
     onSelected,
+    autosizeOption,
   }) => {
     return (
       <DataGridContainer>
@@ -51,6 +55,8 @@ const DataTable = React.memo<TableProps>(
           // rowSelectionModel={() => rowSelected}
           onRowSelectionModelChange={onSelected}
           // autosizeOnMount
+          autosizeOptions={autosizeOption}
+          getCellClassName={params => (params.colDef.type === 'number' ? 'right' : 'center')}
         />
       </DataGridContainer>
     )
@@ -58,37 +64,3 @@ const DataTable = React.memo<TableProps>(
 )
 
 export default DataTable
-
-// export default function DataTable<T>({
-//   data,
-//   columns,
-//   paginationModel,
-//   onPaginationModelChange,
-//   apiref,
-//   getRowId,
-//   checkboxSelection = false,
-//   disableRowSelectionOnClick = false,
-//   onSelected,
-// }: TableProps) {
-//   return (
-//     <DataGridContainer>
-//       <StyledStripedDataGrid
-//         apiRef={apiref}
-//         getRowId={getRowId}
-//         rows={data}
-//         columns={columns}
-//         // autoHeight
-//         disableColumnMenu
-//         getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-//         pageSizeOptions={[10, 50, 100]}
-//         paginationModel={paginationModel}
-//         onPaginationModelChange={onPaginationModelChange}
-//         checkboxSelection={checkboxSelection}
-//         disableRowSelectionOnClick={disableRowSelectionOnClick}
-//         // rowSelectionModel={() => rowSelected}
-//         onRowSelectionModelChange={onSelected}
-//         // autosizeOnMount
-//       />
-//     </DataGridContainer>
-//   )
-// }

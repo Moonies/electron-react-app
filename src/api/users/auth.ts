@@ -48,7 +48,9 @@ export default async function checkAuth(
         }
         resolve({ code: 200, message: 'success', data: data })
       } else {
-        reject(new Error('Invalid credentials'))
+        resolve({ code: 400, message: 'user or pass is not correct', data: null })
+
+        // reject(new Error('Invalid credentials'))
       }
     }, 1000)
   })

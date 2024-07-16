@@ -13,10 +13,11 @@ import {
   InputLabel,
   Autocomplete,
   Box,
+  Typography,
+  IconButton,
 } from '@mui/material'
+import { Close as CloseIcon } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import { SalesData } from 'api/sales/saleList'
 
@@ -91,31 +92,36 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
       maxWidth='md'
     >
       <DialogTitle>
-        {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
+        <Box display='flex' alignItems='center' justifyContent='space-between'>
+          <Typography variant='h6'>
+            {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
+          </Typography>
+          <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
       <DialogContent>
         <Box display={'flex'} flexDirection={'column'}>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label='登録日付'
-                value={dayjs(formData.deliveryDate)}
-                format='YYYY/MM/DD'
-                onChange={newValue =>
-                  handleChange('deliveryDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-                }
-                sx={{ marginTop: 2, width: '25%' }}
-              />
-            </LocalizationProvider>
+            <DatePicker
+              label='登録日付'
+              value={dayjs(formData.deliveryDate)}
+              format='YYYY/MM/DD'
+              onChange={newValue =>
+                handleChange('deliveryDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+              }
+              sx={{ marginTop: 2, width: '25%' }}
+            />
             <TextField
-              label='Invoice Number'
+              label='伝票番号'
               value={formData.invoiceNumber}
               onChange={e => handleChange('invoiceNumber', e.target.value)}
               // fullWidth
               margin='normal'
             />
             <TextField
-              label='Customer Name'
+              label='顧客名称'
               value={formData.customerName}
               onChange={e => handleChange('customerName', e.target.value)}
               margin='normal'
@@ -124,7 +130,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
             <TextField
-              label='Product ID'
+              label='商品番号'
               value={formData.productId}
               onChange={e => handleChange('productId', e.target.value)}
               // fullWidth
@@ -132,7 +138,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
               sx={{ flex: 1 }}
             />
             <TextField
-              label='Quantity'
+              label='数量'
               type='number'
               value={formData.quantity}
               onChange={e => handleChange('quantity', parseFloat(e.target.value))}
@@ -144,17 +150,29 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
               // fullWidth
               options={_mockOption}
               sx={{ marginTop: 2, width: '35%' }}
-              renderInput={params => <TextField {...params} label='Approved Employee' />}
+              renderInput={params => <TextField {...params} label='担当者' />}
             />
           </Box>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
-          Cancel
+        <Button
+          onClick={onClose}
+          variant='contained'
+          // sx={theme => ({
+          //   color: 'white',
+          // })}
+        >
+          キャンセル
         </Button>
-        <Button onClick={handleSubmit} disabled={loading}>
-          {loading ? <CircularProgress size={24} /> : 'Confirm'}
+        <Button
+          onClick={handleSubmit}
+          variant='outlined'
+          sx={theme => ({
+            color: 'white',
+          })}
+        >
+          保存
         </Button>
       </DialogActions>
     </Dialog>

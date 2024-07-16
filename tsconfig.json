@@ -23,7 +23,8 @@
       "components/*": ["./components/*"],
       "api/*": ["./api/*"],
       "api": ["api/index"],
-      "hooks/*": ["./hooks/*"]
+      "hooks/*": ["./hooks/*"],
+      "utils/*": ["./utils/*"]
     }
   },
   "include": ["src", "electron/**/*"]

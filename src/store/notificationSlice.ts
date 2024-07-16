@@ -4,6 +4,8 @@ interface NotificationState {
   message: string | null
   type: 'snackbar' | 'alert' | 'modal' | null
   severity: 'error' | 'warning' | 'info' | 'success'
+  onConfirm?: () => void
+  onCancel?: () => void
 }
 
 const initialState: NotificationState = {

@@ -27,6 +27,12 @@ const ODD_OPACITY = 0.2
 const StyledStripedDataGrid = styled(DataGrid)(({ theme }) => ({
   fontSize: 14,
   // fontWeight: 'bold',
+  [`.${gridClasses.cell}.right`]: {
+    textAlign: 'right',
+  },
+  [`.${gridClasses.cell}.center`]: {
+    textAlign: 'center',
+  },
   '& .MuiDataGrid-columnHeaders': {
     color: theme.palette.text.primary,
     borderBottom: `4px solid ${theme.palette.divider}`,
