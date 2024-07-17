@@ -19,7 +19,7 @@ export interface SalesData {
   saleId: number
   invoiceNumber: number
   customerName: string
-  deliveryDate: Date | string | dayjs.ConfigType
+  deliveryDate: string | dayjs.Dayjs
   productId: string
   productName: string
   // 注番: string

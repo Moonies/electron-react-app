@@ -29,7 +29,8 @@ import { SalesData } from 'api/sales/saleList'
 import { showNotification } from 'store/notificationSlice'
 import { useDispatch } from 'react-redux'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { exportToPdf, printData } from 'utils/exportUtils'
+import { exportToPdf, exportToXlsx, printData } from 'utils/exportUtils'
+import useExportSale from './hooks/useExportSale'
 
 export default function SalePage() {
   const {
@@ -50,6 +51,7 @@ export default function SalePage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const { openConfirmModal } = useConfirmModal()
+  const { printColumnList } = useExportSale()
 
   const dispatch = useDispatch()
 
@@ -131,8 +133,60 @@ export default function SalePage() {
   }
 
   const handleExportPdf = () => {
-    exportToPdf(columns, salesData, 'Sales Quotation')
+    // exportToXlsx(columns, salesData)
     // printData(columns, salesData, 'Sales Quotation')
+    let xx = groupBy(salesData, 'invoiceNumber', [
+      'customerName',
+      'invoiceNumber',
+      'productId',
+      'productName',
+      'quantity',
+      'totalPrice',
+      'unitPrice',
+    ])
+    exportToPdf(printColumnList, xx[4], 'Sales Quotation')
+
+    // printData(printColumnList, xx[4], 'Sales Quotation')
+
+    // console.log(salesData)
+    console.log(xx)
+  }
+
+  const groupBy = (
+    array: SalesData[],
+    key: keyof SalesData,
+    selectColumns?: (keyof SalesData)[]
+  ) => {
+    const groupIndexes: { [key: string]: number } = {}
+    let index = 0
+    return array.reduce(
+      (result, currentValue) => {
+        const groupKey = currentValue[key] ?? 'Unknown'
+        const stringKey = dayjs.isDayjs(groupKey) ? groupKey.format('YYYY-MM-DD') : groupKey
+
+        if (!(stringKey in groupIndexes)) {
+          groupIndexes[stringKey] = index++
+        }
+
+        const groupIndex = groupIndexes[stringKey]
+
+        if (!result[groupIndex]) {
+          result[groupIndex] = []
+        }
+
+        const newItem: Partial<SalesData> = {}
+        if (selectColumns) {
+          selectColumns.forEach(column => {
+            if (currentValue[column] !== undefined) {
+              newItem[column] = currentValue[column] as any
+            }
+          })
+        }
+        result[groupIndex].push(newItem)
+        return result
+      },
+      {} as { [index: number]: Partial<SalesData>[] }
+    )
   }
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>

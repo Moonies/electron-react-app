@@ -55,6 +55,37 @@ app.on('activate', () => {
 ipcMain.on('close-app', () => {
   app.quit()
 })
+
+// List of all options at -
+// https://www.electronjs.org/docs/latest/api/web-contents#contentsprintoptions-callback
+const printOptions = {
+  silent: false,
+  printBackground: true,
+  color: true,
+  margin: {
+    marginType: 'printableArea',
+  },
+  landscape: false,
+  pagesPerSheet: 1,
+  collate: false,
+  copies: 1,
+  header: 'Page header',
+  footer: 'Page footer',
+}
+
+ipcMain.handle('printComponent', (event, url) => {
+  let win = new BrowserWindow({ show: false })
+  win.loadURL(url)
+
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.print(printOptions, (success, failureReason) => {
+      console.log('Print Initiated in Main...')
+      if (!success) console.log(failureReason)
+    })
+  })
+  return 'done in main'
+})
+
 // Auto-updater events
 autoUpdater.on('update-available', () => {
   dialog
