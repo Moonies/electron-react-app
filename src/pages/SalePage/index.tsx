@@ -29,7 +29,7 @@ import { SalesData } from 'api/sales/saleList'
 import { showNotification } from 'store/notificationSlice'
 import { useDispatch } from 'react-redux'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { exportToPdf, exportToXlsx, printData } from 'utils/exportUtils'
+import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useExportSale from './hooks/useExportSale'
 
 export default function SalePage() {
@@ -144,7 +144,7 @@ export default function SalePage() {
       'totalPrice',
       'unitPrice',
     ])
-    exportToPdf(printColumnList, xx[4], 'Sales Quotation')
+    exportToPdf(printColumnList, xx[4], '見積書')
 
     // printData(printColumnList, xx[4], 'Sales Quotation')
 
