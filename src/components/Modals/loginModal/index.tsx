@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material'
 import { login } from 'store/authSlice'
 import { checkAuth, ApiResponse } from 'api'
-import useLoadingRedux from 'hooks/useLoading'
+import useLoading from 'hooks/useLoading'
 import { showNotification } from 'store/notificationSlice'
 import { useNavigate } from 'react-router-dom'
 
@@ -17,7 +17,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const dispatch = useDispatch()
-  const { withLoading } = useLoadingRedux()
+  const { withLoading } = useLoading()
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

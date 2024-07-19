@@ -1,22 +1,31 @@
 import { useState, useCallback, useMemo } from 'react'
-import { subMonths } from 'date-fns'
+import dayjs from 'dayjs'
 import { saleList } from 'api'
 import useLoading from 'hooks/useLoading'
 import { GridColDef } from '@mui/x-data-grid'
 import { SalesData, SalesSummary, SearchCriteria } from 'api/sales/saleList'
+// import dayjs from 'dayjs'
 
 interface PaginationModel {
   page: number
   pageSize: number
 }
 
+interface CategorySaleSearch {
+  value: string
+  display: string
+}
+
 export default function useSales() {
+  const dateThreeMonthsAgo = dayjs().subtract(6, 'month').toDate()
+
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     category: '',
     keyword: '',
-    startDate: subMonths(new Date(), 6),
+    startDate: dateThreeMonthsAgo,
     endDate: new Date(),
   })
+  const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
 
   const [salesSummary, setSalesSummary] = useState<SalesSummary | null>(null)
   const [salesData, setSalesData] = useState<SalesData[]>([])
@@ -24,7 +33,7 @@ export default function useSales() {
     page: 0,
     pageSize: 10,
   })
-  const { withLoading } = useLoading()
+  const { withLoading, setLoading } = useLoading()
 
   const handleChange = (name: string, value: string | Date) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
@@ -71,12 +80,22 @@ export default function useSales() {
     []
   )
 
+  const prepareCategorySearch = useMemo(() => {
+    let result: CategorySaleSearch[] = []
+    columns.forEach(item => {
+      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+    })
+    setCategorySearch(result)
+  }, [])
+
   const handleSearch = useCallback(async () => {
-    const result = await withLoading(saleList(searchCriteria))
+    setLoading(true)
+    const result = await saleList(searchCriteria)
     if (result.code === 200 && result.data) {
       setSalesSummary(result.data.summary)
       setSalesData(result.data.data)
     }
+    setLoading(false)
   }, [searchCriteria, withLoading])
 
   const handlePaginationModelChange = (newModel: PaginationModel) => {
@@ -106,5 +125,7 @@ export default function useSales() {
     currencyFormatter,
     addNewSaleData,
     updateSaleData,
+    prepareCategorySearch,
+    categorySearch,
   }
 }

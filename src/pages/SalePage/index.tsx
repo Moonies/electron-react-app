@@ -44,6 +44,8 @@ export default function SalePage() {
     paginationModel,
     currencyFormatter,
     addNewSaleData,
+    prepareCategorySearch,
+    categorySearch,
   } = useSales()
   const salesDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -65,6 +67,10 @@ export default function SalePage() {
       })
     }
   }, [salesData])
+
+  useEffect(() => {
+    prepareCategorySearch
+  }, [])
 
   const handleAddClick = () => {
     setSelectedSale(undefined)
@@ -214,30 +220,35 @@ export default function SalePage() {
             }}
           >
             <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
-              <FormControl sx={{ width: '30%' }} size='small'>
-                <InputLabel id='category-label'>Category</InputLabel>
-                <Select
-                  labelId='category-label'
-                  name='category'
-                  value={searchCriteria.category}
-                  label='Category'
-                  onChange={e => handleChange('category', e.target.value as string)}
-                >
-                  <MenuItem value='electronics'>Electronics</MenuItem>
-                  <MenuItem value='clothing'>Clothing</MenuItem>
-                  <MenuItem value='books'>Books</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                name='category'
+                value={searchCriteria.category}
+                select
+                label='範疇'
+                id='category-sale'
+                onChange={e => handleChange('category', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-sale-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                {categorySearch?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
               <Box display={'flex'} flex={1}>
                 <TextField
-                  size='small'
                   fullWidth
                   name='keyword'
                   label='検索'
                   value={searchCriteria.keyword}
                   onChange={e => handleChange('keyword', e.target.value)}
                   InputProps={{
-                    style: { fontSize: 24 },
+                    style: { fontSize: '1.2rem' },
                     endAdornment: (
                       <InputAdornment position='end'>
                         <IconButton onClick={handleSearch} edge='end'>
@@ -259,12 +270,14 @@ export default function SalePage() {
               <DatePicker
                 label='Start Date'
                 value={dayjs(searchCriteria.startDate)}
+                format='YYYY/MM/DD'
                 onChange={(date: Dayjs | null) =>
                   handleChange('startDate', date?.toDate() || new Date())
                 }
               />
               <DatePicker
                 label='End Date'
+                format='YYYY/MM/DD'
                 value={dayjs(searchCriteria.endDate)}
                 onChange={(date: Dayjs | null) =>
                   handleChange('endDate', date?.toDate() || new Date())

@@ -1,7 +1,4 @@
 import { useState, useCallback, useMemo } from 'react'
-import { subMonths } from 'date-fns'
-import { saleList } from 'api'
-import useLoading from 'hooks/useLoading'
 import { GridColDef } from '@mui/x-data-grid'
 import { SalesData, SalesSummary, SearchCriteria } from 'api/sales/saleList'
 

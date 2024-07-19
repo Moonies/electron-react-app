@@ -10,7 +10,6 @@ export default function Header({}: React.HTMLProps<HTMLInputElement>) {
         <Typography variant='h6' noWrap>
           早楽経営
         </Typography>
-        {/* <Button color="inherit" component={Link} to="/">Home</Button> */}
       </Toolbar>
     </AppBar>
   )

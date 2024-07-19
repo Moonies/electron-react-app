@@ -21,16 +21,15 @@ const themeOptions: ThemeOptions = {
   },
   components: {
     MuiInputLabel: {
-      styleOverrides: {
-        root: {
+      defaultProps: {
+        sx: {
           fontSize: '1.2rem',
-          outline: 2,
         },
       },
     },
     MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
+      defaultProps: {
+        sx: {
           fontSize: '1.2rem',
         },
       },
