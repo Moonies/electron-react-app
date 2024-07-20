@@ -1,0 +1,118 @@
+import { GridColDef } from '@mui/x-data-grid'
+import { ProductData, SearchCriteriaProductList } from 'api/products/productList'
+import { productList } from 'api'
+import useLoading from 'hooks/useLoading'
+import React, { useCallback, useMemo, useState } from 'react'
+
+interface PaginationModel {
+  page: number
+  pageSize: number
+}
+
+interface CategoryProductSearch {
+  value: string
+  display: string
+}
+
+export default function useProduct() {
+  const [categorySearch, setCategorySearch] = useState<CategoryProductSearch[]>()
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriteriaProductList>({
+    category: '',
+    keyword: '',
+  })
+  const [productData, setProductData] = useState<ProductData[]>([])
+  const [paginationModel, setPaginationModel] = useState<PaginationModel>({
+    page: 0,
+    pageSize: 10,
+  })
+  const { withLoading } = useLoading()
+
+  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
+    style: 'currency',
+    currency: 'JPY',
+  })
+
+  const productUnitConverter = (rawProductUnit: string): string => {
+    switch (rawProductUnit) {
+      case 'piece':
+        return '個'
+      case 'unit':
+        return '台'
+      case 'sheet':
+        return '枚'
+      case 'set':
+        return 'セット'
+
+      default:
+        return ''
+    }
+  }
+
+  const handleChange = (name: string, value: string) => {
+    setSearchCriteria(prev => ({ ...prev, [name]: value }))
+  }
+
+  const columns: GridColDef[] = useMemo(
+    () => [
+      { field: 'productId', headerName: '図番', flex: 1, headerAlign: 'center' },
+      { field: 'productName', headerName: '品名', flex: 1, headerAlign: 'center' },
+      {
+        field: 'productPrice',
+        headerName: '単価',
+        type: 'number',
+        headerAlign: 'center',
+        // minWidth: 200,
+        valueFormatter: value => currencyFormatter.format(Number(value)),
+      },
+      {
+        field: 'productCost',
+        headerName: '原価',
+        type: 'number',
+        headerAlign: 'center',
+        // minWidth: 200,
+        valueFormatter: value => currencyFormatter.format(Number(value)),
+      },
+      { field: 'grossProfitMargin', headerName: '粗利益率', headerAlign: 'center' },
+      {
+        field: 'productUnit',
+        headerName: '単位',
+        type: 'number',
+        headerAlign: 'center',
+        valueGetter: value => productUnitConverter(value),
+      },
+      { field: 'stockQuantity', headerName: '在庫数', type: 'number', headerAlign: 'center' },
+    ],
+    []
+  )
+
+  const prepareCategorySearch = useMemo(() => {
+    let result: CategoryProductSearch[] = []
+    columns.forEach(item => {
+      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+    })
+    setCategorySearch(result)
+  }, [])
+
+  const handleSearch = useCallback(async () => {
+    const result = await withLoading(productList(searchCriteria))
+    if (result.code === 200 && result.data) {
+      setProductData(result.data.data)
+    }
+  }, [searchCriteria, withLoading])
+
+  const handlePaginationModelChange = (newModel: PaginationModel) => {
+    setPaginationModel(newModel)
+    //call APi
+  }
+  return {
+    columns,
+    prepareCategorySearch,
+    categorySearch,
+    searchCriteria,
+    productData,
+    handleSearch,
+    handleChange,
+    handlePaginationModelChange,
+    paginationModel,
+  }
+}

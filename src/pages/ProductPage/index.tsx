@@ -1,17 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Box,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-  InputAdornment,
-  IconButton,
   Divider,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  TextField,
+  Typography,
 } from '@mui/material'
-import { useGridApiRef, GridRowProps, GridRowSelectionModel } from '@mui/x-data-grid'
+import { StyledButton } from '../../styles/styles'
 import {
   Delete as DeleteIcon,
   Search as SearchIcon,
@@ -20,61 +17,56 @@ import {
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
 } from '@mui/icons-material'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import useSales from './hooks/useSale'
-import { StyledButton } from '../../styles/styles'
-import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
-import SalesModal from 'components/Modals/SaleModal'
-import { SalesData } from 'api/sales/saleList'
-import { showNotification } from 'store/notificationSlice'
-import { useDispatch } from 'react-redux'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import dayjs, { Dayjs } from 'dayjs'
+import useProduct from './hooks/useProduct'
+import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
+import ProductModal from 'components/Modals/ProductModal'
+import { ProductData } from 'api/products/productList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
-import useExportSale from './hooks/useExportSale'
+import { useDispatch } from 'react-redux'
+import { showNotification } from 'store/notificationSlice'
 
-export default function SalePage() {
-  const {
-    searchCriteria,
-    handleChange,
-    handleSearch,
-    salesSummary,
-    salesData,
-    columns,
-    handlePaginationModelChange,
-    paginationModel,
-    currencyFormatter,
-    addNewSaleData,
-    prepareCategorySearch,
-    categorySearch,
-  } = useSales()
-  const salesDataGridRef = useGridApiRef()
+export default function ProductPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedSale, setSelectedSale] = useState<SalesData | undefined>(undefined)
+  const [selectedProduct, setSelectedProduct] = useState<ProductData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
-  const { openConfirmModal } = useConfirmModal()
-  const { printColumnList } = useExportSale()
 
+  const { openConfirmModal } = useConfirmModal()
+  const {
+    categorySearch,
+    columns,
+    prepareCategorySearch,
+    handleSearch,
+    productData,
+    searchCriteria,
+    handleChange,
+    handlePaginationModelChange,
+    paginationModel,
+  } = useProduct()
   const dispatch = useDispatch()
 
+  const productDataGridRef = useGridApiRef()
+
   useEffect(() => {
-    if (salesDataGridRef.current) {
-      salesDataGridRef.current.autosizeColumns({
+    if (productDataGridRef.current) {
+      productDataGridRef.current.autosizeColumns({
         // columns: ['customerName', 'productName'],
         includeHeaders: true,
         includeOutliers: true,
         expand: true,
       })
     }
-  }, [salesData])
+  }, [productData])
 
   useEffect(() => {
     prepareCategorySearch
   }, [])
 
   const handleAddClick = () => {
-    setSelectedSale(undefined)
+    setSelectedProduct(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -82,10 +74,10 @@ export default function SalePage() {
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = salesData.find(sale => sale.saleId === selectedId)
+      const selectedData = productData.find(product => product.productId === selectedId)
       if (selectedData) {
         setModalMode('edit')
-        setSelectedSale(selectedData)
+        setSelectedProduct(selectedData)
         setModalOpen(true)
       }
     } else {
@@ -102,14 +94,12 @@ export default function SalePage() {
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = salesData.find(sale => sale.saleId === selectedId)
+      const selectedData = productData.find(product => product.productId === selectedId)
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message:
-            'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
+          message: 'Are you sure you want to delete this Product Number: ' + selectedData.productId,
         })
-
         if (confirmed) {
           // Perform delete operation
           console.log('Delete confirmed')
@@ -128,78 +118,32 @@ export default function SalePage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: SalesData) => {
+  const handleModalConfirm = async (data: ProductData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
-      addNewSaleData()
+      const confirmed = await openConfirmModal({
+        title: '確認してください',
+        message: 'Are you sure you want to add data.',
+      })
+      if (confirmed) {
+        // Perform delete operation
+        console.log('Add confirmed')
+      } else {
+        console.log('Add cancelled')
+      }
+      // addNewSaleData()
     } else {
     }
     // After successful add/edit, refetch the data
     // await fetchSalesData(paginationModel);
   }
 
-  const handleExportPdf = () => {
-    // exportToXlsx(columns, salesData)
-    // printData(columns, salesData, 'Sales Quotation')
-    let xx = groupBy(salesData, 'invoiceNumber', [
-      'customerName',
-      'invoiceNumber',
-      'productId',
-      'productName',
-      'quantity',
-      'totalPrice',
-      'unitPrice',
-    ])
-    exportToPdf(printColumnList, xx[4], '見積書')
-
-    // printData(printColumnList, xx[4], 'Sales Quotation')
-
-    // console.log(salesData)
-    console.log(xx)
-  }
-
-  const groupBy = (
-    array: SalesData[],
-    key: keyof SalesData,
-    selectColumns?: (keyof SalesData)[]
-  ) => {
-    const groupIndexes: { [key: string]: number } = {}
-    let index = 0
-    return array.reduce(
-      (result, currentValue) => {
-        const groupKey = currentValue[key] ?? 'Unknown'
-        const stringKey = dayjs.isDayjs(groupKey) ? groupKey.format('YYYY-MM-DD') : groupKey
-
-        if (!(stringKey in groupIndexes)) {
-          groupIndexes[stringKey] = index++
-        }
-
-        const groupIndex = groupIndexes[stringKey]
-
-        if (!result[groupIndex]) {
-          result[groupIndex] = []
-        }
-
-        const newItem: Partial<SalesData> = {}
-        if (selectColumns) {
-          selectColumns.forEach(column => {
-            if (currentValue[column] !== undefined) {
-              newItem[column] = currentValue[column] as any
-            }
-          })
-        }
-        result[groupIndex].push(newItem)
-        return result
-      },
-      {} as { [index: number]: Partial<SalesData>[] }
-    )
-  }
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>売上管理</Divider>
+          <Divider textAlign='left'>商品管理</Divider>
         </Typography>
       </Box>
       <Box
@@ -261,61 +205,12 @@ export default function SalePage() {
                 />
               </Box>
             </Box>
-            <Box
-              display={'flex'}
-              flexDirection={'row'}
-              gap={2}
-              justifyContent={'space-between'}
-              flex={1}
-            >
-              <DatePicker
-                label='Start Date'
-                value={dayjs(searchCriteria.startDate)}
-                format='YYYY/MM/DD'
-                onChange={(date: Dayjs | null) =>
-                  handleChange('startDate', date?.toDate() || new Date())
-                }
-              />
-              <DatePicker
-                label='End Date'
-                format='YYYY/MM/DD'
-                value={dayjs(searchCriteria.endDate)}
-                onChange={(date: Dayjs | null) =>
-                  handleChange('endDate', date?.toDate() || new Date())
-                }
-              />
-            </Box>
           </Box>
-
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-            gap={3}
-          >
-            {salesSummary && (
-              <>
-                <Typography variant='h6'>
-                  売上総合: {currencyFormatter.format(Number(salesSummary.totalSales))}
-                </Typography>
-                <Typography variant='h6'>
-                  粗利: {currencyFormatter.format(Number(salesSummary.averageOrderValue))}
-                </Typography>
-              </>
-            )}
-          </Box>
-          <Divider orientation='vertical' flexItem></Divider>
+          <Divider orientation='vertical' sx={{ marginLeft: 'auto' }}></Divider>
           <Box
             sx={{
               width: '30%',
               display: 'flex',
-              // justifyContent: 'flex-end',
-              // alignItems: 'flex-start',
               flexDirection: 'column',
             }}
             gap={1}
@@ -364,7 +259,7 @@ export default function SalePage() {
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                onClick={handleExportPdf}
+                // onClick={handleExportPdf}
               >
                 データ出力
               </StyledButton>
@@ -372,22 +267,22 @@ export default function SalePage() {
           </Box>
         </Box>
         <DataTable
-          data={salesData}
+          data={productData}
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
-          apiref={salesDataGridRef}
-          getRowId={row => row.saleId}
+          apiref={productDataGridRef}
+          getRowId={row => row.productId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>
 
       {modalOpen && (
-        <SalesModal
+        <ProductModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedSale}
+          initialData={selectedProduct}
           mode={modalMode}
         />
       )}

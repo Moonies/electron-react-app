@@ -25,6 +25,12 @@ export default function useExportSale() {
     []
   )
 
+  const exportDetail = {
+    fileName: '',
+    type: '',
+    taxType: '',
+  }
+
   return {
     printColumnList,
   }

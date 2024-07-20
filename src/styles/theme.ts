@@ -56,9 +56,19 @@ const themeOptions: ThemeOptions = {
         },
       },
     },
-  },
-  typography: {
-    // fontFamily: 'monospace',
+    MuiDivider: {
+      styleOverrides: {
+        root: props => ({
+          borderColor: props.theme.palette.primary.dark,
+          '&::before': {
+            borderTop: `thin solid ${theme?.palette.primary.dark}`,
+          },
+          '&::after': {
+            borderTop: `thin solid ${theme?.palette.primary.dark}`,
+          },
+        }),
+      },
+    },
   },
 }
 const theme = createTheme(themeOptions, jaJP)

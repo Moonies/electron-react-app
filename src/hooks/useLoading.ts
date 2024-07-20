@@ -5,7 +5,7 @@ import { RootState } from 'store/index'
 import { setLoading as setLoadingAction } from 'store/loadingSlice'
 import { showNotification } from 'store/notificationSlice'
 
-const useLoadingRedux = () => {
+const useLoading = () => {
   const dispatch = useDispatch()
   const isLoading = useSelector((state: RootState) => state.loading.isLoading)
 
@@ -52,4 +52,4 @@ const useLoadingRedux = () => {
   return { isLoading, withLoading, setLoading }
 }
 
-export default useLoadingRedux
+export default useLoading
