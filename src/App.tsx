@@ -19,6 +19,7 @@ import { Toolbar } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { ConfirmModalProvider } from 'components/Modals/ConfirmModal'
+import ProductPage from 'pages/ProductPage'
 
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
@@ -26,7 +27,7 @@ console.error = (...args: any) => {
   if (/defaultProps/.test(args[0])) return
   error(...args)
 }
-
+export {}
 export default function App() {
   const [loginOpen, setLoginOpen] = useState(false)
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
@@ -63,7 +64,7 @@ export default function App() {
                   {/* <Route path="/store" element={<StorePage />} /> */}
                   <Route path='/kpi' element={<KpiPage />} />
                   {/* <Route path="/reports" element={<ReportPage />} /> */}
-                  {/* <Route path="/products" element={<ProductPage />} /> */}
+                  <Route path='/products' element={<ProductPage />} />
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
                 </Routes>
               </Box>

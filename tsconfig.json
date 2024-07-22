@@ -27,5 +27,18 @@
       "utils/*": ["./utils/*"]
     }
   },
-  "include": ["src", "electron/**/*"]
+  "include": ["src/**/*", "electron/**/*"],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "**/*.spec.ts",
+    "**/asset/fonts/*",
+    ".git",
+    ".app-cache",
+    ".npm",
+    ".npm-tmp",
+    "**/dist/*",
+    "**/node_modules/*"
+  ]
 }
