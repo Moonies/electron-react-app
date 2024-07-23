@@ -20,17 +20,24 @@ const themeOptions: ThemeOptions = {
     },
   },
   components: {
+    MuiInputBase: {
+      defaultProps: {
+        sx: {
+          fontSize: '1.4rem',
+        },
+      },
+    },
     MuiInputLabel: {
       defaultProps: {
         sx: {
-          fontSize: '1.2rem',
+          fontSize: '1.4rem',
         },
       },
     },
     MuiOutlinedInput: {
       defaultProps: {
         sx: {
-          fontSize: '1.2rem',
+          fontSize: '1.4rem',
         },
       },
     },

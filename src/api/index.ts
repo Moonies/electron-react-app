@@ -7,3 +7,4 @@ export interface ApiResponse<T> {
 export { default as checkAuth } from './users/auth'
 export { default as productList } from './products/productList'
 export { default as saleList } from './sales/saleList'
+export { default as kpi } from './kpi'

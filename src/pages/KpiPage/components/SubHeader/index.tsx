@@ -14,9 +14,10 @@ const options = ['時系列比較', '計画対実績比較']
 
 interface SubHeader {
   onSubmit: () => void
+  onPressGetData: () => void
 }
 
-export default function SubHeader({ onSubmit }: SubHeader) {
+export default function SubHeader({ onSubmit, onPressGetData }: SubHeader) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [selectedIndex, setSelectedIndex] = React.useState(0)
   const open = Boolean(anchorEl)
@@ -74,7 +75,7 @@ export default function SubHeader({ onSubmit }: SubHeader) {
         <IconButton aria-label='reset' size='large'>
           <ResetIcon sx={{ fontSize: 36 }} />
         </IconButton>
-        <IconButton aria-label='download' size='large'>
+        <IconButton aria-label='download' size='large' onClick={onPressGetData}>
           <CloudDownloadIcon sx={{ fontSize: 36 }} />
         </IconButton>
         <IconButton aria-label='save' size='large'>
