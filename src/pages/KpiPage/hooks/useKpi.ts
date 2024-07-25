@@ -58,9 +58,11 @@ const calculatedFields: (keyof FinancialKpiData)[] = [
 ]
 export default function useKpi() {
   const [kpiData, setKpiData] = useState<FinancialKpiData>({})
+  const [settingPlanData, setSettingPlanData] = useState<SettingPlanFinancialKpiData>({})
+
   const convertDivider = 1000000
   const currentYear = dayjs().get('year')
-  const { withLoading } = useLoading()
+  const { withLoading, setLoading } = useLoading()
 
   const getKpiData = async () => {
     const result = await withLoading(kpi().kpiData({ selectedYear: currentYear }))
@@ -83,15 +85,19 @@ export default function useKpi() {
     return result
   }
   const isUndefined = (rawData: number | undefined): number => (rawData === undefined ? 0 : rawData)
+  const isShrink = (value: number | undefined | string): boolean => !!value || value === 0
 
   const formattedNumber = (rawData: number): string =>
     `${new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(rawData * 100)}%`
 
   const kpiCalculate = (formInput: KpiData) => {
+    setLoading(true)
     let result: FinancialKpiData = {}
-    let planMarginalProfit = 0
+    let planMarginalProfit,
+      actualMarginalProfit = 0
     result.planMarginalProfit =
       isUndefined(formInput.planSalesRevenue) - isUndefined(formInput.planVariableCosts)
     result.planMarginalProfitRate = formattedNumber(
@@ -104,6 +110,7 @@ export default function useKpi() {
       isUndefined(formInput.planOperatingIncome) -
       isUndefined(formInput.planOperatingExpenses)
     planMarginalProfit = result.planMarginalProfit / isUndefined(formInput.planSalesRevenue)
+
     result.actualMarginalProfit =
       isUndefined(formInput.actualSalesRevenue) - isUndefined(formInput.actualVariableCosts)
     result.actualMarginalProfitRate = formattedNumber(
@@ -115,6 +122,7 @@ export default function useKpi() {
       isUndefined(formInput.actualFixedCosts) +
       isUndefined(formInput.actualOperatingIncome) -
       isUndefined(formInput.actualOperatingExpenses)
+    actualMarginalProfit = result.actualMarginalProfit / isUndefined(formInput.actualSalesRevenue)
 
     result.resultOrdinaryProfit = result.actualOrdinaryProfit - result.planOrdinaryProfit
     result.resultSalesRevenue =
@@ -126,7 +134,7 @@ export default function useKpi() {
       isUndefined(formInput.actualOperatingExpenses) - isUndefined(formInput.planOperatingExpenses)
     ).toString()
     result.resultSalesRevenueIncreaseRate = (
-      (result.actualMarginalProfit - result.planMarginalProfit) *
+      (actualMarginalProfit - planMarginalProfit) *
       isUndefined(formInput.actualSalesRevenue)
     ).toString()
     result.resultFixedCosts =
@@ -138,8 +146,41 @@ export default function useKpi() {
       isUndefined(formInput.actualOperatingExpenses) - isUndefined(formInput.planOperatingExpenses)
     ).toString()
     setKpiData({ ...formInput, ...result })
-  }
-  const isShrink = (value: number | undefined | string): boolean => !!value || value === 0
 
-  return { kpiData, getKpiData, isShrink, kpiCalculate }
+    setSettingPlanData({
+      settingSalesRevenue: formInput.actualSalesRevenue,
+      settingVariableCosts: formInput.actualVariableCosts,
+      settingMarginalProfit: result.actualMarginalProfit,
+      settingMarginalProfitRate: result.actualMarginalProfitRate,
+    })
+    setTimeout(() => {
+      setLoading(false)
+    }, 2000)
+  }
+  const settingPlanCalculate = (formSetting: SettingPlanFinancialKpiData) => {
+    console.log('hook:', formSetting)
+    let result: SettingPlanFinancialKpiData = {}
+    result.settingMarginalProfit =
+      isUndefined(formSetting.settingSalesRevenue) - isUndefined(formSetting.settingVariableCosts)
+    result.settingMarginalProfitRate = formattedNumber(
+      result.settingMarginalProfit / isUndefined(formSetting.settingSalesRevenue)
+    )
+    result.settingOrdinaryProfit =
+      isUndefined(formSetting.settingSalesRevenue) -
+      isUndefined(formSetting.settingVariableCosts) -
+      (isUndefined(formSetting.settingFixedCosts) +
+        isUndefined(formSetting.settingOperatingExpenses) -
+        isUndefined(formSetting.settingOperatingIncome))
+    setSettingPlanData({ ...formSetting, ...result })
+  }
+
+  return {
+    kpiData,
+    getKpiData,
+    isShrink,
+    kpiCalculate,
+    settingPlanData,
+    setSettingPlanData,
+    settingPlanCalculate,
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import ReactDOMServer from 'react-dom/server'
 import { Box } from '@mui/system'
 import dayjs from 'dayjs'
 import SubHeader from './components/SubHeader'
@@ -13,14 +14,16 @@ import {
 } from '@mui/material'
 import { StyledCard, StyledCardContent } from './styles'
 import useKpi, { FinancialKpiData, SettingPlanFinancialKpiData } from './hooks/useKpi'
+import useKpiGrpah from './hooks/useKpiGraph'
+import Chart, { DataPoint } from 'components/Chart'
 
 export default function KpiPage() {
   const [formData, setFormData] = useState<Partial<FinancialKpiData>>({})
-  const [settingPlanData, setSettingPlanData] = useState<SettingPlanFinancialKpiData>({})
   const [errors, setErrors] = useState<Partial<FinancialKpiData>>({})
-
-  const { getKpiData, kpiData, isShrink, kpiCalculate } = useKpi()
-
+  const [formSetting, setFormSetting] = useState<Partial<SettingPlanFinancialKpiData>>({})
+  const { getKpiData, kpiData, isShrink, kpiCalculate, settingPlanData, settingPlanCalculate } =
+    useKpi()
+  const { openWindow } = useKpiGrpah()
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setFormData(prev => ({
@@ -30,6 +33,15 @@ export default function KpiPage() {
     if (value) {
       setErrors(prev => ({ ...prev, [name]: undefined }))
     }
+  }
+
+  const settingChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target
+    setFormSetting(prev => ({
+      ...prev,
+      [name]: event.target.type === 'number' ? (value === '' ? null : Number(value)) : value,
+    }))
+    settingPlanCalculate({ ...formSetting, [name]: Number(value) })
   }
 
   const handleSubmit = () => {
@@ -63,10 +75,25 @@ export default function KpiPage() {
     getKpiData()
   }
 
+  const handleOpenChart = () => {
+    const chartData: DataPoint[] = [
+      { name: '限界利益', value: formData.resultOrdinaryProfit ?? 0 },
+      { name: '固定費', value: formData.resultFixedCosts ?? 0 },
+      { name: '外収益', value: Number(formData.resultOperatingExpenses) ?? 0 },
+      { name: '外費用', value: Number(formData.resultOperatingExpenses) ?? 0 },
+      { name: '売上', value: formData.resultSalesRevenue ?? 0 },
+    ]
+    openWindow(Chart, { data: chartData })
+  }
+
   useEffect(() => {
-    console.log('screen:', kpiData)
     setFormData({ ...kpiData })
   }, [kpiData])
+
+  useEffect(() => {
+    console.log('set formsetting')
+    setFormSetting(settingPlanData)
+  }, [settingPlanData])
 
   return (
     <Box padding={2} display={'flex'} flexDirection={'column'} flex={1}>
@@ -465,10 +492,12 @@ export default function KpiPage() {
             />
           </StyledCardContent>
           <CardActions>
-            <Button size='large'>小計</Button>
+            <Button size='large' onClick={handleOpenChart}>
+              小計
+            </Button>
           </CardActions>
         </StyledCard>
-        <StyledCard>
+        <StyledCard id='setting-card'>
           <CardHeader
             title='setting plan'
             sx={{ textAlign: 'center', backgroundColor: theme => theme.palette.info.dark }}
@@ -480,11 +509,11 @@ export default function KpiPage() {
             <TextField
               name='settingSalesRevenue'
               label='売上高'
-              value={settingPlanData.settingSalesRevenue ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingSalesRevenue ?? ''}
+              onChange={settingChange}
               fullWidth
               type={'number'}
-              InputLabelProps={{ shrink: isShrink(settingPlanData.settingSalesRevenue) }}
+              InputLabelProps={{ shrink: isShrink(formSetting.settingSalesRevenue) }}
               margin='normal'
               size='small'
               color='info'
@@ -492,11 +521,11 @@ export default function KpiPage() {
             <TextField
               name='settingVariableCosts'
               label='変動費'
-              value={settingPlanData.settingVariableCosts ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingVariableCosts ?? ''}
+              onChange={settingChange}
               fullWidth
               type={'number'}
-              InputLabelProps={{ shrink: isShrink(settingPlanData.settingVariableCosts) }}
+              InputLabelProps={{ shrink: isShrink(formSetting.settingVariableCosts) }}
               margin='normal'
               size='small'
               color='info'
@@ -504,14 +533,14 @@ export default function KpiPage() {
             <TextField
               name='settingMarginalProfit'
               label='限界利益'
-              value={settingPlanData.settingMarginalProfit ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingMarginalProfit ?? ''}
+              onChange={settingChange}
               type={'number'}
               fullWidth
               InputProps={{
                 readOnly: true,
               }}
-              InputLabelProps={{ shrink: isShrink(settingPlanData.settingMarginalProfit) }}
+              InputLabelProps={{ shrink: isShrink(formSetting.settingMarginalProfit) }}
               margin='normal'
               variant='standard'
               size='small'
@@ -520,14 +549,14 @@ export default function KpiPage() {
             <TextField
               name='settingMarginalProfitRate'
               label='限界利益率'
-              value={settingPlanData.settingMarginalProfitRate ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingMarginalProfitRate ?? ''}
+              onChange={settingChange}
               fullWidth
-              type={'number'}
+              type={'text'}
               InputProps={{
                 readOnly: true,
               }}
-              InputLabelProps={{ shrink: !!settingPlanData.settingMarginalProfitRate }}
+              InputLabelProps={{ shrink: !!formSetting.settingMarginalProfitRate }}
               margin='normal'
               variant='standard'
               size='small'
@@ -536,11 +565,11 @@ export default function KpiPage() {
             <TextField
               name='settingFixedCosts'
               label='固定費'
-              value={settingPlanData.settingFixedCosts ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingFixedCosts ?? ''}
+              onChange={settingChange}
               fullWidth
               type={'number'}
-              InputLabelProps={{ shrink: isShrink(settingPlanData.settingFixedCosts) }}
+              InputLabelProps={{ shrink: isShrink(formSetting.settingFixedCosts) }}
               margin='normal'
               size='small'
               color='info'
@@ -548,11 +577,11 @@ export default function KpiPage() {
             <TextField
               name='settingOperatingIncome'
               label='営業外収益'
-              value={settingPlanData.settingOperatingIncome ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingOperatingIncome ?? ''}
+              onChange={settingChange}
               fullWidth
               type={'number'}
-              InputLabelProps={{ shrink: isShrink(settingPlanData.settingOperatingIncome) }}
+              InputLabelProps={{ shrink: isShrink(formSetting.settingOperatingIncome) }}
               margin='normal'
               size='small'
               color='info'
@@ -560,11 +589,11 @@ export default function KpiPage() {
             <TextField
               name='settingOperatingExpenses'
               label='営業外費用'
-              value={settingPlanData.settingOperatingExpenses ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingOperatingExpenses ?? ''}
+              onChange={settingChange}
               fullWidth
               type={'number'}
-              InputLabelProps={{ shrink: isShrink(settingPlanData.settingOperatingExpenses) }}
+              InputLabelProps={{ shrink: isShrink(formSetting.settingOperatingExpenses) }}
               margin='normal'
               size='small'
               color='info'
@@ -572,11 +601,11 @@ export default function KpiPage() {
             <TextField
               name='settingOrdinaryProfit'
               label='経常利益'
-              value={settingPlanData.settingOrdinaryProfit ?? ''}
-              onChange={handleChange}
+              value={formSetting.settingOrdinaryProfit ?? ''}
+              onChange={settingChange}
               fullWidth
               type={'number'}
-              InputLabelProps={{ shrink: isShrink(settingPlanData.settingOrdinaryProfit) }}
+              InputLabelProps={{ shrink: isShrink(formSetting.settingOrdinaryProfit) }}
               margin='normal'
               InputProps={{
                 readOnly: true,
