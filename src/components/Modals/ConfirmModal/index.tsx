@@ -78,7 +78,7 @@ export const ConfirmModalProvider: React.FC<ConfirmModalProviderProps> = ({ chil
           {modalState.title}
         </DialogTitle>
         <DialogContent>
-          <Typography>{modalState.message}</Typography>
+          <Typography sx={{ whiteSpace: 'pre-line' }}>{modalState.message}</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel} variant='contained'>

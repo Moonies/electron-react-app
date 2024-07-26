@@ -1,15 +1,13 @@
 import React, { useCallback } from 'react'
 import {
-  BarChart,
+  BarChart as Chart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   Cell,
-  Label,
 } from 'recharts'
 
 export interface DataPoint {
@@ -21,15 +19,11 @@ interface ChartComponentProps {
   data: DataPoint[]
 }
 
-interface CustomWindowProps {
-  content: React.ReactNode
-}
-
-const Chart: React.FC<ChartComponentProps> = ({ data }) => {
+const BarChart: React.FC<ChartComponentProps> = ({ data }) => {
   return (
-    <div style={{ width: '100%', height: 400 }}>
-      <ResponsiveContainer>
-        <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+    <div style={{ width: 700, height: 400 }}>
+      <ResponsiveContainer width={'100%'}>
+        <Chart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid />
           <XAxis dataKey='name' />
           <YAxis />
@@ -39,10 +33,10 @@ const Chart: React.FC<ChartComponentProps> = ({ data }) => {
               <Cell key={`cell-${index}`} fill={entry.value >= 0 ? '#82ca9d' : '#ff0000'} />
             ))}
           </Bar>{' '}
-        </BarChart>
+        </Chart>
       </ResponsiveContainer>
     </div>
   )
 }
 
-export default Chart
+export default BarChart

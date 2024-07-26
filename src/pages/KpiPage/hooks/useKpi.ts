@@ -21,13 +21,13 @@ export interface FinancialKpiData {
   actualOperatingIncome?: number
   actualOperatingExpenses?: number
   actualOrdinaryProfit?: number
-  resultOrdinaryProfit?: number
-  resultSalesRevenue?: number
+  resultOrdinaryProfit?: string
+  resultSalesRevenue?: string
   resultSalesRevenueIncreaseRate?: string
-  resultFixedCosts?: number
+  resultFixedCosts?: string
   resultOperatingIncome?: string
   resultOperatingExpenses?: string
-  resultSubTotal?: number
+  resultSubTotal?: string
 }
 
 export interface SettingPlanFinancialKpiData {
@@ -124,27 +124,33 @@ export default function useKpi() {
       isUndefined(formInput.actualOperatingExpenses)
     actualMarginalProfit = result.actualMarginalProfit / isUndefined(formInput.actualSalesRevenue)
 
-    result.resultOrdinaryProfit = result.actualOrdinaryProfit - result.planOrdinaryProfit
-    result.resultSalesRevenue =
+    result.resultOrdinaryProfit = convertResultFormat(
+      result.actualOrdinaryProfit - result.planOrdinaryProfit
+    )
+    result.resultSalesRevenue = convertResultFormat(
       (isUndefined(formInput.actualSalesRevenue) - isUndefined(formInput.planSalesRevenue)) *
-      planMarginalProfit
-    result.resultFixedCosts =
+        planMarginalProfit
+    )
+    result.resultFixedCosts = convertResultFormat(
       isUndefined(result.actualFixedCosts) - isUndefined(result.planFixedCosts)
-    result.resultOperatingExpenses = (
-      isUndefined(formInput.actualOperatingExpenses) - isUndefined(formInput.planOperatingExpenses)
-    ).toString()
-    result.resultSalesRevenueIncreaseRate = (
-      (actualMarginalProfit - planMarginalProfit) *
-      isUndefined(formInput.actualSalesRevenue)
-    ).toString()
-    result.resultFixedCosts =
-      isUndefined(formInput.planFixedCosts) - isUndefined(formInput.actualFixedCosts)
-    result.resultOperatingIncome = (
+    )
+
+    result.resultSalesRevenueIncreaseRate = convertResultFormat(
+      (actualMarginalProfit - planMarginalProfit) * isUndefined(formInput.actualSalesRevenue)
+    )
+    result.resultOperatingIncome = convertResultFormat(
       isUndefined(formInput.actualOperatingIncome) - isUndefined(formInput.planOperatingIncome)
-    ).toString()
-    result.resultOperatingExpenses = (
+    )
+    result.resultOperatingExpenses = convertResultFormat(
       isUndefined(formInput.actualOperatingExpenses) - isUndefined(formInput.planOperatingExpenses)
-    ).toString()
+    )
+    result.resultSubTotal = convertResultFormat(
+      reverseResultFormat(result.resultOrdinaryProfit) +
+        reverseResultFormat(result.resultSalesRevenueIncreaseRate) +
+        reverseResultFormat(result.resultFixedCosts) +
+        reverseResultFormat(result.resultOperatingIncome) +
+        reverseResultFormat(result.resultOperatingExpenses)
+    )
     setKpiData({ ...formInput, ...result })
 
     setSettingPlanData({
@@ -155,7 +161,7 @@ export default function useKpi() {
     })
     setTimeout(() => {
       setLoading(false)
-    }, 2000)
+    }, 1000)
   }
   const settingPlanCalculate = (formSetting: SettingPlanFinancialKpiData) => {
     console.log('hook:', formSetting)
@@ -174,6 +180,13 @@ export default function useKpi() {
     setSettingPlanData({ ...formSetting, ...result })
   }
 
+  const convertResultFormat = (value: number): string => {
+    return value >= 0 ? `${value.toFixed(2)}` : `▲${Math.abs(value).toFixed(2)}`
+  }
+  const reverseResultFormat = (value = '0'): number => {
+    return value.includes('▲') ? Number(value.replace('▲', '-')) : Number(value)
+  }
+
   return {
     kpiData,
     getKpiData,
@@ -182,5 +195,7 @@ export default function useKpi() {
     settingPlanData,
     setSettingPlanData,
     settingPlanCalculate,
+    currentYear,
+    reverseResultFormat,
   }
 }

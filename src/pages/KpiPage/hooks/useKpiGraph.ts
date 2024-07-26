@@ -1,40 +1,22 @@
-import Chart, { DataPoint } from 'components/Chart'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useRef } from 'react'
 import ReactDOM from 'react-dom/client'
-
-interface CustomWindowProps {
-  content: React.ReactNode
-}
-
-interface ChartComponentProps {
-  data: DataPoint[]
-}
 
 export default function useKpiGrpah() {
   const newWindowRef = useRef<Window | null>(null)
 
   const openWindow = useCallback(
     <T extends Record<string, unknown>>(Component: React.ComponentType<T>, props: T) => {
-      const newWindow = window.open('', '_blank', 'width=800,height=500,menubar=no')
-
+      const newWindow = window.open('', '_blank', 'width=800,height=500,menubar=no,resizable=0')
       if (newWindow) {
         newWindow.document.write(`
           <html>
             <head>
-              <title>Chart Window</title>
+              <title>増因モーデルウィンド</title>
             </head>
             <body>
               <div id="root"></div>
               <script>
-                const rootElement = document.getElementById('root');
-                const observer = new ResizeObserver(() => {
-                  window.resizeTo(
-                    rootElement.offsetWidth + 40,
-                    rootElement.offsetHeight + 40}
-                  );
-                });
-                observer.observe(rootElement);
-              });
+               
                 window.addEventListener('beforeunload', () => {
                   // Attempt to cleanup ResizeObserver
                   if (window.ResizeObserver) {
@@ -43,13 +25,14 @@ export default function useKpiGrpah() {
                     window.ResizeObserver.prototype.unobserve = () => {};
                   }
                 });
-               
+
               </script>
             </body>
           </html>`)
         newWindow.document.close()
 
         const root = ReactDOM.createRoot(newWindow.document.getElementById('root')!)
+
         root.render(React.createElement(Component, props))
 
         // Cleanup function

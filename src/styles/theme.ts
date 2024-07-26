@@ -41,6 +41,27 @@ const themeOptions: ThemeOptions = {
         },
       },
     },
+    MuiTextField: {
+      styleOverrides: {
+        root: props => ({
+          '& .MuiOutlinedInput-root': {
+            '&.Mui-focused fieldset': {
+              borderColor: props.theme.palette.info.light,
+            },
+          },
+          '& .MuiInputLabel-root.Mui-focused': {
+            color: 'white',
+          },
+        }),
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          fontSize: '1rem',
+        },
+      },
+    },
     MuiDialogTitle: {
       styleOverrides: {
         root: {

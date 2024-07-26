@@ -15,15 +15,31 @@ import {
 import { StyledCard, StyledCardContent } from './styles'
 import useKpi, { FinancialKpiData, SettingPlanFinancialKpiData } from './hooks/useKpi'
 import useKpiGrpah from './hooks/useKpiGraph'
-import Chart, { DataPoint } from 'components/Chart'
+import BarChart, { DataPoint } from 'components/Chart/BarChart'
+import { useConfirmModal } from 'hooks/useConfirmModal'
+import KpiSettingModal from 'components/Modals/KpiSettingModal'
 
 export default function KpiPage() {
   const [formData, setFormData] = useState<Partial<FinancialKpiData>>({})
   const [errors, setErrors] = useState<Partial<FinancialKpiData>>({})
   const [formSetting, setFormSetting] = useState<Partial<SettingPlanFinancialKpiData>>({})
-  const { getKpiData, kpiData, isShrink, kpiCalculate, settingPlanData, settingPlanCalculate } =
-    useKpi()
+  const {
+    getKpiData,
+    kpiData,
+    isShrink,
+    kpiCalculate,
+    settingPlanData,
+    settingPlanCalculate,
+    currentYear,
+    reverseResultFormat,
+  } = useKpi()
   const { openWindow } = useKpiGrpah()
+  const [planHeaderText, setPlanHeaderText] = useState('')
+  const [actualHeaderText, setActualHeaderText] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const { openConfirmModal } = useConfirmModal()
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setFormData(prev => ({
@@ -49,9 +65,8 @@ export default function KpiPage() {
 
     Object.entries(formData).forEach(([key, value]) => {
       if (key.includes('result') ?? key.toLocaleLowerCase().includes('marginalprofit')) return
-      if (value === undefined ?? value === null ?? value === '') {
+      if (value === undefined || value === null || value === '') {
         newErrors[key] = '必須項目です'
-        console.log(key)
       }
     })
 
@@ -76,18 +91,54 @@ export default function KpiPage() {
   }
 
   const handleOpenChart = () => {
+    console.log(reverseResultFormat(formData.resultOrdinaryProfit))
     const chartData: DataPoint[] = [
-      { name: '限界利益', value: formData.resultOrdinaryProfit ?? 0 },
-      { name: '固定費', value: formData.resultFixedCosts ?? 0 },
-      { name: '外収益', value: Number(formData.resultOperatingExpenses) ?? 0 },
-      { name: '外費用', value: Number(formData.resultOperatingExpenses) ?? 0 },
-      { name: '売上', value: formData.resultSalesRevenue ?? 0 },
+      { name: '限界利益', value: reverseResultFormat(formData.resultOrdinaryProfit) ?? 0 },
+      { name: '固定費', value: reverseResultFormat(formData.resultFixedCosts) ?? 0 },
+      { name: '外収益', value: reverseResultFormat(formData.resultOperatingExpenses) ?? 0 },
+      { name: '外費用', value: reverseResultFormat(formData.resultOperatingExpenses) ?? 0 },
+      { name: '売上', value: reverseResultFormat(formData.resultSalesRevenue) ?? 0 },
     ]
-    openWindow(Chart, { data: chartData })
+    openWindow(BarChart, { data: chartData })
+  }
+
+  const handleReset = async () => {
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: 'Are you sure you want to reset data? \n data is all to be reset',
+    })
+
+    if (confirmed) {
+      const resetData: Partial<FinancialKpiData> = {}
+      Object.keys(formData).forEach(key => {
+        resetData[key as keyof FinancialKpiData] = undefined
+      })
+      setFormData(resetData)
+      setFormSetting({})
+      setErrors({})
+    }
+  }
+
+  const handleSave = () => {
+    setModalOpen(true)
+  }
+
+  const handleSetting = (id: number) => {
+    let newText = id === 1 ? currentYear - 1 + ' 年実績' : currentYear + ' 計画'
+    setPlanHeaderText(newText)
+  }
+
+  const handleModalConfirm = (inputYear: string) => {
+    setModalOpen(false)
   }
 
   useEffect(() => {
+    setPlanHeaderText(currentYear - 1 + ' 年実績')
+    setActualHeaderText(currentYear + ' 年実績')
+  }, [])
+  useEffect(() => {
     setFormData({ ...kpiData })
+    setErrors({})
   }, [kpiData])
 
   useEffect(() => {
@@ -97,7 +148,13 @@ export default function KpiPage() {
 
   return (
     <Box padding={2} display={'flex'} flexDirection={'column'} flex={1}>
-      <SubHeader onSubmit={handleSubmit} onPressGetData={handleClickGetData} />
+      <SubHeader
+        onSubmit={handleSubmit}
+        onPressGetData={handleClickGetData}
+        onPressReset={handleReset}
+        onPressSave={handleSave}
+        onPressSetting={index => handleSetting(index)}
+      />
       <Box
         display={'flex'}
         flexDirection={'row'}
@@ -108,7 +165,7 @@ export default function KpiPage() {
       >
         <StyledCard id='plan-card'>
           <CardHeader
-            title='2022xxx'
+            title={planHeaderText}
             sx={{
               textAlign: 'center',
               backgroundColor: theme => theme.palette.info.dark,
@@ -235,8 +292,6 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               type={'number'}
-              error={!!errors.planOrdinaryProfit}
-              helperText={errors.planOrdinaryProfit}
               InputLabelProps={{ shrink: isShrink(formData.planOrdinaryProfit) }}
               margin='normal'
               InputProps={{
@@ -250,7 +305,7 @@ export default function KpiPage() {
         </StyledCard>
         <StyledCard id='actual-card'>
           <CardHeader
-            title='2023xxx'
+            title={actualHeaderText}
             sx={{ textAlign: 'center', backgroundColor: theme => theme.palette.info.dark }}
           />
           <StyledCardContent>
@@ -373,8 +428,6 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               type={'number'}
-              error={!!errors.actualOrdinaryProfit}
-              helperText={errors.actualOrdinaryProfit}
               InputLabelProps={{ shrink: isShrink(formData.actualOrdinaryProfit) }}
               margin='normal'
               InputProps={{
@@ -395,10 +448,10 @@ export default function KpiPage() {
             <TextField
               name='resultOrdinaryProfit'
               label='経常利益増減'
-              value={formatDisplayValue(formData.resultOrdinaryProfit)}
+              value={formData.resultOrdinaryProfit ?? ''}
               onChange={handleChange}
               fullWidth
-              type={'number'}
+              type={'text'}
               InputLabelProps={{
                 shrink: isShrink(formData.resultOrdinaryProfit),
               }}
@@ -413,10 +466,10 @@ export default function KpiPage() {
             <TextField
               name='resultSalesRevenue'
               label='売上高増減'
-              value={formatDisplayValue(formData.resultSalesRevenue)}
+              value={formData.resultSalesRevenue ?? ''}
               onChange={handleChange}
               fullWidth
-              type={'number'}
+              type={'text'}
               InputLabelProps={{ shrink: isShrink(formData.resultSalesRevenue) }}
               margin='normal'
               InputProps={{
@@ -429,7 +482,7 @@ export default function KpiPage() {
             <TextField
               name='resultSalesRevenueIncreaseRate'
               label='限界利益率増減'
-              value={formatDisplayValue(formData.resultSalesRevenueIncreaseRate)}
+              value={formData.resultSalesRevenueIncreaseRate ?? ''}
               onChange={handleChange}
               fullWidth
               type={'text'}
@@ -445,10 +498,10 @@ export default function KpiPage() {
             <TextField
               name='resultFixedCosts'
               label='固定費増減要'
-              value={formatDisplayValue(formData.resultFixedCosts)}
+              value={formData.resultFixedCosts ?? ''}
               onChange={handleChange}
               fullWidth
-              type={'number'}
+              type={'text'}
               InputLabelProps={{ shrink: isShrink(formData.resultFixedCosts) }}
               margin='normal'
               InputProps={{
@@ -461,7 +514,7 @@ export default function KpiPage() {
             <TextField
               name='resultOperatingIncome'
               label='営業外収益増減'
-              value={formatDisplayValue(formData.resultOperatingIncome)}
+              value={formData.resultOperatingIncome ?? ''}
               onChange={handleChange}
               fullWidth
               type={'text'}
@@ -477,7 +530,7 @@ export default function KpiPage() {
             <TextField
               name='resultOperatingExpenses'
               label='営業が意表増減'
-              value={formatDisplayValue(formData.resultOperatingExpenses)}
+              value={formData.resultOperatingExpenses ?? ''}
               onChange={handleChange}
               fullWidth
               type={'text'}
@@ -495,6 +548,7 @@ export default function KpiPage() {
             <Button size='large' onClick={handleOpenChart}>
               小計
             </Button>
+            <Typography>{formData.resultSubTotal}</Typography>
           </CardActions>
         </StyledCard>
         <StyledCard id='setting-card'>
@@ -617,6 +671,13 @@ export default function KpiPage() {
           </StyledCardContent>
         </StyledCard>
       </Box>
+      {modalOpen && (
+        <KpiSettingModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={intputYear => handleModalConfirm(intputYear)}
+        />
+      )}
     </Box>
   )
 }

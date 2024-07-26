@@ -10,14 +10,26 @@ import {
 } from '@mui/icons-material'
 import dayjs from 'dayjs'
 
-const options = ['時系列比較', '計画対実績比較']
+const options = [
+  { id: 1, label: '時系列比較' },
+  { id: 2, label: '計画対実績比較' },
+]
 
 interface SubHeader {
+  onPressSetting: (index: number) => void
+  onPressSave: () => void
   onSubmit: () => void
   onPressGetData: () => void
+  onPressReset: () => void
 }
 
-export default function SubHeader({ onSubmit, onPressGetData }: SubHeader) {
+export default function SubHeader({
+  onSubmit,
+  onPressGetData,
+  onPressSetting,
+  onPressSave,
+  onPressReset,
+}: SubHeader) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [selectedIndex, setSelectedIndex] = React.useState(0)
   const open = Boolean(anchorEl)
@@ -25,9 +37,10 @@ export default function SubHeader({ onSubmit, onPressGetData }: SubHeader) {
     setAnchorEl(event.currentTarget)
   }
 
-  const handleMenuItemClick = (event: React.MouseEvent<HTMLElement>, index: number) => {
+  const handleMenuItemClick = (event: React.MouseEvent<HTMLElement>, index: number, id: number) => {
     setSelectedIndex(index)
     setAnchorEl(null)
+    onPressSetting(id)
   }
 
   const handleClose = () => {
@@ -64,21 +77,21 @@ export default function SubHeader({ onSubmit, onPressGetData }: SubHeader) {
         >
           {options.map((option, index) => (
             <MenuItem
-              key={option}
+              key={option.id}
               selected={index === selectedIndex}
-              onClick={event => handleMenuItemClick(event, index)}
+              onClick={event => handleMenuItemClick(event, index, option.id)}
             >
-              {option}
+              {option.label}
             </MenuItem>
           ))}
         </Menu>
-        <IconButton aria-label='reset' size='large'>
+        <IconButton aria-label='reset' size='large' onClick={onPressReset}>
           <ResetIcon sx={{ fontSize: 36 }} />
         </IconButton>
         <IconButton aria-label='download' size='large' onClick={onPressGetData}>
           <CloudDownloadIcon sx={{ fontSize: 36 }} />
         </IconButton>
-        <IconButton aria-label='save' size='large'>
+        <IconButton aria-label='save' size='large' onClick={onPressSave}>
           <SaveIcon sx={{ fontSize: 36 }} />
         </IconButton>
         <IconButton aria-label='calculate' size='large' onClick={onSubmit}>
