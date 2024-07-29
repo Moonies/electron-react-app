@@ -1,5 +1,5 @@
 import React from 'react'
-import { AppBar, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import { AppBar, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography } from '@mui/material'
 import {
   Settings as SettingIcon,
   Menu as MenuIcon,
@@ -52,14 +52,16 @@ export default function SubHeader({
         <Typography variant='h4' component='div' sx={{ flexGrow: 1 }}>
           今年は {dayjs().get('year')}
         </Typography>
-        <IconButton
-          id='setting-kpi'
-          aria-label='setting'
-          size='large'
-          onClick={handleClickListItem}
-        >
-          <SettingIcon sx={{ fontSize: 36 }} />
-        </IconButton>
+        <Tooltip title={<Typography fontSize={18}>計算式</Typography>} arrow>
+          <IconButton
+            id='setting-kpi'
+            aria-label='setting'
+            size='large'
+            onClick={handleClickListItem}
+          >
+            <SettingIcon sx={{ fontSize: 36 }} />
+          </IconButton>
+        </Tooltip>
         <Menu
           id='setting-kpi'
           anchorEl={anchorEl}
@@ -85,18 +87,26 @@ export default function SubHeader({
             </MenuItem>
           ))}
         </Menu>
-        <IconButton aria-label='reset' size='large' onClick={onPressReset}>
-          <ResetIcon sx={{ fontSize: 36 }} />
-        </IconButton>
-        <IconButton aria-label='download' size='large' onClick={onPressGetData}>
-          <CloudDownloadIcon sx={{ fontSize: 36 }} />
-        </IconButton>
-        <IconButton aria-label='save' size='large' onClick={onPressSave}>
-          <SaveIcon sx={{ fontSize: 36 }} />
-        </IconButton>
-        <IconButton aria-label='calculate' size='large' onClick={onSubmit}>
-          <AutoGraphIcon sx={{ fontSize: 36 }} />
-        </IconButton>
+        <Tooltip title={<Typography fontSize={18}>データリセット</Typography>} arrow>
+          <IconButton aria-label='reset' size='large' onClick={onPressReset}>
+            <ResetIcon sx={{ fontSize: 36 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={<Typography fontSize={18}>KPIデータ取得</Typography>} arrow>
+          <IconButton aria-label='download' size='large' onClick={onPressGetData}>
+            <CloudDownloadIcon sx={{ fontSize: 36 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={<Typography fontSize={18}>KPIデータ設定</Typography>} arrow>
+          <IconButton aria-label='save' size='large' onClick={onPressSave}>
+            <SaveIcon sx={{ fontSize: 36 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={<Typography fontSize={18}>データ分析</Typography>} arrow>
+          <IconButton aria-label='calculate' size='large' onClick={onSubmit}>
+            <AutoGraphIcon sx={{ fontSize: 36 }} />
+          </IconButton>
+        </Tooltip>
       </Toolbar>
     </AppBar>
   )

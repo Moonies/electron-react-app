@@ -64,19 +64,6 @@ export default function useKpi() {
   const currentYear = dayjs().get('year')
   const { withLoading, setLoading } = useLoading()
 
-  const getKpiData = async () => {
-    const result = await withLoading(kpi().kpiData({ selectedYear: currentYear }))
-    if (result.code == 200 && result.data) {
-      let convertKpiData = convertToPercentages(result.data)
-      // Reset only calculated fields
-      // const resetData = kpiData
-      // calculatedFields.forEach(field => {
-      //   resetData[field] = undefined
-      // })
-      setKpiData({ ...convertKpiData })
-    }
-  }
-
   function convertToPercentages(obj: KpiData): FinancialKpiData {
     const result: Record<string, number> = {}
     for (const [key, value] of Object.entries(obj)) {
@@ -93,11 +80,33 @@ export default function useKpi() {
       maximumFractionDigits: 2,
     }).format(rawData * 100)}%`
 
+  const convertResultFormat = (value: number): string => {
+    return value >= 0 ? `${value.toFixed(2)}` : `▲${Math.abs(value).toFixed(2)}`
+  }
+  const reverseResultFormat = (value = '0'): number => {
+    return value.includes('▲') ? Number(value.replace('▲', '-')) : Number(value)
+  }
+
+  const getKpiData = async () => {
+    const result = await withLoading(kpi().kpiData({ selectedYear: currentYear }))
+    if (result.code == 200 && result.data) {
+      let convertKpiData = convertToPercentages(result.data)
+      setKpiData({ ...convertKpiData })
+    }
+  }
+
   const kpiCalculate = (formInput: KpiData) => {
     setLoading(true)
     let result: FinancialKpiData = {}
     let planMarginalProfit,
-      actualMarginalProfit = 0
+      actualMarginalProfit,
+      resultOrdinaryProfit,
+      resultSalesRevenue,
+      resultFixedCosts,
+      resultSalesRevenueIncreaseRate,
+      resultOperatingIncome,
+      resultOperatingExpenses = 0
+
     result.planMarginalProfit =
       isUndefined(formInput.planSalesRevenue) - isUndefined(formInput.planVariableCosts)
     result.planMarginalProfitRate = formattedNumber(
@@ -124,33 +133,35 @@ export default function useKpi() {
       isUndefined(formInput.actualOperatingExpenses)
     actualMarginalProfit = result.actualMarginalProfit / isUndefined(formInput.actualSalesRevenue)
 
-    result.resultOrdinaryProfit = convertResultFormat(
-      result.actualOrdinaryProfit - result.planOrdinaryProfit
-    )
-    result.resultSalesRevenue = convertResultFormat(
+    resultOrdinaryProfit = result.actualOrdinaryProfit - result.planOrdinaryProfit
+    resultSalesRevenue =
       (isUndefined(formInput.actualSalesRevenue) - isUndefined(formInput.planSalesRevenue)) *
-        planMarginalProfit
-    )
-    result.resultFixedCosts = convertResultFormat(
-      isUndefined(result.actualFixedCosts) - isUndefined(result.planFixedCosts)
+      planMarginalProfit
+    resultFixedCosts =
+      isUndefined(formInput.planFixedCosts) - isUndefined(formInput.actualFixedCosts)
+    resultSalesRevenueIncreaseRate =
+      (actualMarginalProfit - planMarginalProfit) * isUndefined(formInput.actualSalesRevenue)
+    resultOperatingIncome =
+      isUndefined(formInput.actualOperatingIncome) - isUndefined(formInput.planOperatingIncome)
+    resultOperatingExpenses =
+      isUndefined(formInput.actualOperatingExpenses) - isUndefined(formInput.planOperatingExpenses)
+
+    result.resultOrdinaryProfit = convertResultFormat(resultOrdinaryProfit)
+    result.resultSalesRevenue = convertResultFormat(resultSalesRevenue)
+    result.resultFixedCosts = convertResultFormat(resultFixedCosts)
+
+    result.resultSalesRevenueIncreaseRate = convertResultFormat(resultSalesRevenueIncreaseRate)
+    result.resultOperatingIncome = convertResultFormat(resultOperatingIncome)
+    result.resultOperatingExpenses = convertResultFormat(resultOperatingExpenses)
+
+    result.resultSubTotal = convertResultFormat(
+      resultSalesRevenue +
+        resultSalesRevenueIncreaseRate +
+        resultFixedCosts +
+        resultOperatingIncome +
+        resultOperatingExpenses
     )
 
-    result.resultSalesRevenueIncreaseRate = convertResultFormat(
-      (actualMarginalProfit - planMarginalProfit) * isUndefined(formInput.actualSalesRevenue)
-    )
-    result.resultOperatingIncome = convertResultFormat(
-      isUndefined(formInput.actualOperatingIncome) - isUndefined(formInput.planOperatingIncome)
-    )
-    result.resultOperatingExpenses = convertResultFormat(
-      isUndefined(formInput.actualOperatingExpenses) - isUndefined(formInput.planOperatingExpenses)
-    )
-    result.resultSubTotal = convertResultFormat(
-      reverseResultFormat(result.resultOrdinaryProfit) +
-        reverseResultFormat(result.resultSalesRevenueIncreaseRate) +
-        reverseResultFormat(result.resultFixedCosts) +
-        reverseResultFormat(result.resultOperatingIncome) +
-        reverseResultFormat(result.resultOperatingExpenses)
-    )
     setKpiData({ ...formInput, ...result })
 
     setSettingPlanData({
@@ -164,7 +175,6 @@ export default function useKpi() {
     }, 1000)
   }
   const settingPlanCalculate = (formSetting: SettingPlanFinancialKpiData) => {
-    console.log('hook:', formSetting)
     let result: SettingPlanFinancialKpiData = {}
     result.settingMarginalProfit =
       isUndefined(formSetting.settingSalesRevenue) - isUndefined(formSetting.settingVariableCosts)
@@ -178,13 +188,6 @@ export default function useKpi() {
         isUndefined(formSetting.settingOperatingExpenses) -
         isUndefined(formSetting.settingOperatingIncome))
     setSettingPlanData({ ...formSetting, ...result })
-  }
-
-  const convertResultFormat = (value: number): string => {
-    return value >= 0 ? `${value.toFixed(2)}` : `▲${Math.abs(value).toFixed(2)}`
-  }
-  const reverseResultFormat = (value = '0'): number => {
-    return value.includes('▲') ? Number(value.replace('▲', '-')) : Number(value)
   }
 
   return {

@@ -73,7 +73,6 @@ export default function KpiPage() {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
     } else {
-      console.log('Form submitted:', formData)
       // Handle form submission
       kpiCalculate(formData)
     }
@@ -91,7 +90,6 @@ export default function KpiPage() {
   }
 
   const handleOpenChart = () => {
-    console.log(reverseResultFormat(formData.resultOrdinaryProfit))
     const chartData: DataPoint[] = [
       { name: '限界利益', value: reverseResultFormat(formData.resultOrdinaryProfit) ?? 0 },
       { name: '固定費', value: reverseResultFormat(formData.resultFixedCosts) ?? 0 },
@@ -142,7 +140,6 @@ export default function KpiPage() {
   }, [kpiData])
 
   useEffect(() => {
-    console.log('set formsetting')
     setFormSetting(settingPlanData)
   }, [settingPlanData])
 
@@ -441,13 +438,13 @@ export default function KpiPage() {
         </StyledCard>
         <StyledCard id='result-card'>
           <CardHeader
-            title='result'
+            title='概要'
             sx={{ textAlign: 'center', backgroundColor: theme => theme.palette.info.dark }}
           />
           <StyledCardContent>
             <TextField
               name='resultOrdinaryProfit'
-              label='経常利益増減'
+              label='経常利益増減額'
               value={formData.resultOrdinaryProfit ?? ''}
               onChange={handleChange}
               fullWidth
@@ -462,10 +459,11 @@ export default function KpiPage() {
               variant='standard'
               size='small'
               color='info'
+              focused={!!formData.resultOrdinaryProfit}
             />
             <TextField
               name='resultSalesRevenue'
-              label='売上高増減'
+              label='売上高増減要因'
               value={formData.resultSalesRevenue ?? ''}
               onChange={handleChange}
               fullWidth
@@ -478,10 +476,11 @@ export default function KpiPage() {
               variant='standard'
               size='small'
               color='info'
+              focused={!!formData.resultSalesRevenue}
             />
             <TextField
               name='resultSalesRevenueIncreaseRate'
-              label='限界利益率増減'
+              label='限界利益率増減要因'
               value={formData.resultSalesRevenueIncreaseRate ?? ''}
               onChange={handleChange}
               fullWidth
@@ -494,10 +493,11 @@ export default function KpiPage() {
               variant='standard'
               size='small'
               color='info'
+              focused={!!formData.resultSalesRevenueIncreaseRate}
             />
             <TextField
               name='resultFixedCosts'
-              label='固定費増減要'
+              label='固定費増減要因'
               value={formData.resultFixedCosts ?? ''}
               onChange={handleChange}
               fullWidth
@@ -510,10 +510,11 @@ export default function KpiPage() {
               variant='standard'
               size='small'
               color='info'
+              focused={!!formData.resultFixedCosts}
             />
             <TextField
               name='resultOperatingIncome'
-              label='営業外収益増減'
+              label='営業外収益増減要因'
               value={formData.resultOperatingIncome ?? ''}
               onChange={handleChange}
               fullWidth
@@ -526,10 +527,11 @@ export default function KpiPage() {
               variant='standard'
               size='small'
               color='info'
+              focused={!!formData.resultOperatingIncome}
             />
             <TextField
               name='resultOperatingExpenses'
-              label='営業が意表増減'
+              label='営業外費用増減要因'
               value={formData.resultOperatingExpenses ?? ''}
               onChange={handleChange}
               fullWidth
@@ -542,10 +544,11 @@ export default function KpiPage() {
               variant='standard'
               size='small'
               color='info'
+              focused={!!formData.resultOperatingExpenses}
             />
           </StyledCardContent>
           <CardActions>
-            <Button size='large' onClick={handleOpenChart}>
+            <Button size='large' onClick={handleOpenChart} variant='outlined'>
               小計
             </Button>
             <Typography>{formData.resultSubTotal}</Typography>
@@ -553,7 +556,7 @@ export default function KpiPage() {
         </StyledCard>
         <StyledCard id='setting-card'>
           <CardHeader
-            title='setting plan'
+            title='希望年計画設置'
             sx={{ textAlign: 'center', backgroundColor: theme => theme.palette.info.dark }}
           />
           <StyledCardContent>
