@@ -20,17 +20,45 @@ const themeOptions: ThemeOptions = {
     },
   },
   components: {
+    MuiInputBase: {
+      defaultProps: {
+        sx: {
+          fontSize: '1.4rem',
+        },
+      },
+    },
     MuiInputLabel: {
       defaultProps: {
         sx: {
-          fontSize: '1.2rem',
+          fontSize: '1.4rem',
         },
       },
     },
     MuiOutlinedInput: {
       defaultProps: {
         sx: {
-          fontSize: '1.2rem',
+          fontSize: '1.4rem',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: props => ({
+          '& .MuiOutlinedInput-root': {
+            '&.Mui-focused fieldset': {
+              borderColor: props.theme.palette.info.light,
+            },
+          },
+          '& .MuiInputLabel-root.Mui-focused': {
+            color: 'white',
+          },
+        }),
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          fontSize: '1rem',
         },
       },
     },

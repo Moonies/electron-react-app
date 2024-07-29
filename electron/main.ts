@@ -14,6 +14,7 @@ function createWindow() {
       contextIsolation: false,
     },
     // autoHideMenuBar: true,
+    resizable: true,
   })
 
   if (process.env.NODE_ENV === 'development') {
@@ -44,6 +45,11 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+app.on('browser-window-created', (e, win) => {
+  win.removeMenu()
+  win.resizable = false
 })
 
 app.on('activate', () => {
