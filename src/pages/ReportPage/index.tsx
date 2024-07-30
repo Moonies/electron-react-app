@@ -36,7 +36,7 @@ import {
   ReferenceLine,
   Brush,
 } from 'recharts'
-import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import { NameType, Payload, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import useReport from './hooks/useReport'
 
 interface CustomLabelRenderer {
@@ -49,78 +49,52 @@ interface CustomLabelRenderer {
   index: number
 }
 
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  chartId?: string
+  typeFormatValue?: 'percent' | 'currency' | ''
+}
+
 export default function ReportPage() {
   const [outerRadius, setOuterRadius] = useState(112)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { bestTopFiveProductList, profitChartData, saleChartData, worstTopFiveProductList } =
-    useReport()
-
-  const data = [
-    { name: 'Page A', uv: 4000, pv: 2400, amt: 2400, cnt: 490 },
-    { name: 'Page B', uv: 3000, pv: 1398, amt: 2210, cnt: 350 },
-    { name: 'Page C', uv: 2000, pv: 9800, amt: 2290, cnt: 120 },
-    { name: 'Page D', uv: 2780, pv: 3908, amt: 2000, cnt: 680 },
-    { name: 'Page E', uv: 1890, pv: 4800, amt: 2181, cnt: 4000 },
-  ]
-
+  const {
+    profitChartData,
+    saleChartData,
+    bestSaleProductChartData,
+    worstSaleProductChartData,
+    getSaleReport,
+    getBestSaleProductReport,
+    getProfitReport,
+    getWorstSaleProductReport,
+  } = useReport()
+  const [searchCriteria, setSearchCriteria] = useState({
+    category: '',
+    startDate: new Date(),
+    endDate: new Date(),
+  })
   let value = 56
   const dataPieChart = [
     { name: 'Completed', value: value },
     { name: 'Remaining', value: 100 - value },
   ]
 
-  const dataBrushBarChart = [
-    { name: '1', uv: 300, pv: 456 },
-    { name: '2', uv: -145, pv: 230 },
-    { name: '3', uv: -100, pv: 345 },
-    { name: '4', uv: -8, pv: 450 },
-    { name: '5', uv: 100, pv: 321 },
-    { name: '6', uv: 9, pv: 235 },
-    { name: '7', uv: 53, pv: 267 },
-    { name: '8', uv: 252, pv: -378 },
-    { name: '9', uv: 79, pv: -210 },
-    { name: '10', uv: 294, pv: -23 },
-    { name: '12', uv: 43, pv: 45 },
-    { name: '13', uv: -74, pv: 90 },
-    { name: '14', uv: -71, pv: 130 },
-    { name: '15', uv: -117, pv: 11 },
-    { name: '16', uv: -186, pv: 107 },
-    { name: '17', uv: -16, pv: 926 },
-    { name: '18', uv: -125, pv: 653 },
-    { name: '19', uv: 222, pv: 366 },
-    { name: '20', uv: 372, pv: 486 },
-    { name: '21', uv: 182, pv: 512 },
-    { name: '22', uv: 164, pv: 302 },
-    { name: '23', uv: 316, pv: 425 },
-    { name: '24', uv: 131, pv: 467 },
-    { name: '25', uv: 291, pv: -190 },
-    { name: '26', uv: -47, pv: 194 },
-    { name: '27', uv: -415, pv: 371 },
-    { name: '28', uv: -182, pv: 376 },
-    { name: '29', uv: -93, pv: 295 },
-    { name: '30', uv: -99, pv: 322 },
-    { name: '31', uv: -52, pv: 246 },
-    { name: '32', uv: 154, pv: 33 },
-    { name: '33', uv: 205, pv: 354 },
-    { name: '34', uv: 70, pv: 258 },
-    { name: '35', uv: -25, pv: 359 },
-    { name: '36', uv: -59, pv: 192 },
-    { name: '37', uv: -63, pv: 464 },
-    { name: '38', uv: -91, pv: -2 },
-    { name: '39', uv: -66, pv: 154 },
-    { name: '40', uv: -50, pv: 186 },
-  ]
+  const currencyFormatter = (value: number, typeValue?: 'percent' | 'currency') => {
+    switch (typeValue) {
+      case 'currency':
+        return new Intl.NumberFormat('ja-JP', {
+          style: 'currency',
+          currency: 'JPY',
+        }).format(value)
+      case 'percent':
+        return `${value}%`
+      default:
+        return ''
+    }
+  }
 
-  const data01 = [
-    { name: 'Group A', value: 400 },
-    { name: 'Group B', value: 300 },
-    { name: 'Group C', value: 300 },
-    { name: 'Group D', value: 200 },
-    { name: 'Group E', value: 200 },
-  ]
-
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+  const CustomTooltip = ({ active, payload, label, chartId = undefined }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
+      console.log(payload, chartId)
       return (
         <div
           className='custom-tooltip'
@@ -131,10 +105,12 @@ export default function ReportPage() {
             color: 'black',
           }}
         >
-          <p className='label'>{`${label}`}</p>
+          {!chartId && <p className='label'>{`${label}`}</p>}
           {payload.map(pld => (
             <p key={pld.name} style={{ color: pld.color }}>
-              {`${pld.name} : ${pld.value}`}
+              {chartId
+                ? `${pld.name} : ${pld.value}`
+                : convertTooltip(pld.name ?? '', pld.value ?? 0)}{' '}
             </p>
           ))}
         </div>
@@ -186,6 +162,41 @@ export default function ReportPage() {
     )
   }
 
+  const customLegendFormatter = (value: string) => {
+    const labelMap: { [key: string]: string } = {
+      totalUnit: 'Custom UV Label',
+      totalProfit: '総利益',
+      quantityPercent: '数量',
+      profitPercent: '売上',
+      totalSale: '売上',
+      totalPreSale: '予測販売値',
+      totalTarget: '目標',
+    }
+    return labelMap[value] || value
+  }
+
+  const convertTooltip = (label: string, value: number, payload?: Payload<number, string>) => {
+    const labelMap: { [key: string]: string } = {
+      totalUnit: 'Custom UV Label',
+      totalProfit: '総利益',
+      quantityPercent: '数量',
+      profitPercent: '売上',
+      totalSale: '売上',
+      totalPreSale: '予測販売値',
+      totalTarget: '目標',
+    }
+    return `${labelMap[label]} : ${value}` || value
+  }
+  const handleChange = (name: string, value: string | Date) => {
+    setSearchCriteria(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSearch = () => {
+    getSaleReport(searchCriteria)
+    getBestSaleProductReport(searchCriteria)
+    getWorstSaleProductReport(searchCriteria)
+    getProfitReport(searchCriteria)
+  }
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
@@ -209,26 +220,28 @@ export default function ReportPage() {
           <Box display={'flex'} flexDirection={'row'} gap={1} flex={1}>
             <DatePicker
               label='Start Date'
-              // value={dayjs(searchCriteria.startDate)}
+              value={dayjs(searchCriteria.startDate)}
               format='YYYY/MM/DD'
-              // onChange={(date: Dayjs | null) =>
-              //   handleChange('startDate', date?.toDate() || new Date())
-              // }
+              onChange={(date: Dayjs | null) =>
+                handleChange('startDate', date?.toDate() || new Date())
+              }
             />
             <DatePicker
               label='End Date'
               format='YYYY/MM/DD'
-              // value={dayjs(searchCriteria.endDate)}
-              // onChange={(date: Dayjs | null) =>
-              //   handleChange('endDate', date?.toDate() || new Date())
-              // }
+              value={dayjs(searchCriteria.endDate)}
+              onChange={(date: Dayjs | null) =>
+                handleChange('endDate', date?.toDate() || new Date())
+              }
             />
             <TextField
-              id='filled-select-currency'
+              id='report-type'
               select
               label='Select'
               // fullWidth
               sx={{ width: 125 }}
+              value={searchCriteria.category}
+              onChange={e => handleChange('category', e.target.value as string)}
             >
               <MenuItem value={0}>Year</MenuItem>
               <MenuItem value={1}>Month</MenuItem>
@@ -237,6 +250,7 @@ export default function ReportPage() {
             <Button
               variant='outlined'
               sx={{ width: 125, fontSize: 22, height: 48, marginY: 'auto' }}
+              onClick={handleSearch}
             >
               適用
             </Button>
@@ -310,9 +324,15 @@ export default function ReportPage() {
                 <XAxis dataKey='label' />
                 <YAxis tick={{ fill: '#82ca9d' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <Legend formatter={customLegendFormatter} />
                 <Bar dataKey='totalSale' barSize={20} fill='#2196f3' />
-                <Line type='monotone' dataKey='totalPresale' stroke='#b2102f' strokeWidth={3} />
+                <Line
+                  type='monotone'
+                  dataKey='totalPreSale'
+                  label='TotalPreSale'
+                  stroke='#b2102f'
+                  strokeWidth={3}
+                />
                 <Scatter dataKey='totalTarget' fill='#ff9100' shape='square' />
               </ComposedChart>
             </ResponsiveContainer>
@@ -324,7 +344,7 @@ export default function ReportPage() {
                   <BarChart
                     width={500}
                     height={300}
-                    data={dataBrushBarChart}
+                    data={profitChartData}
                     margin={{
                       top: 5,
                       right: 30,
@@ -333,10 +353,14 @@ export default function ReportPage() {
                     }}
                   >
                     <CartesianGrid strokeDasharray='3 3' />
-                    <XAxis dataKey='name' />
+                    <XAxis dataKey='label' />
                     <YAxis />
-                    <Tooltip />
-                    <Legend verticalAlign='top' wrapperStyle={{ lineHeight: '40px' }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend
+                      verticalAlign='top'
+                      wrapperStyle={{ lineHeight: '40px' }}
+                      formatter={customLegendFormatter}
+                    />
                     <ReferenceLine y={0} stroke='#000' />
                     <Brush
                       dataKey='name'
@@ -345,8 +369,7 @@ export default function ReportPage() {
                       fill='#e0e0e0'
                       travellerWidth={10}
                     />
-                    <Bar dataKey='pv' fill='#8884d8' />
-                    <Bar dataKey='uv' fill='#82ca9d' />
+                    <Bar dataKey='totalProfit' fill='#8884d8' />
                   </BarChart>
                 </ResponsiveContainer>
               </Paper>
@@ -355,9 +378,9 @@ export default function ReportPage() {
               <Paper elevation={24} sx={{ height: '100%' }}>
                 <ResponsiveContainer width='100%' height={400}>
                   <BarChart
-                    width={500}
+                    width={300}
                     height={300}
-                    data={data}
+                    data={worstSaleProductChartData}
                     margin={{
                       top: 20,
                       right: 30,
@@ -368,11 +391,11 @@ export default function ReportPage() {
                   >
                     <CartesianGrid strokeDasharray='3 3' />
                     <XAxis type='number' />
-                    <YAxis dataKey='name' type='category' />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey='pv' fill='#8884d8' />
-                    <Bar dataKey='amt' fill='#82ca9d' />
+                    <YAxis dataKey='productName' type='category' tick={{ fill: '#ffffff' }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend formatter={customLegendFormatter} />
+                    <Bar dataKey='quantityPercent' fill='#8884d8' />
+                    <Bar dataKey='profitPercent' fill='#82ca9d' />
                   </BarChart>
                 </ResponsiveContainer>
               </Paper>
@@ -416,21 +439,31 @@ export default function ReportPage() {
             </ResponsiveContainer>
             <ResponsiveContainer width={'100%'} height={400}>
               <PieChart>
-                <Tooltip />
                 <Pie
-                  data={data01}
+                  data={bestSaleProductChartData}
                   cx='50%'
                   cy='50%'
                   labelLine={false}
                   label={renderCustomizedLabel}
                   outerRadius={outerRadius}
                   fill='#8884d8'
-                  dataKey='value'
+                  dataKey='profitPercent'
+                  id='bestSaleProductChart'
+                  nameKey={'productName'}
                 >
-                  {data01.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                  {bestSaleProductChartData &&
+                    bestSaleProductChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${entry.totalProfit}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
                 </Pie>
+                <Tooltip
+                  content={
+                    <CustomTooltip chartId='bestSaleProductChart' typeFormatValue='percent' />
+                  }
+                />
               </PieChart>
             </ResponsiveContainer>
           </Paper>

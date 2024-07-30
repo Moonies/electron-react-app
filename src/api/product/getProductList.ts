@@ -3,49 +3,29 @@ import { ApiResponse } from 'api'
 import { mockdata } from './_mockdata'
 import dayjs from 'dayjs'
 
-export interface SearchCriteria {
+export interface SearchCriteriaProductList {
   category: string
   keyword: string
-  startDate: Date
-  endDate: Date
-}
-export interface SalesSummary {
-  totalSales: number
-  averageOrderValue: number
-  topSellingProduct: string
 }
 
-export interface SalesData {
-  saleId: number
-  invoiceNumber: number
-  customerName: string
-  deliveryDate: string | dayjs.Dayjs
+export interface ProductData {
   productId: string
   productName: string
-  // 注番: string
-  quantity: number
-  unitPrice: number
-  totalPrice: number
-  // ｵｰﾀﾞｰ: string
-  employeeName: string
-  orderApprovedEmployee: string
-  orderId: number
+  stockQuantity: number
+  productCost: number
+  productPrice: number
+  productUnit: string
 }
 
-export default async function saleList(
-  criteria: SearchCriteria
-): Promise<ApiResponse<{ summary: SalesSummary; data: SalesData[] }>> {
+export default async function getProductList(
+  criteria: SearchCriteriaProductList
+): Promise<ApiResponse<{ data: ProductData[] }>> {
   //for beta:test
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
     message: 'Success',
     data: {
-      summary: {
-        totalSales: 10000,
-        averageOrderValue: 100,
-        topSellingProduct: 'Product A',
-      },
       data: mockdata,
     },
   }

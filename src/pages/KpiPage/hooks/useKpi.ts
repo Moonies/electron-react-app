@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { kpi } from 'api/index'
+import { api } from 'api/index'
 import dayjs from 'dayjs'
 import useLoading from 'hooks/useLoading'
-import { KpiData } from 'api/kpi/kpiData'
+import { KpiData } from 'api/kpi/getKpiData'
 
 export interface FinancialKpiData {
   planSalesRevenue?: number
@@ -88,7 +88,7 @@ export default function useKpi() {
   }
 
   const getKpiData = async () => {
-    const result = await withLoading(kpi().kpiData({ selectedYear: currentYear }))
+    const result = await withLoading(api.kpi().getKpiData({ selectedYear: currentYear }))
     if (result.code == 200 && result.data) {
       let convertKpiData = convertToPercentages(result.data)
       setKpiData({ ...convertKpiData })

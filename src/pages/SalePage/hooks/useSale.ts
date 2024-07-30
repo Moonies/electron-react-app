@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo } from 'react'
 import dayjs from 'dayjs'
-import { saleList } from 'api'
+import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import { GridColDef } from '@mui/x-data-grid'
-import { SalesData, SalesSummary, SearchCriteria } from 'api/sales/saleList'
+import { SalesData, SalesSummary, SearchCriteria } from 'api/sale/getSaleList'
 // import dayjs from 'dayjs'
 
 interface PaginationModel {
@@ -90,7 +90,7 @@ export default function useSales() {
 
   const handleSearch = useCallback(async () => {
     setLoading(true)
-    const result = await saleList(searchCriteria)
+    const result = await api.sale().getSaleList(searchCriteria)
     if (result.code === 200 && result.data) {
       setSalesSummary(result.data.summary)
       setSalesData(result.data.data)

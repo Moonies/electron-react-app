@@ -3,10 +3,10 @@ import { ApiResponse } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
 
 export interface YearKpiSelecte {
-  selectedYear: Dayjs
+  selectedYear: number
 }
 
-export interface KpiSaveData {
+export interface KpiData {
   planSalesRevenue?: number
   planVariableCosts?: number
   planFixedCosts?: number
@@ -21,33 +21,30 @@ export interface KpiSaveData {
   actualOrdinaryProfit?: number
 }
 
-const mockdata = [
-  {
-    planSalesRevenue: 32000000,
-    planVariableCosts: 100000000,
-    planFixedCosts: 60000000,
-    planOperatingIncome: 40000000,
-    planOperatingExpenses: 30000000,
-    planOrdinaryProfit: 170000,
-    actualSalesRevenue: 2000000,
-    actualVariableCosts: 0,
-    actualFixedCosts: 500000,
-    actualOperatingIncome: 0,
-    actualOperatingExpenses: 0,
-    actualOrdinaryProfit: 1500000,
-  },
-]
-export default async function kpiSaveData(
-  year: YearKpiSelecte
-): Promise<ApiResponse<{ data: KpiSaveData[] }>> {
+const mockdata = {
+  planSalesRevenue: 2000000,
+  planVariableCosts: 1000000,
+  planFixedCosts: 6000000,
+  planOperatingIncome: 4000000,
+  planOperatingExpenses: 3000000,
+  planOrdinaryProfit: 170000,
+  actualSalesRevenue: 2000000,
+  actualVariableCosts: 0,
+  actualFixedCosts: 500000,
+  actualOperatingIncome: 0,
+  actualOperatingExpenses: 0,
+  actualOrdinaryProfit: 1500000,
+}
+
+export default async function GetKpiData(
+  selectedYear: YearKpiSelecte
+): Promise<ApiResponse<KpiData>> {
   //for beta:test
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
     message: 'Success',
-    data: {
-      data: mockdata,
-    },
+    data: mockdata,
   }
   // when use real API
   // try {
