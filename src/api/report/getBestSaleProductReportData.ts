@@ -1,11 +1,6 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
-
-export interface SearchCriteria {
-  category: string
-  startDate: Date
-  endDate: Date
-}
+import { ReportSearchCriteria } from '.'
 
 export interface BestSaleProductReportData {
   productCode: string
@@ -43,7 +38,7 @@ const mockBestSaleProductList = [
 ]
 
 export default async function GetBestSaleProductReportData(
-  searchCriteria: SearchCriteria
+  searchCriteria: ReportSearchCriteria
 ): Promise<ApiResponse<BestSaleProductReportData[]>> {
   //for beta:test
   await new Promise(resolve => setTimeout(resolve, 1000))

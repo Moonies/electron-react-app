@@ -1,11 +1,6 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
-
-export interface SearchCriteria {
-  category: string
-  startDate: Date
-  endDate: Date
-}
+import { ReportSearchCriteria } from '.'
 
 export interface ProfitReportData {
   label: string
@@ -21,7 +16,7 @@ const mockProfitChartData = [
 ]
 
 export default async function GetProfitReportData(
-  searchCriteria: SearchCriteria
+  searchCriteria: ReportSearchCriteria
 ): Promise<ApiResponse<ProfitReportData[]>> {
   //for beta:test
   await new Promise(resolve => setTimeout(resolve, 1000))

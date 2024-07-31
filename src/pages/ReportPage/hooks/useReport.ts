@@ -1,10 +1,11 @@
 import { api } from 'api/index'
+import { ReportSearchCriteria } from 'api/report'
 import { BestSaleProductReportData } from 'api/report/getBestSaleProductReportData'
 import { ProfitReportData } from 'api/report/getProfitReportData'
-import { SaleReportData, SearchCriteria } from 'api/report/getSaleReportData'
+import { SaleReportData } from 'api/report/getSaleReportData'
 import { WorstProductReportData } from 'api/report/getWorstSaleProductReportData'
 import useLoading from 'hooks/useLoading'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 export default function useReport() {
   const [saleChartData, setSaleChartData] = useState<SaleReportData[]>()
@@ -13,6 +14,13 @@ export default function useReport() {
     useState<BestSaleProductReportData[]>()
   const [worstSaleProductChartData, setWorstSaleProductChartData] =
     useState<WorstProductReportData[]>()
+  const [progressChartData, setProgressChartData] = useState<
+    {
+      name: string
+      value: number
+    }[]
+  >()
+  const [inProgessValue, setInProgressValue] = useState(0)
 
   const labelConvert = {
     totalUnit: 'Custom UV Label',
@@ -25,28 +33,62 @@ export default function useReport() {
   }
   const { withLoading, setLoading } = useLoading()
 
-  const getSaleReport = async (searchCriteria: SearchCriteria) => {
+  const customLegendFormatter = (value: string) => {
+    const labelMap: { [key: string]: string } = labelConvert
+    return labelMap[value] || value
+  }
+
+  const convertTooltip = (label: string, value: number | string) => {
+    const labelMap: { [key: string]: string } = labelConvert
+    return `${labelMap[label]} : ${value}` || value
+  }
+
+  const currencyFormatter = (value = 0, typeValue: 'percent' | 'currency' | '') => {
+    switch (typeValue) {
+      case 'currency':
+        return new Intl.NumberFormat('ja-JP', {
+          style: 'currency',
+          currency: 'JPY',
+        }).format(value)
+      case 'percent':
+        return `${value}%`
+      default:
+        return ''
+    }
+  }
+
+  const getTotalSale = async (searchCriteria: ReportSearchCriteria) => {
+    //get sum sale total with date
+    let totalSale = 56 // this value from API totalSale(form Sale Table) / resultSumKpi(form KPI Table)
+    setInProgressValue(totalSale)
+    setProgressChartData([
+      { name: 'Completed', value: totalSale },
+      { name: 'Remaining', value: 100 - totalSale },
+    ])
+  }
+
+  const getSaleReport = async (searchCriteria: ReportSearchCriteria) => {
     const result = await withLoading(api.report().getSaleReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setSaleChartData(result.data)
     }
   }
 
-  const getProfitReport = async (searchCriteria: SearchCriteria) => {
+  const getProfitReport = async (searchCriteria: ReportSearchCriteria) => {
     const result = await withLoading(api.report().getProfitReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setProfitChartData(result.data)
     }
   }
 
-  const getBestSaleProductReport = async (searchCriteria: SearchCriteria) => {
+  const getBestSaleProductReport = async (searchCriteria: ReportSearchCriteria) => {
     const result = await withLoading(api.report().getBestSaleProductReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setBestSaleProductChartData(result.data)
     }
   }
 
-  const getWorstSaleProductReport = async (searchCriteria: SearchCriteria) => {
+  const getWorstSaleProductReport = async (searchCriteria: ReportSearchCriteria) => {
     const result = await withLoading(api.report().getWorstSaleProductReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setWorstSaleProductChartData(result.data)
@@ -61,5 +103,11 @@ export default function useReport() {
     getProfitReport,
     getBestSaleProductReport,
     getWorstSaleProductReport,
+    customLegendFormatter,
+    convertTooltip,
+    currencyFormatter,
+    getTotalSale,
+    progressChartData,
+    inProgessValue,
   }
 }

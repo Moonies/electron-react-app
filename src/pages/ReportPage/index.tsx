@@ -1,16 +1,4 @@
-import {
-  AppBar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  MenuItem,
-  Paper,
-  TextField,
-  Toolbar,
-  Typography,
-} from '@mui/material'
+import { Box, Card, CardContent, CardHeader, Paper, SvgIcon, Typography } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs'
 import React, { useEffect, useRef, useState } from 'react'
@@ -22,37 +10,20 @@ import {
   Scatter,
   XAxis,
   YAxis,
-  ZAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   TooltipProps,
-  Rectangle,
-  Dot,
-  PieChart,
-  Pie,
-  Cell,
   BarChart,
   ReferenceLine,
   Brush,
 } from 'recharts'
-import { NameType, Payload, ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import BestSaleProductChart from './components/BestSaleProductChart'
+import CustomTooltip from './components/CustomTooltip'
+import ProgressChart from './components/ProgressChart'
+import SubHeader from './components/SubHeader'
 import useReport from './hooks/useReport'
-
-interface CustomLabelRenderer {
-  cx: number
-  cy: number
-  midAngle: number
-  innerRadius: number
-  outerRadius: number
-  percent: number
-  index: number
-}
-
-interface CustomTooltipProps extends TooltipProps<number, string> {
-  chartId?: string
-  typeFormatValue?: 'percent' | 'currency' | ''
-}
+import CustomIcon from 'components/CustomIcon'
 
 export default function ReportPage() {
   const [outerRadius, setOuterRadius] = useState(112)
@@ -66,127 +37,17 @@ export default function ReportPage() {
     getBestSaleProductReport,
     getProfitReport,
     getWorstSaleProductReport,
+    customLegendFormatter,
+    progressChartData,
+    inProgessValue,
+    getTotalSale,
   } = useReport()
   const [searchCriteria, setSearchCriteria] = useState({
     category: '',
     startDate: new Date(),
     endDate: new Date(),
   })
-  let value = 56
-  const dataPieChart = [
-    { name: 'Completed', value: value },
-    { name: 'Remaining', value: 100 - value },
-  ]
 
-  const currencyFormatter = (value: number, typeValue?: 'percent' | 'currency') => {
-    switch (typeValue) {
-      case 'currency':
-        return new Intl.NumberFormat('ja-JP', {
-          style: 'currency',
-          currency: 'JPY',
-        }).format(value)
-      case 'percent':
-        return `${value}%`
-      default:
-        return ''
-    }
-  }
-
-  const CustomTooltip = ({ active, payload, label, chartId = undefined }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      console.log(payload, chartId)
-      return (
-        <div
-          className='custom-tooltip'
-          style={{
-            backgroundColor: 'white',
-            padding: '10px',
-            border: '1px solid #ccc',
-            color: 'black',
-          }}
-        >
-          {!chartId && <p className='label'>{`${label}`}</p>}
-          {payload.map(pld => (
-            <p key={pld.name} style={{ color: pld.color }}>
-              {chartId
-                ? `${pld.name} : ${pld.value}`
-                : convertTooltip(pld.name ?? '', pld.value ?? 0)}{' '}
-            </p>
-          ))}
-        </div>
-      )
-    }
-
-    return null
-  }
-  const RADIAN = Math.PI / 180
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#ff4242']
-
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-    index,
-  }: CustomLabelRenderer) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5
-    const x = cx + radius * Math.cos(-midAngle * RADIAN)
-    const y = cy + radius * Math.sin(-midAngle * RADIAN)
-    // Adjust position for better centering
-    const sin = Math.sin(-midAngle * RADIAN)
-    const cos = Math.cos(-midAngle * RADIAN)
-    const sx = cx + (outerRadius + 10) * cos
-    const sy = cy + (outerRadius + 10) * sin
-    const mx = cx + (outerRadius + 30) * cos
-    const my = cy + (outerRadius + 30) * sin
-    const ex = mx + (cos >= 0 ? 1 : -1) * 22
-    const ey = my
-    const textAnchor = cos >= 0 ? 'start' : 'end'
-
-    const percentValue = (percent * 100).toFixed(0)
-    return (
-      <g>
-        <text
-          x={x}
-          y={y}
-          fill={percent > 0.1 ? 'white' : 'black'}
-          textAnchor='middle'
-          dominantBaseline='central'
-          fontSize={percent > 0.05 ? '14' : '10'}
-        >
-          {percent > 0.03 ? `${percentValue}%` : ''}
-        </text>
-      </g>
-    )
-  }
-
-  const customLegendFormatter = (value: string) => {
-    const labelMap: { [key: string]: string } = {
-      totalUnit: 'Custom UV Label',
-      totalProfit: '総利益',
-      quantityPercent: '数量',
-      profitPercent: '売上',
-      totalSale: '売上',
-      totalPreSale: '予測販売値',
-      totalTarget: '目標',
-    }
-    return labelMap[value] || value
-  }
-
-  const convertTooltip = (label: string, value: number, payload?: Payload<number, string>) => {
-    const labelMap: { [key: string]: string } = {
-      totalUnit: 'Custom UV Label',
-      totalProfit: '総利益',
-      quantityPercent: '数量',
-      profitPercent: '売上',
-      totalSale: '売上',
-      totalPreSale: '予測販売値',
-      totalTarget: '目標',
-    }
-    return `${labelMap[label]} : ${value}` || value
-  }
   const handleChange = (name: string, value: string | Date) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
@@ -196,6 +57,7 @@ export default function ReportPage() {
     getBestSaleProductReport(searchCriteria)
     getWorstSaleProductReport(searchCriteria)
     getProfitReport(searchCriteria)
+    getTotalSale(searchCriteria)
   }
   useEffect(() => {
     const updateSize = () => {
@@ -215,48 +77,11 @@ export default function ReportPage() {
 
   return (
     <Box flex={1} display={'flex'} flexDirection={'column'} p={2}>
-      <AppBar position='static' sx={{ margin: 1 }}>
-        <Toolbar>
-          <Box display={'flex'} flexDirection={'row'} gap={1} flex={1}>
-            <DatePicker
-              label='Start Date'
-              value={dayjs(searchCriteria.startDate)}
-              format='YYYY/MM/DD'
-              onChange={(date: Dayjs | null) =>
-                handleChange('startDate', date?.toDate() || new Date())
-              }
-            />
-            <DatePicker
-              label='End Date'
-              format='YYYY/MM/DD'
-              value={dayjs(searchCriteria.endDate)}
-              onChange={(date: Dayjs | null) =>
-                handleChange('endDate', date?.toDate() || new Date())
-              }
-            />
-            <TextField
-              id='report-type'
-              select
-              label='Select'
-              // fullWidth
-              sx={{ width: 125 }}
-              value={searchCriteria.category}
-              onChange={e => handleChange('category', e.target.value as string)}
-            >
-              <MenuItem value={0}>Year</MenuItem>
-              <MenuItem value={1}>Month</MenuItem>
-              <MenuItem value={2}>Week</MenuItem>
-            </TextField>
-            <Button
-              variant='outlined'
-              sx={{ width: 125, fontSize: 22, height: 48, marginY: 'auto' }}
-              onClick={handleSearch}
-            >
-              適用
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      <SubHeader
+        handleChange={handleChange}
+        handleSearch={handleSearch}
+        searchCriteria={searchCriteria}
+      />
       <Box
         display={'flex'}
         flexDirection={'row'}
@@ -267,8 +92,9 @@ export default function ReportPage() {
         maxHeight={200}
       >
         <Card sx={{ width: '20%', border: 1, borderStyle: 'solid' }}>
-          <CardHeader title='Total Sale' subheader='9999.99' />
+          <CardHeader title='Total Sale' subheader='9999.99'></CardHeader>
           <CardContent>
+            <CustomIcon name='bullsEyeTarget' color='info' fontSize='large' />
             <Typography variant='body2' color='text.secondary'>
               ¥123.45
             </Typography>
@@ -392,7 +218,7 @@ export default function ReportPage() {
                     <CartesianGrid strokeDasharray='3 3' />
                     <XAxis type='number' />
                     <YAxis dataKey='productName' type='category' tick={{ fill: '#ffffff' }} />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip typeFormatValue='percent' />} />
                     <Legend formatter={customLegendFormatter} />
                     <Bar dataKey='quantityPercent' fill='#8884d8' />
                     <Bar dataKey='profitPercent' fill='#82ca9d' />
@@ -410,34 +236,12 @@ export default function ReportPage() {
           ref={containerRef}
         >
           <Paper elevation={24} sx={{ height: '100%' }}>
-            <ResponsiveContainer width='100%' height={300}>
-              <PieChart>
-                <Pie
-                  data={dataPieChart}
-                  cx='50%'
-                  cy='50%'
-                  innerRadius='50%'
-                  outerRadius='70%'
-                  startAngle={90}
-                  endAngle={-270}
-                  dataKey='value'
-                >
-                  <Cell fill={'#8884d8'} />
-                  <Cell fill='#e0e0e0' /> {/* Light gray for the unfilled portion */}
-                </Pie>
-                <text
-                  x='50%'
-                  y='50%'
-                  textAnchor='middle'
-                  dominantBaseline='middle'
-                  className='text-3xl font-bold'
-                  fill={'white'}
-                >
-                  {`${value}%`}
-                </text>
-              </PieChart>
-            </ResponsiveContainer>
-            <ResponsiveContainer width={'100%'} height={400}>
+            <ProgressChart dataPieChart={progressChartData} inProgressValue={inProgessValue} />
+            <BestSaleProductChart
+              bestSaleProductChartData={bestSaleProductChartData}
+              outerRadius={outerRadius}
+            />
+            {/* <ResponsiveContainer width={'100%'} height={400}>
               <PieChart>
                 <Pie
                   data={bestSaleProductChartData}
@@ -465,7 +269,7 @@ export default function ReportPage() {
                   }
                 />
               </PieChart>
-            </ResponsiveContainer>
+            </ResponsiveContainer> */}
           </Paper>
         </Box>
       </Box>
