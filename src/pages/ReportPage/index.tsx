@@ -1,4 +1,13 @@
-import { Box, Card, CardContent, CardHeader, Paper, SvgIcon, Typography } from '@mui/material'
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  Paper,
+  SvgIcon,
+  Typography,
+} from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs'
 import React, { useEffect, useRef, useState } from 'react'
@@ -24,6 +33,10 @@ import ProgressChart from './components/ProgressChart'
 import SubHeader from './components/SubHeader'
 import useReport from './hooks/useReport'
 import CustomIcon from 'components/CustomIcon'
+import SaleChart from './components/SaleChart'
+import SaleProfitChart from './components/SaleProfitChart'
+import WorstSaleProductChart from './components/WorstSaleProductChart'
+import { StyledCard } from './styles'
 
 export default function ReportPage() {
   const [outerRadius, setOuterRadius] = useState(112)
@@ -40,15 +53,24 @@ export default function ReportPage() {
     customLegendFormatter,
     progressChartData,
     inProgessValue,
-    getTotalSale,
+    getSummary,
+    formatTextDisplay,
+    summaryData,
+    formatTextCompare,
+    summaryCompareData,
+    checkTextColor,
   } = useReport()
   const [searchCriteria, setSearchCriteria] = useState({
-    category: '',
+    category: 0,
     startDate: new Date(),
     endDate: new Date(),
   })
+  const [labelCompare, setLabelCompare] = useState('')
+  const [labelSelectedYear, setLabelSelectedYear] = useState(
+    `${dayjs(searchCriteria.startDate).format('YYYY')} ~ ${dayjs(searchCriteria.endDate).format('YYYY')}`
+  )
 
-  const handleChange = (name: string, value: string | Date) => {
+  const handleChange = (name: string, value: string | Date | null) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 
@@ -57,8 +79,15 @@ export default function ReportPage() {
     getBestSaleProductReport(searchCriteria)
     getWorstSaleProductReport(searchCriteria)
     getProfitReport(searchCriteria)
-    getTotalSale(searchCriteria)
+    getSummary(searchCriteria)
+    setLabelCompare(
+      `${dayjs(searchCriteria.startDate).format('YYYY-MM-DD')} ~ ${dayjs(searchCriteria.endDate).format('YYYY-MM-DD')}との比較`
+    )
+    setLabelSelectedYear(
+      `${dayjs(searchCriteria.startDate).format('YYYY')} ~ ${dayjs(searchCriteria.endDate).format('YYYY')}`
+    )
   }
+
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
@@ -91,185 +120,141 @@ export default function ReportPage() {
         justifyContent={'space-around'}
         maxHeight={200}
       >
-        <Card sx={{ width: '20%', border: 1, borderStyle: 'solid' }}>
-          <CardHeader title='Total Sale' subheader='9999.99'></CardHeader>
+        <StyledCard variant='outlined'>
+          <CardHeader
+            title={
+              <Typography component='div' variant='h6'>
+                売上総額
+              </Typography>
+            }
+            subheader={formatTextDisplay(summaryData?.totalSale ?? 0)}
+            avatar={<CustomIcon name='coins' color='action' fontSize='large' />}
+          />
           <CardContent>
-            <CustomIcon name='bullsEyeTarget' color='info' fontSize='large' />
-            <Typography variant='body2' color='text.secondary'>
-              ¥123.45
+            <Typography>{labelCompare}</Typography>
+            <Typography color={checkTextColor(summaryCompareData?.saleData)}>
+              {formatTextCompare(summaryCompareData?.saleData)}
             </Typography>
           </CardContent>
-        </Card>
-        <Card sx={{ width: '20%', border: 1, borderStyle: 'solid' }}>
-          <CardHeader title='Summary Amout of Sale' subheader='999999.99' />
+        </StyledCard>
+        <StyledCard variant='outlined'>
+          <CardHeader
+            title={
+              <Typography component='div' variant='h6'>
+                売上数量
+              </Typography>
+            }
+            subheader={summaryData?.totalAmountSale}
+            avatar={<CustomIcon name='boxesStacked' color='action' fontSize='large' />}
+          />
           <CardContent>
-            <Typography variant='body2' color='text.secondary'>
-              ¥123.45
+            <Typography>{labelCompare}</Typography>
+            <Typography color={checkTextColor(summaryCompareData?.amountSaleData)}>
+              {formatTextCompare(summaryCompareData?.amountSaleData, 'amount')}
             </Typography>
           </CardContent>
-        </Card>
-        <Card sx={{ width: '20%', border: 1, borderStyle: 'solid' }}>
-          <CardHeader title='Summary' subheader='999999.0099' />
+        </StyledCard>
+        <StyledCard variant='outlined'>
+          <CardHeader
+            title={
+              <Typography component='div' variant='h6'>
+                原価総額
+              </Typography>
+            }
+            subheader={formatTextDisplay(summaryData?.totalCost ?? 0)}
+            avatar={<CustomIcon name='moneyDollar' color='secondary' fontSize='large' />}
+          />
           <CardContent>
-            <Typography variant='body2' color='text.secondary'>
-              ¥123.45
+            <Typography>{labelCompare}</Typography>
+            <Typography color={checkTextColor(summaryCompareData?.costData)}>
+              {formatTextCompare(summaryCompareData?.costData)}
             </Typography>
           </CardContent>
-        </Card>
-        <Card sx={{ width: '20%', border: 1, borderStyle: 'solid' }}>
-          <CardHeader title='Summary Profit' subheader='12345.67' />
+        </StyledCard>
+        <StyledCard variant='outlined'>
+          <CardHeader
+            title={
+              <Typography component='div' variant='h6'>
+                粗利益
+              </Typography>
+            }
+            subheader={formatTextDisplay(summaryData?.totalProfit ?? 0)}
+            avatar={<CustomIcon name='handHoldingDollar' color='action' fontSize='large' />}
+          />
           <CardContent>
-            <Typography variant='body2' color='text.secondary'>
-              ¥123.45
+            <Typography>{labelCompare}</Typography>
+            <Typography color={checkTextColor(summaryCompareData?.profitData)}>
+              {formatTextCompare(summaryCompareData?.profitData)}
             </Typography>
           </CardContent>
-        </Card>
-        <Card sx={{ width: '20%', border: 1, borderStyle: 'solid' }}>
-          <CardHeader title='Mission of Year xxxx~xxxx' />
+        </StyledCard>
+        <StyledCard variant='outlined'>
+          <CardHeader
+            title={
+              <Typography component='div' variant='h6'>
+                {labelSelectedYear}目標
+              </Typography>
+            }
+            avatar={<CustomIcon name='bullsEyeTarget' color='action' fontSize='large' />}
+          />
           <CardContent>
-            <Typography variant='body2' color='text.secondary'>
-              ¥123.45
+            <Typography variant='h4' color='text.secondary'>
+              {formatTextDisplay(summaryData?.totalTarget ?? 0)}
             </Typography>
           </CardContent>
-        </Card>
+        </StyledCard>
       </Box>
-      <Box display={'flex'} flexDirection={'row'} flex={1}>
+      <Box display={'flex'} flexDirection={'row'} flex={1} gap={1}>
         <Box display={'flex'} flexDirection={'column'} flex={1}>
-          <Box display={'flex'} flexDirection={'row'}>
-            <ResponsiveContainer width='100%' height={400}>
-              <ComposedChart
-                data={saleChartData}
-                margin={{
-                  top: 20,
-                  right: 20,
-                  bottom: 20,
-                  left: 20,
-                }}
-              >
-                <CartesianGrid stroke='#f5f5f5' />
-                <XAxis dataKey='label' />
-                <YAxis tick={{ fill: '#82ca9d' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend formatter={customLegendFormatter} />
-                <Bar dataKey='totalSale' barSize={20} fill='#2196f3' />
-                <Line
-                  type='monotone'
-                  dataKey='totalPreSale'
-                  label='TotalPreSale'
-                  stroke='#b2102f'
-                  strokeWidth={3}
-                />
-                <Scatter dataKey='totalTarget' fill='#ff9100' shape='square' />
-              </ComposedChart>
-            </ResponsiveContainer>
+          <Box display={'flex'} flexDirection={'row'} flexGrow={1}>
+            <Box display={'flex'} flexDirection={'column'} flex={1}>
+              <Typography textAlign={'right'} pt={2} px={2} variant='subtitle1'>
+                (百万円)
+              </Typography>
+              <SaleChart
+                customLegendFormatter={value => customLegendFormatter(value)}
+                saleChartData={saleChartData}
+              />
+            </Box>
           </Box>
-          <Box display={'flex'} flexDirection={'row'} gap={2}>
+          <Box display={'flex'} flexDirection={'row'} gap={1}>
             <Box display={'flex'} flexDirection={'column'} flex={1}>
               <Paper elevation={24}>
-                <ResponsiveContainer width='100%' height={400}>
-                  <BarChart
-                    width={500}
-                    height={300}
-                    data={profitChartData}
-                    margin={{
-                      top: 5,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray='3 3' />
-                    <XAxis dataKey='label' />
-                    <YAxis />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend
-                      verticalAlign='top'
-                      wrapperStyle={{ lineHeight: '40px' }}
-                      formatter={customLegendFormatter}
-                    />
-                    <ReferenceLine y={0} stroke='#000' />
-                    <Brush
-                      dataKey='name'
-                      height={30}
-                      stroke='#8884d8'
-                      fill='#e0e0e0'
-                      travellerWidth={10}
-                    />
-                    <Bar dataKey='totalProfit' fill='#8884d8' />
-                  </BarChart>
-                </ResponsiveContainer>
+                <Typography textAlign={'right'} pt={1} px={2} variant='subtitle2'>
+                  (百万円)
+                </Typography>
+                <SaleProfitChart
+                  customLegendFormatter={value => customLegendFormatter(value)}
+                  profitChartData={profitChartData}
+                />
               </Paper>
             </Box>
             <Box display={'flex'} flexDirection={'column'} flex={1}>
               <Paper elevation={24} sx={{ height: '100%' }}>
-                <ResponsiveContainer width='100%' height={400}>
-                  <BarChart
-                    width={300}
-                    height={300}
-                    data={worstSaleProductChartData}
-                    margin={{
-                      top: 20,
-                      right: 30,
-                      left: 20,
-                      bottom: 5,
-                    }}
-                    layout='vertical'
-                  >
-                    <CartesianGrid strokeDasharray='3 3' />
-                    <XAxis type='number' />
-                    <YAxis dataKey='productName' type='category' tick={{ fill: '#ffffff' }} />
-                    <Tooltip content={<CustomTooltip typeFormatValue='percent' />} />
-                    <Legend formatter={customLegendFormatter} />
-                    <Bar dataKey='quantityPercent' fill='#8884d8' />
-                    <Bar dataKey='profitPercent' fill='#82ca9d' />
-                  </BarChart>
-                </ResponsiveContainer>
+                <WorstSaleProductChart
+                  customLegendFormatter={value => customLegendFormatter(value)}
+                  worstSaleProductChartData={worstSaleProductChartData}
+                />
               </Paper>
             </Box>
           </Box>
         </Box>
-        <Box
-          display={'flex'}
-          flexDirection={'column'}
-          sx={{ width: '25%' }}
-          p={1}
-          ref={containerRef}
-        >
-          <Paper elevation={24} sx={{ height: '100%' }}>
+        <Box display={'flex'} flexDirection={'column'} width={'25%'} ref={containerRef}>
+          <Paper elevation={24} sx={{ height: '100%', padding: 2 }}>
+            <Typography align='center' variant='h4' pt={1}>
+              パフォーマンス
+            </Typography>
+            <Typography align='left' variant='subtitle1' pt={2}>
+              <Divider textAlign='left'>売上目標達成率</Divider>
+            </Typography>
             <ProgressChart dataPieChart={progressChartData} inProgressValue={inProgessValue} />
+            <Typography align='left' variant='subtitle1'>
+              <Divider textAlign='left'>粗利に影響する商品</Divider>
+            </Typography>
             <BestSaleProductChart
               bestSaleProductChartData={bestSaleProductChartData}
               outerRadius={outerRadius}
             />
-            {/* <ResponsiveContainer width={'100%'} height={400}>
-              <PieChart>
-                <Pie
-                  data={bestSaleProductChartData}
-                  cx='50%'
-                  cy='50%'
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                  outerRadius={outerRadius}
-                  fill='#8884d8'
-                  dataKey='profitPercent'
-                  id='bestSaleProductChart'
-                  nameKey={'productName'}
-                >
-                  {bestSaleProductChartData &&
-                    bestSaleProductChartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${entry.totalProfit}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                </Pie>
-                <Tooltip
-                  content={
-                    <CustomTooltip chartId='bestSaleProductChart' typeFormatValue='percent' />
-                  }
-                />
-              </PieChart>
-            </ResponsiveContainer> */}
           </Paper>
         </Box>
       </Box>

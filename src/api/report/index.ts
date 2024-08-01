@@ -4,7 +4,7 @@ import { default as getWorstSaleProductReportData } from './getWorstSaleProductR
 import { default as getBestSaleProductReportData } from './getBestSaleProductReportData'
 
 export interface ReportSearchCriteria {
-  category: string
+  category: number
   startDate: Date
   endDate: Date
 }

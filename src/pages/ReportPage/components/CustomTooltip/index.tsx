@@ -27,9 +27,10 @@ export default function CustomTooltip({
       >
         {!chartId && <p className='label'>{`${label}`}</p>}
         {payload.map(pld => (
-          <p key={pld.name} style={{ color: pld.color }}>
+          <p key={pld.name} style={{ color: pld.color, whiteSpace: 'pre-line' }}>
             {chartId
-              ? `${pld.name} : ${currencyFormatter(pld.value, typeFormatValue)}`
+              ? `${currencyFormatter(pld.value, typeFormatValue)} : ${pld.name} 
+               ${currencyFormatter(pld.payload.totalProfit, 'currency')}`
               : convertTooltip(pld.name ?? '', currencyFormatter(pld.value, typeFormatValue))}
           </p>
         ))}
