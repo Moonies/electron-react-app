@@ -7,7 +7,7 @@ interface DataProgressChart {
 }
 
 interface ProgressChart {
-  inProgressValue: number
+  inProgressValue?: number
   dataPieChart?: DataProgressChart[]
 }
 export default function ProgressChart({ dataPieChart, inProgressValue }: ProgressChart) {
@@ -35,7 +35,7 @@ export default function ProgressChart({ dataPieChart, inProgressValue }: Progres
           className='text-3xl font-bold'
           fill={'white'}
         >
-          {`${inProgressValue}%`}
+          {inProgressValue && `${inProgressValue}%`}
         </text>
       </PieChart>
     </ResponsiveContainer>

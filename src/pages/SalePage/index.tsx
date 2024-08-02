@@ -27,11 +27,10 @@ import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
 import SalesModal from 'components/Modals/SaleModal'
 import { SalesData } from 'api/sale/getSaleList'
-import { showNotification } from 'store/notificationSlice'
-import { useDispatch } from 'react-redux'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useExportSale from './hooks/useExportSale'
+import useNotification from 'hooks/useNotification'
 
 export default function SalePage() {
   const {
@@ -55,8 +54,7 @@ export default function SalePage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const { openConfirmModal } = useConfirmModal()
   const { printColumnList } = useExportSale()
-
-  const dispatch = useDispatch()
+  const { notificationModal } = useNotification()
 
   useEffect(() => {
     if (salesDataGridRef.current) {
@@ -89,13 +87,7 @@ export default function SalePage() {
         setModalOpen(true)
       }
     } else {
-      dispatch(
-        showNotification({
-          message: 'Please select a row in the table to edit.',
-          type: 'modal',
-          severity: 'error',
-        })
-      )
+      notificationModal.error('Please select a row in the table to edit.')
     }
   }, [selectionModel])
 
@@ -118,13 +110,7 @@ export default function SalePage() {
         }
       }
     } else {
-      dispatch(
-        showNotification({
-          message: 'Please select a row in the table to delete.',
-          type: 'modal',
-          severity: 'error',
-        })
-      )
+      notificationModal.error('Please select a row in the table to delete.')
     }
   }, [selectionModel])
 

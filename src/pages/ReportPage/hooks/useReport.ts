@@ -42,7 +42,7 @@ export default function useReport() {
       value: number
     }[]
   >()
-  const [inProgessValue, setInProgressValue] = useState(0)
+  const [inProgessValue, setInProgressValue] = useState<number>()
   const [summaryData, setSummaryData] = useState<SummaryData>()
   const [summaryCompareData, setSummaryCompareData] = useState<SummaryCompareData>()
 
