@@ -8,7 +8,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   width: '128pt',
   justifyContent: 'flex-start',
   whiteSpace: 'nowrap',
-  fontcolor: '#fffff',
+  fontcolor: '#ffffff',
   '&.MuiButton-root': {
     color: '#ffffff',
   },

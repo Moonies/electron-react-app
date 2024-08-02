@@ -1,33 +1,29 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
-import { mockdata } from './_mockdata'
-import dayjs from 'dayjs'
+import { ReportSearchCriteria } from '.'
 
-export interface SearchCriteriaProductList {
-  category: string
-  keyword: string
+export interface ProfitReportData {
+  label: string
+  totalUnit: number
+  totalProfit: number
 }
 
-export interface ProductData {
-  productId: string
-  productName: string
-  stockQuantity: number
-  productCost: number
-  productPrice: number
-  productUnit: string
-}
+const mockProfitChartData = [
+  { label: '2023/1', totalUnit: 69170, totalProfit: 3595781 },
+  { label: '2023/2', totalUnit: 49683, totalProfit: 2495526 },
+  { label: '2023/3', totalUnit: 43967, totalProfit: 1977547 },
+  { label: '2023/4', totalUnit: 1000, totalProfit: 4729200 },
+]
 
-export default async function productList(
-  criteria: SearchCriteriaProductList
-): Promise<ApiResponse<{ data: ProductData[] }>> {
+export default async function GetProfitReportData(
+  searchCriteria: ReportSearchCriteria
+): Promise<ApiResponse<ProfitReportData[]>> {
   //for beta:test
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
     message: 'Success',
-    data: {
-      data: mockdata,
-    },
+    data: mockProfitChartData,
   }
   // when use real API
   // try {

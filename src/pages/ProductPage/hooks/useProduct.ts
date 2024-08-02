@@ -1,6 +1,6 @@
 import { GridColDef } from '@mui/x-data-grid'
-import { ProductData, SearchCriteriaProductList } from 'api/products/productList'
-import { productList } from 'api'
+import { ProductData, SearchCriteriaProductList } from 'api/product/getProductList'
+import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -94,7 +94,7 @@ export default function useProduct() {
   }, [])
 
   const handleSearch = useCallback(async () => {
-    const result = await withLoading(productList(searchCriteria))
+    const result = await withLoading(api.product().getProductList(searchCriteria))
     if (result.code === 200 && result.data) {
       setProductData(result.data.data)
     }

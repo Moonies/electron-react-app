@@ -18,22 +18,20 @@ import {
   UploadFile as UploadFileIcon,
 } from '@mui/icons-material'
 import DataTable from 'components/DataTable'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import dayjs, { Dayjs } from 'dayjs'
 import useProduct from './hooks/useProduct'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import ProductModal from 'components/Modals/ProductModal'
-import { ProductData } from 'api/products/productList'
+import { ProductData } from 'api/product/getProductList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import { useDispatch } from 'react-redux'
-import { showNotification } from 'store/notificationSlice'
+import useNotification from 'hooks/useNotification'
 
 export default function ProductPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedProduct, setSelectedProduct] = useState<ProductData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
-
+  const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
   const {
     categorySearch,
@@ -81,13 +79,7 @@ export default function ProductPage() {
         setModalOpen(true)
       }
     } else {
-      dispatch(
-        showNotification({
-          message: 'Please select a row in the table to edit.',
-          type: 'modal',
-          severity: 'error',
-        })
-      )
+      notificationModal.error('Please select a row in the table to edit.')
     }
   }, [selectionModel])
 
@@ -108,13 +100,7 @@ export default function ProductPage() {
         }
       }
     } else {
-      dispatch(
-        showNotification({
-          message: 'Please select a row in the table to delete.',
-          type: 'modal',
-          severity: 'error',
-        })
-      )
+      notificationModal.error('Please select a row in the table to delete.')
     }
   }, [selectionModel])
 

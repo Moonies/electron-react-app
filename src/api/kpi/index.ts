@@ -1,6 +1,6 @@
-import { default as kpiData } from './kpiData'
-import { default as kpiSaveData } from './kpiSaveData'
+import { default as getKpiData } from './getKpiData'
+import { default as saveKpiData } from './saveKpiData'
 
 export default function kpi() {
-  return { kpiData, kpiSaveData }
+  return { getKpiData, saveKpiData }
 }

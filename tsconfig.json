@@ -33,7 +33,7 @@
     "build",
     "dist",
     "**/*.spec.ts",
-    "**/asset/fonts/*",
+    "**/asset/*",
     ".git",
     ".app-cache",
     ".npm",

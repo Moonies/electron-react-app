@@ -19,7 +19,7 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
-import { ProductData } from 'api/products/productList'
+import { ProductData } from 'api/product/getProductList'
 
 interface SalesModalProps {
   open: boolean

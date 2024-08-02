@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material'
 import { login } from 'store/authSlice'
-import { checkAuth, ApiResponse } from 'api'
+import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import { showNotification } from 'store/notificationSlice'
 import { useNavigate } from 'react-router-dom'
@@ -21,7 +21,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await withLoading(checkAuth(username, password))
+    const result = await withLoading(api.user().checkAuth(username, password))
 
     if (result.code === 200 && result.data) {
       dispatch(login(result.data))
