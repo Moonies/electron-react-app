@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { StyledButton } from '../../styles/styles'
+import { StyledButton } from '../../../../styles/styles'
 import {
   Delete as DeleteIcon,
   // Search as SearchIcon,

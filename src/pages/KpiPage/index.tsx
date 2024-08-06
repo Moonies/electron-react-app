@@ -18,6 +18,7 @@ import useKpiGrpah from './hooks/useKpiGraph'
 import BarChart, { DataPoint } from 'components/Chart/BarChart'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import KpiSettingModal from 'components/Modals/KpiSettingModal'
+import { isShrink } from 'utils/inputUtils'
 
 export default function KpiPage() {
   const [formData, setFormData] = useState<Partial<FinancialKpiData>>({})
@@ -26,7 +27,6 @@ export default function KpiPage() {
   const {
     getKpiData,
     kpiData,
-    isShrink,
     kpiCalculate,
     settingPlanData,
     settingPlanCalculate,

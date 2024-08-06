@@ -3,12 +3,14 @@ import { default as userApi } from './user'
 import { default as productApi } from './product'
 import { default as saleApi } from './sale'
 import { default as reportApi } from './report'
+import { default as myCompanyApi } from './myCompany'
+import { default as postCodeApi } from './postCode'
 import axios, { AxiosInstance } from 'axios'
 
 export interface ApiResponse<T> {
   code: number
   message: string
-  data: T | null
+  data: T | null | undefined
 }
 
 // Determine the base URL based on the environment
@@ -40,4 +42,6 @@ export const api = {
   product: productApi,
   sale: saleApi,
   report: reportApi,
+  myCompany: myCompanyApi,
+  postCode: postCodeApi,
 }

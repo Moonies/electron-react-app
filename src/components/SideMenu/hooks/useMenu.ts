@@ -72,7 +72,7 @@ export default function useMenu() {
         {
           text: 'My Company',
           icon: Store,
-          path: '/settings/company',
+          path: '/settings/mycompany',
         },
         {
           text: 'Customer',

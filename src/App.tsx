@@ -21,7 +21,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { ConfirmModalProvider } from 'components/Modals/ConfirmModal'
 import ProductPage from 'pages/ProductPage'
 import ReportPage from 'pages/ReportPage'
-import AccountManagementPage from 'pages/AccountManagementPage'
+import AccountManagementPage from 'pages/SettingPage/pages/AccountManagementPage'
+import MyCompanyManagementPage from 'pages/SettingPage/pages/MyCompanyManagementPage'
 
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
@@ -69,7 +70,7 @@ export default function App() {
                   <Route path='/products' element={<ProductPage />} />
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
                   <Route path='/settings/account' element={<AccountManagementPage />} />
-                  {/* <Route path="/settings" element={<SettingPage />} /> */}
+                  <Route path='/settings/mycompany' element={<MyCompanyManagementPage />} />
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
                 </Routes>
               </Box>

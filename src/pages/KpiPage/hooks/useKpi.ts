@@ -72,7 +72,6 @@ export default function useKpi() {
     return result
   }
   const isUndefined = (rawData: number | undefined): number => (rawData === undefined ? 0 : rawData)
-  const isShrink = (value: number | undefined | string): boolean => !!value || value === 0
 
   const formattedNumber = (rawData: number): string =>
     `${new Intl.NumberFormat('en-US', {
@@ -193,7 +192,6 @@ export default function useKpi() {
   return {
     kpiData,
     getKpiData,
-    isShrink,
     kpiCalculate,
     settingPlanData,
     setSettingPlanData,
