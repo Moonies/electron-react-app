@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { StyledButton } from '../../../../styles/styles'
+import { StyledButton } from 'styles/styles'
 import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'

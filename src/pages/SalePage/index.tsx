@@ -22,7 +22,7 @@ import {
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import useSales from './hooks/useSale'
-import { StyledButton } from '../../styles/styles'
+import { StyledButton } from 'styles/styles'
 import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
 import SalesModal from 'components/Modals/SaleModal'

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Divider,
@@ -11,60 +11,52 @@ import {
 import { StyledButton } from 'styles/styles'
 import {
   Delete as DeleteIcon,
-  Search as SearchIcon,
+  Clear as ClearIcon,
   Add as AddIcon,
   Edit as EditIcon,
-  Print as PrintIcon,
-  UploadFile as UploadFileIcon,
 } from '@mui/icons-material'
 import DataTable from 'components/DataTable'
-import useProduct from './hooks/useProduct'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
-import ProductModal from 'components/Modals/ProductModal'
-import { ProductData } from 'api/product/getProductList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { useDispatch } from 'react-redux'
 import useNotification from 'hooks/useNotification'
+import useCustomer from './hooks/useCustomer'
+import CustomerManagementModal from 'components/Modals/CustomerManagementModal'
+import { CustomerData } from 'api/customer/getCustomerList'
 
-export default function ProductPage() {
+export default function CustomerManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedProduct, setSelectedProduct] = useState<ProductData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
-  const {
-    categorySearch,
-    columns,
-    prepareCategorySearch,
-    handleSearch,
-    productData,
-    searchCriteria,
-    handleChange,
-    handlePaginationModelChange,
-    paginationModel,
-  } = useProduct()
-  const dispatch = useDispatch()
-
   const productDataGridRef = useGridApiRef()
+  const [filterValue, setFilterValue] = useState('')
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | undefined>()
+
+  const {
+    columns,
+    paginationModel,
+    getCusomerListData,
+    customerListData,
+    handlePaginationModelChange,
+  } = useCustomer()
 
   useEffect(() => {
     if (productDataGridRef.current) {
       productDataGridRef.current.autosizeColumns({
-        // columns: ['customerName', 'productName'],
         includeHeaders: true,
         includeOutliers: true,
         expand: true,
       })
     }
-  }, [productData])
+  }, [customerListData])
 
   useEffect(() => {
-    prepareCategorySearch
+    getCusomerListData()
   }, [])
 
   const handleAddClick = () => {
-    setSelectedProduct(undefined)
+    setSelectedCustomer(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -72,10 +64,10 @@ export default function ProductPage() {
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = productData.find(product => product.productId === selectedId)
+      const selectedData = customerListData.find(item => item.id === selectedId)
       if (selectedData) {
         setModalMode('edit')
-        setSelectedProduct(selectedData)
+        setSelectedCustomer(selectedData)
         setModalOpen(true)
       }
     } else {
@@ -86,11 +78,11 @@ export default function ProductPage() {
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = productData.find(product => product.productId === selectedId)
+      const selectedData = customerListData.find(item => item.id === selectedId)
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: 'Are you sure you want to delete this Product Number: ' + selectedData.productId,
+          message: 'Are you sure you want to delete this Name : ' + selectedData.customerName,
         })
         if (confirmed) {
           // Perform delete operation
@@ -104,7 +96,7 @@ export default function ProductPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: ProductData) => {
+  const handleModalConfirm = async (data: any) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -125,11 +117,23 @@ export default function ProductPage() {
     // await fetchSalesData(paginationModel);
   }
 
+  const filteredRows = () => {
+    return customerListData.filter(row =>
+      Object.values(row).some(value =>
+        value.toString().toLowerCase().includes(filterValue.toLowerCase())
+      )
+    )
+  }
+
+  const handleClear = () => {
+    setFilterValue('')
+  }
+
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>商品管理</Divider>
+          <Divider textAlign='left'>顧客管理</Divider>
         </Typography>
       </Box>
       <Box
@@ -151,40 +155,21 @@ export default function ProductPage() {
             }}
           >
             <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
-              <TextField
-                name='category'
-                value={searchCriteria.category}
-                select
-                label='範疇'
-                id='category-sale'
-                onChange={e => handleChange('category', e.target.value as string)}
-                sx={{ width: '30%' }}
-                InputLabelProps={{
-                  id: 'category-sale-label',
-                  htmlFor: 'category',
-                  component: 'span',
-                }}
-              >
-                {categorySearch?.map(item => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.display}
-                  </MenuItem>
-                ))}
-              </TextField>
               <Box display={'flex'} flex={1}>
                 <TextField
                   fullWidth
                   name='keyword'
                   label='検索'
-                  value={searchCriteria.keyword}
-                  onChange={e => handleChange('keyword', e.target.value)}
+                  value={filterValue}
+                  onChange={e => setFilterValue(e.target.value)}
                   InputProps={{
-                    style: { fontSize: '1.2rem' },
                     endAdornment: (
                       <InputAdornment position='end'>
-                        <IconButton onClick={handleSearch} edge='end'>
-                          <SearchIcon />
-                        </IconButton>
+                        {filterValue && (
+                          <IconButton onClick={handleClear} edge='end'>
+                            <ClearIcon />
+                          </IconButton>
+                        )}
                       </InputAdornment>
                     ),
                   }}
@@ -237,38 +222,25 @@ export default function ProductPage() {
                 visible
               </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton variant='outlined' startIcon={<UploadFileIcon />} size='large'>
-                自動アプロード
-              </StyledButton>
-              <StyledButton
-                variant='outlined'
-                startIcon={<PrintIcon />}
-                size='large'
-                // onClick={handleExportPdf}
-              >
-                データ出力
-              </StyledButton>
-            </Box>
           </Box>
         </Box>
         <DataTable
-          data={productData}
+          data={filteredRows()}
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={productDataGridRef}
-          getRowId={row => row.productId}
+          getRowId={row => row.id}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>
 
       {modalOpen && (
-        <ProductModal
+        <CustomerManagementModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedProduct}
+          initialData={selectedCustomer}
           mode={modalMode}
         />
       )}
