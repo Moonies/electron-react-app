@@ -29,7 +29,7 @@ export default function CustomerManagementPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
-  const productDataGridRef = useGridApiRef()
+  const customerDataGridRef = useGridApiRef()
   const [filterValue, setFilterValue] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | undefined>()
 
@@ -42,8 +42,8 @@ export default function CustomerManagementPage() {
   } = useCustomer()
 
   useEffect(() => {
-    if (productDataGridRef.current) {
-      productDataGridRef.current.autosizeColumns({
+    if (customerDataGridRef.current) {
+      customerDataGridRef.current.autosizeColumns({
         includeHeaders: true,
         includeOutliers: true,
         expand: true,
@@ -229,7 +229,7 @@ export default function CustomerManagementPage() {
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
-          apiref={productDataGridRef}
+          apiref={customerDataGridRef}
           getRowId={row => row.id}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />

@@ -6,6 +6,7 @@ import { default as reportApi } from './report'
 import { default as myCompanyApi } from './myCompany'
 import { default as postCodeApi } from './postCode'
 import { default as customerApi } from './customer'
+import { default as supplierApi } from './supplier'
 import axios, { AxiosInstance } from 'axios'
 
 export interface ApiResponse<T> {
@@ -46,4 +47,5 @@ export const api = {
   myCompany: myCompanyApi,
   postCode: postCodeApi,
   customer: customerApi,
+  supplier: supplierApi,
 }

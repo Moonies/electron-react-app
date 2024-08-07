@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Divider,
@@ -11,7 +11,7 @@ import {
 import { StyledButton } from 'styles/styles'
 import {
   Delete as DeleteIcon,
-  // Search as SearchIcon,
+  Clear as ClearIcon,
   Add as AddIcon,
   Edit as EditIcon,
 } from '@mui/icons-material'
@@ -19,39 +19,44 @@ import DataTable from 'components/DataTable'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
-import useAccount from './hooks/useAccount'
-import AccountManagementModal from 'components/Modals/AccountManagementModal'
-import { UserData } from 'api/user/getUserList'
+import useSupplier from './hooks/useSupplier'
+import { SupplierData } from 'api/supplier/getSupplierList'
+import SupplierManagementModal from 'components/Modals/SupplierManagementModal'
 
-export default function AccountManagementPage() {
+export default function SupplierManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
-  const accountDataGridRef = useGridApiRef()
+  const supplierDataGridRef = useGridApiRef()
   const [filterValue, setFilterValue] = useState('')
-  const [selectedUser, setSelectedUser] = useState<UserData | undefined>()
+  const [selectedSupplier, setSelectedSupplier] = useState<SupplierData | undefined>()
 
-  const { columns, getUserList, userListData, paginationModel, handlePaginationModelChange } =
-    useAccount()
+  const {
+    columns,
+    paginationModel,
+    handlePaginationModelChange,
+    getSupplierListData,
+    supplierListData,
+  } = useSupplier()
 
   useEffect(() => {
-    if (accountDataGridRef.current) {
-      accountDataGridRef.current.autosizeColumns({
+    if (supplierDataGridRef.current) {
+      supplierDataGridRef.current.autosizeColumns({
         includeHeaders: true,
         includeOutliers: true,
         expand: true,
       })
     }
-  }, [userListData])
+  }, [supplierListData])
 
   useEffect(() => {
-    getUserList()
+    getSupplierListData()
   }, [])
 
   const handleAddClick = () => {
-    // setSelectedProduct(undefined)
+    setSelectedSupplier(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -59,10 +64,10 @@ export default function AccountManagementPage() {
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = userListData.find(user => user.userId === selectedId)
+      const selectedData = supplierListData.find(item => item.id === selectedId)
       if (selectedData) {
         setModalMode('edit')
-        setSelectedUser(selectedData)
+        setSelectedSupplier(selectedData)
         setModalOpen(true)
       }
     } else {
@@ -73,11 +78,11 @@ export default function AccountManagementPage() {
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = userListData.find(user => user.userId === selectedId)
+      const selectedData = supplierListData.find(item => item.id === selectedId)
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: 'Are you sure you want to delete this User Name : ' + selectedData.username,
+          message: 'Are you sure you want to delete this Name : ' + selectedData.customerName,
         })
         if (confirmed) {
           // Perform delete operation
@@ -113,18 +118,22 @@ export default function AccountManagementPage() {
   }
 
   const filteredRows = () => {
-    return userListData.filter(row =>
+    return supplierListData.filter(row =>
       Object.values(row).some(value =>
         value.toString().toLowerCase().includes(filterValue.toLowerCase())
       )
     )
   }
 
+  const handleClear = () => {
+    setFilterValue('')
+  }
+
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>アカウント管理</Divider>
+          <Divider textAlign='left'>Supplier Management</Divider>
         </Typography>
       </Box>
       <Box
@@ -153,16 +162,17 @@ export default function AccountManagementPage() {
                   label='検索'
                   value={filterValue}
                   onChange={e => setFilterValue(e.target.value)}
-                  // InputProps={{
-                  //   style: { fontSize: '1.2rem' },
-                  //   endAdornment: (
-                  //     <InputAdornment position='end'>
-                  //       <IconButton onClick={handleSearch} edge='end'>
-                  //         <SearchIcon />
-                  //       </IconButton>
-                  //     </InputAdornment>
-                  //   ),
-                  // }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        {filterValue && (
+                          <IconButton onClick={handleClear} edge='end'>
+                            <ClearIcon />
+                          </IconButton>
+                        )}
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Box>
             </Box>
@@ -219,18 +229,18 @@ export default function AccountManagementPage() {
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
-          apiref={accountDataGridRef}
-          getRowId={row => row.userId}
+          apiref={supplierDataGridRef}
+          getRowId={row => row.id}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>
 
       {modalOpen && (
-        <AccountManagementModal
+        <SupplierManagementModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedUser}
+          initialData={selectedSupplier}
           mode={modalMode}
         />
       )}
