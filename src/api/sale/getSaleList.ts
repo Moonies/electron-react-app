@@ -8,6 +8,8 @@ export interface SearchCriteria {
   keyword: string
   startDate: Date
   endDate: Date
+  page?: number
+  pageSize?: number
 }
 export interface SalesSummary {
   totalSales: number
@@ -31,11 +33,28 @@ export interface SalesData {
   orderApprovedEmployee: string
   orderId: number
 }
+//for implement case only when apprved should be remove it
+function chunkArray(mockdata: SalesData[], pageSize: number, page: number) {
+  const result = []
+  for (let i = 0; i < mockdata.length; i += pageSize) {
+    result.push(mockdata.slice(i, i + pageSize))
+  }
+  return result[page]
+}
 
-export default async function getSaleList(
-  criteria: SearchCriteria
-): Promise<ApiResponse<{ summary: SalesSummary; data: SalesData[] }>> {
+export default async function getSaleList({
+  category,
+  keyword,
+  startDate,
+  endDate,
+  page = 0,
+  pageSize = 10,
+}: SearchCriteria): Promise<
+  ApiResponse<{ summary: SalesSummary; data: SalesData[]; totalRow: number }>
+> {
   //for beta:test
+  let newMock = chunkArray(mockdata, pageSize, page)
+
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
@@ -46,7 +65,8 @@ export default async function getSaleList(
         averageOrderValue: 100,
         topSellingProduct: 'Product A',
       },
-      data: mockdata,
+      data: newMock,
+      totalRow: mockdata.length,
     },
   }
   // when use real API

@@ -46,6 +46,7 @@ export default function SalePage() {
     addNewSaleData,
     prepareCategorySearch,
     categorySearch,
+    totalRows,
   } = useSales()
   const salesDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -360,6 +361,7 @@ export default function SalePage() {
         <DataTable
           data={salesData}
           columns={columns}
+          totalRows={totalRows}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={salesDataGridRef}
