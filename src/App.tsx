@@ -25,6 +25,7 @@ import AccountManagementPage from 'pages/SettingPage/pages/AccountManagementPage
 import MyCompanyManagementPage from 'pages/SettingPage/pages/MyCompanyManagementPage'
 import CustomerManagementPage from 'pages/SettingPage/pages/CustomerManagementPage'
 import SupplierManagementPage from 'pages/SettingPage/pages/SupplierManagementPage'
+import ComponentManagementPage from 'pages/SettingPage/pages/ComponentManagementPage'
 
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
@@ -75,6 +76,8 @@ export default function App() {
                   <Route path='/settings/mycompany' element={<MyCompanyManagementPage />} />
                   <Route path='/settings/customer' element={<CustomerManagementPage />} />
                   <Route path='/settings/supplier' element={<SupplierManagementPage />} />
+                  {/* <Route path='/settings/server' element={<ComponentManagementPage />} /> */}
+                  <Route path='/settings/component' element={<ComponentManagementPage />} />
 
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
                 </Routes>
