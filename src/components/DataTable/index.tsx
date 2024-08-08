@@ -22,6 +22,7 @@ interface TableProps {
   disableRowSelectionOnClick?: boolean
   onSelected: (newModel: GridRowSelectionModel) => void
   autosizeOption?: GridAutosizeOptions
+  totalRows?: number
 }
 
 const DataTable = React.memo<TableProps>(
@@ -36,6 +37,7 @@ const DataTable = React.memo<TableProps>(
     disableRowSelectionOnClick = false,
     onSelected,
     autosizeOption,
+    totalRows,
   }) => {
     return (
       <DataGridContainer>
@@ -43,6 +45,7 @@ const DataTable = React.memo<TableProps>(
           apiRef={apiref}
           getRowId={getRowId}
           rows={data}
+          rowCount={totalRows}
           columns={columns}
           // autoHeight
           disableColumnMenu
@@ -55,6 +58,7 @@ const DataTable = React.memo<TableProps>(
           // rowSelectionModel={() => rowSelected}
           onRowSelectionModelChange={onSelected}
           // autosizeOnMount
+          paginationMode={totalRows ? 'server' : 'client'} //when change to fetch by api should be 'server' only
           autosizeOptions={autosizeOption}
           getCellClassName={params => (params.colDef.type === 'number' ? 'right' : 'center')}
         />
