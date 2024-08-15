@@ -26,6 +26,8 @@ import MyCompanyManagementPage from 'pages/SettingPage/pages/MyCompanyManagement
 import CustomerManagementPage from 'pages/SettingPage/pages/CustomerManagementPage'
 import SupplierManagementPage from 'pages/SettingPage/pages/SupplierManagementPage'
 import ComponentManagementPage from 'pages/SettingPage/pages/ComponentManagementPage'
+import IpSettingModal from 'components/Modals/IpSettingModal'
+import { useApiConfig } from 'hooks/useApiConfig'
 
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
@@ -33,17 +35,45 @@ console.error = (...args: any) => {
   if (/defaultProps/.test(args[0])) return
   error(...args)
 }
-export {}
+declare global {
+  interface Window {
+    electronAPI: {
+      getApiConfig: () => Promise<string | null>
+      saveApiConfig: (apiUrl: string) => Promise<boolean>
+    }
+  }
+}
+
+interface ApiConfig {
+  baseUrl: string
+  // apiKey?: string
+}
+
 export default function App() {
   const [loginOpen, setLoginOpen] = useState(false)
+  //default is false when have a token or time limit should be change in store.
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
   const { isLoading } = useLoadingRedux()
+  const [apiConfigModal, setApiConfigmodal] = useState<boolean>(false)
+  const { loadConfig, isConfigSet } = useApiConfig()
 
   useEffect(() => {
+    const configLoaded = loadConfig()
+    if (!configLoaded) {
+      setApiConfigmodal(true)
+    } else {
+      console.log(isAuthenticated)
+      setLoginOpen(true)
+    }
+  }, [])
+
+  const handleCloseApiConfig = () => {
+    setApiConfigmodal(false)
+    // check connection or something
     if (!isAuthenticated) {
       setLoginOpen(true)
     }
-  }, [isAuthenticated])
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -105,6 +135,7 @@ export default function App() {
             }}
             onSuccess={() => setLoginOpen(false)}
           />
+          <IpSettingModal open={apiConfigModal} onClose={() => handleCloseApiConfig()} />
           <LoadingOverlay open={isLoading} />
           <Notification />
         </Router>
