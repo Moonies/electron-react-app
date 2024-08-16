@@ -6,7 +6,7 @@ import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import { showNotification } from 'store/notificationSlice'
 import { useNavigate } from 'react-router-dom'
-import { useApiConfig } from 'hooks/useApiConfig'
+import useApiConfig from 'hooks/useApiConfig'
 
 interface SettingModalProps {
   open: boolean

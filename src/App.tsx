@@ -27,7 +27,8 @@ import CustomerManagementPage from 'pages/SettingPage/pages/CustomerManagementPa
 import SupplierManagementPage from 'pages/SettingPage/pages/SupplierManagementPage'
 import ComponentManagementPage from 'pages/SettingPage/pages/ComponentManagementPage'
 import IpSettingModal from 'components/Modals/IpSettingModal'
-import { useApiConfig } from 'hooks/useApiConfig'
+import useApiConfig from 'hooks/useApiConfig'
+import IpConfigManegementPage from 'pages/SettingPage/pages/IpConfigManagementPage'
 
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
@@ -106,7 +107,7 @@ export default function App() {
                   <Route path='/settings/mycompany' element={<MyCompanyManagementPage />} />
                   <Route path='/settings/customer' element={<CustomerManagementPage />} />
                   <Route path='/settings/supplier' element={<SupplierManagementPage />} />
-                  {/* <Route path='/settings/server' element={<ComponentManagementPage />} /> */}
+                  <Route path='/settings/server' element={<IpConfigManegementPage />} />
                   <Route path='/settings/component' element={<ComponentManagementPage />} />
 
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
