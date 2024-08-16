@@ -1,4 +1,3 @@
-// useApiConfig.ts
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from 'store/index'
 import { setConfig, clearConfig } from 'store/apiConfigSlice'
@@ -8,7 +7,7 @@ export interface ApiConfig {
   apiKey?: string
 }
 
-export const useApiConfig = () => {
+export default function useApiConfig() {
   const dispatch = useDispatch()
   const { config } = useSelector((state: RootState) => state.apiConfig)
 
