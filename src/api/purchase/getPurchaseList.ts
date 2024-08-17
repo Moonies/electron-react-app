@@ -12,10 +12,11 @@ export interface SearchCriteria {
 }
 
 export interface PurchaseData {
-  saleId: number
+  purchaseId: number
   invoiceNumber: number
-  customerName: string
-  deliveryDate: string | dayjs.Dayjs
+  supplierCompanyId: string
+  supplierCompanyName: string
+  quatationRequestDate: string | dayjs.Dayjs
   productId: string
   productName: string
   // 注番: string

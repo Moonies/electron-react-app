@@ -24,53 +24,63 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { StyledButton } from 'styles/styles'
 import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
-import SalesModal from 'components/Modals/SaleModal'
-import { SalesData } from 'api/sale/getSaleList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
 import usePurchase from './hooks/usePurchase'
+import { PurchaseData } from 'api/purchase/getPurchaseList'
+import PurchaseModal from 'components/Modals/PurchaseModal'
 
 export default function PurchasePage() {
-  const { searchCriteria, handleChange } = usePurchase()
-  const salesDataGridRef = useGridApiRef()
+  const {
+    searchCriteria,
+    handleChange,
+    handleSearch,
+    columns,
+    paginationModel,
+    purchaseData,
+    handlePaginationModelChange,
+    prepareCategorySearch,
+    categorySearch,
+  } = usePurchase()
+  const purchaseDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedSale, setSelectedSale] = useState<SalesData | undefined>(undefined)
+  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
   // useEffect(() => {
-  //   if (salesDataGridRef.current) {
-  //     salesDataGridRef.current.autosizeColumns({
+  //   if (purchaseDataGridRef.current) {
+  //     purchaseDataGridRef.current.autosizeColumns({
   //       // columns: ['customerName', 'productName'],
   //       includeHeaders: true,
   //       includeOutliers: true,
   //       expand: true,
   //     })
   //   }
-  // }, [salesData])
+  // }, [purchaseData])
 
-  // useEffect(() => {
-  //   prepareCategorySearch
-  // }, [])
+  useEffect(() => {
+    prepareCategorySearch
+  }, [])
 
   const handleAddClick = () => {
-    setSelectedSale(undefined)
+    setSelectedPurchase(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
 
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
-      // const selectedId = selectionModel[0]
-      // const selectedData = salesData.find(sale => sale.saleId === selectedId)
-      // if (selectedData) {
-      //   setModalMode('edit')
-      //   setSelectedSale(selectedData)
-      //   setModalOpen(true)
-      // }
+      const selectedId = selectionModel[0]
+      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
+      if (selectedData) {
+        setModalMode('edit')
+        setSelectedPurchase(selectedData)
+        setModalOpen(true)
+      }
     } else {
       notificationModal.error('Please select a row in the table to edit.')
     }
@@ -78,27 +88,27 @@ export default function PurchasePage() {
 
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
-      // const selectedId = selectionModel[0]
-      // const selectedData = salesData.find(sale => sale.saleId === selectedId)
-      // if (selectedData) {
-      //   const confirmed = await openConfirmModal({
-      //     title: '確認してください',
-      //     message:
-      //       'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
-      //   })
-      //   if (confirmed) {
-      //     // Perform delete operation
-      //     console.log('Delete confirmed')
-      //   } else {
-      //     console.log('Delete cancelled')
-      //   }
-      // }
+      const selectedId = selectionModel[0]
+      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
+      if (selectedData) {
+        const confirmed = await openConfirmModal({
+          title: '確認してください',
+          message:
+            'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
+        })
+        if (confirmed) {
+          // Perform delete operation
+          console.log('Delete confirmed')
+        } else {
+          console.log('Delete cancelled')
+        }
+      }
     } else {
       notificationModal.error('Please select a row in the table to delete.')
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: SalesData) => {
+  const handleModalConfirm = async (data: PurchaseData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -113,7 +123,7 @@ export default function PurchasePage() {
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>売上管理</Divider>
+          <Divider textAlign='left'>仕入管理</Divider>
         </Typography>
       </Box>
       <Box
@@ -135,7 +145,7 @@ export default function PurchasePage() {
             }}
           >
             <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
-              {/* <TextField
+              <TextField
                 name='category'
                 value={searchCriteria.category}
                 select
@@ -154,9 +164,9 @@ export default function PurchasePage() {
                     {item.display}
                   </MenuItem>
                 ))}
-              </TextField> */}
+              </TextField>
               <Box display={'flex'} flex={1}>
-                {/* <TextField
+                <TextField
                   fullWidth
                   name='keyword'
                   label='検索'
@@ -172,7 +182,7 @@ export default function PurchasePage() {
                       </InputAdornment>
                     ),
                   }}
-                /> */}
+                />
               </Box>
             </Box>
             <Box
@@ -274,27 +284,27 @@ export default function PurchasePage() {
             </Box>
           </Box>
         </Box>
-        {/* <DataTable
-          data={salesData}
+        <DataTable
+          data={purchaseData}
           columns={columns}
-          totalRows={totalRows}
+          totalRows={purchaseData.length}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
-          apiref={salesDataGridRef}
-          getRowId={row => row.saleId}
+          apiref={purchaseDataGridRef}
+          getRowId={row => row.purchaseId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
-        /> */}
+        />
       </Box>
 
-      {/* {modalOpen && (
-        <SalesModal
+      {modalOpen && (
+        <PurchaseModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedSale}
+          initialData={selectedPurchase}
           mode={modalMode}
         />
-      )} */}
+      )}
     </Box>
   )
 }
