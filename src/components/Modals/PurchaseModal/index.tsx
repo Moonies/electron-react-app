@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -15,13 +15,23 @@ import {
   Box,
   Typography,
   IconButton,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
+import { debounce } from '@mui/material/utils'
+
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
-
-interface SalesModalProps {
+import { api } from 'api/index'
+import { ComponentIdData } from 'api/component/getComponentIdList'
+interface Option {
+  label: string
+  id: number
+}
+interface PurchaseModalProps {
   open: boolean
   onClose: () => void
   onConfirm: (data: PurchaseData) => Promise<void>
@@ -29,19 +39,20 @@ interface SalesModalProps {
   mode: 'add' | 'edit'
 }
 const defaultFormData: PurchaseData = {
-  purchaseId: 0,
-  invoiceNumber: 0,
+  purchaseId: '',
+  invoiceNumber: '',
   supplierCompanyId: '',
   supplierCompanyName: '',
-  quatationRequestDate: dayjs(),
-  productId: '',
-  productName: '',
+  componentNumber: '',
+  componentName: '',
   quantity: 0,
   unitPrice: 0,
   totalPrice: 0,
-  employeeName: '',
-  orderApprovedEmployee: '',
-  orderId: 0,
+  orderRequestEmployeeName: '',
+  orderApprovedEmployeeName: '',
+  quotationRequestDate: dayjs(),
+  purchaseApprovedDate: dayjs(),
+  purchaseReciptDate: dayjs(),
 }
 export default function PurchaseModal({
   open,
@@ -49,9 +60,11 @@ export default function PurchaseModal({
   onConfirm,
   initialData,
   mode,
-}: SalesModalProps) {
+}: PurchaseModalProps) {
   const [formData, setFormData] = useState<PurchaseData>(defaultFormData)
   const [loading, setLoading] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const [componentIdList, setComponentIdList] = useState<ComponentIdData[]>([])
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -78,7 +91,28 @@ export default function PurchaseModal({
     }
   }
 
-  const _mockOption = [
+  const debouncedFetchOptions = useCallback(
+    debounce(async (query: string) => {
+      if (query.length >= 2) {
+        setLoading(true)
+        try {
+          const fetchedOptions = await api.component().getComponentIdList(query)
+          setComponentIdList(fetchedOptions.data ?? [])
+        } catch (error) {
+          console.error('Error fetching options:', error)
+        } finally {
+          setLoading(false)
+        }
+      }
+    }, 300),
+    []
+  )
+
+  useEffect(() => {
+    debouncedFetchOptions(inputValue)
+  }, [inputValue, debouncedFetchOptions])
+
+  const _mockOption: Option[] = [
     { label: 'aaaaa', id: 1 },
     { label: 'bbdbd', id: 2 },
     { label: 'cdfasd', id: 3 },
@@ -113,10 +147,10 @@ export default function PurchaseModal({
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
             <DatePicker
               label='登録日付'
-              value={dayjs(formData.quatationRequestDate)}
+              value={dayjs(formData.quotationRequestDate)}
               format='YYYY/MM/DD'
               onChange={newValue =>
-                handleChange('quatationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+                handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
               }
               sx={{ marginTop: 2, width: '25%' }}
             />
@@ -132,17 +166,90 @@ export default function PurchaseModal({
               value={formData.supplierCompanyName}
               onChange={e => handleChange('supplierCompanyName', e.target.value)}
               margin='normal'
-              sx={{ flex: 1 }}
+              // sx={{ flex: 1 }}
+            />
+          </Box>
+          <Box display={'flex'} flexDirection={'row'} gap={2}>
+            <DatePicker
+              label='発注承認済'
+              value={dayjs(formData.purchaseApprovedDate)}
+              format='YYYY/MM/DD'
+              onChange={newValue =>
+                handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+              }
+              sx={{ marginTop: 2, width: '25%' }}
+            />
+            <DatePicker
+              label='入庫承認済'
+              value={dayjs(formData.purchaseReciptDate)}
+              format='YYYY/MM/DD'
+              onChange={newValue =>
+                handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+              }
+              sx={{ marginTop: 2, width: '25%' }}
             />
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-            <TextField
-              label='商品番号'
-              value={formData.productId}
-              onChange={e => handleChange('productId', e.target.value)}
+            <Autocomplete
               // fullWidth
-              margin='normal'
-              sx={{ flex: 1 }}
+              options={_mockOption}
+              sx={{ marginTop: 2, width: '35%' }}
+              renderInput={params => <TextField {...params} label='担当者' />}
+            />
+          </Box>
+          <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+            <Autocomplete
+              // fullWidth
+              options={componentIdList}
+              getOptionLabel={option => {
+                if (typeof option === 'string') {
+                  return option
+                }
+                if (option && option.componentNumber) {
+                  return option.componentNumber
+                }
+                return ''
+              }}
+              freeSolo
+              // disableClearable
+              sx={{ marginTop: 2, flex: 1 }}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label='商品番号'
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loading ? <CircularProgress color='inherit' size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              onInputChange={(event, newInputValue) => {
+                setInputValue(newInputValue)
+                setFormData(prev => ({ ...prev, ['productId']: newInputValue }))
+              }}
+              //comment for check error
+              // onChange={(event, newValue) => {
+              //   if (typeof newValue === 'string') {
+              //     setFormData(prev => ({ ...prev, ['productId']: newValue }))
+              //     console.log('choose from list', newValue)
+              //   } else if (newValue && newValue.componentNumber) {
+              //     // Create a new value from the user input
+              //     setFormData(prev => ({ ...prev, ['productId']: newValue.componentNumber }))
+              //     console.log('new input value', newValue.componentNumber)
+              //   } else {
+              //     // setValue(newValue)
+              //     console.log('other', newValue)
+              //   }
+              // }}
+              isOptionEqualToValue={(option, value) =>
+                option.componentNumber === value.componentNumber
+              }
+              value={formData.componentNumber}
             />
             <TextField
               label='数量'
@@ -151,13 +258,7 @@ export default function PurchaseModal({
               onChange={e => handleChange('quantity', parseFloat(e.target.value))}
               // fullWidth
               margin='normal'
-              sx={{ width: '20%' }}
-            />
-            <Autocomplete
-              // fullWidth
-              options={_mockOption}
-              sx={{ marginTop: 2, width: '35%' }}
-              renderInput={params => <TextField {...params} label='担当者' />}
+              // sx={{ width: '20%' }}
             />
           </Box>
         </Box>

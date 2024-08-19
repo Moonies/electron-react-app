@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
 import dayjs from 'dayjs'
-
+import { mockData } from './_mockdata'
 export interface SearchCriteria {
   category: string
   keyword: string
@@ -12,21 +12,20 @@ export interface SearchCriteria {
 }
 
 export interface PurchaseData {
-  purchaseId: number
-  invoiceNumber: number
+  purchaseId: string
+  invoiceNumber: string
   supplierCompanyId: string
   supplierCompanyName: string
-  quatationRequestDate: string | dayjs.Dayjs
-  productId: string
-  productName: string
-  // 注番: string
+  componentNumber: string
+  componentName: string
   quantity: number
   unitPrice: number
   totalPrice: number
-  // ｵｰﾀﾞｰ: string
-  employeeName: string
-  orderApprovedEmployee: string
-  orderId: number
+  orderRequestEmployeeName: string
+  orderApprovedEmployeeName: string
+  quotationRequestDate: string | dayjs.Dayjs
+  purchaseApprovedDate: string | dayjs.Dayjs
+  purchaseReciptDate: string | dayjs.Dayjs
 }
 //for implement case only when apprved should be remove it
 function chunkArray(mockdata: PurchaseData[], pageSize: number, page: number) {
@@ -46,14 +45,14 @@ export default async function getPurchaseList({
   pageSize = 10,
 }: SearchCriteria): Promise<ApiResponse<{ data: PurchaseData[]; totalRow: number }>> {
   //for beta:test
-  // let newMock = chunkArray(mockdata, pageSize, page)
+  // let newMock = chunkArray(mockData, pageSize, page)
 
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
     message: 'Success',
     data: {
-      data: [],
+      data: mockData,
       totalRow: 0,
     },
   }

@@ -54,9 +54,10 @@ export default function usePurchase() {
         // flex: 1,
         // valueFormatter: (params) => dayjs(params.value).format('YYYY-MM-DD'),
       },
-      { field: 'customerName', headerName: '取引先', headerAlign: 'center', flex: 1 },
-      { field: 'deliveryDate', headerName: '納入日', headerAlign: 'center' },
-      { field: 'productId', headerName: '図番', minWidth: 100, headerAlign: 'center' },
+      { field: 'supplierCompanyName', headerName: '仕入先', headerAlign: 'center', flex: 1 },
+      { field: 'quotationRequestDate', headerName: '登録日付', headerAlign: 'center' },
+      { field: 'productId', headerName: '商品番号', minWidth: 100, headerAlign: 'center' },
+
       { field: 'productName', headerName: '品名', minWidth: 100, headerAlign: 'center', flex: 1 },
       { field: 'quantity', headerName: '数量', type: 'number', headerAlign: 'center' },
       {
@@ -73,9 +74,10 @@ export default function usePurchase() {
         headerAlign: 'center',
         valueFormatter: value => currencyFormatter.format(Number(value)),
       },
-      { field: 'employeeName', headerName: '担当者名', headerAlign: 'center' },
-      { field: 'orderApprovedEmployee', headerName: '発注担当', headerAlign: 'center' },
-      { field: 'orderId', headerName: '受注番号', headerAlign: 'center' },
+      { field: 'orderRequestEmployeeName', headerName: '担当者名', headerAlign: 'center' },
+      { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
+      { field: 'purchaseApprovedDate', headerName: '見積書依頼', headerAlign: 'center' },
+      { field: 'purchaseReciptDate', headerName: '入庫承認済', headerAlign: 'center' },
     ],
     []
   )

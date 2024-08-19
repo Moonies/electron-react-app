@@ -51,16 +51,16 @@ export default function PurchasePage() {
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
-  // useEffect(() => {
-  //   if (purchaseDataGridRef.current) {
-  //     purchaseDataGridRef.current.autosizeColumns({
-  //       // columns: ['customerName', 'productName'],
-  //       includeHeaders: true,
-  //       includeOutliers: true,
-  //       expand: true,
-  //     })
-  //   }
-  // }, [purchaseData])
+  useEffect(() => {
+    if (purchaseDataGridRef.current) {
+      purchaseDataGridRef.current.autosizeColumns({
+        // columns: ['customerName', 'productName'],
+        includeHeaders: true,
+        includeOutliers: true,
+        expand: true,
+      })
+    }
+  }, [purchaseData])
 
   useEffect(() => {
     prepareCategorySearch
@@ -287,7 +287,7 @@ export default function PurchasePage() {
         <DataTable
           data={purchaseData}
           columns={columns}
-          totalRows={purchaseData.length}
+          // totalRows={purchaseData.length}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={purchaseDataGridRef}
