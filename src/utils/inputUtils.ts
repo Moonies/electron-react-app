@@ -1,1 +1,2 @@
-export const isShrink = (value: number | undefined | string): boolean => !!value || value === 0
+export const isShrink = (value: number | undefined | string | null): boolean =>
+  !!value || value === 0

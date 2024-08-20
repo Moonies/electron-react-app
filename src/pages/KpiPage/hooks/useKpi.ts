@@ -5,21 +5,21 @@ import useLoading from 'hooks/useLoading'
 import { KpiData } from 'api/kpi/getKpiData'
 
 export interface FinancialKpiData {
-  planSalesRevenue?: number
-  planVariableCosts?: number
-  planFixedCosts?: number
+  planSalesRevenue: number | null
+  planVariableCosts: number | null
+  planFixedCosts: number | null
   planMarginalProfit?: number
   planMarginalProfitRate?: string
-  planOperatingIncome?: number
-  planOperatingExpenses?: number
+  planOperatingIncome: number | null
+  planOperatingExpenses: number | null
   planOrdinaryProfit?: number
-  actualSalesRevenue?: number
-  actualVariableCosts?: number
-  actualFixedCosts?: number
+  actualSalesRevenue: number | null
+  actualVariableCosts: number | null
+  actualFixedCosts: number | null
   actualMarginalProfit?: number
   actualMarginalProfitRate?: string
-  actualOperatingIncome?: number
-  actualOperatingExpenses?: number
+  actualOperatingIncome: number | null
+  actualOperatingExpenses: number | null
   actualOrdinaryProfit?: number
   resultOrdinaryProfit?: string
   resultSalesRevenue?: string
@@ -31,8 +31,8 @@ export interface FinancialKpiData {
 }
 
 export interface SettingPlanFinancialKpiData {
-  settingSalesRevenue?: number
-  settingVariableCosts?: number
+  settingSalesRevenue: number | null
+  settingVariableCosts: number | null
   settingFixedCosts?: number
   settingMarginalProfit?: number
   settingMarginalProfitRate?: string
@@ -57,21 +57,41 @@ const calculatedFields: (keyof FinancialKpiData)[] = [
   'resultSubTotal',
 ]
 export default function useKpi() {
-  const [kpiData, setKpiData] = useState<FinancialKpiData>({})
-  const [settingPlanData, setSettingPlanData] = useState<SettingPlanFinancialKpiData>({})
+  const initFormData = {
+    planSalesRevenue: null,
+    planVariableCosts: null,
+    planFixedCosts: null,
+    planOperatingIncome: null,
+    planOperatingExpenses: null,
+    actualSalesRevenue: null,
+    actualVariableCosts: null,
+    actualFixedCosts: null,
+    actualOperatingIncome: null,
+    actualOperatingExpenses: null,
+  }
+  const [kpiData, setKpiData] = useState<FinancialKpiData>(initFormData)
+  const [settingPlanData, setSettingPlanData] = useState<SettingPlanFinancialKpiData>({
+    settingSalesRevenue: null,
+    settingVariableCosts: null,
+  })
 
   const convertDivider = 1000000
   const currentYear = dayjs().get('year')
   const { withLoading, setLoading } = useLoading()
 
   function convertToPercentages(obj: KpiData): FinancialKpiData {
-    const result: Record<string, number> = {}
+    const result: FinancialKpiData = initFormData
+
     for (const [key, value] of Object.entries(obj)) {
-      result[key] = value / convertDivider
+      if (key in result) {
+        ;(result as any)[key] =
+          value !== null && value !== undefined ? value / convertDivider : null
+      }
     }
     return result
   }
-  const isUndefined = (rawData: number | undefined): number => (rawData === undefined ? 0 : rawData)
+  const isUndefined = (rawData: number | undefined | null): number =>
+    rawData === undefined || rawData === null ? 0 : rawData
 
   const formattedNumber = (rawData: number): string =>
     `${new Intl.NumberFormat('en-US', {
@@ -96,7 +116,7 @@ export default function useKpi() {
 
   const kpiCalculate = (formInput: KpiData) => {
     setLoading(true)
-    let result: FinancialKpiData = {}
+    let result: FinancialKpiData = formInput
     let planMarginalProfit,
       actualMarginalProfit,
       resultOrdinaryProfit,
@@ -174,7 +194,7 @@ export default function useKpi() {
     }, 1000)
   }
   const settingPlanCalculate = (formSetting: SettingPlanFinancialKpiData) => {
-    let result: SettingPlanFinancialKpiData = {}
+    let result: SettingPlanFinancialKpiData = formSetting
     result.settingMarginalProfit =
       isUndefined(formSetting.settingSalesRevenue) - isUndefined(formSetting.settingVariableCosts)
     result.settingMarginalProfitRate = formattedNumber(
@@ -198,5 +218,6 @@ export default function useKpi() {
     settingPlanCalculate,
     currentYear,
     reverseResultFormat,
+    initFormData,
   }
 }

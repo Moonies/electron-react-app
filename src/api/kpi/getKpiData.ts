@@ -7,17 +7,17 @@ export interface YearKpiSelecte {
 }
 
 export interface KpiData {
-  planSalesRevenue?: number
-  planVariableCosts?: number
-  planFixedCosts?: number
-  planOperatingIncome?: number
-  planOperatingExpenses?: number
+  planSalesRevenue: number | null
+  planVariableCosts: number | null
+  planFixedCosts: number | null
+  planOperatingIncome: number | null
+  planOperatingExpenses: number | null
   planOrdinaryProfit?: number
-  actualSalesRevenue?: number
-  actualVariableCosts?: number
-  actualFixedCosts?: number
-  actualOperatingIncome?: number
-  actualOperatingExpenses?: number
+  actualSalesRevenue: number | null
+  actualVariableCosts: number | null
+  actualFixedCosts: number | null
+  actualOperatingIncome: number | null
+  actualOperatingExpenses: number | null
   actualOrdinaryProfit?: number
 }
 
