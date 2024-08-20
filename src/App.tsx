@@ -30,6 +30,7 @@ import IpSettingModal from 'components/Modals/IpSettingModal'
 import useApiConfig from 'hooks/useApiConfig'
 import IpConfigManegementPage from 'pages/SettingPage/pages/IpConfigManagementPage'
 import PurchasePage from 'pages/PurchasePage'
+import OrderPage from 'pages/OrderPage'
 
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
@@ -98,7 +99,7 @@ export default function App() {
                 <Routes>
                   <Route path='/' element={<DashboardPage />} />
                   <Route path='/sales' element={<SalePage />} />
-                  {/* <Route path="/orders" element={<OrderPage />} /> */}
+                  <Route path='/orders' element={<OrderPage />} />
                   <Route path='/purchase' element={<PurchasePage />} />
                   <Route path='/kpi' element={<KpiPage />} />
                   <Route path='/reports' element={<ReportPage />} />

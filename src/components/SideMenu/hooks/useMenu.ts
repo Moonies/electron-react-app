@@ -38,23 +38,24 @@ export default function useMenu() {
     {
       text: 'Orders',
       icon: Receipt,
-      children: [
-        {
-          text: 'Summary',
-          icon: ContentPasteSearch,
-          path: '/orders/summary',
-        },
-        {
-          text: 'Shipping',
-          icon: LocalShipping,
-          path: '/orders/shipping',
-        },
-        {
-          text: 'Invoice',
-          icon: ReceiptLong,
-          path: '/orders/invoice',
-        },
-      ],
+      path: '/orders',
+      // children: [
+      //   {
+      //     text: 'Summary',
+      //     icon: ContentPasteSearch,
+      //     path: '/orders/summary',
+      //   },
+      //   {
+      //     text: 'Shipping',
+      //     icon: LocalShipping,
+      //     path: '/orders/shipping',
+      //   },
+      //   {
+      //     text: 'Invoice',
+      //     icon: ReceiptLong,
+      //     path: '/orders/invoice',
+      //   },
+      // ],
     },
     { text: 'Purchase', icon: Inventory, path: '/purchase' },
     { text: 'KPI', icon: TrendingUp, path: '/kpi' },
