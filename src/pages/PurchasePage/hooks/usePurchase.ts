@@ -1,5 +1,6 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { api } from 'api/index'
+import { PurchaseStatus } from 'api/purchase'
 import { PurchaseData, SearchCriteria } from 'api/purchase/getPurchaseList'
 import dayjs from 'dayjs'
 import useLoading from 'hooks/useLoading'
@@ -44,6 +45,23 @@ export default function usePurchase() {
     currency: 'JPY',
   })
 
+  const convertStatus = (status: string) => {
+    switch (status) {
+      case PurchaseStatus.INVOICE_PENDING:
+        return '見積書依頼'
+      case PurchaseStatus.ON_DELIVERY:
+        return '配達中'
+      case PurchaseStatus.DELIVERED:
+        return '入庫済'
+      case PurchaseStatus.REJECTED:
+        return '返品中'
+      case PurchaseStatus.CANCELLED:
+        return 'キャンセル'
+      default:
+        return ''
+    }
+  }
+
   const columns: GridColDef[] = useMemo(
     () => [
       {
@@ -54,11 +72,17 @@ export default function usePurchase() {
         // flex: 1,
         // valueFormatter: (params) => dayjs(params.value).format('YYYY-MM-DD'),
       },
+      {
+        field: 'status',
+        headerName: '状態',
+        headerAlign: 'center',
+        valueFormatter: value => convertStatus(value),
+      },
       { field: 'supplierCompanyName', headerName: '仕入先', headerAlign: 'center', flex: 1 },
       { field: 'quotationRequestDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'productId', headerName: '商品番号', minWidth: 100, headerAlign: 'center' },
+      { field: 'componentNumber', headerName: '商品番号', minWidth: 100, headerAlign: 'center' },
 
-      { field: 'productName', headerName: '品名', minWidth: 100, headerAlign: 'center', flex: 1 },
+      { field: 'componentName', headerName: '品名', minWidth: 100, headerAlign: 'center', flex: 1 },
       { field: 'quantity', headerName: '数量', type: 'number', headerAlign: 'center' },
       {
         field: 'unitPrice',

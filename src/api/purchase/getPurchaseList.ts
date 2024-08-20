@@ -2,6 +2,7 @@ import axios from 'axios'
 import { ApiResponse } from 'api'
 import dayjs from 'dayjs'
 import { mockData } from './_mockdata'
+import { PurchaseStatus } from '.'
 export interface SearchCriteria {
   category: string
   keyword: string
@@ -26,6 +27,7 @@ export interface PurchaseData {
   quotationRequestDate: string | dayjs.Dayjs
   purchaseApprovedDate: string | dayjs.Dayjs
   purchaseReciptDate: string | dayjs.Dayjs
+  status: string | null
 }
 //for implement case only when apprved should be remove it
 function chunkArray(mockdata: PurchaseData[], pageSize: number, page: number) {

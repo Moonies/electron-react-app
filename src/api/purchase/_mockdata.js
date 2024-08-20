@@ -15,6 +15,7 @@ export const mockData = [
     invoiceNumber: '082482',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102096',
@@ -32,6 +33,7 @@ export const mockData = [
     invoiceNumber: '861972',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102097',
@@ -49,6 +51,7 @@ export const mockData = [
     invoiceNumber: '861972',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102098',
@@ -66,6 +69,7 @@ export const mockData = [
     invoiceNumber: '861972',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102099',
@@ -83,6 +87,7 @@ export const mockData = [
     invoiceNumber: '284922',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102100',
@@ -100,6 +105,7 @@ export const mockData = [
     invoiceNumber: '284922',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102101',
@@ -117,6 +123,7 @@ export const mockData = [
     invoiceNumber: '281820',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102102',
@@ -134,6 +141,7 @@ export const mockData = [
     invoiceNumber: '281820',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102103',
@@ -151,6 +159,7 @@ export const mockData = [
     invoiceNumber: '281820',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102588',
@@ -168,6 +177,7 @@ export const mockData = [
     invoiceNumber: '861972',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102589',
@@ -185,6 +195,7 @@ export const mockData = [
     invoiceNumber: '271652',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102590',
@@ -202,6 +213,7 @@ export const mockData = [
     invoiceNumber: '284922',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102591',
@@ -219,6 +231,7 @@ export const mockData = [
     invoiceNumber: '300013',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102592',
@@ -236,6 +249,7 @@ export const mockData = [
     invoiceNumber: '300013',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102593',
@@ -253,6 +267,7 @@ export const mockData = [
     invoiceNumber: '300013',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102594',
@@ -270,6 +285,7 @@ export const mockData = [
     invoiceNumber: '300013',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102595',
@@ -287,6 +303,7 @@ export const mockData = [
     invoiceNumber: '317181',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102596',
@@ -304,6 +321,7 @@ export const mockData = [
     invoiceNumber: '322133',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102597',
@@ -321,6 +339,7 @@ export const mockData = [
     invoiceNumber: '082513',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102598',
@@ -338,6 +357,7 @@ export const mockData = [
     invoiceNumber: '082506',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102599',
@@ -355,6 +375,7 @@ export const mockData = [
     invoiceNumber: '181475',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
   {
     purchaseId: '102600',
@@ -372,5 +393,6 @@ export const mockData = [
     invoiceNumber: '332313',
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeName: '',
+    status: 'delivered',
   },
 ]

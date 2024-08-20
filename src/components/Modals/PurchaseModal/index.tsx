@@ -53,6 +53,7 @@ const defaultFormData: PurchaseData = {
   quotationRequestDate: dayjs(),
   purchaseApprovedDate: dayjs(),
   purchaseReciptDate: dayjs(),
+  status: null,
 }
 export default function PurchaseModal({
   open,
@@ -119,6 +120,14 @@ export default function PurchaseModal({
     { label: 'qwerty', id: 4 },
     { label: 'asddffg', id: 5 },
     { label: 'minoiui', id: 6 },
+  ]
+
+  const statusList = [
+    { label: '見積書依頼', value: 'invoice_pending' },
+    { label: '配達中', value: 'on_delivery' },
+    { label: '入庫済', value: 'delivered' },
+    { label: '返品中', value: 'rejected' },
+    { label: 'キャンセル', value: 'cancelled' },
   ]
   return (
     <Dialog
@@ -188,6 +197,23 @@ export default function PurchaseModal({
               }
               sx={{ marginTop: 2, width: '25%' }}
             />
+            <TextField
+              label='状態'
+              value={formData.status ?? ''}
+              onChange={e => handleChange('status', e.target.value)}
+              margin='normal'
+              select
+              sx={{ flex: 1 }}
+              InputLabelProps={{
+                component: 'span',
+              }}
+            >
+              {statusList.map(item => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </TextField>
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
             <Autocomplete
@@ -201,6 +227,14 @@ export default function PurchaseModal({
             <Autocomplete
               // fullWidth
               options={componentIdList}
+              renderOption={(props, option) => {
+                const { key, ...optionProps } = props
+                return (
+                  <Box key={key} component='li' {...optionProps}>
+                    {option.componentNumber + '  :  ' + option.componentName}
+                  </Box>
+                )
+              }}
               getOptionLabel={option => {
                 if (typeof option === 'string') {
                   return option
