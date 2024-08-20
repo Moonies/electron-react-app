@@ -21,9 +21,11 @@ import KpiSettingModal from 'components/Modals/KpiSettingModal'
 import { isShrink } from 'utils/inputUtils'
 
 export default function KpiPage() {
-  const [formData, setFormData] = useState<Partial<FinancialKpiData>>({})
   const [errors, setErrors] = useState<Partial<FinancialKpiData>>({})
-  const [formSetting, setFormSetting] = useState<Partial<SettingPlanFinancialKpiData>>({})
+  const [formSetting, setFormSetting] = useState<SettingPlanFinancialKpiData>({
+    settingSalesRevenue: null,
+    settingVariableCosts: null,
+  })
   const {
     getKpiData,
     kpiData,
@@ -32,7 +34,9 @@ export default function KpiPage() {
     settingPlanCalculate,
     currentYear,
     reverseResultFormat,
+    initFormData,
   } = useKpi()
+  const [formData, setFormData] = useState<FinancialKpiData>(initFormData)
   const { openWindow } = useKpiGrpah()
   const [planHeaderText, setPlanHeaderText] = useState('')
   const [actualHeaderText, setActualHeaderText] = useState('')
@@ -62,18 +66,19 @@ export default function KpiPage() {
 
   const handleSubmit = () => {
     const newErrors: Record<string, string> = {}
+    let hasErrors = false
 
     Object.entries(formData).forEach(([key, value]) => {
       if (key.includes('result') ?? key.toLocaleLowerCase().includes('marginalprofit')) return
       if (value === undefined || value === null || value === '') {
         newErrors[key] = '必須項目です'
+        hasErrors = true
       }
     })
 
-    if (Object.keys(newErrors).length > 0) {
+    if (hasErrors) {
       setErrors(newErrors)
     } else {
-      // Handle form submission
       kpiCalculate(formData)
     }
   }
@@ -107,12 +112,8 @@ export default function KpiPage() {
     })
 
     if (confirmed) {
-      const resetData: Partial<FinancialKpiData> = {}
-      Object.keys(formData).forEach(key => {
-        resetData[key as keyof FinancialKpiData] = undefined
-      })
-      setFormData(resetData)
-      setFormSetting({})
+      setFormData(initFormData)
+      setFormSetting({ settingSalesRevenue: null, settingVariableCosts: null })
       setErrors({})
     }
   }
