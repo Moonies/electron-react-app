@@ -179,7 +179,6 @@ export default function ProductPage() {
                   value={searchCriteria.keyword}
                   onChange={e => handleChange('keyword', e.target.value)}
                   InputProps={{
-                    style: { fontSize: '1.2rem' },
                     endAdornment: (
                       <InputAdornment position='end'>
                         <IconButton onClick={handleSearch} edge='end'>

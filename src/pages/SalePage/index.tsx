@@ -228,25 +228,22 @@ export default function SalePage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <Box display={'flex'} flex={1}>
-                <TextField
-                  fullWidth
-                  name='keyword'
-                  label='検索'
-                  value={searchCriteria.keyword}
-                  onChange={e => handleChange('keyword', e.target.value)}
-                  InputProps={{
-                    style: { fontSize: '1.2rem' },
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton onClick={handleSearch} edge='end'>
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
+              <TextField
+                fullWidth
+                name='keyword'
+                label='検索'
+                value={searchCriteria.keyword}
+                onChange={e => handleChange('keyword', e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton onClick={handleSearch} edge='end'>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
             </Box>
             <Box
               display={'flex'}

@@ -10,6 +10,7 @@ import {
   InputAdornment,
   IconButton,
   Divider,
+  Button,
 } from '@mui/material'
 import { useGridApiRef, GridRowProps, GridRowSelectionModel } from '@mui/x-data-grid'
 import {
@@ -30,6 +31,8 @@ import useNotification from 'hooks/useNotification'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import PurchaseModal from 'components/Modals/PurchaseModal'
 import useOrder from './hooks/useOrder'
+import OrderModal from 'components/Modals/OrderModal'
+import { OrderData } from 'api/order/getOrderList'
 
 export default function OrderPage() {
   const {
@@ -46,29 +49,29 @@ export default function OrderPage() {
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseData | undefined>(undefined)
+  const [selectedOrder, setSelectedOrder] = useState<OrderData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
-  // useEffect(() => {
-  //   if (orderDataGridRef.current) {
-  //     orderDataGridRef.current.autosizeColumns({
-  //       // columns: ['customerName', 'productName'],
-  //       includeHeaders: true,
-  //       includeOutliers: true,
-  //       expand: true,
-  //     })
-  //   }
-  // }, [purchaseData])
+  useEffect(() => {
+    if (orderDataGridRef.current) {
+      orderDataGridRef.current.autosizeColumns({
+        // columns: ['customerName', 'productName'],
+        includeHeaders: true,
+        includeOutliers: true,
+        expand: true,
+      })
+    }
+  }, [orderData])
 
   useEffect(() => {
     prepareCategorySearch
   }, [])
 
   const handleAddClick = () => {
-    setSelectedPurchase(undefined)
+    setSelectedOrder(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -79,7 +82,7 @@ export default function OrderPage() {
       // const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
       // if (selectedData) {
       //   setModalMode('edit')
-      //   setSelectedPurchase(selectedData)
+      //   setSelectedOrder(selectedData)
       //   setModalOpen(true)
       // }
     } else {
@@ -109,7 +112,7 @@ export default function OrderPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: PurchaseData) => {
+  const handleModalConfirm = async (data: OrderData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -166,28 +169,16 @@ export default function OrderPage() {
                   </MenuItem>
                 ))}
               </TextField>
-              {/* <Box display={'flex'} flex={1}> */}
               <TextField
                 // fullWidth
                 name='keyword'
                 label='検索'
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
-                InputProps={{
-                  style: { fontSize: '1.2rem' },
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton onClick={handleSearch} edge='end'>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
               />
-              {/* </Box> */}
               <TextField
                 name='ststus'
-                value={searchCriteria.status}
+                value={searchCriteria.status ?? ''}
                 select
                 label='Status'
                 id='status-order'
@@ -205,6 +196,9 @@ export default function OrderPage() {
                   </MenuItem>
                 ))}
               </TextField>
+              <Button variant='contained' endIcon={<SearchIcon />} onClick={handleSearch}>
+                Search
+              </Button>
             </Box>
             <Box
               display={'flex'}
@@ -317,15 +311,15 @@ export default function OrderPage() {
         />
       </Box>
 
-      {/* {modalOpen && (
-        <PurchaseModal
+      {modalOpen && (
+        <OrderModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedPurchase}
+          initialData={selectedOrder}
           mode={modalMode}
         />
-      )} */}
+      )}
     </Box>
   )
 }

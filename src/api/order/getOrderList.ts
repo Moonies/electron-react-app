@@ -15,18 +15,19 @@ export interface SearchCriteria {
   status: `${OrderStatus}` | null
 }
 
-// export type OrderStatusType = `${OrderStatus}`;
-
-export interface OrderData {
-  orderId: string
-  invoiceNumber: string
-  customerCompanyId: string
-  customerCompanyName: string
+export type ProductList = {
   productNumber: string
   productName: string
   quantity: number
   unitPrice: number
   totalPrice: number
+}
+export interface OrderData {
+  orderId: string
+  invoiceNumber: string
+  customerCompanyId: string
+  customerCompanyName: string
+  product?: ProductList[] | null
   orderRequestEmployeeName: string
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs
@@ -49,6 +50,7 @@ export default async function getOrderList({
   keyword,
   startDate,
   endDate,
+  status,
   page = 0,
   pageSize = 10,
 }: SearchCriteria): Promise<ApiResponse<{ data: OrderData[]; totalRow: number }>> {
