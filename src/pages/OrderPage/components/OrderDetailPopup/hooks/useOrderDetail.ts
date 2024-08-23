@@ -1,25 +1,24 @@
 import { debounce } from '@mui/material'
 import {
   GridColDef,
-  GridActionsCellItem,
-  GridRowModes,
-  GridRowModesModel,
-  GridRowId,
-  GridRowModel,
-  GridRowsProp,
   GridEventListener,
   GridRowEditStopReasons,
+  GridRowId,
+  GridRowModel,
+  GridRowModes,
+  GridRowModesModel,
+  GridRowsProp,
 } from '@mui/x-data-grid'
 import { api } from 'api/index'
+import { OrderData } from 'api/order/getOrderList'
 import { ProductDataDetail } from 'api/product/getProductData'
 import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
-
 import React, { useCallback, useMemo, useState } from 'react'
 
-export default function useAddOrder() {
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({})
-  const [newProductListData, setNewProductListData] = useState<GridRowsProp>([])
-  const [productData, setProductData] = useState<ProductDataDetail[]>([])
+export default function useOrderDetail(orderDeta: OrderData) {
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
+  const [newProductListData, setNewProductListData] = useState<GridRowsProp>(orderDeta.product)
+  const [productData, setProductData] = useState<ProductDataDetail[]>()
 
   const [loading, setLoading] = useState(false)
 
@@ -84,8 +83,7 @@ export default function useAddOrder() {
     }, 300),
     []
   )
-
-  const columns: GridColDef[] = useMemo(
+  const baseColumns: GridColDef[] = useMemo(
     () => [
       {
         field: 'productNumber',
@@ -114,25 +112,12 @@ export default function useAddOrder() {
         headerName: 'Actions',
         width: 100,
         cellClassName: 'actions',
-        // getActions: ({ id }) => {
-        //   const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
-        //   if (isInEditMode) {
-        //     return [
-        //       { label: 'Save', onClick: handleSaveClick(id) },
-        //       { label: 'Cancel', onClick: handleCancelClick(id) },
-        //     ]
-        //   }
-        //   return [
-        //     { label: 'Edit', onClick: handleEditClick(id) },
-        //     { label: 'Delete', onClick: handleDeleteClick(id) },
-        //   ]
-        // },
       },
     ],
-    [rowModesModel, handleSaveClick, handleCancelClick, handleEditClick, handleDeleteClick]
+    []
   )
   return {
-    columns,
+    baseColumns,
     newProductListData,
     rowModesModel,
     processRowUpdate,

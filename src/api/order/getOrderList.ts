@@ -16,6 +16,7 @@ export interface SearchCriteria {
 }
 
 export type ProductList = {
+  id: string
   productNumber: string
   productName: string
   quantity: number
@@ -23,11 +24,11 @@ export type ProductList = {
   totalPrice: number
 }
 export interface OrderData {
+  id: string
   orderId: string
-  invoiceNumber: string
   customerCompanyId: string
   customerCompanyName: string
-  product?: ProductList[] | null
+  product: ProductList[]
   orderRequestEmployeeName: string
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs

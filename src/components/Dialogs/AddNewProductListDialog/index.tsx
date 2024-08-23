@@ -27,14 +27,12 @@ interface DialogProductProps {
   // productData: ProductDataDetail[]
 }
 
-export default function DialogProduct({
+export default function AddnewProductDialog({
   open,
   onClose,
   onSubmit,
   // productData,
 }: DialogProductProps) {
-  const [inputYear, setInputYear] = useState({})
-  const [errors, setErrors] = useState('')
   const [formData, setFormData] = useState<ProductDetail>({
     productNumber: null,
     productName: null,
@@ -47,12 +45,6 @@ export default function DialogProduct({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit(formData)
-    // if (!/^\d{4}$/.test(inputYear)) {
-    //   setErrors('year format is wrong !! ex.20xx')
-    //   return false
-    // } else {
-    //   onSubmit(inputYear)
-    // }
   }
 
   const debouncedFetchOptions = useCallback(

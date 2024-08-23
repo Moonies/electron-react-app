@@ -33,6 +33,7 @@ import PurchaseModal from 'components/Modals/PurchaseModal'
 import useOrder from './hooks/useOrder'
 import OrderModal from 'components/Modals/OrderModal'
 import { OrderData } from 'api/order/getOrderList'
+import OrderDetailPopup from './components/OrderDetailPopup'
 
 export default function OrderPage() {
   const {
@@ -49,18 +50,20 @@ export default function OrderPage() {
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedOrder, setSelectedOrder] = useState<OrderData | undefined>(undefined)
+  const [selectedOrder, setSelectedOrder] = useState<OrderData>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [popupOpen, setPopupOpen] = useState(false)
+  const [popupMode, setPopupMode] = useState<'view' | 'edit'>('view')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
   useEffect(() => {
     if (orderDataGridRef.current) {
       orderDataGridRef.current.autosizeColumns({
-        // columns: ['customerName', 'productName'],
-        includeHeaders: true,
-        includeOutliers: true,
+        // columns: ['id', 'customerCompanyName'],
+        // includeHeaders: true,
+        // includeOutliers: true,
         expand: true,
       })
     }
@@ -78,13 +81,13 @@ export default function OrderPage() {
 
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
-      // const selectedId = selectionModel[0]
-      // const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
-      // if (selectedData) {
-      //   setModalMode('edit')
-      //   setSelectedOrder(selectedData)
-      //   setModalOpen(true)
-      // }
+      const selectedId = selectionModel[0]
+      const selectedData = orderData.find(order => order.id === selectedId)
+      if (selectedData) {
+        setPopupMode('edit')
+        setSelectedOrder(selectedData)
+        setPopupOpen(true)
+      }
     } else {
       notificationModal.error('Please select a row in the table to edit.')
     }
@@ -112,7 +115,32 @@ export default function OrderPage() {
     }
   }, [selectionModel])
 
+  const handleViewDetailClick = useCallback(async () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = orderData.find(order => order.id === selectedId)
+      if (selectedData) {
+        setPopupMode('view')
+        setSelectedOrder(selectedData)
+        setPopupOpen(true)
+      }
+    } else {
+      notificationModal.error('Please select a row in the table to edit.')
+    }
+  }, [selectionModel])
+
   const handleModalConfirm = async (data: OrderData) => {
+    // Implement add/edit functionality
+    console.log('Confirmed data:', data)
+    if (modalMode === 'add') {
+      // addNewSaleData()
+    } else {
+    }
+    // After successful add/edit, refetch the data
+    // await fetchSalesData(paginationModel);
+  }
+
+  const handlePopupConfirm = async (data?: OrderData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -279,9 +307,10 @@ export default function OrderPage() {
                 variant='outlined'
                 startIcon={<EditIcon />}
                 size='large'
-                sx={{ visibility: 'hidden' }}
+                onClick={handleViewDetailClick}
+                // sx={{ visibility: 'hidden' }}
               >
-                visible
+                details
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
@@ -306,7 +335,7 @@ export default function OrderPage() {
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={orderDataGridRef}
-          getRowId={row => row.orderId}
+          // getRowId={row => row.orderId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>
@@ -318,6 +347,15 @@ export default function OrderPage() {
           onConfirm={handleModalConfirm}
           initialData={selectedOrder}
           mode={modalMode}
+        />
+      )}
+      {popupOpen && (
+        <OrderDetailPopup
+          mode={popupMode}
+          onClose={() => setPopupOpen(false)}
+          onConfirm={handlePopupConfirm}
+          open={popupOpen}
+          initialData={selectedOrder}
         />
       )}
     </Box>
