@@ -25,7 +25,24 @@ export default function useOrderDetail(orderDeta: OrderData) {
   const handleAddNewProduct = (newProduct: ProductDetail) => {
     console.log(newProduct)
     let currentIndex = newProductListData.length
-    setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+    let currentProductData = newProductListData
+    if (currentProductData.length > 0) {
+      const resultIndex = currentProductData.findIndex(
+        item => item.productNumber === newProduct.productNumber
+      )
+      if (resultIndex !== -1) {
+        let newRow = currentProductData.map((product, index) =>
+          index === resultIndex
+            ? { ...product, quantity: product.quantity + newProduct.quantity }
+            : product
+        )
+        setNewProductListData(newRow)
+      } else {
+        setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+      }
+    } else {
+      setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+    }
   }
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -83,6 +100,12 @@ export default function useOrderDetail(orderDeta: OrderData) {
     }, 300),
     []
   )
+
+  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
+    style: 'currency',
+    currency: 'JPY',
+  })
+
   const baseColumns: GridColDef[] = useMemo(
     () => [
       {
@@ -105,6 +128,25 @@ export default function useOrderDetail(orderDeta: OrderData) {
         headerAlign: 'center',
         flex: 1,
         editable: true,
+      },
+      {
+        field: 'productPrice',
+        headerName: '単価',
+        type: 'number',
+        headerAlign: 'center',
+        flex: 1,
+        valueFormatter: value => currencyFormatter.format(Number(value)),
+      },
+      {
+        field: 'totalPrice',
+        headerName: '金額',
+        type: 'number',
+        headerAlign: 'center',
+        flex: 1,
+        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueGetter: (value, row) => {
+          return row.quantity * row.productPrice
+        },
       },
       {
         field: 'actions',

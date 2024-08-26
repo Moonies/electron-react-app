@@ -181,10 +181,10 @@ export default function OrderDetailPopup({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async () => {
-    setLoading(true)
+  const handleSubmit = () => {
+    // setLoading(true)
     try {
-      // await onConfirm({ ...formData, product: newProductListData as ProductList[] })
+      onConfirm({ ...formData, product: newProductListData as ProductList[] })
       // onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
@@ -269,8 +269,8 @@ export default function OrderDetailPopup({
               readOnly={popupMode === 'view'}
             />
             <TextField
-              label='受注番号'
-              value={formData?.id}
+              label='注番'
+              value={formData?.orderId}
               onChange={e => handleChange('id', e.target.value)}
               margin='normal'
               sx={{ flex: 1 }}
@@ -291,7 +291,7 @@ export default function OrderDetailPopup({
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <DatePicker
-              label='quotationRequestDate'
+              label='見積書日付'
               value={dayjs(formData?.quotationRequestDate)}
               format='YYYY/MM/DD'
               onChange={newValue =>
@@ -301,7 +301,7 @@ export default function OrderDetailPopup({
               readOnly={popupMode === 'view'}
             />
             <DatePicker
-              label='shippingmentDate'
+              label='出荷日付'
               value={dayjs(formData?.shippingmentDate)}
               format='YYYY/MM/DD'
               onChange={newValue =>
@@ -311,7 +311,7 @@ export default function OrderDetailPopup({
               readOnly={popupMode === 'view'}
             />
             <DatePicker
-              label='paymentDueDate'
+              label='支払期限'
               value={dayjs(formData?.paymentDueDate)}
               format='YYYY/MM/DD'
               onChange={newValue =>

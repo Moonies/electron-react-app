@@ -20,7 +20,7 @@ export type ProductList = {
   productNumber: string
   productName: string
   quantity: number
-  unitPrice: number
+  productPrice: number
   totalPrice: number
 }
 export interface OrderData {

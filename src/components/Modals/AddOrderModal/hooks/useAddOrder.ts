@@ -24,9 +24,26 @@ export default function useAddOrder() {
   const [loading, setLoading] = useState(false)
 
   const handleAddNewProduct = (newProduct: ProductDetail) => {
-    console.log(newProduct)
+    // console.log(newProduct)
     let currentIndex = newProductListData.length
-    setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+    let currentProductData = newProductListData
+    if (currentProductData.length > 0) {
+      const resultIndex = currentProductData.findIndex(
+        item => item.productNumber === newProduct.productNumber
+      )
+      if (resultIndex !== -1) {
+        let newRow = currentProductData.map((product, index) =>
+          index === resultIndex
+            ? { ...product, quantity: product.quantity + newProduct.quantity }
+            : product
+        )
+        setNewProductListData(newRow)
+      } else {
+        setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+      }
+    } else {
+      setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+    }
   }
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -85,6 +102,11 @@ export default function useAddOrder() {
     []
   )
 
+  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
+    style: 'currency',
+    currency: 'JPY',
+  })
+
   const columns: GridColDef[] = useMemo(
     () => [
       {
@@ -99,7 +121,7 @@ export default function useAddOrder() {
         headerName: '商品名',
         headerAlign: 'center',
         flex: 1,
-        editable: true,
+        // editable: true,
       },
       {
         field: 'quantity',
@@ -109,24 +131,30 @@ export default function useAddOrder() {
         editable: true,
       },
       {
+        field: 'productPrice',
+        headerName: '単価',
+        type: 'number',
+        headerAlign: 'center',
+        flex: 1,
+        valueFormatter: value => currencyFormatter.format(Number(value)),
+      },
+      {
+        field: 'totalPrice',
+        headerName: '金額',
+        type: 'number',
+        headerAlign: 'center',
+        flex: 1,
+        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueGetter: (value, row) => {
+          return row.quantity * row.productPrice
+        },
+      },
+      {
         field: 'actions',
         type: 'actions',
         headerName: 'Actions',
         width: 100,
         cellClassName: 'actions',
-        // getActions: ({ id }) => {
-        //   const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
-        //   if (isInEditMode) {
-        //     return [
-        //       { label: 'Save', onClick: handleSaveClick(id) },
-        //       { label: 'Cancel', onClick: handleCancelClick(id) },
-        //     ]
-        //   }
-        //   return [
-        //     { label: 'Edit', onClick: handleEditClick(id) },
-        //     { label: 'Delete', onClick: handleDeleteClick(id) },
-        //   ]
-        // },
       },
     ],
     [rowModesModel, handleSaveClick, handleCancelClick, handleEditClick, handleDeleteClick]

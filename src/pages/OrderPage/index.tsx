@@ -20,6 +20,7 @@ import {
   Edit as EditIcon,
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
+  ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { StyledButton } from 'styles/styles'
@@ -28,10 +29,9 @@ import DataTable from 'components/DataTable'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
-import { PurchaseData } from 'api/purchase/getPurchaseList'
 import PurchaseModal from 'components/Modals/PurchaseModal'
 import useOrder from './hooks/useOrder'
-import OrderModal from 'components/Modals/OrderModal'
+import OrderModal from 'components/Modals/AddOrderModal'
 import { OrderData } from 'api/order/getOrderList'
 import OrderDetailPopup from './components/OrderDetailPopup'
 
@@ -47,12 +47,13 @@ export default function OrderPage() {
     handlePaginationModelChange,
     categorySearch,
     statusOrder,
+    convertStatus,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedOrder, setSelectedOrder] = useState<OrderData>()
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [modalMode, setModalMode] = useState<'add'>('add')
   const [popupOpen, setPopupOpen] = useState(false)
   const [popupMode, setPopupMode] = useState<'view' | 'edit'>('view')
   const { openConfirmModal } = useConfirmModal()
@@ -95,21 +96,20 @@ export default function OrderPage() {
 
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
-      // const selectedId = selectionModel[0]
-      // const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
-      // if (selectedData) {
-      //   const confirmed = await openConfirmModal({
-      //     title: '確認してください',
-      //     message:
-      //       'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
-      //   })
-      //   if (confirmed) {
-      //     // Perform delete operation
-      //     console.log('Delete confirmed')
-      //   } else {
-      //     console.log('Delete cancelled')
-      //   }
-      // }
+      const selectedId = selectionModel[0]
+      const selectedData = orderData.find(order => order.id === selectedId)
+      if (selectedData) {
+        const confirmed = await openConfirmModal({
+          title: '確認してください',
+          message: 'Are you sure you want to delete this order Number: ' + selectedData.id,
+        })
+        if (confirmed) {
+          // Perform delete operation
+          console.log('Delete confirmed')
+        } else {
+          console.log('Delete cancelled')
+        }
+      }
     } else {
       notificationModal.error('Please select a row in the table to delete.')
     }
@@ -125,7 +125,7 @@ export default function OrderPage() {
         setPopupOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to edit.')
+      notificationModal.error('Please select a row in the table to view detail.')
     }
   }, [selectionModel])
 
@@ -137,18 +137,14 @@ export default function OrderPage() {
     } else {
     }
     // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
+    // await fetchNewOrderData(paginationModel);
   }
 
   const handlePopupConfirm = async (data?: OrderData) => {
-    // Implement add/edit functionality
+    // Implement add functionality
+    setPopupOpen(false)
     console.log('Confirmed data:', data)
-    if (modalMode === 'add') {
-      // addNewSaleData()
-    } else {
-    }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
+    // await fetchNewOrderData(paginationModel);
   }
 
   return (
@@ -208,7 +204,7 @@ export default function OrderPage() {
                 name='ststus'
                 value={searchCriteria.status ?? ''}
                 select
-                label='Status'
+                label='状態'
                 id='status-order'
                 onChange={e => handleChange('status', e.target.value as string)}
                 sx={{ width: '30%' }}
@@ -220,7 +216,7 @@ export default function OrderPage() {
               >
                 {statusOrder?.map(item => (
                   <MenuItem key={item} value={item}>
-                    {item}
+                    {convertStatus(item)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -305,12 +301,12 @@ export default function OrderPage() {
               </StyledButton>
               <StyledButton
                 variant='outlined'
-                startIcon={<EditIcon />}
+                startIcon={<DetailIcon />}
                 size='large'
                 onClick={handleViewDetailClick}
                 // sx={{ visibility: 'hidden' }}
               >
-                details
+                詳細
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>

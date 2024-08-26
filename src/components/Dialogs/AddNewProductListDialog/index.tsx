@@ -18,7 +18,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 export type ProductDetail = {
   productNumber: string | null
   productName: string | null
-  quantity: number | null
+  quantity: number
+  productPrice: number
 }
 interface DialogProductProps {
   open: boolean
@@ -36,7 +37,8 @@ export default function AddnewProductDialog({
   const [formData, setFormData] = useState<ProductDetail>({
     productNumber: null,
     productName: null,
-    quantity: null,
+    quantity: 1,
+    productPrice: 0,
   })
   const [loading, setLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
@@ -108,6 +110,7 @@ export default function AddnewProductDialog({
                       </>
                     ),
                   }}
+                  required
                 />
               )}
               onInputChange={(event, newInputValue) => {
@@ -120,7 +123,7 @@ export default function AddnewProductDialog({
                     ...prev,
                     productNumber: newValue.productId || null,
                     productName: newValue.productName || null,
-                    productPrice: newValue.productPrice || null,
+                    productPrice: newValue.productPrice || 0,
                   }))
                 }
               }}

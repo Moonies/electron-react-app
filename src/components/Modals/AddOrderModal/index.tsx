@@ -28,7 +28,6 @@ import {
   Save as SaveIcon,
   Close as CancelIcon,
 } from '@mui/icons-material'
-import { debounce } from '@mui/material/utils'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import { api } from 'api/index'
@@ -53,7 +52,7 @@ interface PurchaseModalProps {
   onClose: () => void
   onConfirm: (data: OrderData) => Promise<void>
   initialData?: OrderData
-  mode: 'add' | 'edit'
+  mode: 'add' | 'edit' | 'view'
 }
 const defaultFormData: OrderData = {
   id: '',
@@ -102,12 +101,8 @@ export default function OrderModal({
   } = useAddOrder()
 
   useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      setFormData(initialData)
-    } else {
-      setFormData(defaultFormData)
-    }
-  }, [initialData])
+    console.log(newProductListData)
+  }, [newProductListData])
 
   const updatedColumns = columns.map(column => {
     if (column.field === 'actions') {
@@ -225,7 +220,7 @@ export default function OrderModal({
               sx={{ marginTop: 2, width: '25%' }}
             />
             <TextField
-              label='伝票番号'
+              label='注番'
               value={formData.orderId}
               onChange={e => handleChange('orderId', e.target.value)}
               // fullWidth
@@ -242,7 +237,7 @@ export default function OrderModal({
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <DatePicker
-              label='quotationRequestDate'
+              label='見積書日付'
               value={dayjs(formData.quotationRequestDate)}
               format='YYYY/MM/DD'
               onChange={newValue =>
@@ -251,7 +246,7 @@ export default function OrderModal({
               sx={{ marginTop: 2, width: '25%' }}
             />
             <DatePicker
-              label='shippingmentDate'
+              label='出荷日付'
               value={dayjs(formData.shippingmentDate)}
               format='YYYY/MM/DD'
               onChange={newValue =>
@@ -260,7 +255,7 @@ export default function OrderModal({
               sx={{ marginTop: 2, width: '25%' }}
             />
             <DatePicker
-              label='paymentDueDate'
+              label='支払期限'
               value={dayjs(formData.paymentDueDate)}
               format='YYYY/MM/DD'
               onChange={newValue =>

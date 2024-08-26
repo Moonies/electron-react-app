@@ -17,7 +17,7 @@ export default function useOrder() {
   const [orderData, setOrderData] = useState<OrderData[]>([])
   // const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
-  const statusOrder: OrderStatus[] = Object.values(OrderStatus)
+  const statusOrder = Object.values(OrderStatus)
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10,
@@ -74,24 +74,6 @@ export default function useOrder() {
       { field: 'customerCompanyName', headerName: '発注先', headerAlign: 'center', flex: 1 },
       { field: 'orderId', headerName: '注番', headerAlign: 'center' },
       { field: 'registDate', headerName: '登録日付', headerAlign: 'center' },
-      // { field: 'productNumber', headerName: '商品番号', minWidth: 100, headerAlign: 'center' },
-
-      // { field: 'productName', headerName: '品名', minWidth: 100, headerAlign: 'center', flex: 1 },
-      // { field: 'quantity', headerName: '数量', type: 'number', headerAlign: 'center' },
-      // {
-      //   field: 'unitPrice',
-      //   headerName: '単価',
-      //   type: 'number',
-      //   headerAlign: 'center',
-      //   valueFormatter: value => currencyFormatter.format(Number(value)),
-      // },
-      // {
-      //   field: 'totalPrice',
-      //   headerName: '金額',
-      //   type: 'number',
-      //   headerAlign: 'center',
-      //   valueFormatter: value => currencyFormatter.format(Number(value)),
-      // },
       { field: 'orderRequestEmployeeName', headerName: '担当者名', headerAlign: 'center' },
       { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
@@ -104,6 +86,8 @@ export default function useOrder() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
+      if (item.field === 'status') return
+
       result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
     })
     setCategorySearch(result)
@@ -154,5 +138,6 @@ export default function useOrder() {
     categorySearch,
     handlePaginationModelChange,
     statusOrder,
+    convertStatus,
   }
 }
