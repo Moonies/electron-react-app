@@ -153,16 +153,6 @@ export default function AccountManagementPage() {
                   label='検索'
                   value={filterValue}
                   onChange={e => setFilterValue(e.target.value)}
-                  // InputProps={{
-                  //   style: { fontSize: '1.2rem' },
-                  //   endAdornment: (
-                  //     <InputAdornment position='end'>
-                  //       <IconButton onClick={handleSearch} edge='end'>
-                  //         <SearchIcon />
-                  //       </IconButton>
-                  //     </InputAdornment>
-                  //   ),
-                  // }}
                 />
               </Box>
             </Box>

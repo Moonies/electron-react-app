@@ -10,6 +10,7 @@ import {
   InputAdornment,
   IconButton,
   Divider,
+  Button,
 } from '@mui/material'
 import { useGridApiRef, GridRowProps, GridRowSelectionModel } from '@mui/x-data-grid'
 import {
@@ -19,6 +20,7 @@ import {
   Edit as EditIcon,
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
+  ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { StyledButton } from 'styles/styles'
@@ -27,47 +29,55 @@ import DataTable from 'components/DataTable'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
-import usePurchase from './hooks/usePurchase'
-import { PurchaseData } from 'api/purchase/getPurchaseList'
 import PurchaseModal from 'components/Modals/PurchaseModal'
+import useOrder from './hooks/useOrder'
+import OrderModal from 'components/Modals/OrderModal'
+import { OrderData } from 'api/order/getOrderList'
 
-export default function PurchasePage() {
+export default function OrderPage() {
   const {
     searchCriteria,
     handleChange,
     handleSearch,
-    columns,
     paginationModel,
-    purchaseData,
-    handlePaginationModelChange,
+    orderData,
+    columns,
     prepareCategorySearch,
+    handlePaginationModelChange,
     categorySearch,
-  } = usePurchase()
-  const purchaseDataGridRef = useGridApiRef()
+    statusOrder,
+    convertStatus,
+    addNewOrder,
+    editOrder,
+    deleteOrder,
+  } = useOrder()
+  const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseData | undefined>(undefined)
+  const [selectedOrder, setSelectedOrder] = useState<OrderData>()
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
+  const [popupOpen, setPopupOpen] = useState(false)
+  const [popupMode, setPopupMode] = useState<'view' | 'edit'>('view')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
   useEffect(() => {
-    if (purchaseDataGridRef.current) {
-      purchaseDataGridRef.current.autosizeColumns({
-        // columns: ['customerName', 'productName'],
-        includeHeaders: true,
-        includeOutliers: true,
+    if (orderDataGridRef.current) {
+      orderDataGridRef.current.autosizeColumns({
+        // columns: ['id', 'customerCompanyName'],
+        // includeHeaders: true,
+        // includeOutliers: true,
         expand: true,
       })
     }
-  }, [purchaseData])
+  }, [orderData])
 
   useEffect(() => {
     prepareCategorySearch
   }, [])
 
   const handleAddClick = () => {
-    setSelectedPurchase(undefined)
+    setSelectedOrder(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -75,10 +85,13 @@ export default function PurchasePage() {
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
+      const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
+        // setPopupMode('edit')
+        // setSelectedOrder(selectedData)
+        // setPopupOpen(true)
+        setSelectedOrder(selectedData)
         setModalMode('edit')
-        setSelectedPurchase(selectedData)
         setModalOpen(true)
       }
     } else {
@@ -89,12 +102,11 @@ export default function PurchasePage() {
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
+      const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message:
-            'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
+          message: 'Are you sure you want to delete this order Number: ' + selectedData.id,
         })
         if (confirmed) {
           // Perform delete operation
@@ -108,22 +120,52 @@ export default function PurchasePage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: PurchaseData) => {
+  const handleViewDetailClick = useCallback(async () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = orderData.find(order => order.id === selectedId)
+      if (selectedData) {
+        // setPopupMode('view')
+        // setSelectedOrder(selectedData)
+        // setPopupOpen(true)
+        setSelectedOrder(selectedData)
+        setModalMode('view')
+        setModalOpen(true)
+      }
+    } else {
+      notificationModal.error('Please select a row in the table to view detail.')
+    }
+  }, [selectionModel])
+
+  const handleModalConfirm = async (data: OrderData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
       // addNewSaleData()
     } else {
     }
+    switch (modalMode) {
+      case 'add':
+        addNewOrder(data)
+        break
+      case 'edit':
+        editOrder(data)
+        break
+      case 'view':
+        deleteOrder(data)
+        break
+      default:
+        break
+    }
     // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
+    // await fetchNewOrderData(paginationModel);
   }
 
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>仕入管理</Divider>
+          <Divider textAlign='left'>受注管理</Divider>
         </Typography>
       </Box>
       <Box
@@ -141,7 +183,7 @@ export default function PurchasePage() {
               display: 'flex',
               flexDirection: 'column',
               gap: 2,
-              width: '40%',
+              width: '60%',
             }}
           >
             <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
@@ -150,11 +192,11 @@ export default function PurchasePage() {
                 value={searchCriteria.category}
                 select
                 label='範疇'
-                id='category-sale'
+                id='category-order'
                 onChange={e => handleChange('category', e.target.value as string)}
                 sx={{ width: '30%' }}
                 InputLabelProps={{
-                  id: 'category-sale-label',
+                  id: 'category-order-label',
                   htmlFor: 'category',
                   component: 'span',
                 }}
@@ -165,31 +207,43 @@ export default function PurchasePage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <Box display={'flex'} flex={1}>
-                <TextField
-                  fullWidth
-                  name='keyword'
-                  label='検索'
-                  value={searchCriteria.keyword}
-                  onChange={e => handleChange('keyword', e.target.value)}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton onClick={handleSearch} edge='end'>
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
+              <TextField
+                // fullWidth
+                name='keyword'
+                label='検索'
+                value={searchCriteria.keyword}
+                onChange={e => handleChange('keyword', e.target.value)}
+              />
+              <TextField
+                name='ststus'
+                value={searchCriteria.status ?? ''}
+                select
+                label='状態'
+                id='status-order'
+                onChange={e => handleChange('status', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'status-order-label',
+                  htmlFor: 'status',
+                  component: 'span',
+                }}
+              >
+                {statusOrder?.map(item => (
+                  <MenuItem key={item} value={item}>
+                    {convertStatus(item)}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <Button variant='contained' endIcon={<SearchIcon />} onClick={handleSearch}>
+                Search
+              </Button>
             </Box>
             <Box
               display={'flex'}
               flexDirection={'row'}
               gap={2}
-              justifyContent={'space-between'}
-              flex={1}
+              // justifyContent={'space-between'}
+              // flex={1}
             >
               <DatePicker
                 label='Start Date'
@@ -209,19 +263,7 @@ export default function PurchasePage() {
               />
             </Box>
           </Box>
-
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-            gap={3}
-          ></Box>
-          <Divider orientation='vertical' flexItem></Divider>
+          <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
             sx={{
               width: '30%',
@@ -261,15 +303,22 @@ export default function PurchasePage() {
               </StyledButton>
               <StyledButton
                 variant='outlined'
-                startIcon={<EditIcon />}
+                startIcon={<DetailIcon />}
                 size='large'
-                sx={{ visibility: 'hidden' }}
+                onClick={handleViewDetailClick}
+                // sx={{ visibility: 'hidden' }}
               >
-                visible
+                詳細
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton variant='outlined' startIcon={<UploadFileIcon />} size='large'>
+              <StyledButton
+                variant='outlined'
+                startIcon={<UploadFileIcon />}
+                size='large'
+                sx={{ visibility: 'hidden' }}
+              >
+                {/* current version is not support */}
                 自動アプロード
               </StyledButton>
               <StyledButton
@@ -284,26 +333,35 @@ export default function PurchasePage() {
           </Box>
         </Box>
         <DataTable
-          data={purchaseData}
+          data={orderData}
           columns={columns}
-          // totalRows={purchaseData.length}
+          // totalRows={orderData.length}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
-          apiref={purchaseDataGridRef}
-          getRowId={row => row.purchaseId}
+          apiref={orderDataGridRef}
+          // getRowId={row => row.orderId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>
 
       {modalOpen && (
-        <PurchaseModal
+        <OrderModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedPurchase}
+          initialData={selectedOrder}
           mode={modalMode}
         />
       )}
+      {/* {popupOpen && (
+        <OrderDetailPopup
+          mode={popupMode}
+          onClose={() => setPopupOpen(false)}
+          onConfirm={handlePopupConfirm}
+          open={popupOpen}
+          initialData={selectedOrder}
+        />
+      )} */}
     </Box>
   )
 }

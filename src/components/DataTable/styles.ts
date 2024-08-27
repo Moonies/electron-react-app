@@ -5,7 +5,7 @@ import { DataGrid, gridClasses } from '@mui/x-data-grid'
 const DataGridContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexGrow: 1,
-  height: 400,
+  // height: 400,
   '& .MuiDataGrid-root': {
     border: `2px solid ${theme.palette.primary.dark}`,
   },

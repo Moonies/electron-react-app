@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   GridAutosizeOptions,
   GridCellParams,
@@ -6,24 +6,30 @@ import {
   GridPaginationModel,
   GridRowIdGetter,
   GridRowSelectionModel,
+  GridRowsProp,
   GridValidRowModel,
+  GridRowModes,
 } from '@mui/x-data-grid'
 import { StyledStripedDataGrid, DataGridContainer } from './styles'
-import { GridApiCommunity } from '@mui/x-data-grid/internals'
+import { DataGridProps, GridApiCommunity } from '@mui/x-data-grid/internals'
+import { SxProps } from '@mui/system'
+import { SixKPlus } from '@mui/icons-material'
 
-interface TableProps {
-  data: any[]
+interface CustomTableProps {
+  data: any[] | GridRowsProp
   columns: GridColDef[]
-  paginationModel: GridPaginationModel
-  onPaginationModelChange: (newModel: GridPaginationModel) => void
+  paginationModel?: GridPaginationModel
+  onPaginationModelChange?: (newModel: GridPaginationModel) => void
   apiref: React.MutableRefObject<GridApiCommunity>
-  getRowId: GridRowIdGetter<GridValidRowModel> | undefined
+  getRowId?: GridRowIdGetter<GridValidRowModel>
   checkboxSelection?: boolean
   disableRowSelectionOnClick?: boolean
   onSelected: (newModel: GridRowSelectionModel) => void
   autosizeOption?: GridAutosizeOptions
   totalRows?: number
+  sx?: SxProps
 }
+type TableProps = CustomTableProps & Omit<DataGridProps, keyof CustomTableProps>
 
 const DataTable = React.memo<TableProps>(
   ({
@@ -38,9 +44,11 @@ const DataTable = React.memo<TableProps>(
     onSelected,
     autosizeOption,
     totalRows,
+    sx = { height: 400 },
+    ...props
   }) => {
     return (
-      <DataGridContainer>
+      <DataGridContainer sx={sx}>
         <StyledStripedDataGrid
           apiRef={apiref}
           getRowId={getRowId}
@@ -61,6 +69,8 @@ const DataTable = React.memo<TableProps>(
           paginationMode={totalRows ? 'server' : 'client'} //when change to fetch by api should be 'server' only
           autosizeOptions={autosizeOption}
           getCellClassName={params => (params.colDef.type === 'number' ? 'right' : 'center')}
+          // sx={sx}
+          {...props}
         />
       </DataGridContainer>
     )
