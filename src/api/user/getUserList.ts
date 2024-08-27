@@ -10,7 +10,7 @@ export interface UserData {
 }
 
 export interface GetUserListProps {
-  username: string
+  username?: string
 }
 
 export default async function getUserList({
@@ -41,8 +41,8 @@ export default async function getUserList({
       //test only
       let data = [
         {
-          userId: '66b058a49973bc5b41e4eca0',
-          fullName: 'Lenora',
+          userId: 'AB1100',
+          fullName: '平井昌司',
           username: 'Lenora-66b058a49973bc5b41e4eca0',
           password: '825h7Tmp4QCyIaZ',
           role: 'normal',
@@ -55,8 +55,8 @@ export default async function getUserList({
           role: 'senior',
         },
         {
-          userId: '66b058a49973bc5b41e4eca2',
-          fullName: 'Jensen',
+          userId: 'AA0011',
+          fullName: '村田幸恵',
           username: 'Jensen-66b058a49973bc5b41e4eca2',
           password: 'GMSH3C0qBIMoQGN',
           role: 'manager',

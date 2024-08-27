@@ -1,6 +1,7 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { api } from 'api/index'
 import { OrderStatus } from 'api/order'
+import { NewOrder } from 'api/order/addNewOrder'
 import { OrderData } from 'api/order/getOrderList'
 import dayjs from 'dayjs'
 import useLoading from 'hooks/useLoading'
@@ -61,9 +62,6 @@ export default function useOrder() {
         field: 'id',
         headerName: '受注番号',
         headerAlign: 'center',
-        // minWidth: 100,
-        // flex: 1,
-        // valueFormatter: (params) => dayjs(params.value).format('YYYY-MM-DD'),
       },
       {
         field: 'status',
@@ -87,7 +85,6 @@ export default function useOrder() {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
       if (item.field === 'status') return
-
       result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
     })
     setCategorySearch(result)
@@ -118,6 +115,32 @@ export default function useOrder() {
     // getSaleList(newModel)
   }
 
+  const addNewOrder = async (formData: OrderData) => {
+    let data: NewOrder = {
+      orderId: formData.orderId,
+      customerCompanyId: formData.customerCompanyId,
+      product: formData.product,
+      orderRequestEmployeeId: formData.orderRequestEmployeeId,
+      orderApprovedEmployeeId: formData.orderApprovedEmployeeId,
+      quotationRequestDate: dayjs(formData.quotationRequestDate).format('YYYY/MM/DD'),
+      registDate: dayjs(formData.registDate).format('YYYY/MM/DD'),
+      shippingmentDate: dayjs(formData.shippingmentDate).format('YYYY/MM/DD'),
+      paymentDueDate: dayjs(formData.paymentDueDate).format('YYYY/MM/DD'),
+      status: formData.status,
+    }
+    // console.log(data)
+    //call api
+    const result = await api.order().addNewOrder(data)
+  }
+
+  const editOrder = async (FormData: OrderData) => {
+    //call update api
+  }
+
+  const deleteOrder = async (FormData: OrderData) => {
+    //cal delete api
+  }
+
   const getPurchaseListData = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
     //call api
@@ -139,5 +162,8 @@ export default function useOrder() {
     handlePaginationModelChange,
     statusOrder,
     convertStatus,
+    addNewOrder,
+    editOrder,
+    deleteOrder,
   }
 }

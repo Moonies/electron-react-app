@@ -1,62 +1,26 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
 import dayjs from 'dayjs'
-import { OrderStatus } from '.'
-import { mockData } from './_mockdata'
-// import { PurchaseStatus } from '.'
-// export type OrderStatus = 'DELIVERED' | 'CANCEL' | 'PENDING' | 'SHIPPING' | 'OVERDUEDATE' | 'ALL'
-export interface SearchCriteria {
-  category: string
-  keyword: string
-  startDate: Date
-  endDate: Date
-  page?: number
-  pageSize?: number
-  status: `${OrderStatus}` | null
-}
 
 export type ProductList = {
   id: string
   productNumber: string
-  productName: string
   quantity: number
-  productPrice: number
-  totalPrice: number
 }
-export interface OrderData {
-  id: string
+export interface NewOrder {
   orderId: string
   customerCompanyId: string
-  customerCompanyName: string
   product: ProductList[]
   orderRequestEmployeeId: string
-  orderRequestEmployeeName: string
   orderApprovedEmployeeId: string
-  orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs
   registDate: string | dayjs.Dayjs
   shippingmentDate: string | dayjs.Dayjs
   paymentDueDate: string | dayjs.Dayjs
   status: string | null
 }
-//for implement case only when apprved should be remove it
-function chunkArray(mockdata: OrderData[], pageSize: number, page: number) {
-  const result = []
-  for (let i = 0; i < mockdata.length; i += pageSize) {
-    result.push(mockdata.slice(i, i + pageSize))
-  }
-  return result[page]
-}
 
-export default async function getOrderList({
-  category,
-  keyword,
-  startDate,
-  endDate,
-  status,
-  page = 0,
-  pageSize = 10,
-}: SearchCriteria): Promise<ApiResponse<{ data: OrderData[]; totalRow: number }>> {
+export default async function addNewOrder(newOrder: NewOrder): Promise<ApiResponse<{}>> {
   //for beta:test
   // let newMock = chunkArray(mockData, pageSize, page)
 
@@ -64,10 +28,7 @@ export default async function getOrderList({
   return {
     code: 200,
     message: 'Success',
-    data: {
-      data: mockData,
-      totalRow: 0,
-    },
+    data: {},
   }
   // when use real API
   // try {

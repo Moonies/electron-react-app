@@ -1,5 +1,7 @@
 import React from 'react'
 import { default as getOrderList } from './getOrderList'
+import { default as addNewOrder } from './addNewOrder'
+
 export enum OrderStatus {
   ALL = 'all',
   RECEIVED = 'received',
@@ -10,5 +12,5 @@ export enum OrderStatus {
   CANCEL = 'cancel',
 }
 export default function order() {
-  return { getOrderList }
+  return { getOrderList, addNewOrder }
 }

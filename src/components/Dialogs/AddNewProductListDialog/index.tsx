@@ -44,8 +44,9 @@ export default function AddnewProductDialog({
   const [inputValue, setInputValue] = useState('')
   const [productList, setProductList] = useState<ProductDataDetail[]>([])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submitProduct = async (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     onSubmit(formData)
   }
 
@@ -71,9 +72,19 @@ export default function AddnewProductDialog({
   }, [inputValue, debouncedFetchOptions])
 
   return (
-    <Dialog open={open} onClose={onClose} disableEscapeKeyDown={true} maxWidth='sm' fullWidth>
+    <Dialog
+      open={open}
+      disableEscapeKeyDown={true}
+      maxWidth='sm'
+      fullWidth
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose()
+        }
+      }}
+    >
       <DialogTitle>Please Select Product</DialogTitle>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={submitProduct}>
         <DialogContent>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
             <Autocomplete

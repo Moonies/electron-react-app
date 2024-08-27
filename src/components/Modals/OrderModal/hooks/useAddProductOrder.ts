@@ -10,21 +10,25 @@ import {
   GridEventListener,
   GridRowEditStopReasons,
 } from '@mui/x-data-grid'
+import { CustomerData } from 'api/customer/getCustomerList'
 import { api } from 'api/index'
+import { OrderData } from 'api/order/getOrderList'
 import { ProductDataDetail } from 'api/product/getProductData'
+import { UserData } from 'api/user/getUserList'
 import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
+import useLoading from 'hooks/useLoading'
 
 import React, { useCallback, useMemo, useState } from 'react'
 
-export default function useAddOrder() {
+export default function useAddOrder(orderDeta: OrderData) {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({})
-  const [newProductListData, setNewProductListData] = useState<GridRowsProp>([])
+  const [newProductListData, setNewProductListData] = useState<GridRowsProp>(orderDeta.product)
   const [productData, setProductData] = useState<ProductDataDetail[]>([])
-
-  const [loading, setLoading] = useState(false)
+  const [userListData, setUserListData] = useState<UserData[]>([])
+  const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
+  const { withLoading, setLoading } = useLoading()
 
   const handleAddNewProduct = (newProduct: ProductDetail) => {
-    // console.log(newProduct)
     let currentIndex = newProductListData.length
     let currentProductData = newProductListData
     if (currentProductData.length > 0) {
@@ -45,6 +49,7 @@ export default function useAddOrder() {
       setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
     }
   }
+
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true
@@ -114,14 +119,12 @@ export default function useAddOrder() {
         headerName: '商品番号',
         headerAlign: 'center',
         flex: 1,
-        // editable: true,
       },
       {
         field: 'productName',
         headerName: '商品名',
         headerAlign: 'center',
         flex: 1,
-        // editable: true,
       },
       {
         field: 'quantity',
@@ -159,6 +162,19 @@ export default function useAddOrder() {
     ],
     [rowModesModel, handleSaveClick, handleCancelClick, handleEditClick, handleDeleteClick]
   )
+
+  const getUserList = async () => {
+    const result = await api.user().getUserList({})
+    if (result.code === 200 && result.data) {
+      setUserListData(result.data)
+    }
+  }
+  const getCustomerList = async () => {
+    const result = await api.customer().getCustomerList()
+    if (result.data && result.code === 200) {
+      setCustomerListData(result.data)
+    }
+  }
   return {
     columns,
     newProductListData,
@@ -174,7 +190,10 @@ export default function useAddOrder() {
     handleDeleteClick,
     debouncedFetchOptions,
     productData,
-    loading,
     handleAddNewProduct,
+    userListData,
+    customerListData,
+    getUserList,
+    getCustomerList,
   }
 }

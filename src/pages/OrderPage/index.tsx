@@ -31,9 +31,8 @@ import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
 import PurchaseModal from 'components/Modals/PurchaseModal'
 import useOrder from './hooks/useOrder'
-import OrderModal from 'components/Modals/AddOrderModal'
+import OrderModal from 'components/Modals/OrderModal'
 import { OrderData } from 'api/order/getOrderList'
-import OrderDetailPopup from './components/OrderDetailPopup'
 
 export default function OrderPage() {
   const {
@@ -48,12 +47,15 @@ export default function OrderPage() {
     categorySearch,
     statusOrder,
     convertStatus,
+    addNewOrder,
+    editOrder,
+    deleteOrder,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedOrder, setSelectedOrder] = useState<OrderData>()
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'add'>('add')
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const [popupOpen, setPopupOpen] = useState(false)
   const [popupMode, setPopupMode] = useState<'view' | 'edit'>('view')
   const { openConfirmModal } = useConfirmModal()
@@ -85,9 +87,12 @@ export default function OrderPage() {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        setPopupMode('edit')
+        // setPopupMode('edit')
+        // setSelectedOrder(selectedData)
+        // setPopupOpen(true)
         setSelectedOrder(selectedData)
-        setPopupOpen(true)
+        setModalMode('edit')
+        setModalOpen(true)
       }
     } else {
       notificationModal.error('Please select a row in the table to edit.')
@@ -120,9 +125,12 @@ export default function OrderPage() {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        setPopupMode('view')
+        // setPopupMode('view')
+        // setSelectedOrder(selectedData)
+        // setPopupOpen(true)
         setSelectedOrder(selectedData)
-        setPopupOpen(true)
+        setModalMode('view')
+        setModalOpen(true)
       }
     } else {
       notificationModal.error('Please select a row in the table to view detail.')
@@ -136,14 +144,20 @@ export default function OrderPage() {
       // addNewSaleData()
     } else {
     }
+    switch (modalMode) {
+      case 'add':
+        addNewOrder(data)
+        break
+      case 'edit':
+        editOrder(data)
+        break
+      case 'view':
+        deleteOrder(data)
+        break
+      default:
+        break
+    }
     // After successful add/edit, refetch the data
-    // await fetchNewOrderData(paginationModel);
-  }
-
-  const handlePopupConfirm = async (data?: OrderData) => {
-    // Implement add functionality
-    setPopupOpen(false)
-    console.log('Confirmed data:', data)
     // await fetchNewOrderData(paginationModel);
   }
 
@@ -249,18 +263,6 @@ export default function OrderPage() {
               />
             </Box>
           </Box>
-
-          {/* <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-            gap={3}
-          ></Box> */}
           <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
             sx={{
@@ -310,7 +312,13 @@ export default function OrderPage() {
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton variant='outlined' startIcon={<UploadFileIcon />} size='large'>
+              <StyledButton
+                variant='outlined'
+                startIcon={<UploadFileIcon />}
+                size='large'
+                sx={{ visibility: 'hidden' }}
+              >
+                {/* current version is not support */}
                 自動アプロード
               </StyledButton>
               <StyledButton
@@ -345,7 +353,7 @@ export default function OrderPage() {
           mode={modalMode}
         />
       )}
-      {popupOpen && (
+      {/* {popupOpen && (
         <OrderDetailPopup
           mode={popupMode}
           onClose={() => setPopupOpen(false)}
@@ -353,7 +361,7 @@ export default function OrderPage() {
           open={popupOpen}
           initialData={selectedOrder}
         />
-      )}
+      )} */}
     </Box>
   )
 }
