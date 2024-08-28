@@ -237,7 +237,13 @@ export default function ProductPage() {
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton variant='outlined' startIcon={<UploadFileIcon />} size='large'>
+              <StyledButton
+                variant='outlined'
+                startIcon={<UploadFileIcon />}
+                size='large'
+                sx={{ visibility: 'hidden' }}
+              >
+                {/* not support in aplha thest */}
                 自動アプロード
               </StyledButton>
               <StyledButton

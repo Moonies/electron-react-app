@@ -310,6 +310,7 @@ export default function SalePage() {
                 startIcon={<AddIcon />}
                 size='large'
                 onClick={handleAddClick}
+                sx={{ visibility: 'hidden' }}
               >
                 追加
               </StyledButton>
@@ -318,6 +319,7 @@ export default function SalePage() {
                 startIcon={<DeleteIcon />}
                 size='large'
                 onClick={handleDeleteClick}
+                sx={{ visibility: 'hidden' }}
               >
                 削除
               </StyledButton>
@@ -328,6 +330,7 @@ export default function SalePage() {
                 startIcon={<EditIcon />}
                 size='large'
                 onClick={handleEditClick}
+                sx={{ visibility: 'hidden' }}
               >
                 編集
               </StyledButton>
@@ -341,7 +344,13 @@ export default function SalePage() {
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton variant='outlined' startIcon={<UploadFileIcon />} size='large'>
+              <StyledButton
+                variant='outlined'
+                startIcon={<UploadFileIcon />}
+                size='large'
+                sx={{ visibility: 'hidden' }}
+              >
+                {/* not support in alpha test */}
                 自動アプロード
               </StyledButton>
               <StyledButton

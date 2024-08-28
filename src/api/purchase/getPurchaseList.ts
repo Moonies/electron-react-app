@@ -11,17 +11,20 @@ export interface SearchCriteria {
   page?: number
   pageSize?: number
 }
-
-export interface PurchaseData {
-  purchaseId: string
-  invoiceNumber: string
-  supplierCompanyId: string
-  supplierCompanyName: string
+export type ComponentList = {
+  id: string
   componentNumber: string
   componentName: string
   quantity: number
   unitPrice: number
   totalPrice: number
+}
+export interface PurchaseData {
+  purchaseId: string
+  invoiceNumber: string
+  supplierCompanyId: string
+  supplierCompanyName: string
+  component: ComponentList[]
   orderRequestEmployeeName: string
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs

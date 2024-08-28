@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, forwardRef, useMemo } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -18,8 +18,15 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Slide,
 } from '@mui/material'
-import { Close as CloseIcon } from '@mui/icons-material'
+import {
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Close as CancelIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material'
 import { debounce } from '@mui/material/utils'
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -27,6 +34,15 @@ import dayjs from 'dayjs'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import { api } from 'api/index'
 import { ComponentIdData } from 'api/component/getComponentIdList'
+import { TransitionProps } from '@mui/material/transitions'
+import useAddComponent from './hooks/useAddComponent'
+import DataTable from 'components/DataTable'
+import {
+  GridActionsCellItem,
+  GridRowModes,
+  GridRowSelectionModel,
+  useGridApiRef,
+} from '@mui/x-data-grid'
 interface Option {
   label: string
   id: number
@@ -36,18 +52,14 @@ interface PurchaseModalProps {
   onClose: () => void
   onConfirm: (data: PurchaseData) => Promise<void>
   initialData?: PurchaseData
-  mode: 'add' | 'edit'
+  mode: 'add' | 'edit' | 'view'
 }
 const defaultFormData: PurchaseData = {
   purchaseId: '',
   invoiceNumber: '',
   supplierCompanyId: '',
   supplierCompanyName: '',
-  componentNumber: '',
-  componentName: '',
-  quantity: 0,
-  unitPrice: 0,
-  totalPrice: 0,
+  component: [],
   orderRequestEmployeeName: '',
   orderApprovedEmployeeName: '',
   quotationRequestDate: dayjs(),
@@ -62,10 +74,30 @@ export default function PurchaseModal({
   initialData,
   mode,
 }: PurchaseModalProps) {
-  const [formData, setFormData] = useState<PurchaseData>(defaultFormData)
+  const [formData, setFormData] = useState<PurchaseData>(initialData ?? defaultFormData)
   const [loading, setLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [componentIdList, setComponentIdList] = useState<ComponentIdData[]>([])
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
+  const [modalMode, setModalMode] = useState(mode)
+  const addNewComponentDataGridRef = useGridApiRef()
+
+  const {
+    columns,
+    componentData,
+    getCustomerList,
+    getUserList,
+    userListData,
+    rowModesModel,
+    processRowUpdate,
+    handleRowModesModelChange,
+    handleRowEditStop,
+    handleSaveClick,
+    handleCancelClick,
+    handleEditClick,
+    handleDeleteClick,
+    newComponentListData,
+  } = useAddComponent(formData)
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -129,6 +161,73 @@ export default function PurchaseModal({
     { label: '返品中', value: 'rejected' },
     { label: 'キャンセル', value: 'cancelled' },
   ]
+
+  const columnVisibilityModel = useMemo(() => {
+    return {
+      actions: modalMode !== 'view',
+    }
+  }, [modalMode])
+
+  const Transition = useCallback(
+    forwardRef(function Transition(
+      props: TransitionProps & {
+        children: React.ReactElement<any, any>
+      },
+      ref: React.Ref<unknown>
+    ) {
+      return <Slide direction='up' ref={ref} {...props} />
+    }),
+    []
+  )
+
+  const updatedColumns = columns.map(column => {
+    if (column.field === 'actions') {
+      return {
+        ...column,
+        getActions: ({ id }: any) => {
+          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
+
+          if (isInEditMode) {
+            return [
+              <GridActionsCellItem
+                icon={<SaveIcon />}
+                label='Save'
+                sx={{
+                  color: 'primary.main',
+                }}
+                onClick={handleSaveClick(id)}
+              />,
+              <GridActionsCellItem
+                icon={<CancelIcon />}
+                label='Cancel'
+                className='textPrimary'
+                onClick={handleCancelClick(id)}
+                color='inherit'
+              />,
+            ]
+          }
+
+          return [
+            <GridActionsCellItem
+              icon={<EditIcon />}
+              label='Edit'
+              className='textPrimary'
+              onClick={handleEditClick(id)}
+              color='inherit'
+            />,
+            <GridActionsCellItem
+              icon={<DeleteIcon />}
+              label='Delete'
+              onClick={handleDeleteClick(id)}
+              color='inherit'
+            />,
+          ]
+        },
+      }
+    }
+    return column
+  })
+
   return (
     <Dialog
       open={open}
@@ -138,8 +237,11 @@ export default function PurchaseModal({
         }
       }}
       disableEscapeKeyDown
-      fullWidth
-      maxWidth='md'
+      // fullWidth
+      // maxWidth='md'
+      fullScreen
+      TransitionComponent={Transition}
+      keepMounted
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -216,6 +318,19 @@ export default function PurchaseModal({
             </TextField>
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+            <Box display={'flex'} alignItems={'end'}>
+              <Button
+                // onClick={() => setOpenDialog(true)}
+                variant='outlined'
+                sx={theme => ({
+                  color: 'white',
+                  visibility: modalMode === 'view' ? 'hidden' : 'inherit',
+                  // height: '50%',
+                })}
+              >
+                Add Component
+              </Button>
+            </Box>
             <Autocomplete
               // fullWidth
               options={_mockOption}
@@ -224,7 +339,7 @@ export default function PurchaseModal({
             />
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-            <Autocomplete
+            {/* <Autocomplete
               // fullWidth
               options={componentIdList}
               renderOption={(props, option) => {
@@ -266,20 +381,6 @@ export default function PurchaseModal({
                 setInputValue(newInputValue)
                 setFormData(prev => ({ ...prev, ['productId']: newInputValue }))
               }}
-              //comment for check error
-              // onChange={(event, newValue) => {
-              //   if (typeof newValue === 'string') {
-              //     setFormData(prev => ({ ...prev, ['productId']: newValue }))
-              //     console.log('choose from list', newValue)
-              //   } else if (newValue && newValue.componentNumber) {
-              //     // Create a new value from the user input
-              //     setFormData(prev => ({ ...prev, ['productId']: newValue.componentNumber }))
-              //     console.log('new input value', newValue.componentNumber)
-              //   } else {
-              //     // setValue(newValue)
-              //     console.log('other', newValue)
-              //   }
-              // }}
               isOptionEqualToValue={(option, value) =>
                 option.componentNumber === value.componentNumber
               }
@@ -290,11 +391,24 @@ export default function PurchaseModal({
               type='number'
               value={formData.quantity}
               onChange={e => handleChange('quantity', parseFloat(e.target.value))}
-              // fullWidth
               margin='normal'
-              // sx={{ width: '20%' }}
-            />
+            /> */}
           </Box>
+          <DataTable
+            data={newComponentListData}
+            columns={updatedColumns}
+            apiref={addNewComponentDataGridRef}
+            // getRowId={row => row.productNumber}
+            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+            sx={{ height: 475, mt: 2 }}
+            editMode='row'
+            rowModesModel={rowModesModel}
+            onRowModesModelChange={handleRowModesModelChange}
+            onRowEditStop={handleRowEditStop}
+            processRowUpdate={processRowUpdate}
+            disableColumnSelector
+            columnVisibilityModel={columnVisibilityModel}
+          />
         </Box>
       </DialogContent>
       <DialogActions>

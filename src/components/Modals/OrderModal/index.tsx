@@ -24,8 +24,6 @@ import {
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
-import { api } from 'api/index'
-import { ComponentIdData } from 'api/component/getComponentIdList'
 import { OrderData, ProductList } from 'api/order/getOrderList'
 import DataTable from 'components/DataTable'
 import useAddProductOrder from './hooks/useAddProductOrder'
