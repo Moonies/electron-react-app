@@ -1,6 +1,6 @@
 import { default as getComponentList } from './getComponentList'
-import { default as getComponentIdList } from './getComponentIdList'
+import { default as getComponentData } from './getComponentData'
 
 export default function component() {
-  return { getComponentList, getComponentIdList }
+  return { getComponentList, getComponentData }
 }

@@ -234,8 +234,13 @@ export default function OrderPage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <Button variant='contained' endIcon={<SearchIcon />} onClick={handleSearch}>
-                Search
+              <Button
+                variant='contained'
+                endIcon={<SearchIcon />}
+                onClick={handleSearch}
+                size='large'
+              >
+                検索
               </Button>
             </Box>
             <Box

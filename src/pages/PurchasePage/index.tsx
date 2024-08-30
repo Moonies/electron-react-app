@@ -112,6 +112,21 @@ export default function PurchasePage() {
     }
   }, [selectionModel])
 
+  const handleViewDetailClick = useCallback(async () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
+      if (selectedData) {
+        setModalMode('view')
+        setSelectedPurchase(selectedData)
+        setModalOpen(true)
+        console.log(selectedData)
+      }
+    } else {
+      notificationModal.error('Please select a row in the table to view detail.')
+    }
+  }, [selectionModel])
+
   const handleModalConfirm = async (data: PurchaseData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
@@ -170,24 +185,14 @@ export default function PurchasePage() {
                 ))}
               </TextField>
               <TextField
-                // fullWidth
                 name='keyword'
                 label='検索'
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
-                // InputProps={{
-                //   endAdornment: (
-                //     <InputAdornment position='end'>
-                //       <IconButton onClick={handleSearch} edge='end'>
-                //         <SearchIcon />
-                //       </IconButton>
-                //     </InputAdornment>
-                //   ),
-                // }}
               />
               <TextField
                 name='ststus'
-                // value={searchCriteria.status ?? ''}
+                value={searchCriteria.status ?? ''}
                 select
                 label='状態'
                 id='status-order'
@@ -205,8 +210,14 @@ export default function PurchasePage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <Button variant='contained' endIcon={<SearchIcon />} onClick={handleSearch}>
-                Search
+              <Button
+                variant='contained'
+                endIcon={<SearchIcon />}
+                onClick={handleSearch}
+                // sx={{ whiteSpace: 'nowrap' }}
+                size='large'
+              >
+                検索
               </Button>
             </Box>
             <Box
@@ -289,6 +300,7 @@ export default function PurchasePage() {
                 startIcon={<DetailIcon />}
                 size='large'
                 // sx={{ visibility: 'hidden' }}
+                onClick={handleViewDetailClick}
               >
                 詳細
               </StyledButton>

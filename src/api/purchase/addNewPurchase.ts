@@ -4,8 +4,11 @@ import dayjs from 'dayjs'
 
 export type componentList = {
   id: string
-  productNumber: string
+  componentNumber: string
+  componentName: string
   quantity: number
+  unitPrice: number
+  totalPrice: number
 }
 export interface NewPurchase {
   orderId: string

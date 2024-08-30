@@ -1,49 +1,25 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
 import dayjs from 'dayjs'
+import { mockData } from './_mockdata'
 
-export interface ComponentIdData {
+export interface ComponentData {
   id: string
   componentNumber: string
   componentName: string
+  price: number
 }
 
 export default async function getComponentIdList(
   query: string
-): Promise<ApiResponse<ComponentIdData[]>> {
+): Promise<ApiResponse<ComponentData[]>> {
   //for beta:test
   //use props query to filter in component
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
     message: 'Success',
-    data: [
-      {
-        id: '66b4118dcb5d152039f74147',
-        componentNumber: 'HW327351070',
-        componentName: 'Kulas - Will',
-      },
-      {
-        id: '66b4118dcb5d152039f74149',
-        componentNumber: 'HW206241140',
-        componentName: 'Gleason - Schimmel',
-      },
-      {
-        id: '66b4118dcb5d152039f7414b',
-        componentNumber: 'HW206241150',
-        componentName: 'Mayer - Mohr',
-      },
-      {
-        id: '66b4118dcb5d152039f7414d',
-        componentNumber: '66b4118dcb5d152039f7414d',
-        componentName: 'Brekke Group',
-      },
-      {
-        id: '66b4118dcb5d152039f7414f',
-        componentNumber: '66b4118dcb5d152039f7414f',
-        componentName: 'Kessler Group',
-      },
-    ],
+    data: mockData,
   }
   // when use real API
   // try {

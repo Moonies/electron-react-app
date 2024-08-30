@@ -17,6 +17,7 @@ import { OrderData } from 'api/order/getOrderList'
 import { ProductDataDetail } from 'api/product/getProductData'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import { UserData } from 'api/user/getUserList'
+import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
 import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
 import useLoading from 'hooks/useLoading'
 
@@ -32,25 +33,26 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   const [supplierCompanyListData, setSupplierCompanyListData] = useState<CustomerData[]>([])
   const { withLoading, setLoading } = useLoading()
 
-  const handleAddNewProduct = (newProduct: ProductDetail) => {
+  const handleAddNewComponent = (newComponent: NewComponentDetail) => {
     let currentIndex = newComponentListData.length
     let currentComponentData = newComponentListData
+    //should be get componentbyId for check and create new Id
     if (currentComponentData.length > 0) {
       const resultIndex = currentComponentData.findIndex(
-        item => item.productNumber === newProduct.productNumber
+        item => item.componentNumber === newComponent.componentNumber
       )
       if (resultIndex !== -1) {
         let newRow = currentComponentData.map((product, index) =>
           index === resultIndex
-            ? { ...product, quantity: product.quantity + newProduct.quantity }
+            ? { ...product, quantity: product.quantity + newComponent.quantity }
             : product
         )
         setNewComponentListData(newRow)
       } else {
-        setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+        setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
       }
     } else {
-      setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+      setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
     }
   }
 
@@ -196,7 +198,7 @@ export default function useAddComponent(purchaseData: PurchaseData) {
     handleDeleteClick,
     debouncedFetchOptions,
     componentData,
-    handleAddNewProduct,
+    handleAddNewComponent,
     userListData,
     supplierCompanyListData,
     getUserList,

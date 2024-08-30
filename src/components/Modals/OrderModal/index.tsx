@@ -419,6 +419,7 @@ export default function OrderModal({
             processRowUpdate={processRowUpdate}
             disableColumnSelector
             columnVisibilityModel={columnVisibilityModel}
+            isCellEditable={() => modalMode !== 'view'}
           />
           {openDialog && (
             <AddnewProductDialog
@@ -432,27 +433,29 @@ export default function OrderModal({
             />
           )}
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={onClose}
-            variant='contained'
-            // sx={theme => ({
-            //   color: 'white',
-            // })}
-          >
-            キャンセル
-          </Button>
-          <Button
-            type='submit'
-            // onClick={handleSubmit}
-            variant='outlined'
-            sx={theme => ({
-              color: 'white',
-            })}
-          >
-            保存
-          </Button>
-        </DialogActions>
+        {modalMode !== 'view' && (
+          <DialogActions>
+            <Button
+              onClick={onClose}
+              variant='contained'
+              // sx={theme => ({
+              //   color: 'white',
+              // })}
+            >
+              キャンセル
+            </Button>
+            <Button
+              type='submit'
+              // onClick={handleSubmit}
+              variant='outlined'
+              sx={theme => ({
+                color: 'white',
+              })}
+            >
+              保存
+            </Button>
+          </DialogActions>
+        )}
       </form>
     </Dialog>
   )

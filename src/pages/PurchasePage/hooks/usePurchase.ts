@@ -28,6 +28,7 @@ export default function usePurchase() {
     keyword: '',
     startDate: dateThreeMonthsAgo,
     endDate: new Date(),
+    status: null,
   })
 
   const handleChange = (name: string, value: string | Date) => {
@@ -62,7 +63,7 @@ export default function usePurchase() {
     () => [
       {
         field: 'invoiceNumber',
-        headerName: '伝票番号',
+        headerName: '注番',
         headerAlign: 'center',
         // minWidth: 100,
         // flex: 1,

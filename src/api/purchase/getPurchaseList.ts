@@ -10,6 +10,7 @@ export interface SearchCriteria {
   endDate: Date
   page?: number
   pageSize?: number
+  status: `${PurchaseStatus}` | null
 }
 export type ComponentList = {
   id: string
@@ -25,7 +26,9 @@ export interface PurchaseData {
   supplierCompanyId: string
   supplierCompanyName: string
   component: ComponentList[]
+  orderRequestEmployeeId: string
   orderRequestEmployeeName: string
+  orderApprovedEmployeeId: string
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs
   purchaseApprovedDate: string | dayjs.Dayjs

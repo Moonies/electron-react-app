@@ -97,6 +97,13 @@ const themeOptions: ThemeOptions = {
         }),
       },
     },
+    MuiButton: {
+      styleOverrides: {
+        root: props => ({
+          whiteSpace: 'nowrap',
+        }),
+      },
+    },
   },
 }
 const theme = createTheme(themeOptions, jaJP)
