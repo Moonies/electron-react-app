@@ -79,7 +79,7 @@ export default function ProductPage() {
         setModalOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to edit.')
+      notificationModal.error('編集する表の行を選択してください。')
     }
   }, [selectionModel])
 
@@ -90,7 +90,8 @@ export default function ProductPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: 'Are you sure you want to delete this Product Number: ' + selectedData.productId,
+          message: `この選ばれたの商品番号　 ${selectedData.productId}　を削除してもよろしいですか?`,
+          // message: 'Are you sure you want to delete this Product Number: ' + selectedData.productId,
         })
         if (confirmed) {
           // Perform delete operation
@@ -100,7 +101,7 @@ export default function ProductPage() {
         }
       }
     } else {
-      notificationModal.error('Please select a row in the table to delete.')
+      notificationModal.error('削除する行をテーブルから選択してください')
     }
   }, [selectionModel])
 

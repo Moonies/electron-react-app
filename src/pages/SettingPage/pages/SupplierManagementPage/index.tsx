@@ -71,7 +71,7 @@ export default function SupplierManagementPage() {
         setModalOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to edit.')
+      notificationModal.error('編集する表の行を選択してください。')
     }
   }, [selectionModel])
 
@@ -82,7 +82,8 @@ export default function SupplierManagementPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: 'Are you sure you want to delete this Name : ' + selectedData.customerName,
+          message: `この選ばれた　 ${selectedData.customerName}　を削除してもよろしいですか?`,
+          // message: 'Are you sure you want to delete this Name : ' + selectedData.customerName,
         })
         if (confirmed) {
           // Perform delete operation
@@ -92,7 +93,7 @@ export default function SupplierManagementPage() {
         }
       }
     } else {
-      notificationModal.error('Please select a row in the table to delete.')
+      notificationModal.error('削除する行をテーブルから選択してください')
     }
   }, [selectionModel])
 
@@ -133,7 +134,7 @@ export default function SupplierManagementPage() {
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>Supplier Management</Divider>
+          <Divider textAlign='left'>仕入単価管理</Divider>
         </Typography>
       </Box>
       <Box

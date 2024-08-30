@@ -95,7 +95,7 @@ export default function OrderPage() {
         setModalOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to edit.')
+      notificationModal.error('編集する表の行を選択してください。')
     }
   }, [selectionModel])
 
@@ -106,7 +106,8 @@ export default function OrderPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: 'Are you sure you want to delete this order Number: ' + selectedData.id,
+          message: `この選ばれたの受注番号　 ${selectedData.id}　を削除してもよろしいですか?`,
+          // message: 'Are you sure you want to delete this order Number: ' + selectedData.id,
         })
         if (confirmed) {
           // Perform delete operation
@@ -116,7 +117,7 @@ export default function OrderPage() {
         }
       }
     } else {
-      notificationModal.error('Please select a row in the table to delete.')
+      notificationModal.error('削除する行をテーブルから選択してください')
     }
   }, [selectionModel])
 
@@ -133,7 +134,7 @@ export default function OrderPage() {
         setModalOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to view detail.')
+      notificationModal.error('詳細を表示するには、表の行を選択してください。')
     }
   }, [selectionModel])
 

@@ -89,7 +89,7 @@ export default function SalePage() {
         setModalOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to edit.')
+      notificationModal.error('編集する表の行を選択してください。')
     }
   }, [selectionModel])
 
@@ -104,7 +104,7 @@ export default function SalePage() {
         setModalOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to view detail.')
+      notificationModal.error('詳細を表示するには、表の行を選択してください。')
     }
   }, [selectionModel])
 
@@ -126,7 +126,7 @@ export default function SalePage() {
         }
       }
     } else {
-      notificationModal.error('Please select a row in the table to delete.')
+      notificationModal.error('削除する行をテーブルから選択してください')
     }
   }, [selectionModel])
 
@@ -332,7 +332,7 @@ export default function SalePage() {
                 size='large'
                 onClick={handleSearch}
               >
-                search
+                検索
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>

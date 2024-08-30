@@ -71,7 +71,7 @@ export default function ComponentManagementPage() {
         setModalOpen(true)
       }
     } else {
-      notificationModal.error('Please select a row in the table to edit.')
+      notificationModal.error('編集する表の行を選択してください。')
     }
   }, [selectionModel])
 
@@ -82,7 +82,7 @@ export default function ComponentManagementPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: 'Are you sure you want to delete this Name : ' + selectedData.componentName,
+          message: `この選ばれた　 ${selectedData.componentName}　を削除してもよろしいですか?`,
         })
         if (confirmed) {
           // Perform delete operation
@@ -92,7 +92,7 @@ export default function ComponentManagementPage() {
         }
       }
     } else {
-      notificationModal.error('Please select a row in the table to delete.')
+      notificationModal.error('削除する行をテーブルから選択してください')
     }
   }, [selectionModel])
 

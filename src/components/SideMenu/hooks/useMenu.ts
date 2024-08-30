@@ -76,7 +76,7 @@ export default function useMenu() {
           path: '/settings/mycompany',
         },
         {
-          text: '客管理',
+          text: '顧客管理',
           icon: Storefront,
           path: '/settings/customer',
         },
