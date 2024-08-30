@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { SalesData, SalesSummary, SearchCriteria } from 'api/sale/getSaleList'
+import { SalesSummary, SearchCriteria } from 'api/sale/getSaleList'
 
 export default function useExportSale() {
   const printColumnList: GridColDef[] = useMemo(

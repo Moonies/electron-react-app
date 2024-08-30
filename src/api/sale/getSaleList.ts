@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
-import { mockdata } from './_mockdata'
+import { mockData } from './_mockdata'
 import dayjs from 'dayjs'
 
 export interface SearchCriteria {
@@ -16,25 +16,32 @@ export interface SalesSummary {
   averageOrderValue: number
   topSellingProduct: string
 }
-
-export interface SalesData {
-  saleId: number
-  invoiceNumber: number
-  customerName: string
-  deliveryDate: string | dayjs.Dayjs
-  productId: string
+export type ProductList = {
+  id: string
+  productNumber: string
   productName: string
-  // 注番: string
   quantity: number
-  unitPrice: number
+  productPrice: number
   totalPrice: number
-  // ｵｰﾀﾞｰ: string
-  employeeName: string
-  orderApprovedEmployee: string
-  orderId: number
+}
+export interface SaleData {
+  id: string
+  orderId: string
+  customerCompanyId: string
+  customerCompanyName: string
+  product: ProductList[]
+  orderRequestEmployeeId: string
+  orderRequestEmployeeName: string
+  orderApprovedEmployeeId: string
+  orderApprovedEmployeeName: string
+  quotationRequestDate: string | dayjs.Dayjs
+  registDate: string | dayjs.Dayjs
+  shippingmentDate: string | dayjs.Dayjs
+  paymentDueDate: string | dayjs.Dayjs
+  status: string | null
 }
 //for implement case only when apprved should be remove it
-function chunkArray(mockdata: SalesData[], pageSize: number, page: number) {
+function chunkArray(mockdata: SaleData[], pageSize: number, page: number) {
   const result = []
   for (let i = 0; i < mockdata.length; i += pageSize) {
     result.push(mockdata.slice(i, i + pageSize))
@@ -50,10 +57,10 @@ export default async function getSaleList({
   page = 0,
   pageSize = 10,
 }: SearchCriteria): Promise<
-  ApiResponse<{ summary: SalesSummary; data: SalesData[]; totalRow: number }>
+  ApiResponse<{ summary: SalesSummary; data: SaleData[]; totalRow: number }>
 > {
   //for beta:test
-  let newMock = chunkArray(mockdata, pageSize, page)
+  let newMock = chunkArray(mockData, pageSize, page)
 
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
@@ -66,7 +73,7 @@ export default async function getSaleList({
         topSellingProduct: 'Product A',
       },
       data: newMock,
-      totalRow: mockdata.length,
+      totalRow: mockData.length,
     },
   }
   // when use real API

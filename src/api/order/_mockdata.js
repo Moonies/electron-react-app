@@ -249,29 +249,4 @@ export const mockData = [
     status: 'delivered',
     registDate: '',
   },
-  // {
-  //   id: '102588',
-  //   customerCompanyId: '',
-  //   customerCompanyName: '㈲エスユー',
-  //   quotationRequestDate: '2024/07/01',
-  //   paymentDueDate: '2024/01/30',
-  //   shippingmentDate: '2024/07/01',
-  //   product: [
-  //     {
-  //       productNumber: 'HW206241030',
-  //       productName: 'SPRING SHAFT',
-  //       // notes: '★/材料支給',
-  //       quantity: 8,
-  //       productPrice: 2500,
-  //       totalPrice: 20000,
-  //     },
-  //   ],
-  //   orderId: '861972',
-  // orderApprovedEmployeeId:'AB1100',
-  //   orderApprovedEmployeeName: '平井昌司',
-  // orderRequestEmployeeId:'',//
-  // orderRequestEmployeeName: '',
-  //   status: 'delivered',
-  //   registDate: '',
-  // },
 ]

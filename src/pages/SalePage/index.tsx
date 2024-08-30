@@ -19,6 +19,7 @@ import {
   Edit as EditIcon,
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
+  ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import useSales from './hooks/useSale'
@@ -26,7 +27,7 @@ import { StyledButton } from 'styles/styles'
 import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
 import SalesModal from 'components/Modals/SaleModal'
-import { SalesData } from 'api/sale/getSaleList'
+import { SaleData } from 'api/sale/getSaleList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useExportSale from './hooks/useExportSale'
@@ -38,7 +39,7 @@ export default function SalePage() {
     handleChange,
     handleSearch,
     salesSummary,
-    salesData,
+    saleData,
     columns,
     handlePaginationModelChange,
     paginationModel,
@@ -48,25 +49,25 @@ export default function SalePage() {
     categorySearch,
     totalRows,
   } = useSales()
-  const salesDataGridRef = useGridApiRef()
+  const saleDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedSale, setSelectedSale] = useState<SalesData | undefined>(undefined)
+  const [selectedSale, setSelectedSale] = useState<SaleData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
   const { printColumnList } = useExportSale()
   const { notificationModal } = useNotification()
 
   useEffect(() => {
-    if (salesDataGridRef.current) {
-      salesDataGridRef.current.autosizeColumns({
+    if (saleDataGridRef.current) {
+      saleDataGridRef.current.autosizeColumns({
         // columns: ['customerName', 'productName'],
         includeHeaders: true,
         includeOutliers: true,
         expand: true,
       })
     }
-  }, [salesData])
+  }, [saleData])
 
   useEffect(() => {
     prepareCategorySearch
@@ -81,7 +82,7 @@ export default function SalePage() {
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = salesData.find(sale => sale.saleId === selectedId)
+      const selectedData = saleData.find(item => item.orderId === selectedId)
       if (selectedData) {
         setModalMode('edit')
         setSelectedSale(selectedData)
@@ -92,15 +93,29 @@ export default function SalePage() {
     }
   }, [selectionModel])
 
+  const handleViewDetailClick = useCallback(async () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+
+      const selectedData = saleData.find(item => item.id === selectedId)
+      if (selectedData) {
+        setModalMode('view')
+        setSelectedSale(selectedData)
+        setModalOpen(true)
+      }
+    } else {
+      notificationModal.error('Please select a row in the table to view detail.')
+    }
+  }, [selectionModel])
+
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = salesData.find(sale => sale.saleId === selectedId)
+      const selectedData = saleData.find(item => item.orderId === selectedId)
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message:
-            'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
+          message: 'Are you sure you want to delete this Invoice Number: ' + selectedData.orderId,
         })
 
         if (confirmed) {
@@ -115,7 +130,7 @@ export default function SalePage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: SalesData) => {
+  const handleModalConfirm = async (data: SaleData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -123,65 +138,63 @@ export default function SalePage() {
     } else {
     }
     // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
+    // await fetchSaleData(paginationModel);
   }
 
   const handleExportPdf = () => {
-    // exportToXlsx(columns, salesData)
-    // printData(columns, salesData, 'Sales Quotation')
-    let xx = groupBy(salesData, 'invoiceNumber', [
-      'customerName',
-      'invoiceNumber',
-      'productId',
-      'productName',
-      'quantity',
-      'totalPrice',
-      'unitPrice',
-    ])
-    exportToPdf(printColumnList, xx[4], '見積書')
-
+    // exportToXlsx(columns, saleData)
+    // printData(columns, saleData, 'Sales Quotation')
+    // let xx = groupBy(saleData, 'invoiceNumber', [
+    //   'customerName',
+    //   'invoiceNumber',
+    //   'productId',
+    //   'productName',
+    //   'quantity',
+    //   'totalPrice',
+    //   'unitPrice',
+    // ])
+    // exportToPdf(printColumnList, xx[4], '見積書')
     // printData(printColumnList, xx[4], 'Sales Quotation')
-
-    // console.log(salesData)
-    console.log(xx)
+    // console.log(saleData)
+    // console.log(xx)
   }
+  //maybe not use groupby
+  // const groupBy = (
+  //   array: SaleData[],
+  //   key: keyof SaleData,
+  //   selectColumns?: (keyof SaleData)[]
+  // ) => {
+  //   const groupIndexes: { [key: string]: number } = {}
+  //   let index = 0
+  //   return array.reduce(
+  //     (result, currentValue) => {
+  //       const groupKey = currentValue[key] ?? 'Unknown'
+  //       const stringKey = dayjs.isDayjs(groupKey) ? groupKey.format('YYYY-MM-DD') : groupKey
 
-  const groupBy = (
-    array: SalesData[],
-    key: keyof SalesData,
-    selectColumns?: (keyof SalesData)[]
-  ) => {
-    const groupIndexes: { [key: string]: number } = {}
-    let index = 0
-    return array.reduce(
-      (result, currentValue) => {
-        const groupKey = currentValue[key] ?? 'Unknown'
-        const stringKey = dayjs.isDayjs(groupKey) ? groupKey.format('YYYY-MM-DD') : groupKey
+  //       if (!(stringKey in groupIndexes)) {
+  //         groupIndexes[stringKey] = index++
+  //       }
 
-        if (!(stringKey in groupIndexes)) {
-          groupIndexes[stringKey] = index++
-        }
+  //       const groupIndex = groupIndexes[stringKey]
 
-        const groupIndex = groupIndexes[stringKey]
+  //       if (!result[groupIndex]) {
+  //         result[groupIndex] = []
+  //       }
 
-        if (!result[groupIndex]) {
-          result[groupIndex] = []
-        }
-
-        const newItem: Partial<SalesData> = {}
-        if (selectColumns) {
-          selectColumns.forEach(column => {
-            if (currentValue[column] !== undefined) {
-              newItem[column] = currentValue[column] as any
-            }
-          })
-        }
-        result[groupIndex].push(newItem)
-        return result
-      },
-      {} as { [index: number]: Partial<SalesData>[] }
-    )
-  }
+  //       const newItem: Partial<SaleData> = {}
+  //       if (selectColumns) {
+  //         selectColumns.forEach(column => {
+  //           if (currentValue[column] !== undefined) {
+  //             newItem[column] = currentValue[column] as any
+  //           }
+  //         })
+  //       }
+  //       result[groupIndex].push(newItem)
+  //       return result
+  //     },
+  //     {} as { [index: number]: Partial<SaleData>[] }
+  //   )
+  // }
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
@@ -234,15 +247,15 @@ export default function SalePage() {
                 label='検索'
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position='end'>
-                      <IconButton onClick={handleSearch} edge='end'>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
+                // InputProps={{
+                //   endAdornment: (
+                //     <InputAdornment position='end'>
+                //       <IconButton onClick={handleSearch} edge='end'>
+                //         <SearchIcon />
+                //       </IconButton>
+                //     </InputAdornment>
+                //   ),
+                // }}
               />
             </Box>
             <Box
@@ -296,16 +309,15 @@ export default function SalePage() {
           <Divider orientation='vertical' flexItem></Divider>
           <Box
             sx={{
-              width: '30%',
+              // width: '30%',
               display: 'flex',
-              // justifyContent: 'flex-end',
-              // alignItems: 'flex-start',
               flexDirection: 'column',
+              marginRight: 4,
             }}
             gap={1}
           >
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<AddIcon />}
                 size='large'
@@ -313,19 +325,18 @@ export default function SalePage() {
                 sx={{ visibility: 'hidden' }}
               >
                 追加
-              </StyledButton>
+              </StyledButton> */}
               <StyledButton
                 variant='outlined'
-                startIcon={<DeleteIcon />}
+                startIcon={<SearchIcon />}
                 size='large'
-                onClick={handleDeleteClick}
-                sx={{ visibility: 'hidden' }}
+                onClick={handleSearch}
               >
-                削除
+                search
               </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<EditIcon />}
                 size='large'
@@ -333,26 +344,27 @@ export default function SalePage() {
                 sx={{ visibility: 'hidden' }}
               >
                 編集
-              </StyledButton>
+              </StyledButton> */}
               <StyledButton
                 variant='outlined'
-                startIcon={<EditIcon />}
+                startIcon={<DetailIcon />}
                 size='large'
-                sx={{ visibility: 'hidden' }}
+                onClick={handleViewDetailClick}
+                // sx={{ visibility: 'hidden' }}
               >
-                visible
+                詳細
               </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
-                {/* not support in alpha test */}
+                not support in alpha test 
                 自動アプロード
-              </StyledButton>
+              </StyledButton> */}
               <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}
@@ -365,13 +377,13 @@ export default function SalePage() {
           </Box>
         </Box>
         <DataTable
-          data={salesData}
+          data={saleData}
           columns={columns}
           totalRows={totalRows}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
-          apiref={salesDataGridRef}
-          getRowId={row => row.saleId}
+          apiref={saleDataGridRef}
+          // getRowId={row => row.saleId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>

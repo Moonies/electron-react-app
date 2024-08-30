@@ -19,13 +19,13 @@ export default function DashboardPage() {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant='h4'>Dashboard</Typography>
+            <Typography variant='h4'>Welcome to Hayaraku</Typography>
           </Paper>
         </Grid>
 
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant='h6'>Recent Activity</Typography>
+            <Typography variant='h6'>建築構造中</Typography>
             {/* Add a list of recent activities here */}
           </Paper>
         </Grid>
