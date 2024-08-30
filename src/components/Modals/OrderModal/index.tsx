@@ -24,8 +24,6 @@ import {
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
-import { api } from 'api/index'
-import { ComponentIdData } from 'api/component/getComponentIdList'
 import { OrderData, ProductList } from 'api/order/getOrderList'
 import DataTable from 'components/DataTable'
 import useAddProductOrder from './hooks/useAddProductOrder'
@@ -421,6 +419,7 @@ export default function OrderModal({
             processRowUpdate={processRowUpdate}
             disableColumnSelector
             columnVisibilityModel={columnVisibilityModel}
+            isCellEditable={() => modalMode !== 'view'}
           />
           {openDialog && (
             <AddnewProductDialog
@@ -434,27 +433,29 @@ export default function OrderModal({
             />
           )}
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={onClose}
-            variant='contained'
-            // sx={theme => ({
-            //   color: 'white',
-            // })}
-          >
-            キャンセル
-          </Button>
-          <Button
-            type='submit'
-            // onClick={handleSubmit}
-            variant='outlined'
-            sx={theme => ({
-              color: 'white',
-            })}
-          >
-            保存
-          </Button>
-        </DialogActions>
+        {modalMode !== 'view' && (
+          <DialogActions>
+            <Button
+              onClick={onClose}
+              variant='contained'
+              // sx={theme => ({
+              //   color: 'white',
+              // })}
+            >
+              キャンセル
+            </Button>
+            <Button
+              type='submit'
+              // onClick={handleSubmit}
+              variant='outlined'
+              sx={theme => ({
+                color: 'white',
+              })}
+            >
+              保存
+            </Button>
+          </DialogActions>
+        )}
       </form>
     </Dialog>
   )

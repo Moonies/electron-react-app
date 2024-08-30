@@ -57,6 +57,7 @@ const Notification: React.FC = () => {
         }}
         maxWidth='sm'
         fullWidth={true}
+        keepMounted
         TransitionComponent={Transition}
       >
         <DialogTitle

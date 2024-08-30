@@ -17,6 +17,7 @@ export default function usePurchase() {
   const [purchaseData, setPurchaseData] = useState<PurchaseData[]>([])
   // const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
+  const statusPurchase = Object.values(PurchaseStatus)
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
@@ -27,6 +28,7 @@ export default function usePurchase() {
     keyword: '',
     startDate: dateThreeMonthsAgo,
     endDate: new Date(),
+    status: null,
   })
 
   const handleChange = (name: string, value: string | Date) => {
@@ -39,11 +41,6 @@ export default function usePurchase() {
     //if condition when search put in here
     getPurchaseListData(paginationModel)
   }, [searchCriteria, withLoading])
-
-  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-  })
 
   const convertStatus = (status: string) => {
     switch (status) {
@@ -66,7 +63,7 @@ export default function usePurchase() {
     () => [
       {
         field: 'invoiceNumber',
-        headerName: '伝票番号',
+        headerName: '注番',
         headerAlign: 'center',
         // minWidth: 100,
         // flex: 1,
@@ -80,24 +77,6 @@ export default function usePurchase() {
       },
       { field: 'supplierCompanyName', headerName: '仕入先', headerAlign: 'center', flex: 1 },
       { field: 'quotationRequestDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'componentNumber', headerName: '商品番号', minWidth: 100, headerAlign: 'center' },
-
-      { field: 'componentName', headerName: '品名', minWidth: 100, headerAlign: 'center', flex: 1 },
-      { field: 'quantity', headerName: '数量', type: 'number', headerAlign: 'center' },
-      {
-        field: 'unitPrice',
-        headerName: '単価',
-        type: 'number',
-        headerAlign: 'center',
-        valueFormatter: value => currencyFormatter.format(Number(value)),
-      },
-      {
-        field: 'totalPrice',
-        headerName: '金額',
-        type: 'number',
-        headerAlign: 'center',
-        valueFormatter: value => currencyFormatter.format(Number(value)),
-      },
       { field: 'orderRequestEmployeeName', headerName: '担当者名', headerAlign: 'center' },
       { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       { field: 'purchaseApprovedDate', headerName: '見積書依頼', headerAlign: 'center' },
@@ -109,6 +88,7 @@ export default function usePurchase() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
+      if (item.field === 'status') return
       result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
     })
     setCategorySearch(result)
@@ -150,5 +130,7 @@ export default function usePurchase() {
     handlePaginationModelChange,
     prepareCategorySearch,
     categorySearch,
+    statusPurchase,
+    convertStatus,
   }
 }

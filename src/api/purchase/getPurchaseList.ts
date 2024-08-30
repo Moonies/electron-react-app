@@ -10,19 +10,25 @@ export interface SearchCriteria {
   endDate: Date
   page?: number
   pageSize?: number
+  status: `${PurchaseStatus}` | null
 }
-
-export interface PurchaseData {
-  purchaseId: string
-  invoiceNumber: string
-  supplierCompanyId: string
-  supplierCompanyName: string
+export type ComponentList = {
+  id: string
   componentNumber: string
   componentName: string
   quantity: number
   unitPrice: number
   totalPrice: number
+}
+export interface PurchaseData {
+  purchaseId: string
+  invoiceNumber: string
+  supplierCompanyId: string
+  supplierCompanyName: string
+  component: ComponentList[]
+  orderRequestEmployeeId: string
   orderRequestEmployeeName: string
+  orderApprovedEmployeeId: string
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs
   purchaseApprovedDate: string | dayjs.Dayjs

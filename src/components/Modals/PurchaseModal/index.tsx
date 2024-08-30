@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, forwardRef, useMemo } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -18,15 +18,32 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Slide,
 } from '@mui/material'
-import { Close as CloseIcon } from '@mui/icons-material'
+import {
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Close as CancelIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material'
 import { debounce } from '@mui/material/utils'
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import { api } from 'api/index'
-import { ComponentIdData } from 'api/component/getComponentIdList'
+import { TransitionProps } from '@mui/material/transitions'
+import useAddComponent from './hooks/useAddComponent'
+import DataTable from 'components/DataTable'
+import {
+  GridActionsCellItem,
+  GridRowModes,
+  GridRowSelectionModel,
+  useGridApiRef,
+} from '@mui/x-data-grid'
+import AddnewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
+import useLoading from 'hooks/useLoading'
 interface Option {
   label: string
   id: number
@@ -36,19 +53,17 @@ interface PurchaseModalProps {
   onClose: () => void
   onConfirm: (data: PurchaseData) => Promise<void>
   initialData?: PurchaseData
-  mode: 'add' | 'edit'
+  mode: 'add' | 'edit' | 'view'
 }
 const defaultFormData: PurchaseData = {
   purchaseId: '',
   invoiceNumber: '',
   supplierCompanyId: '',
   supplierCompanyName: '',
-  componentNumber: '',
-  componentName: '',
-  quantity: 0,
-  unitPrice: 0,
-  totalPrice: 0,
+  component: [],
+  orderRequestEmployeeId: '',
   orderRequestEmployeeName: '',
+  orderApprovedEmployeeId: '',
   orderApprovedEmployeeName: '',
   quotationRequestDate: dayjs(),
   purchaseApprovedDate: dayjs(),
@@ -62,18 +77,33 @@ export default function PurchaseModal({
   initialData,
   mode,
 }: PurchaseModalProps) {
-  const [formData, setFormData] = useState<PurchaseData>(defaultFormData)
-  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState<PurchaseData>(initialData ?? defaultFormData)
   const [inputValue, setInputValue] = useState('')
-  const [componentIdList, setComponentIdList] = useState<ComponentIdData[]>([])
+  // const [componentIdList, setComponentIdList] = useState<ComponentIdData[]>([])
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
+  const addNewComponentDataGridRef = useGridApiRef()
+  const [openDialog, setOpenDialog] = useState(false)
+  const { setLoading } = useLoading()
 
-  useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      setFormData(initialData)
-    } else {
-      setFormData(defaultFormData)
-    }
-  }, [initialData])
+  const {
+    columns,
+    componentData,
+    getCustomerList,
+    getUserList,
+    userListData,
+    supplierCompanyListData,
+    rowModesModel,
+    processRowUpdate,
+    handleRowModesModelChange,
+    handleRowEditStop,
+    handleSaveClick,
+    handleCancelClick,
+    handleEditClick,
+    handleDeleteClick,
+    newComponentListData,
+    handleAddNewComponent,
+  } = useAddComponent(formData)
 
   const handleChange = (field: keyof PurchaseData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -92,36 +122,6 @@ export default function PurchaseModal({
     }
   }
 
-  const debouncedFetchOptions = useCallback(
-    debounce(async (query: string) => {
-      if (query.length >= 2) {
-        setLoading(true)
-        try {
-          const fetchedOptions = await api.component().getComponentIdList(query)
-          setComponentIdList(fetchedOptions.data ?? [])
-        } catch (error) {
-          console.error('Error fetching options:', error)
-        } finally {
-          setLoading(false)
-        }
-      }
-    }, 300),
-    []
-  )
-
-  useEffect(() => {
-    debouncedFetchOptions(inputValue)
-  }, [inputValue, debouncedFetchOptions])
-
-  const _mockOption: Option[] = [
-    { label: 'aaaaa', id: 1 },
-    { label: 'bbdbd', id: 2 },
-    { label: 'cdfasd', id: 3 },
-    { label: 'qwerty', id: 4 },
-    { label: 'asddffg', id: 5 },
-    { label: 'minoiui', id: 6 },
-  ]
-
   const statusList = [
     { label: '見積書依頼', value: 'invoice_pending' },
     { label: '配達中', value: 'on_delivery' },
@@ -129,6 +129,88 @@ export default function PurchaseModal({
     { label: '返品中', value: 'rejected' },
     { label: 'キャンセル', value: 'cancelled' },
   ]
+
+  const columnVisibilityModel = useMemo(() => {
+    return {
+      actions: modalMode !== 'view',
+    }
+  }, [modalMode])
+
+  const Transition = useCallback(
+    forwardRef(function Transition(
+      props: TransitionProps & {
+        children: React.ReactElement<any, any>
+      },
+      ref: React.Ref<unknown>
+    ) {
+      return <Slide direction='up' ref={ref} {...props} />
+    }),
+    []
+  )
+
+  const updatedColumns = columns.map(column => {
+    if (column.field === 'actions') {
+      return {
+        ...column,
+        getActions: ({ id }: any) => {
+          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
+
+          if (isInEditMode) {
+            return [
+              <GridActionsCellItem
+                icon={<SaveIcon />}
+                label='Save'
+                sx={{
+                  color: 'primary.main',
+                }}
+                onClick={handleSaveClick(id)}
+              />,
+              <GridActionsCellItem
+                icon={<CancelIcon />}
+                label='Cancel'
+                className='textPrimary'
+                onClick={handleCancelClick(id)}
+                color='inherit'
+              />,
+            ]
+          }
+
+          return [
+            <GridActionsCellItem
+              icon={<EditIcon />}
+              label='Edit'
+              className='textPrimary'
+              onClick={handleEditClick(id)}
+              color='inherit'
+            />,
+            <GridActionsCellItem
+              icon={<DeleteIcon />}
+              label='Delete'
+              onClick={handleDeleteClick(id)}
+              color='inherit'
+            />,
+          ]
+        },
+      }
+    }
+    return column
+  })
+
+  useEffect(() => {
+    //when have new function or condition should to move loading
+    setLoading(true)
+    getUserList()
+    getCustomerList().finally(() => setLoading(false))
+  }, [])
+
+  const findUserById = (userId: string | null) => {
+    return userListData?.find(user => user.userId === userId) || null
+  }
+
+  const findCustomerById = (customerId: string | null) => {
+    return supplierCompanyListData?.find(customer => customer.id === customerId) || null
+  }
+
   return (
     <Dialog
       open={open}
@@ -138,17 +220,37 @@ export default function PurchaseModal({
         }
       }}
       disableEscapeKeyDown
-      fullWidth
-      maxWidth='md'
+      // fullWidth
+      // maxWidth='md'
+      fullScreen
+      TransitionComponent={Transition}
+      keepMounted
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6'>
-            {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
+            {/* {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'} */}
+            {modalMode === 'view'
+              ? '仕入データモーダルウィンドウ'
+              : modalMode === 'edit'
+                ? '編集モーダルウィンドウ'
+                : '追加モーダルウィンドウ'}
           </Typography>
-          <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
-            <CloseIcon />
-          </IconButton>
+          <Box display={'flex'} gap={4}>
+            {modalMode === 'view' && (
+              <IconButton
+                edge='end'
+                color='inherit'
+                onClick={() => setModalMode('edit')}
+                aria-label='edit'
+              >
+                <EditIcon />
+              </IconButton>
+            )}
+            <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </Box>
       </DialogTitle>
       <DialogContent>
@@ -162,20 +264,50 @@ export default function PurchaseModal({
                 handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
               }
               sx={{ marginTop: 2, width: '25%' }}
+              readOnly={modalMode === 'view'}
             />
             <TextField
-              label='伝票番号'
+              label='注番'
               value={formData.invoiceNumber}
               onChange={e => handleChange('invoiceNumber', e.target.value)}
-              // fullWidth
+              fullWidth
               margin='normal'
+              required
+              inputProps={{
+                readOnly: modalMode === 'view',
+              }}
             />
-            <TextField
+            {/* <TextField
               label='顧客名称'
               value={formData.supplierCompanyName}
               onChange={e => handleChange('supplierCompanyName', e.target.value)}
               margin='normal'
-              // sx={{ flex: 1 }}
+              fullWidth
+            /> */}
+            <Autocomplete
+              options={supplierCompanyListData}
+              renderOption={(props, option) => {
+                const { key, ...optionProps } = props
+                return (
+                  <Box key={key} component='li' {...optionProps}>
+                    {option.customerName}
+                  </Box>
+                )
+              }}
+              getOptionLabel={option => option.customerName}
+              sx={{ width: '35%', marginTop: 2 }}
+              renderInput={params => <TextField {...params} label='顧客名称' />}
+              readOnly={modalMode === 'view'}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              onChange={(event, newValue) => {
+                if (typeof newValue === 'object' && newValue !== null) {
+                  setFormData(prev => ({
+                    ...prev,
+                    customerCompanyId: newValue.id,
+                  }))
+                }
+              }}
+              value={findCustomerById(formData.supplierCompanyId)}
             />
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
@@ -187,6 +319,7 @@ export default function PurchaseModal({
                 handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
               }
               sx={{ marginTop: 2, width: '25%' }}
+              readOnly={modalMode === 'view'}
             />
             <DatePicker
               label='入庫承認済'
@@ -196,6 +329,7 @@ export default function PurchaseModal({
                 handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
               }
               sx={{ marginTop: 2, width: '25%' }}
+              readOnly={modalMode === 'view'}
             />
             <TextField
               label='状態'
@@ -207,6 +341,9 @@ export default function PurchaseModal({
               InputLabelProps={{
                 component: 'span',
               }}
+              inputProps={{
+                readOnly: modalMode === 'view',
+              }}
             >
               {statusList.map(item => (
                 <MenuItem key={item.value} value={item.value}>
@@ -216,107 +353,102 @@ export default function PurchaseModal({
             </TextField>
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-            <Autocomplete
-              // fullWidth
+            <Box display={'flex'} alignItems={'end'}>
+              <Button
+                onClick={() => setOpenDialog(true)}
+                variant='outlined'
+                sx={theme => ({
+                  color: 'white',
+                  visibility: modalMode === 'view' ? 'hidden' : 'inherit',
+                  // height: '50%',
+                })}
+              >
+                Add Component
+              </Button>
+            </Box>
+            {/* <Autocomplete
               options={_mockOption}
               sx={{ marginTop: 2, width: '35%' }}
               renderInput={params => <TextField {...params} label='担当者' />}
-            />
-          </Box>
-          <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+              value={formData.orderApprovedEmployeeName}
+            /> */}
             <Autocomplete
-              // fullWidth
-              options={componentIdList}
+              options={userListData}
               renderOption={(props, option) => {
                 const { key, ...optionProps } = props
                 return (
                   <Box key={key} component='li' {...optionProps}>
-                    {option.componentNumber + '  :  ' + option.componentName}
+                    {option.fullName}
                   </Box>
                 )
               }}
-              getOptionLabel={option => {
-                if (typeof option === 'string') {
-                  return option
+              getOptionLabel={option => option.fullName}
+              sx={{ width: '35%' }}
+              renderInput={params => <TextField {...params} label='担当者' />}
+              readOnly={modalMode === 'view'}
+              isOptionEqualToValue={(option, value) => option.userId === value.userId}
+              onChange={(event, newValue) => {
+                if (typeof newValue === 'object' && newValue !== null) {
+                  setFormData(prev => ({
+                    ...prev,
+                    orderApprovedEmployeeId: newValue.userId,
+                  }))
                 }
-                if (option && option.componentNumber) {
-                  return option.componentNumber
-                }
-                return ''
               }}
-              freeSolo
-              // disableClearable
-              sx={{ marginTop: 2, flex: 1 }}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label='商品番号'
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loading ? <CircularProgress color='inherit' size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-              onInputChange={(event, newInputValue) => {
-                setInputValue(newInputValue)
-                setFormData(prev => ({ ...prev, ['productId']: newInputValue }))
-              }}
-              //comment for check error
-              // onChange={(event, newValue) => {
-              //   if (typeof newValue === 'string') {
-              //     setFormData(prev => ({ ...prev, ['productId']: newValue }))
-              //     console.log('choose from list', newValue)
-              //   } else if (newValue && newValue.componentNumber) {
-              //     // Create a new value from the user input
-              //     setFormData(prev => ({ ...prev, ['productId']: newValue.componentNumber }))
-              //     console.log('new input value', newValue.componentNumber)
-              //   } else {
-              //     // setValue(newValue)
-              //     console.log('other', newValue)
-              //   }
-              // }}
-              isOptionEqualToValue={(option, value) =>
-                option.componentNumber === value.componentNumber
-              }
-              value={formData.componentNumber}
-            />
-            <TextField
-              label='数量'
-              type='number'
-              value={formData.quantity}
-              onChange={e => handleChange('quantity', parseFloat(e.target.value))}
-              // fullWidth
-              margin='normal'
-              // sx={{ width: '20%' }}
+              value={findUserById(formData.orderApprovedEmployeeId)}
             />
           </Box>
+          <DataTable
+            data={newComponentListData}
+            columns={updatedColumns}
+            apiref={addNewComponentDataGridRef}
+            // getRowId={row => row.productNumber}
+            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+            sx={{ height: 475, mt: 2 }}
+            editMode='row'
+            rowModesModel={rowModesModel}
+            onRowModesModelChange={handleRowModesModelChange}
+            onRowEditStop={handleRowEditStop}
+            processRowUpdate={processRowUpdate}
+            disableColumnSelector
+            columnVisibilityModel={columnVisibilityModel}
+            isCellEditable={() => modalMode !== 'view'}
+          />
+          {openDialog && (
+            <AddnewComponentListDialog
+              open={openDialog}
+              onClose={() => setOpenDialog(false)}
+              onSubmit={newProduct => {
+                setOpenDialog(false)
+                handleAddNewComponent(newProduct)
+              }}
+              // initialData={selectedOrder}
+            />
+          )}
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={onClose}
-          variant='contained'
-          // sx={theme => ({
-          //   color: 'white',
-          // })}
-        >
-          キャンセル
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant='outlined'
-          sx={theme => ({
-            color: 'white',
-          })}
-        >
-          保存
-        </Button>
-      </DialogActions>
+      {modalMode !== 'view' && (
+        <DialogActions>
+          <Button
+            onClick={onClose}
+            variant='contained'
+            // sx={theme => ({
+            //   color: 'white',
+            // })}
+          >
+            キャンセル
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant='outlined'
+            sx={theme => ({
+              color: 'white',
+            })}
+          >
+            保存
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   )
 }

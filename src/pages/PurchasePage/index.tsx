@@ -10,6 +10,7 @@ import {
   InputAdornment,
   IconButton,
   Divider,
+  Button,
 } from '@mui/material'
 import { useGridApiRef, GridRowProps, GridRowSelectionModel } from '@mui/x-data-grid'
 import {
@@ -19,6 +20,7 @@ import {
   Edit as EditIcon,
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
+  ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { StyledButton } from 'styles/styles'
@@ -42,12 +44,14 @@ export default function PurchasePage() {
     handlePaginationModelChange,
     prepareCategorySearch,
     categorySearch,
+    statusPurchase,
+    convertStatus,
   } = usePurchase()
   const purchaseDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedPurchase, setSelectedPurchase] = useState<PurchaseData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
@@ -108,6 +112,21 @@ export default function PurchasePage() {
     }
   }, [selectionModel])
 
+  const handleViewDetailClick = useCallback(async () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
+      if (selectedData) {
+        setModalMode('view')
+        setSelectedPurchase(selectedData)
+        setModalOpen(true)
+        console.log(selectedData)
+      }
+    } else {
+      notificationModal.error('Please select a row in the table to view detail.')
+    }
+  }, [selectionModel])
+
   const handleModalConfirm = async (data: PurchaseData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
@@ -141,7 +160,7 @@ export default function PurchasePage() {
               display: 'flex',
               flexDirection: 'column',
               gap: 2,
-              width: '40%',
+              width: '60%',
             }}
           >
             <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
@@ -165,30 +184,47 @@ export default function PurchasePage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <Box display={'flex'} flex={1}>
-                <TextField
-                  fullWidth
-                  name='keyword'
-                  label='検索'
-                  value={searchCriteria.keyword}
-                  onChange={e => handleChange('keyword', e.target.value)}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton onClick={handleSearch} edge='end'>
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
+              <TextField
+                name='keyword'
+                label='検索'
+                value={searchCriteria.keyword}
+                onChange={e => handleChange('keyword', e.target.value)}
+              />
+              <TextField
+                name='ststus'
+                value={searchCriteria.status ?? ''}
+                select
+                label='状態'
+                id='status-order'
+                onChange={e => handleChange('status', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'status-order-label',
+                  htmlFor: 'status',
+                  component: 'span',
+                }}
+              >
+                {statusPurchase?.map(item => (
+                  <MenuItem key={item} value={item}>
+                    {convertStatus(item)}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <Button
+                variant='contained'
+                endIcon={<SearchIcon />}
+                onClick={handleSearch}
+                // sx={{ whiteSpace: 'nowrap' }}
+                size='large'
+              >
+                検索
+              </Button>
             </Box>
             <Box
               display={'flex'}
               flexDirection={'row'}
               gap={2}
-              justifyContent={'space-between'}
+              // justifyContent={'space-between'}
               flex={1}
             >
               <DatePicker
@@ -209,7 +245,7 @@ export default function PurchasePage() {
               />
             </Box>
           </Box>
-
+          {/* 
           <Box
             sx={{
               flex: 1,
@@ -220,8 +256,8 @@ export default function PurchasePage() {
               height: '100%',
             }}
             gap={3}
-          ></Box>
-          <Divider orientation='vertical' flexItem></Divider>
+          ></Box> */}
+          <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
             sx={{
               width: '30%',
@@ -261,15 +297,21 @@ export default function PurchasePage() {
               </StyledButton>
               <StyledButton
                 variant='outlined'
-                startIcon={<EditIcon />}
+                startIcon={<DetailIcon />}
                 size='large'
-                sx={{ visibility: 'hidden' }}
+                // sx={{ visibility: 'hidden' }}
+                onClick={handleViewDetailClick}
               >
-                visible
+                詳細
               </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton variant='outlined' startIcon={<UploadFileIcon />} size='large'>
+              <StyledButton
+                variant='outlined'
+                startIcon={<UploadFileIcon />}
+                size='large'
+                sx={{ visibility: 'hidden' }}
+              >
                 自動アプロード
               </StyledButton>
               <StyledButton

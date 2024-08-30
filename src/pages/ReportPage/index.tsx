@@ -220,6 +220,9 @@ export default function ReportPage() {
           <Box display={'flex'} flexDirection={'row'} gap={1}>
             <Box display={'flex'} flexDirection={'column'} flex={1}>
               <Paper elevation={24}>
+                <Typography textAlign={'left'} pt={1} px={2} variant='subtitle1'>
+                  総利益（粗利）
+                </Typography>
                 <Typography textAlign={'right'} pt={1} px={2} variant='subtitle2'>
                   (百万円)
                 </Typography>
@@ -231,6 +234,9 @@ export default function ReportPage() {
             </Box>
             <Box display={'flex'} flexDirection={'column'} flex={1}>
               <Paper elevation={24} sx={{ height: '100%' }}>
+                <Typography textAlign={'left'} pt={1} px={2} variant='subtitle1'>
+                  商品別生産効率(悪い5選)
+                </Typography>
                 <WorstSaleProductChart
                   customLegendFormatter={value => customLegendFormatter(value)}
                   worstSaleProductChartData={worstSaleProductChartData}
