@@ -34,9 +34,9 @@ export default function useMenu() {
 
   const menuItem: MenuItem[] = [
     { text: 'Dashboard', icon: Dashboard, path: '/' },
-    { text: 'Sales', icon: ShoppingCart, path: '/sales' },
+    { text: '売上管理', icon: ShoppingCart, path: '/sales' },
     {
-      text: 'Orders',
+      text: '受注管理',
       icon: Receipt,
       path: '/orders',
       // children: [
@@ -57,41 +57,41 @@ export default function useMenu() {
       //   },
       // ],
     },
-    { text: 'Purchase', icon: Inventory, path: '/purchase' },
+    { text: '仕入管理', icon: Inventory, path: '/purchase' },
     { text: 'KPI', icon: TrendingUp, path: '/kpi' },
-    { text: 'Reports', icon: Assessment, path: '/reports' },
-    { text: 'Products', icon: Category, path: '/products' },
+    { text: 'レポート', icon: Assessment, path: '/reports' },
+    { text: '商品管理', icon: Category, path: '/products' },
     {
-      text: 'Settings',
+      text: '設定',
       icon: Settings,
       children: [
         {
-          text: 'Account',
+          text: 'アカウント管理',
           icon: ManageAccounts,
           path: '/settings/account',
         },
         {
-          text: 'My Company',
+          text: '企業情報',
           icon: Store,
           path: '/settings/mycompany',
         },
         {
-          text: 'Customer',
+          text: '客管理',
           icon: Storefront,
           path: '/settings/customer',
         },
         {
-          text: 'Supplier',
+          text: '仕入先管理',
           icon: Diversity3,
           path: '/settings/supplier',
         },
         {
-          text: 'Server',
+          text: 'サーバー情報',
           icon: Storage,
           path: '/settings/server',
         },
         {
-          text: 'Component',
+          text: '仕入単価管理',
           icon: PrecisionManufacturing,
           path: '/settings/component',
         },
