@@ -230,22 +230,38 @@ export default function ProductPage() {
               </StyledButton>
               <StyledButton
                 variant='outlined'
+                startIcon={<PrintIcon />}
+                size='large'
+                // onClick={handleExportPdf}
+              >
+                データ出力
+              </StyledButton>
+              {/* <StyledButton
+                variant='outlined'
                 startIcon={<EditIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
                 visible
-              </StyledButton>
+              </StyledButton> */}
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
-                {/* not support in aplha thest */}
+                not support in aplha thest
                 自動アプロード
+              </StyledButton>
+              <StyledButton
+                variant='outlined'
+                startIcon={<EditIcon />}
+                size='large'
+                sx={{ visibility: 'hidden' }}
+              >
+                visible
               </StyledButton>
               <StyledButton
                 variant='outlined'
@@ -255,7 +271,7 @@ export default function ProductPage() {
               >
                 データ出力
               </StyledButton>
-            </Box>
+            </Box> */}
           </Box>
         </Box>
         <DataTable

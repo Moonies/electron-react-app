@@ -32,6 +32,7 @@ import { useConfirmModal } from 'hooks/useConfirmModal'
 import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useExportSale from './hooks/useExportSale'
 import useNotification from 'hooks/useNotification'
+import useLoading from 'hooks/useLoading'
 
 export default function SalePage() {
   const {
@@ -55,8 +56,15 @@ export default function SalePage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
-  const { printColumnList } = useExportSale()
+  const {
+    printColumnList,
+    exportDetail,
+    getCustomerDetail,
+    getMyCompanyDetail,
+    exportSaleSelected,
+  } = useExportSale()
   const { notificationModal } = useNotification()
+  const { setLoading } = useLoading()
 
   useEffect(() => {
     if (saleDataGridRef.current) {
@@ -141,22 +149,18 @@ export default function SalePage() {
     // await fetchSaleData(paginationModel);
   }
 
-  const handleExportPdf = () => {
-    // exportToXlsx(columns, saleData)
-    // printData(columns, saleData, 'Sales Quotation')
-    // let xx = groupBy(saleData, 'invoiceNumber', [
-    //   'customerName',
-    //   'invoiceNumber',
-    //   'productId',
-    //   'productName',
-    //   'quantity',
-    //   'totalPrice',
-    //   'unitPrice',
-    // ])
-    // exportToPdf(printColumnList, xx[4], '見積書')
-    // printData(printColumnList, xx[4], 'Sales Quotation')
-    // console.log(saleData)
-    // console.log(xx)
+  const handleExportPdf = async () => {
+    // setLoading(true)
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = saleData.find(item => item.id === selectedId)
+      if (selectedData) {
+        exportSaleSelected(selectedData)
+      }
+    } else {
+      setLoading(false)
+      notificationModal.error('出力する行をテーブルから選択してください')
+    }
   }
   //maybe not use groupby
   // const groupBy = (

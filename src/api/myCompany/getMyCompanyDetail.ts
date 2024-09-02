@@ -12,6 +12,7 @@ export interface MyCompanyDetail {
   companyCity: string
   companyAddressCode: string
   companyBuildingDetail: string
+  companyFax?: string
 }
 export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompanyDetail>> {
   // when use real API
@@ -48,6 +49,7 @@ export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompan
         companyCity: '伏見区',
         companyAddressCode: '淀際目町335-5',
         companyBuildingDetail: 'aatower',
+        companyFax: '07003151547',
       }
 
       resolve({ code: 200, message: 'success', data: data })

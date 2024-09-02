@@ -5,6 +5,49 @@ import { saveAs } from 'file-saver'
 import { GridColDef } from '@mui/x-data-grid'
 import JsBarcode from 'jsbarcode'
 import '../asset/fonts/NotoSansJP-normal'
+import { SaleExportDetail } from 'pages/SalePage/hooks/useExportSale'
+
+export enum PrintType {
+  SALE = 'quotation',
+  ORDER = 'order_invoice',
+  DELIVERY = 'delivery',
+  SHIPPING = 'shipping_invoice',
+  PURCHASE = 'purchase_invoice',
+}
+export enum PrintTitle {
+  SALE = '見積書',
+  ORDER = 'order_invoice',
+  DELIVERY = 'delivery',
+  SHIPPING = 'shipping_invoice',
+  PURCHASE = 'purchase_invoice',
+}
+export type SenderDetail = {
+  postCode: string
+  fullAddress: string
+  phoneNumber: string
+  email: string
+  fax?: string
+  name: string
+}
+
+export type ReceiverDetail = {
+  postCode: string
+  fullAddress: string
+  phoneNumber: string
+  email: string
+  fax?: string
+  name: string
+}
+
+export interface ExportDetail {
+  sender: SenderDetail
+  receiver: ReceiverDetail
+  title: string
+  fileName: string
+  id: string
+}
+
+type ExportDetailType = SaleExportDetail
 
 // Helper function to get cell value
 const getCellValue = (row: any, col: GridColDef): string => {
@@ -133,7 +176,7 @@ export const exportToXlsx = (columns: GridColDef[], rows: any[]) => {
 }
 
 // Updated exportToPdf function
-export const exportToPdf = (columns: GridColDef[], rows: any[], title: string = '見積書') => {
+export const exportToPdf = (columns: GridColDef[], rows: object[], exportDetail: ExportDetail) => {
   const doc = new jsPDF({
     orientation: 'p',
     unit: 'mm',
@@ -164,48 +207,50 @@ export const exportToPdf = (columns: GridColDef[], rows: any[], title: string = 
     // Header
     const header = (data: any) => {
       doc.setFontSize(24)
-      doc.text(title, pageWidth / 2, 20, { align: 'center', charSpace: 8 })
+      doc.text(exportDetail.title, pageWidth / 2, 20, { align: 'center', charSpace: 8 })
 
       //Recipient info
       doc.setFontSize(18)
-      const customerName = '株式会社さんせん清水'
-      doc.text('株式会社さんせん清水', margin + 5, 40, { maxWidth: 75 })
+      // const customerName = '株式会社さんせん清水'
+      doc.text(exportDetail.receiver.name, margin + 5, 40, { maxWidth: 75 })
       drawVerticalText(doc, '御中', 95, 37, 14) // Draw '御中' vertically
       doc.setDrawColor(0)
       doc.setLineWidth(0.5)
       doc.line(margin, 45, 90, 45)
 
       doc.setFontSize(10)
-      doc.text('〒000-0000', margin, 60)
-      doc.text('京都府京都市伏見区淀際目町335-5 123', margin, 67)
+      doc.text(exportDetail.receiver.postCode, margin, 60)
+      doc.text(exportDetail.receiver.fullAddress, margin, 67)
 
       doc.text('TEL:', margin, 74)
-      doc.text('012-3456-7899', margin + labelTelWidth + 5, 74)
+      doc.text(exportDetail.receiver.phoneNumber, margin + labelTelWidth + 5, 74)
       doc.text('E-Mail:', margin, 81)
-      doc.text('customer@xxxxxxxx.com', margin + labelEmailWidth + 5, 81)
+      doc.text(exportDetail.receiver.email, margin + labelEmailWidth + 5, 81)
 
       doc.text('下記の通り、納品致しました。', margin, 95),
         drawLabelValuePair(doc, '発行日 ', today, pageWidth - 80, 40, 70)
       // Draw '番号' and its value
-      drawLabelValuePair(doc, '番号  ', '1234567890', pageWidth - 80, 47, 70)
+      drawLabelValuePair(doc, '番号  ', exportDetail.id, pageWidth - 80, 47, 70)
 
       // Add barcode
-      addBarcode(doc, '1234567890', pageWidth - 65, 50, 50, 10)
+      addBarcode(doc, exportDetail.id, pageWidth - 65, 50, 50, 10)
 
       // Sender info
-      doc.text('株式会社さんせん清水', pageMiddle + marginMidle, 65, { align: 'left' })
-      doc.text('〒613-0915', pageMiddle + marginMidle, 72, { align: 'left' })
-      doc.text('北海道市伏見区淀際目町335-9', pageMiddle + marginMidle, 79, {
+      doc.text(exportDetail.sender.name, pageMiddle + marginMidle, 65, { align: 'left' })
+      doc.text(exportDetail.sender.postCode, pageMiddle + marginMidle, 72, { align: 'left' })
+      doc.text(exportDetail.sender.fullAddress, pageMiddle + marginMidle, 79, {
         align: 'left',
       })
       doc.text('E-Mail:', pageMiddle + marginMidle, 86, { align: 'left' })
-      doc.text('info@sansenshimizu.com', pageMiddle + marginMidle + labelEmailWidth + 5, 86, {
+      doc.text(exportDetail.sender.email, pageMiddle + marginMidle + labelEmailWidth + 5, 86, {
         align: 'left',
       })
       doc.text('TEL:', pageMiddle + marginMidle, 93, { align: 'left' })
-      doc.text('012-3456-789', pageMiddle + marginMidle + labelTelWidth + 5, 93, { align: 'left' })
+      doc.text(exportDetail.sender.phoneNumber, pageMiddle + marginMidle + labelTelWidth + 5, 93, {
+        align: 'left',
+      })
       doc.text('FAX:', pageMiddle + marginMidle, 100, { align: 'left' })
-      doc.text('070-0315-1547', pageMiddle + marginMidle + labelFaxWidth + 5, 100, {
+      doc.text(exportDetail.sender.fax ?? '', pageMiddle + marginMidle + labelFaxWidth + 5, 100, {
         align: 'left',
       })
     }
@@ -328,7 +373,7 @@ export const exportToPdf = (columns: GridColDef[], rows: any[], title: string = 
     doc.line(totalSectionX, finalY + 36, totalSectionX + totalSectionWidth, finalY + 36)
 
     // Save the PDF
-    doc.save(`${title}.pdf`)
+    doc.save(`${exportDetail.fileName}.pdf`)
 
     // Optional: Preview after export
     // This part is commented out because it requires additional setup and might not work in all environments
