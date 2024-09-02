@@ -217,6 +217,8 @@ export default function OrderModal({
       fullScreen
       TransitionComponent={Transition}
       keepMounted
+      scroll={'paper'}
+      fullWidth
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -245,9 +247,9 @@ export default function OrderModal({
           </Box>
         </Box>
       </DialogTitle>
-      <form onSubmit={handleSubmit}>
-        <DialogContent>
-          <Box display={'flex'} flexDirection={'column'}>
+      <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <DialogContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Box display={'flex'} flexDirection={'column'} flexGrow={1}>
             <Box display={'flex'} flexDirection={'row'} gap={2}>
               <DatePicker
                 label='登録日付'
@@ -404,23 +406,23 @@ export default function OrderModal({
                 value={findUserById(formData.orderApprovedEmployeeId)}
               />
             </Box>
+            <DataTable
+              data={newProductListData}
+              columns={updatedColumns}
+              apiref={addNewProductDataGridRef}
+              // getRowId={row => row.productNumber}
+              onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+              sx={{ height: 475, mt: 2 }}
+              editMode='row'
+              rowModesModel={rowModesModel}
+              onRowModesModelChange={handleRowModesModelChange}
+              onRowEditStop={handleRowEditStop}
+              processRowUpdate={processRowUpdate}
+              disableColumnSelector
+              columnVisibilityModel={columnVisibilityModel}
+              isCellEditable={() => modalMode !== 'view'}
+            />
           </Box>
-          <DataTable
-            data={newProductListData}
-            columns={updatedColumns}
-            apiref={addNewProductDataGridRef}
-            // getRowId={row => row.productNumber}
-            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
-            sx={{ height: 475, mt: 2 }}
-            editMode='row'
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
-            processRowUpdate={processRowUpdate}
-            disableColumnSelector
-            columnVisibilityModel={columnVisibilityModel}
-            isCellEditable={() => modalMode !== 'view'}
-          />
           {openDialog && (
             <AddnewProductDialog
               open={openDialog}
