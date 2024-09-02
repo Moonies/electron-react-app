@@ -225,6 +225,7 @@ export default function PurchaseModal({
       fullScreen
       TransitionComponent={Transition}
       keepMounted
+      scroll={'paper'}
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -253,202 +254,214 @@ export default function PurchaseModal({
           </Box>
         </Box>
       </DialogTitle>
-      <DialogContent>
-        <Box display={'flex'} flexDirection={'column'}>
-          <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-            <DatePicker
-              label='登録日付'
-              value={dayjs(formData.quotationRequestDate)}
-              format='YYYY/MM/DD'
-              onChange={newValue =>
-                handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-              }
-              sx={{ marginTop: 2, width: '25%' }}
-              readOnly={modalMode === 'view'}
-            />
-            <TextField
-              label='注番'
-              value={formData.invoiceNumber}
-              onChange={e => handleChange('invoiceNumber', e.target.value)}
-              fullWidth
-              margin='normal'
-              required
-              inputProps={{
-                readOnly: modalMode === 'view',
-              }}
-            />
-            {/* <TextField
+      <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <DialogContent>
+          <Box display={'flex'} flexDirection={'column'}>
+            <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+              <DatePicker
+                label='登録日付'
+                value={dayjs(formData.quotationRequestDate)}
+                format='YYYY/MM/DD'
+                onChange={newValue =>
+                  handleChange(
+                    'quotationRequestDate',
+                    newValue ? newValue.format('YYYY-MM-DD') : ''
+                  )
+                }
+                sx={{ marginTop: 2, width: '25%' }}
+                readOnly={modalMode === 'view'}
+              />
+              <TextField
+                label='注番'
+                value={formData.invoiceNumber}
+                onChange={e => handleChange('invoiceNumber', e.target.value)}
+                fullWidth
+                margin='normal'
+                required
+                inputProps={{
+                  readOnly: modalMode === 'view',
+                }}
+              />
+              {/* <TextField
               label='顧客名称'
               value={formData.supplierCompanyName}
               onChange={e => handleChange('supplierCompanyName', e.target.value)}
               margin='normal'
               fullWidth
             /> */}
-            <Autocomplete
-              options={supplierCompanyListData}
-              renderOption={(props, option) => {
-                const { key, ...optionProps } = props
-                return (
-                  <Box key={key} component='li' {...optionProps}>
-                    {option.customerName}
-                  </Box>
-                )
-              }}
-              getOptionLabel={option => option.customerName}
-              sx={{ width: '35%', marginTop: 2 }}
-              renderInput={params => <TextField {...params} label='顧客名称' />}
-              readOnly={modalMode === 'view'}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              onChange={(event, newValue) => {
-                if (typeof newValue === 'object' && newValue !== null) {
-                  setFormData(prev => ({
-                    ...prev,
-                    customerCompanyId: newValue.id,
-                  }))
-                }
-              }}
-              value={findCustomerById(formData.supplierCompanyId)}
-            />
-          </Box>
-          <Box display={'flex'} flexDirection={'row'} gap={2}>
-            <DatePicker
-              label='発注承認済'
-              value={dayjs(formData.purchaseApprovedDate)}
-              format='YYYY/MM/DD'
-              onChange={newValue =>
-                handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-              }
-              sx={{ marginTop: 2, width: '25%' }}
-              readOnly={modalMode === 'view'}
-            />
-            <DatePicker
-              label='入庫承認済'
-              value={dayjs(formData.purchaseReciptDate)}
-              format='YYYY/MM/DD'
-              onChange={newValue =>
-                handleChange('quotationRequestDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-              }
-              sx={{ marginTop: 2, width: '25%' }}
-              readOnly={modalMode === 'view'}
-            />
-            <TextField
-              label='状態'
-              value={formData.status ?? ''}
-              onChange={e => handleChange('status', e.target.value)}
-              margin='normal'
-              select
-              sx={{ flex: 1 }}
-              InputLabelProps={{
-                component: 'span',
-              }}
-              inputProps={{
-                readOnly: modalMode === 'view',
-              }}
-            >
-              {statusList.map(item => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-            <Box display={'flex'} alignItems={'end'}>
-              <Button
-                onClick={() => setOpenDialog(true)}
-                variant='outlined'
-                sx={theme => ({
-                  color: 'white',
-                  visibility: modalMode === 'view' ? 'hidden' : 'inherit',
-                  // height: '50%',
-                })}
-              >
-                Add Component
-              </Button>
+              <Autocomplete
+                options={supplierCompanyListData}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props
+                  return (
+                    <Box key={key} component='li' {...optionProps}>
+                      {option.customerName}
+                    </Box>
+                  )
+                }}
+                getOptionLabel={option => option.customerName}
+                sx={{ width: '35%', marginTop: 2 }}
+                renderInput={params => <TextField {...params} label='顧客名称' />}
+                readOnly={modalMode === 'view'}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(event, newValue) => {
+                  if (typeof newValue === 'object' && newValue !== null) {
+                    setFormData(prev => ({
+                      ...prev,
+                      customerCompanyId: newValue.id,
+                    }))
+                  }
+                }}
+                value={findCustomerById(formData.supplierCompanyId)}
+              />
             </Box>
-            {/* <Autocomplete
+            <Box display={'flex'} flexDirection={'row'} gap={2}>
+              <DatePicker
+                label='発注承認済'
+                value={dayjs(formData.purchaseApprovedDate)}
+                format='YYYY/MM/DD'
+                onChange={newValue =>
+                  handleChange(
+                    'quotationRequestDate',
+                    newValue ? newValue.format('YYYY-MM-DD') : ''
+                  )
+                }
+                sx={{ marginTop: 2, width: '25%' }}
+                readOnly={modalMode === 'view'}
+              />
+              <DatePicker
+                label='入庫承認済'
+                value={dayjs(formData.purchaseReciptDate)}
+                format='YYYY/MM/DD'
+                onChange={newValue =>
+                  handleChange(
+                    'quotationRequestDate',
+                    newValue ? newValue.format('YYYY-MM-DD') : ''
+                  )
+                }
+                sx={{ marginTop: 2, width: '25%' }}
+                readOnly={modalMode === 'view'}
+              />
+              <TextField
+                label='状態'
+                value={formData.status ?? ''}
+                onChange={e => handleChange('status', e.target.value)}
+                margin='normal'
+                select
+                sx={{ flex: 1 }}
+                InputLabelProps={{
+                  component: 'span',
+                }}
+                inputProps={{
+                  readOnly: modalMode === 'view',
+                }}
+              >
+                {statusList.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+              <Box display={'flex'} alignItems={'end'}>
+                <Button
+                  onClick={() => setOpenDialog(true)}
+                  variant='outlined'
+                  sx={theme => ({
+                    color: 'white',
+                    visibility: modalMode === 'view' ? 'hidden' : 'inherit',
+                    // height: '50%',
+                  })}
+                >
+                  Add Component
+                </Button>
+              </Box>
+              {/* <Autocomplete
               options={_mockOption}
               sx={{ marginTop: 2, width: '35%' }}
               renderInput={params => <TextField {...params} label='担当者' />}
               value={formData.orderApprovedEmployeeName}
             /> */}
-            <Autocomplete
-              options={userListData}
-              renderOption={(props, option) => {
-                const { key, ...optionProps } = props
-                return (
-                  <Box key={key} component='li' {...optionProps}>
-                    {option.fullName}
-                  </Box>
-                )
-              }}
-              getOptionLabel={option => option.fullName}
-              sx={{ width: '35%' }}
-              renderInput={params => <TextField {...params} label='担当者' />}
-              readOnly={modalMode === 'view'}
-              isOptionEqualToValue={(option, value) => option.userId === value.userId}
-              onChange={(event, newValue) => {
-                if (typeof newValue === 'object' && newValue !== null) {
-                  setFormData(prev => ({
-                    ...prev,
-                    orderApprovedEmployeeId: newValue.userId,
-                  }))
-                }
-              }}
-              value={findUserById(formData.orderApprovedEmployeeId)}
+              <Autocomplete
+                options={userListData}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props
+                  return (
+                    <Box key={key} component='li' {...optionProps}>
+                      {option.fullName}
+                    </Box>
+                  )
+                }}
+                getOptionLabel={option => option.fullName}
+                sx={{ width: '35%' }}
+                renderInput={params => <TextField {...params} label='担当者' />}
+                readOnly={modalMode === 'view'}
+                isOptionEqualToValue={(option, value) => option.userId === value.userId}
+                onChange={(event, newValue) => {
+                  if (typeof newValue === 'object' && newValue !== null) {
+                    setFormData(prev => ({
+                      ...prev,
+                      orderApprovedEmployeeId: newValue.userId,
+                    }))
+                  }
+                }}
+                value={findUserById(formData.orderApprovedEmployeeId)}
+              />
+            </Box>
+            <DataTable
+              data={newComponentListData}
+              columns={updatedColumns}
+              apiref={addNewComponentDataGridRef}
+              // getRowId={row => row.productNumber}
+              onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+              sx={{ height: 475, mt: 2 }}
+              editMode='row'
+              rowModesModel={rowModesModel}
+              onRowModesModelChange={handleRowModesModelChange}
+              onRowEditStop={handleRowEditStop}
+              processRowUpdate={processRowUpdate}
+              disableColumnSelector
+              columnVisibilityModel={columnVisibilityModel}
+              isCellEditable={() => modalMode !== 'view'}
             />
+            {openDialog && (
+              <AddnewComponentListDialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                onSubmit={newProduct => {
+                  setOpenDialog(false)
+                  handleAddNewComponent(newProduct)
+                }}
+                // initialData={selectedOrder}
+              />
+            )}
           </Box>
-          <DataTable
-            data={newComponentListData}
-            columns={updatedColumns}
-            apiref={addNewComponentDataGridRef}
-            // getRowId={row => row.productNumber}
-            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
-            sx={{ height: 475, mt: 2 }}
-            editMode='row'
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
-            processRowUpdate={processRowUpdate}
-            disableColumnSelector
-            columnVisibilityModel={columnVisibilityModel}
-            isCellEditable={() => modalMode !== 'view'}
-          />
-          {openDialog && (
-            <AddnewComponentListDialog
-              open={openDialog}
-              onClose={() => setOpenDialog(false)}
-              onSubmit={newProduct => {
-                setOpenDialog(false)
-                handleAddNewComponent(newProduct)
-              }}
-              // initialData={selectedOrder}
-            />
-          )}
-        </Box>
-      </DialogContent>
-      {modalMode !== 'view' && (
-        <DialogActions>
-          <Button
-            onClick={onClose}
-            variant='contained'
-            // sx={theme => ({
-            //   color: 'white',
-            // })}
-          >
-            キャンセル
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant='outlined'
-            sx={theme => ({
-              color: 'white',
-            })}
-          >
-            保存
-          </Button>
-        </DialogActions>
-      )}
+        </DialogContent>
+        {modalMode !== 'view' && (
+          <DialogActions>
+            <Button
+              onClick={onClose}
+              variant='contained'
+              // sx={theme => ({
+              //   color: 'white',
+              // })}
+            >
+              キャンセル
+            </Button>
+            <Button
+              // onClick={handleSubmit}
+              variant='outlined'
+              type='submit'
+              sx={theme => ({
+                color: 'white',
+              })}
+            >
+              保存
+            </Button>
+          </DialogActions>
+        )}
+      </form>
     </Dialog>
   )
 }
