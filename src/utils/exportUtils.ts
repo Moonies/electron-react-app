@@ -5,7 +5,6 @@ import { saveAs } from 'file-saver'
 import { GridColDef } from '@mui/x-data-grid'
 import JsBarcode from 'jsbarcode'
 import '../asset/fonts/NotoSansJP-normal'
-import { SaleExportDetail } from 'pages/SalePage/hooks/useExportSale'
 
 export enum PrintType {
   SALE = 'quotation',
@@ -15,11 +14,12 @@ export enum PrintType {
   PURCHASE = 'purchase_invoice',
 }
 export enum PrintTitle {
-  SALE = '見積書',
-  ORDER = 'order_invoice',
-  DELIVERY = 'delivery',
-  SHIPPING = 'shipping_invoice',
-  PURCHASE = 'purchase_invoice',
+  SALE = '請求書',
+  NonOrder = '見積書',
+  ORDER = '納品書',
+  // DELIVERY = '見積書',
+  // SHIPPING = '出荷伝票',
+  PURCHASE = '仕入票',
 }
 export type SenderDetail = {
   postCode: string
@@ -46,8 +46,6 @@ export interface ExportDetail {
   fileName: string
   id: string
 }
-
-type ExportDetailType = SaleExportDetail
 
 // Helper function to get cell value
 const getCellValue = (row: any, col: GridColDef): string => {

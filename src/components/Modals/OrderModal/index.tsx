@@ -392,7 +392,7 @@ export default function OrderModal({
                 }}
                 getOptionLabel={option => option.fullName}
                 sx={{ width: '35%' }}
-                renderInput={params => <TextField {...params} label='担当者' />}
+                renderInput={params => <TextField {...params} label='承認者' />}
                 readOnly={modalMode === 'view'}
                 isOptionEqualToValue={(option, value) => option.userId === value.userId}
                 onChange={(event, newValue) => {

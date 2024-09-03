@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo } from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { api } from 'api/index'
-import { CustomerDetailData } from 'api/customer/getCustomerDetailById'
-import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
+import { OrderStatus } from 'api/order'
+import { OrderData } from 'api/order/getOrderList'
+import useLoading from 'hooks/useLoading'
+import { useCallback, useMemo, useState } from 'react'
 import {
   ExportDetail,
   exportToPdf,
@@ -11,8 +12,6 @@ import {
   SenderDetail,
 } from 'utils/exportUtils'
 import { formatPhoneNumber, formatPostcode } from 'utils/formatUtils'
-import { SaleData } from 'api/sale/getSaleList'
-import useLoading from 'hooks/useLoading'
 
 const initialExportDetail: ExportDetail = {
   id: '',
@@ -36,7 +35,7 @@ const initialExportDetail: ExportDetail = {
   },
 }
 
-export default function useExportSale() {
+export default function useExportOrder() {
   const [exportDetail, setExportDetail] = useState<ExportDetail>(initialExportDetail)
   const { setLoading } = useLoading()
   const printColumnList: GridColDef[] = useMemo(
@@ -67,7 +66,6 @@ export default function useExportSale() {
         postCode: formatPostcode(data.postalCode),
         fax: formatPhoneNumber(data.faxNumber) ?? '',
       }
-      // setExportDetail(prev => ({ ...prev, receiver: newReceiver }))
     }
   }
 
@@ -82,37 +80,50 @@ export default function useExportSale() {
         postCode: formatPostcode(data.companyPostCode),
         fax: formatPhoneNumber(data.companyFax),
       }
-      // setExportDetail(prev => ({ ...prev, sender: newSender }))
     }
   }
 
-  const exportSaleSelected = async (saleSelectedData: SaleData) => {
+  const convertTitle = useCallback((typeOrder: string | null): string => {
+    switch (typeOrder) {
+      case OrderStatus.DELIVERED:
+        return PrintTitle.SALE
+      case OrderStatus.RECEIVED:
+        return PrintTitle.ORDER
+      case OrderStatus.NonOrder:
+        return PrintTitle.NonOrder
+      case OrderStatus.INSTORE:
+        return PrintTitle.PURCHASE
+      default:
+        return ''
+    }
+  }, [])
+
+  const exportSaleSelected = async (orderSelectedData: OrderData) => {
     setLoading(true)
+    let title = convertTitle(orderSelectedData.status)
     try {
       const [receiver, sender] = await Promise.all([
-        getCustomerDetail(saleSelectedData.customerCompanyId),
+        getCustomerDetail(orderSelectedData.customerCompanyId),
         getMyCompanyDetail(),
       ])
 
       const newExportDetail: ExportDetail = {
-        id: saleSelectedData.id,
-        title: PrintTitle.SALE, // Assuming PrintTitle.SALE is 'SALE'
-        fileName: PrintTitle.SALE + '(Test)', // Assuming PrintTitle.SALE is 'SALE'
+        id: orderSelectedData.id,
+        title: title,
+        fileName: title + '(Test)',
         receiver: receiver || ({} as ReceiverDetail),
-        sender: sender || ({} as ReceiverDetail),
+        sender: sender || ({} as SenderDetail),
       }
 
       setExportDetail(newExportDetail)
 
-      // console.log(newExportDetail)
-      exportToPdf(printColumnList, saleSelectedData.product, newExportDetail)
+      exportToPdf(printColumnList, orderSelectedData.product, newExportDetail)
     } catch (error) {
       console.error('Error exporting sale:', error)
     } finally {
       setLoading(false)
     }
   }
-
   return {
     printColumnList,
     getCustomerDetail,

@@ -55,7 +55,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const viewSaleProductDetail = useGridApiRef()
   const { setLoading } = useLoading()
-  const { columns, convertStatus } = useSaleDetail()
+  const { columns } = useSaleDetail()
 
   // useEffect(() => {
   //   if (mode === 'edit' && initialData) {
@@ -168,7 +168,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
               sx={{ marginTop: 2, width: '25%' }}
               readOnly
             />
-            <TextField
+            {/* <TextField
               label='状態'
               value={convertStatus(formData.status) ?? ''}
               margin='normal'
@@ -176,7 +176,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
               InputProps={{
                 readOnly: mode === 'view',
               }}
-            ></TextField>
+            /> */}
           </Box>
           <Box
             display={'flex'}
