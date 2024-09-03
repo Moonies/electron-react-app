@@ -115,7 +115,7 @@ export const mockData = [
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeId: '',
     orderRequestEmployeeName: '',
-    status: 'delivered',
+    status: 'quatation',
     registDate: '',
   },
   {
@@ -168,7 +168,7 @@ export const mockData = [
     orderApprovedEmployeeName: '平井昌司',
     orderRequestEmployeeId: '',
     orderRequestEmployeeName: '',
-    status: 'delivered',
+    status: 'instore',
     registDate: '',
   },
   {

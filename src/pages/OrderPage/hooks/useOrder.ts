@@ -41,12 +41,12 @@ export default function useOrder() {
     switch (status) {
       case OrderStatus.RECEIVED:
         return '未発注'
-      case OrderStatus.PROCESSING:
-        return '発注済'
+      case OrderStatus.NonOrder:
+        return '見積'
       case OrderStatus.OVER_DUE_DATE:
         return '納期超過'
-      case OrderStatus.SHIPPED:
-        return '出荷中'
+      case OrderStatus.INSTORE:
+        return '入庫済'
       case OrderStatus.DELIVERED:
         return '出荷済'
       case OrderStatus.CANCEL:

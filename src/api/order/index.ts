@@ -3,11 +3,13 @@ import { default as getOrderList } from './getOrderList'
 import { default as addNewOrder } from './addNewOrder'
 
 export enum OrderStatus {
-  ALL = 'all',
-  RECEIVED = 'received',
-  PROCESSING = 'processing',
+  // ALL = 'all',
+  NonOrder = 'quatation',
+  RECEIVED = 'ordered',
+  // PROCESSING = 'processing',
   OVER_DUE_DATE = 'over_due_date',
-  SHIPPED = 'shipping',
+  // SHIPPED = 'shipping',
+  INSTORE = 'instore',
   DELIVERED = 'delivered',
   CANCEL = 'cancel',
 }

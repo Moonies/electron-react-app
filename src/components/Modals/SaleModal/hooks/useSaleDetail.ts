@@ -16,24 +16,24 @@ export default function useSaleDetail() {
     currency: 'JPY',
   })
 
-  const convertStatus = (status: string | null) => {
-    switch (status) {
-      case OrderStatus.RECEIVED:
-        return '未発注'
-      case OrderStatus.PROCESSING:
-        return '発注済'
-      case OrderStatus.OVER_DUE_DATE:
-        return '納期超過'
-      case OrderStatus.SHIPPED:
-        return '出荷中'
-      case OrderStatus.DELIVERED:
-        return '出荷済'
-      case OrderStatus.CANCEL:
-        return 'キャンセル'
-      default:
-        return ''
-    }
-  }
+  // const convertStatus = (status: string | null) => {
+  //   switch (status) {
+  //     case OrderStatus.RECEIVED:
+  //       return '未発注'
+  //     case OrderStatus.PROCESSING:
+  //       return '発注済'
+  //     case OrderStatus.OVER_DUE_DATE:
+  //       return '納期超過'
+  //     case OrderStatus.SHIPPED:
+  //       return '出荷中'
+  //     case OrderStatus.DELIVERED:
+  //       return '出荷済'
+  //     case OrderStatus.CANCEL:
+  //       return 'キャンセル'
+  //     default:
+  //       return ''
+  //   }
+  // }
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -80,6 +80,6 @@ export default function useSaleDetail() {
 
   return {
     columns,
-    convertStatus,
+    // convertStatus,
   }
 }

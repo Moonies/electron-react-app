@@ -132,7 +132,7 @@ export const useEmail = () => {
           floatPrecision: 16,
         })
 
-        exportToPdf(columns, rows, title)
+        // exportToPdf(columns, rows, title)
 
         const pdfData = doc.output('arraybuffer')
         resolve({

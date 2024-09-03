@@ -33,6 +33,8 @@ import PurchaseModal from 'components/Modals/PurchaseModal'
 import useOrder from './hooks/useOrder'
 import OrderModal from 'components/Modals/OrderModal'
 import { OrderData } from 'api/order/getOrderList'
+import useExportOrder from './hooks/useExportOrder'
+import { OrderStatus } from 'api/order'
 
 export default function OrderPage() {
   const {
@@ -56,10 +58,9 @@ export default function OrderPage() {
   const [selectedOrder, setSelectedOrder] = useState<OrderData>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
-  const [popupOpen, setPopupOpen] = useState(false)
-  const [popupMode, setPopupMode] = useState<'view' | 'edit'>('view')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
+  const { exportSaleSelected } = useExportOrder()
 
   useEffect(() => {
     if (orderDataGridRef.current) {
@@ -160,6 +161,19 @@ export default function OrderPage() {
     }
     // After successful add/edit, refetch the data
     // await fetchNewOrderData(paginationModel);
+  }
+
+  const handleExportPdf = () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = orderData.find(order => order.id === selectedId)
+      // if(selectedData?.status === OrderStatus.CANCEL) has condition??
+      if (selectedData) {
+        exportSaleSelected(selectedData)
+      }
+    } else {
+      notificationModal.error('出力する行をテーブルから選択してください')
+    }
   }
 
   return (
@@ -331,7 +345,7 @@ export default function OrderPage() {
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                // onClick={handleExportPdf}
+                onClick={handleExportPdf}
               >
                 データ出力
               </StyledButton>
