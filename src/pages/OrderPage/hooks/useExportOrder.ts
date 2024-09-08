@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   ExportDetail,
   exportToPdf,
+  PdfGenerator,
   PrintTitle,
   ReceiverDetail,
   SenderDetail,
@@ -117,7 +118,27 @@ export default function useExportOrder() {
 
       setExportDetail(newExportDetail)
 
-      exportToPdf(printColumnList, orderSelectedData.product, newExportDetail)
+      // exportToPdf(printColumnList, orderSelectedData.product, newExportDetail)
+      const orderData = {
+        code: '1820',
+        companyName: '有限会社 コーワレーザー',
+        companyAddress: '京都府久世郡久御山町新珠城117',
+        companyPhone: '0774-43-4775',
+        companyFax: '0774-43-6098',
+        orderNumber: '379548',
+        productName: 'BRACKET',
+        drawingNumber: 'JH622022380',
+        orderDate: '24/09/03',
+        deliveryDate: '24/09/10',
+        quantity: 1,
+        unitPrice: 0, // Add actual unit price
+        totalAmount: 0, // Add actual total amount
+        recipientCompany: '株式会社さんせん清水',
+        recipientAddress: '京都市伏見区淀際目町335番地の5',
+        recipientPhone: '075-631-6293',
+        recipientFax: '075-631-2394',
+      }
+      PdfGenerator()
     } catch (error) {
       console.error('Error exporting sale:', error)
     } finally {

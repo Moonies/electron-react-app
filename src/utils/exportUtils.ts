@@ -4,6 +4,8 @@ import 'jspdf-autotable'
 import { saveAs } from 'file-saver'
 import { GridColDef } from '@mui/x-data-grid'
 import JsBarcode from 'jsbarcode'
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer'
+
 import '../asset/fonts/NotoSansJP-normal'
 
 export enum PrintType {
@@ -45,6 +47,21 @@ export interface ExportDetail {
   title: string
   fileName: string
   id: string
+}
+interface DocumentData {
+  code: string
+  companyName: string
+  address: string
+  tel: string
+  fax: string
+  orderNumber: string
+  itemName: string
+  drawingNumber: string
+  orderDate: string
+  deliveryDate: string
+  quantity: number
+  recipientName: string
+  recipientDepartment: string
 }
 
 // Helper function to get cell value
@@ -384,6 +401,100 @@ export const exportToPdf = (columns: GridColDef[], rows: object[], exportDetail:
   }
 }
 
+export const PdfGenerator = () => {
+  const data: DocumentData = {
+    code: '1820',
+    companyName: '有限会社 コーワレーザー',
+    address: '京都府久世郡久御山町新城117',
+    tel: '0774-43-4775',
+    fax: '0774-43-6098',
+    orderNumber: '379548',
+    itemName: 'BRACKET',
+    drawingNumber: 'JH622022380',
+    orderDate: '24/09/03',
+    deliveryDate: '24/09/10',
+    quantity: 1,
+    recipientName: '株式会社さんせん清水 御中',
+    recipientDepartment: '担当：',
+  }
+  const doc = new jsPDF()
+
+  // Set font
+  doc.setFont('NotoSansJP', 'normal')
+
+  // Add title// Title and content
+  doc.setFontSize(16)
+  doc.text('納 品 書', doc.internal.pageSize.width / 2, 20, { align: 'center' })
+  doc.setFontSize(12)
+  doc.text('コ ー ド', doc.internal.pageSize.width / 2, 30, { align: 'center' })
+
+  // Recipient info
+  doc.setFontSize(10)
+  doc.text('株式会社さんせん清水 御中', 14, 40)
+  doc.text('担当：', 14, 45)
+
+  // Company info
+  doc.setFontSize(10)
+  doc.text('有限会社 コーワレーザー', doc.internal.pageSize.width - 14, 40, { align: 'right' })
+  doc.text('京都府久世郡久御山町新珠城117', doc.internal.pageSize.width - 14, 45, {
+    align: 'right',
+  })
+  doc.text('TEL 0774-43-4775 FAX 0774-43-6098', doc.internal.pageSize.width - 14, 50, {
+    align: 'right',
+  })
+
+  // Main table
+  const mainTableData = [
+    ['発注番号', '品名', '図面番号', '発注日', '手配納期'],
+    ['379548', 'BRACKET', 'JH622022380', '24/09/03', '24/09/10'],
+  ]
+
+  ;(doc as any).autoTable({
+    startY: 55,
+    head: [mainTableData[0]],
+    body: [mainTableData[1]],
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 2, font: 'NotoSansJP' },
+    columnStyles: {
+      0: { cellWidth: 35 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 30 },
+    },
+  })
+
+  // Secondary table
+  const secondaryTableData = [
+    ['納入日', '要入庫', '注文数', '納入数', '不良品・他', '単価', '合計金額'],
+    ['', '☆', '1', '', '', '', ''],
+    ['摘要', '☆', '', '', '', '', ''],
+  ]
+
+  ;(doc as any).autoTable({
+    startY: (doc as any).lastAutoTable.finalY,
+    head: [secondaryTableData[0]],
+    body: secondaryTableData.slice(1),
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 2 },
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 20 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 25 },
+      5: { cellWidth: 30 },
+      6: { cellWidth: 40 },
+    },
+  })
+
+  // Barcode (placeholder)
+  doc.setFontSize(10)
+  doc.text('*379548-0-S*', 14, (doc as any).lastAutoTable.finalY + 20)
+
+  // Save the PDF
+  doc.save('納品書.pdf')
+}
 // Print function optional (building con..)
 /* export const printData = (columns: GridColDef[], rows: any[], title: string = '見積書') => {
   const headers = columns.map(col => col.headerName || col.field)
