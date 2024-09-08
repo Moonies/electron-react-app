@@ -35,8 +35,6 @@ import OrderModal from 'components/Modals/OrderModal'
 import { OrderData } from 'api/order/getOrderList'
 import useExportOrder from './hooks/useExportOrder'
 import { OrderStatus } from 'api/order'
-import ReactPDF, { pdf, PDFDownloadLink, usePDF, BlobProvider } from '@react-pdf/renderer'
-import { DeliverySlipData, PDFDocument } from './components/OrderPreview'
 
 export default function OrderPage() {
   const {
@@ -63,33 +61,6 @@ export default function OrderPage() {
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
   const { exportSaleSelected } = useExportOrder()
-  const [showPDF, setShowPDF] = useState(false)
-
-  // const [instance, updateInstance] = usePDF({})
-
-  const [slipsData, setSlipsData] = useState<DeliverySlipData[]>([
-    {
-      orderNumber: '0379548-0-S',
-      companyName: '株式会社さんせん清水',
-      contactPerson: '山田太郎',
-      productName: 'BRACKET',
-      drawingNumber: 'JH622022380',
-      orderDate: '24/09/03',
-      dueDate: '24/09/10',
-      quantity: 1,
-    },
-    {
-      orderNumber: '0379549-1-S',
-      companyName: '株式会社たなか',
-      contactPerson: '佐藤花子',
-      productName: 'BOLT',
-      drawingNumber: 'JH622022381',
-      orderDate: '24/09/04',
-      dueDate: '24/09/11',
-      quantity: 2,
-    },
-    // ... more slip data objects
-  ])
 
   useEffect(() => {
     if (orderDataGridRef.current) {
@@ -192,41 +163,17 @@ export default function OrderPage() {
     // await fetchNewOrderData(paginationModel);
   }
 
-  const handleExportPdf = async () => {
-    setSlipsData(prevData => [
-      ...prevData,
-      {
-        orderNumber: `0379${550 + prevData.length + 1}-0-A`,
-        companyName: '新規会社',
-        contactPerson: '新規担当者',
-        productName: '新規製品',
-        drawingNumber: 'JH62202XXXX',
-        orderDate: '24/09/XX',
-        dueDate: '24/09/XX',
-        quantity: 1,
-      },
-    ])
-
-    const blob = await pdf(<PDFDocument data={slipsData} />).toBlob()
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', 'document.pdf')
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    // updateInstance(<PDFDocument data={slipsData} />)
-    // setShowPDF(true)
-    // if (selectionModel.length === 1) {
-    //   const selectedId = selectionModel[0]
-    //   const selectedData = orderData.find(order => order.id === selectedId)
-    //   // if(selectedData?.status === OrderStatus.CANCEL) has condition??
-    //   if (selectedData) {
-    //     exportSaleSelected(selectedData)
-    //   }
-    // } else {
-    //   notificationModal.error('出力する行をテーブルから選択してください')
-    // }
+  const handleExportPdf = () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = orderData.find(order => order.id === selectedId)
+      // if(selectedData?.status === OrderStatus.CANCEL) has condition??
+      if (selectedData) {
+        exportSaleSelected(selectedData)
+      }
+    } else {
+      notificationModal.error('出力する行をテーブルから選択してください')
+    }
   }
 
   return (
@@ -394,7 +341,6 @@ export default function OrderPage() {
                 {/* current version is not support */}
                 自動アプロード
               </StyledButton>
-              {/* <PDFDownloadLink document={<PDFDocument data={slipsData} />} fileName='invoice.pdf'> */}
               <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}
@@ -403,7 +349,6 @@ export default function OrderPage() {
               >
                 データ出力
               </StyledButton>
-              {/* </PDFDownloadLink> */}
             </Box>
           </Box>
         </Box>
@@ -428,22 +373,6 @@ export default function OrderPage() {
           mode={modalMode}
         />
       )}
-      {/* {showPDF && (
-        <PDFDownloadLink document={<PDFDocument data={slipsData} />} fileName='invoice.pdf' />
-      )} */}
-      {/* <BlobProvider document={<PDFDocument data={slipsData} />}>
-        {({ blob, url, loading, error }) => (
-          <a href={url!} download='document.pdf'>
-            {loading ? 'Loading document...' : 'Download PDF'}
-          </a>
-        )}
-      </BlobProvider> */}
-
-      {/* {showPDF && (
-        <div className='mt-4' style={{ height: '80vh' }}>
-          <PDFGenerator orderId='2306292-20' />
-        </div>
-      )} */}
       {/* {popupOpen && (
         <OrderDetailPopup
           mode={popupMode}
