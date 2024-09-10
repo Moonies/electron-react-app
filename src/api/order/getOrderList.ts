@@ -35,7 +35,7 @@ export interface OrderData {
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs
   registDate: string | dayjs.Dayjs
-  shippingmentDate: string | dayjs.Dayjs
+  shippingmentDate: string | Date
   paymentDueDate: string | dayjs.Dayjs
   status: string | null
 }

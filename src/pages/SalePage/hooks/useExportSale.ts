@@ -72,7 +72,7 @@ export default function useExportSale() {
   }
 
   const getMyCompanyDetail = async () => {
-    const { data } = await api.myCompany().getCompanyDetail()
+    const { data } = await api.myCompany().getMyCompanyDetail()
     if (data) {
       return {
         name: data.companyName,
