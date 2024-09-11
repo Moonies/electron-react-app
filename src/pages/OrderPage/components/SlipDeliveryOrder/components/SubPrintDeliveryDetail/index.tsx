@@ -1,58 +1,30 @@
-import React from 'react'
-import { Document, Page, Text, View, StyleSheet, PDFViewer, Font, Image } from '@react-pdf/renderer'
-import { SlipDetail } from '../OrderPreview'
+import { Text, View, Image } from '@react-pdf/renderer'
+import { SlipDetail } from '../..'
 import { ProductList } from 'api/order/getOrderList'
-
+import { styles } from './styles'
+import dayjs from 'dayjs'
 export interface DeliverySlipData {
   barCodeGenerate: (orderId: string) => string
   slipData: SlipDetail
   product: ProductList
+  type: 'invoice' | 'delivery'
 }
 export default function SubPrintDeliveryDetail({
   barCodeGenerate,
   slipData,
   product,
+  type,
 }: DeliverySlipData) {
-  const styles = StyleSheet.create({
-    table: {
-      // display: 'table',
-      width: 540,
-      borderStyle: 'solid',
-      borderWidth: 1,
-      // borderRightWidth: 0,
-      // borderBottomWidth: 0,
-      // borderLeftWidth: 0,
-      // borderColor: 'red',
-      height: 216,
-    },
-    tableRow: {
-      // margin: 'auto',
-      flexDirection: 'row',
-      textAlign: 'left',
-      // flex: 1,
-    },
-    tableCol: {
-      borderStyle: 'solid',
-      borderWidth: 0.4,
-      // borderLeftWidth: 0,
-      // borderTopWidth: 0,
-    },
-    tableCell: {
-      margin: 'auto',
-      // marginTop: 5,
-      fontSize: 10,
-    },
-    headerCell: {
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-  })
+  const isDelivery = type === 'delivery'
+
   return (
     <>
       <View style={styles.table}>
         <View style={styles.tableRow}>
           <View style={[styles.tableCol, { width: '100%', borderBottomWidth: 0 }]}>
-            <Text style={[styles.tableCell, styles.headerCell]}>納　品　書</Text>
+            <Text style={[styles.tableCell, styles.headerCell]}>
+              {isDelivery ? '納　品　書' : '請求明細書'}
+            </Text>
           </View>
         </View>
         <View style={styles.tableRow}>
@@ -123,19 +95,25 @@ export default function SubPrintDeliveryDetail({
             <Text style={styles.tableCell}>{product.productNumber}</Text>
           </View>
           <View style={[styles.tableCol, { width: '15%' }]}>
-            <Text style={styles.tableCell}>24/09/03</Text>
+            <Text style={styles.tableCell}>
+              {dayjs(slipData.orderShippingDate).format('YYYY/MM/DD')}
+            </Text>
           </View>
           <View style={[styles.tableCol, { width: '15%' }]}>
-            <Text style={styles.tableCell}>24/09/10</Text>
+            <Text style={styles.tableCell}>
+              {dayjs(slipData.orderShippingExpireDate).format('YYYY/MM/DD')}
+            </Text>
           </View>
         </View>
         <View style={styles.tableRow}>
-          <View style={[styles.tableCol, { width: '8%' }]}>
+          <View style={[styles.tableCol, { width: isDelivery ? '8%' : '15%' }]}>
             <Text style={styles.tableCell}>納入日</Text>
           </View>
-          <View style={[styles.tableCol, { width: '7%' }]}>
-            <Text style={styles.tableCell}>要入庫</Text>
-          </View>
+          {isDelivery && (
+            <View style={[styles.tableCol, { width: '7%' }]}>
+              <Text style={styles.tableCell}>要入庫</Text>
+            </View>
+          )}
           <View style={[styles.tableCol, { width: '20%' }]}>
             <Text style={styles.tableCell}>注文数</Text>
           </View>
@@ -153,12 +131,14 @@ export default function SubPrintDeliveryDetail({
           </View>
         </View>
         <View style={styles.tableRow}>
-          <View style={[styles.tableCol, { width: '8%', paddingVertical: 8 }]}>
+          <View style={[styles.tableCol, { width: isDelivery ? '8%' : '15%', paddingVertical: 8 }]}>
             <Text style={styles.tableCell}></Text>
           </View>
-          <View style={[styles.tableCol, { width: '7%' }]}>
-            <Text style={styles.tableCell}>☆</Text>
-          </View>
+          {isDelivery && (
+            <View style={[styles.tableCol, { width: '7%' }]}>
+              <Text style={styles.tableCell}>☆</Text>
+            </View>
+          )}
           <View style={[styles.tableCol, { width: '20%', paddingVertical: 8 }]}>
             <Text style={styles.tableCell}>1</Text>
           </View>

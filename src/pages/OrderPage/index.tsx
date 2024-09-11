@@ -1,18 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  Box,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-  InputAdornment,
-  IconButton,
-  Divider,
-  Button,
-} from '@mui/material'
-import { useGridApiRef, GridRowProps, GridRowSelectionModel } from '@mui/x-data-grid'
+import { Box, TextField, MenuItem, Typography, Divider, Button } from '@mui/material'
+import { useGridApiRef, GridRowSelectionModel } from '@mui/x-data-grid'
 import {
   Delete as DeleteIcon,
   Search as SearchIcon,
@@ -27,16 +15,15 @@ import { StyledButton } from 'styles/styles'
 import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
-import PurchaseModal from 'components/Modals/PurchaseModal'
 import useOrder from './hooks/useOrder'
 import OrderModal from 'components/Modals/OrderModal'
 import { OrderData } from 'api/order/getOrderList'
 import useExportOrder from './hooks/useExportOrder'
+import { pdf, PDFDownloadLink, usePDF, BlobProvider } from '@react-pdf/renderer'
+import { DeliverySlipData, PDFDocument, PDFGenerator } from './components/SlipDeliveryOrder'
+import useLoading from 'hooks/useLoading'
 import { OrderStatus } from 'api/order'
-import ReactPDF, { pdf, PDFDownloadLink, usePDF, BlobProvider } from '@react-pdf/renderer'
-import { DeliverySlipData, PDFDocument, PDFGenerator } from './components/OrderPreview'
 
 export default function OrderPage() {
   const {
@@ -62,9 +49,9 @@ export default function OrderPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
-  const { exportSaleSelected } = useExportOrder()
+  const { exportSaleSelected, prepareSlipData } = useExportOrder()
   const [showPDF, setShowPDF] = useState(false)
-
+  const { setLoading } = useLoading()
   // const [instance, updateInstance] = usePDF({})
 
   const [slipsData, setSlipsData] = useState<DeliverySlipData>()
@@ -95,9 +82,6 @@ export default function OrderPage() {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        // setPopupMode('edit')
-        // setSelectedOrder(selectedData)
-        // setPopupOpen(true)
         setSelectedOrder(selectedData)
         setModalMode('edit')
         setModalOpen(true)
@@ -134,9 +118,6 @@ export default function OrderPage() {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        // setPopupMode('view')
-        // setSelectedOrder(selectedData)
-        // setPopupOpen(true)
         setSelectedOrder(selectedData)
         setModalMode('view')
         setModalOpen(true)
@@ -171,21 +152,31 @@ export default function OrderPage() {
   }
 
   const handleExportPdf = async () => {
-    setShowPDF(true)
+    // setShowPDF(true) //for test to preview PDF
+    setLoading(true)
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       // if(selectedData?.status === OrderStatus.CANCEL) has condition??
       if (selectedData) {
-        let newSlipData: DeliverySlipData = {
-          customerCompanyId: selectedData.customerCompanyId,
-          id: selectedData.id,
-          orderId: selectedData.orderId,
-          product: selectedData.product,
-          shippingmentDate: selectedData.shippingmentDate,
+        if (selectedData.status === OrderStatus.ORDER) {
+          const newSlipData = await prepareSlipData(selectedData)
+          if (newSlipData !== undefined) {
+            const blob = await pdf(
+              <PDFDocument data={newSlipData} render={() => setLoading(false)} />
+            ).toBlob()
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', 'document.pdf')
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }
+          //and call update status to ORDERED
+        } else {
+          exportSaleSelected(selectedData)
         }
-        setSlipsData(newSlipData)
-        // exportSaleSelected(selectedData)
       }
     } else {
       notificationModal.error('出力する行をテーブルから選択してください')
@@ -357,7 +348,6 @@ export default function OrderPage() {
                 {/* current version is not support */}
                 自動アプロード
               </StyledButton>
-              {/* <PDFDownloadLink document={<PDFDocument data={slipsData} />} fileName='invoice.pdf'> */}
               <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}
@@ -366,7 +356,6 @@ export default function OrderPage() {
               >
                 データ出力
               </StyledButton>
-              {/* </PDFDownloadLink> */}
             </Box>
           </Box>
         </Box>
@@ -391,30 +380,10 @@ export default function OrderPage() {
           mode={modalMode}
         />
       )}
-      {/* {showPDF && (
-        <PDFDownloadLink document={<PDFDocument data={slipsData} />} fileName='invoice.pdf' />
-      )} */}
-      {/* <BlobProvider document={<PDFDocument data={slipsData} />}>
-        {({ blob, url, loading, error }) => (
-          <a href={url!} download='document.pdf'>
-            {loading ? 'Loading document...' : 'Download PDF'}
-          </a>
-        )}
-      </BlobProvider> */}
-
-      {showPDF && slipsData && (
+      {/* {showPDF && slipsData && (
         <div className='mt-4' style={{ height: '80vh' }}>
-          <PDFGenerator data={slipsData} />
+          <PDFGenerator data={slipsData} render={() => setLoading(false)} />
         </div>
-      )}
-      {/* {popupOpen && (
-        <OrderDetailPopup
-          mode={popupMode}
-          onClose={() => setPopupOpen(false)}
-          onConfirm={handlePopupConfirm}
-          open={popupOpen}
-          initialData={selectedOrder}
-        />
       )} */}
     </Box>
   )

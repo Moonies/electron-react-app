@@ -1,74 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  PDFViewer,
-  Font,
-  Image as PDFImage,
-  Svg,
-} from '@react-pdf/renderer'
+import { Text, View, Image as PDFImage } from '@react-pdf/renderer'
 import { api } from 'api/index'
-const styles = StyleSheet.create({
-  table: {
-    // display: 'table',
-    width: 540,
-    borderStyle: 'solid',
-    borderWidth: 1,
-    // borderRightWidth: 0,
-    // borderBottomWidth: 0,
-    // borderLeftWidth: 0,
-    // borderColor: 'red',
-    height: 230,
-  },
-  tableRow: {
-    // margin: 'auto',
-    flexDirection: 'row',
-    textAlign: 'left',
-    // flex: 1,
-  },
-  tableCol: {
-    borderStyle: 'solid',
-    borderWidth: 0.4,
-    // borderLeftWidth: 0,
-    // borderTopWidth: 0,
-  },
-  tableCell: {
-    margin: 'auto',
-    // marginTop: 5,
-    fontSize: 10,
-  },
-  headerCell: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-})
+import { styles } from './styles'
+import { SlipDetail } from '../..'
+import { ProductList } from 'api/order/getOrderList'
+import dayjs from 'dayjs'
 
-type orderDetail = {
-  customerNumber: string
-  customerName: string
-  customerFullAddress: string
-  customerTel: string
-  customerFax?: string
-  myCompanyName: string
-  myCompanyFullAddress: string
-  myCompanyTel: string
-  myCompanyFax: string
-  myCompanySeal: string
-  orderNumber: string
-  productNumber: string
-  productName: string
-  productQuantity: number
-  productPrices: number
-  orderShippingExpireDate: Date
-}
-export interface DeliverySlipData {
-  invoiceData: orderDetail
+export interface DeliverySlipOrderData {
+  slipData: SlipDetail
+  product: ProductList
 }
 
-export default function SubPrintOrderDetail() {
+export default function SubPrintOrderDetail({ product, slipData }: DeliverySlipOrderData) {
   const [base64String, setBase64String] = useState<string | null>(null)
 
   useEffect(() => {
@@ -101,10 +44,12 @@ export default function SubPrintOrderDetail() {
             ]}
           >
             <View style={{ paddingLeft: 8 }}>
-              <Text style={{ fontSize: 10, marginLeft: 25 }}>コード 1820</Text>
-              <Text style={{ fontSize: 10 }}>有限会社 コーワレーザー</Text>
-              <Text style={{ paddingTop: 15, fontSize: 10 }}>京都府久世郡久御山町新珠城117</Text>
-              <Text style={{ fontSize: 10 }}>TEL 0774-43-4775 FAX 0774-43-6098</Text>
+              <Text style={{ fontSize: 10, marginLeft: 25 }}>コード {slipData.customerNumber}</Text>
+              <Text style={{ fontSize: 10 }}>{slipData.customerName}</Text>
+              <Text style={{ paddingTop: 15, fontSize: 10 }}>{slipData.customerFullAddress}</Text>
+              <Text style={{ fontSize: 10 }}>
+                TEL {slipData.customerTel} FAX {slipData.customerFax}
+              </Text>
             </View>
           </View>
           <View
@@ -120,10 +65,14 @@ export default function SubPrintOrderDetail() {
             ]}
           >
             <View style={{ paddingLeft: 80 }}>
-              <Text style={{ fontSize: 10 }}>発注日：2023年02月10日</Text>
-              <Text style={{ fontSize: 10, paddingTop: 15 }}>株式会社さんせん清水</Text>
-              <Text style={{ fontSize: 10 }}>京都府京都市伏見区淀際目町335-5</Text>
-              <Text style={{ fontSize: 10 }}>TEL 075-631-6293 FAX 075-631-2394</Text>
+              <Text style={{ fontSize: 10 }}>
+                発注日： {dayjs(slipData.orderShippingDate).format('YYYY年MM月DD日')}
+              </Text>
+              <Text style={{ fontSize: 10, paddingTop: 15 }}>{slipData.myCompanyName}</Text>
+              <Text style={{ fontSize: 10 }}>{slipData.myCompanyFullAddress}</Text>
+              <Text style={{ fontSize: 10 }}>
+                TEL {slipData.myCompanyTel} FAX {slipData.myCompanyFax}
+              </Text>
               <Text style={{ textAlign: 'right', paddingRight: 48, fontSize: 10 }}>担当：</Text>
             </View>
             {base64String ? (
@@ -151,16 +100,16 @@ export default function SubPrintOrderDetail() {
         </View>
         <View style={styles.tableRow}>
           <View style={[styles.tableCol, { width: '20%', paddingVertical: 8 }]}>
-            <Text style={styles.tableCell}>379548</Text>
+            <Text style={styles.tableCell}>{slipData.id}</Text>
           </View>
           <View style={[styles.tableCol, { width: '25%' }]}>
-            <Text style={styles.tableCell}>BRACKET</Text>
+            <Text style={styles.tableCell}>{product.productName}</Text>
           </View>
           <View style={[styles.tableCol, { width: '30%' }]}>
-            <Text style={styles.tableCell}>JH622022380</Text>
+            <Text style={styles.tableCell}>{product.productNumber}</Text>
           </View>
           <View style={[styles.tableCol, { width: '25%' }]}>
-            <Text style={styles.tableCell}>24/09/03</Text>
+            <Text style={styles.tableCell}></Text>
           </View>
         </View>
         <View style={styles.tableRow}>
@@ -194,7 +143,9 @@ export default function SubPrintOrderDetail() {
             <Text style={styles.tableCell}>納期</Text>
           </View>
           <View style={[styles.tableCol, { width: '25%' }]}>
-            <Text style={styles.tableCell}>24/00/00</Text>
+            <Text style={styles.tableCell}>
+              {dayjs(slipData.orderShippingExpireDate).format('YYYY/MM/DD')}
+            </Text>
           </View>
           <View style={[styles.tableCol, { width: '15%' }]}>
             <Text style={styles.tableCell}>摘　　要</Text>

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { OrderStatus } from '.'
 import { mockData } from './_mockdata'
 // import { PurchaseStatus } from '.'
@@ -33,10 +33,10 @@ export interface OrderData {
   orderRequestEmployeeName: string
   orderApprovedEmployeeId: string
   orderApprovedEmployeeName: string
-  quotationRequestDate: string | dayjs.Dayjs
-  registDate: string | dayjs.Dayjs
-  shippingmentDate: string | Date
-  paymentDueDate: string | dayjs.Dayjs
+  quotationRequestDate: string | Dayjs
+  registDate: string | Dayjs
+  shippingmentDate: string | Dayjs
+  paymentDueDate: string | Dayjs
   status: string | null
 }
 //for implement case only when apprved should be remove it
