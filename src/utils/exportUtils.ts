@@ -4,6 +4,8 @@ import 'jspdf-autotable'
 import { saveAs } from 'file-saver'
 import { GridColDef } from '@mui/x-data-grid'
 import JsBarcode from 'jsbarcode'
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer'
+
 import '../asset/fonts/NotoSansJP-normal'
 
 export enum PrintType {
@@ -45,6 +47,21 @@ export interface ExportDetail {
   title: string
   fileName: string
   id: string
+}
+interface DocumentData {
+  code: string
+  companyName: string
+  address: string
+  tel: string
+  fax: string
+  orderNumber: string
+  itemName: string
+  drawingNumber: string
+  orderDate: string
+  deliveryDate: string
+  quantity: number
+  recipientName: string
+  recipientDepartment: string
 }
 
 // Helper function to get cell value

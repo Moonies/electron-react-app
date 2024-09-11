@@ -3,6 +3,7 @@ import { api } from 'api/index'
 import { OrderStatus } from 'api/order'
 import { OrderData } from 'api/order/getOrderList'
 import useLoading from 'hooks/useLoading'
+import useNotification from 'hooks/useNotification'
 import { useCallback, useMemo, useState } from 'react'
 import {
   ExportDetail,
@@ -12,6 +13,7 @@ import {
   SenderDetail,
 } from 'utils/exportUtils'
 import { formatPhoneNumber, formatPostcode } from 'utils/formatUtils'
+import { DeliverySlipData, SlipDetail } from '../components/SlipDeliveryOrder'
 
 const initialExportDetail: ExportDetail = {
   id: '',
@@ -36,8 +38,8 @@ const initialExportDetail: ExportDetail = {
 }
 
 export default function useExportOrder() {
-  const [exportDetail, setExportDetail] = useState<ExportDetail>(initialExportDetail)
   const { setLoading } = useLoading()
+  const { notificationModal } = useNotification()
   const printColumnList: GridColDef[] = useMemo(
     () => [
       { field: 'productName', headerName: '品名' },
@@ -59,6 +61,7 @@ export default function useExportOrder() {
     const { data } = await api.customer().getCustomerDetailById(customerId)
     if (data) {
       return {
+        id: data.id,
         name: data.customerName,
         email: data.email,
         fullAddress: data.prefecture + data.city + data.street + data.addressCode,
@@ -70,7 +73,7 @@ export default function useExportOrder() {
   }
 
   const getMyCompanyDetail = async () => {
-    const { data } = await api.myCompany().getCompanyDetail()
+    const { data } = await api.myCompany().getMyCompanyDetail()
     if (data) {
       return {
         name: data.companyName,
@@ -102,7 +105,7 @@ export default function useExportOrder() {
     setLoading(true)
     let title = convertTitle(orderSelectedData.status)
     try {
-      const [receiver, sender] = await Promise.all([
+      const [customer, myCompany] = await Promise.all([
         getCustomerDetail(orderSelectedData.customerCompanyId),
         getMyCompanyDetail(),
       ])
@@ -111,24 +114,51 @@ export default function useExportOrder() {
         id: orderSelectedData.id,
         title: title,
         fileName: title + '(Test)',
-        receiver: receiver || ({} as ReceiverDetail),
-        sender: sender || ({} as SenderDetail),
+        receiver: customer || ({} as ReceiverDetail),
+        sender: myCompany || ({} as SenderDetail),
       }
-
-      setExportDetail(newExportDetail)
-
       exportToPdf(printColumnList, orderSelectedData.product, newExportDetail)
     } catch (error) {
-      console.error('Error exporting sale:', error)
+      notificationModal.error(`Error exporting : ${error}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const prepareSlipData = async (orderSelectedData: OrderData) => {
+    try {
+      const [customer, myCompany] = await Promise.all([
+        getCustomerDetail(orderSelectedData.customerCompanyId),
+        getMyCompanyDetail(),
+      ])
+
+      let newSlipData: DeliverySlipData = {
+        customerNumber: customer?.id ?? '',
+        customerName: customer?.name ?? '',
+        customerFullAddress: customer?.fullAddress ?? '',
+        customerTel: customer?.phoneNumber ?? '',
+        customerFax: customer?.fax ?? '',
+        myCompanyName: myCompany?.name ?? '',
+        myCompanyFullAddress: myCompany?.fullAddress ?? '',
+        myCompanyTel: myCompany?.phoneNumber ?? '',
+        myCompanyFax: myCompany?.fax ?? '',
+        id: orderSelectedData.id,
+        orderNumber: orderSelectedData.orderId,
+        orderShippingDate: orderSelectedData.shippingmentDate,
+        orderShippingExpireDate: '',
+        totalProduct: orderSelectedData.product.length,
+        product: orderSelectedData.product,
+      }
+
+      return newSlipData
+    } catch (error) {
+      notificationModal.error(`Error Prepare SlipData : ${error}`)
     } finally {
       setLoading(false)
     }
   }
   return {
-    printColumnList,
-    getCustomerDetail,
-    getMyCompanyDetail,
-    exportDetail,
     exportSaleSelected,
+    prepareSlipData,
   }
 }

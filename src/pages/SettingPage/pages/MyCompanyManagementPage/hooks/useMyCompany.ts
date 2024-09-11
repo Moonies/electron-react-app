@@ -19,7 +19,7 @@ export default function useMyCompany() {
   const [myCompanyDetail, setMyCompanyDetail] = useState<Partial<MyCompanyDetail | null>>()
   const { withLoading } = useLoading()
   const getMyCompanyDetail = async () => {
-    const result = await withLoading(api.myCompany().getCompanyDetail())
+    const result = await withLoading(api.myCompany().getMyCompanyDetail())
     if (result.code === 200) {
       setMyCompanyDetail(result.data)
     }

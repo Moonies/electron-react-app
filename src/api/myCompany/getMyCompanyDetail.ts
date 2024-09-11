@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
+import { mockData } from './_mockSealData'
 
 export interface MyCompanyDetail {
   companyName: string
@@ -13,6 +14,7 @@ export interface MyCompanyDetail {
   companyAddressCode: string
   companyBuildingDetail: string
   companyFax?: string
+  seal: string
 }
 export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompanyDetail>> {
   // when use real API
@@ -50,6 +52,7 @@ export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompan
         companyAddressCode: '淀際目町335-5',
         companyBuildingDetail: 'aatower',
         companyFax: '07003151547',
+        seal: mockData,
       }
 
       resolve({ code: 200, message: 'success', data: data })

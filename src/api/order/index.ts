@@ -8,7 +8,8 @@ export enum OrderStatus {
   RECEIVED = 'ordered',
   // PROCESSING = 'processing',
   OVER_DUE_DATE = 'over_due_date',
-  // SHIPPED = 'shipping',
+  ORDER = 'order',
+  ORDERING = 'ordering', //shipping?
   INSTORE = 'instore',
   DELIVERED = 'delivered',
   CANCEL = 'cancel',
