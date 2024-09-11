@@ -168,7 +168,7 @@ export default function OrderPage() {
             const url = URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', 'document.pdf')
+            link.setAttribute('download', '3連納品書.pdf') //name sapce is waiting to confirm
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
