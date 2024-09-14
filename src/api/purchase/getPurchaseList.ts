@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { mockData } from './_mockdata'
 import { PurchaseStatus } from '.'
 export interface SearchCriteria {
@@ -34,6 +34,20 @@ export interface PurchaseData {
   purchaseApprovedDate: string | dayjs.Dayjs
   purchaseReciptDate: string | dayjs.Dayjs
   status: string | null
+
+  //newData
+  // deliveryDate :Dayjs | string
+  // orderApprovalDate :Dayjs | string
+  // orderApprovalPendingDate :Dayjs | string
+  // orderCode : string
+  // purchaseCode: string
+  // registrationDate :Dayjs | string
+  // stockApprovalDate: Dayjs | string
+  // stockApprovalPendingDate: Dayjs | string
+  // totalAmount : number
+  // companyId: number
+  // id :number
+  // memo : string
 }
 //for implement case only when apprved should be remove it
 function chunkArray(mockdata: PurchaseData[], pageSize: number, page: number) {

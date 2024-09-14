@@ -3,17 +3,32 @@ import { ApiResponse } from 'api'
 import dayjs from 'dayjs'
 
 export interface CustomerData {
-  id: string
-  customerName: string
-  closeingDay: string | dayjs.Dayjs
+  // id: string
+  // name: string
+  // closingDay: string | dayjs.Dayjs
+  // phoneNumber: string
+  // postalCode: string
+  // prefecture: string
+  // city: string
+  // street: string
+  // buildingName: string
+  // paymentDeadline: string | dayjs.Dayjs
+  // email: string
+
+  closingDay: string
+  paymentDeadline: string
+  id: number
+  city: string
+  companyCode: string
+  companyType: string
+  email: string
+  fax?: string
+  name: string
   phoneNumber: string
   postalCode: string
   prefecture: string
-  city: string
-  street: string
-  buildingName: string
-  paymentDueDate: string | dayjs.Dayjs
-  email: string
+  streetAddress: string
+  buildingName?: string
 }
 
 export default async function getCustomerList(): Promise<ApiResponse<CustomerData[]>> {
@@ -24,69 +39,68 @@ export default async function getCustomerList(): Promise<ApiResponse<CustomerDat
     message: 'Success',
     data: [
       {
-        customerName: 'Leo',
-        email: 'Anastasia_McGlynn@example.com',
-        phoneNumber: '631.358.0516 x4835',
-        street: '798 Abbott Manor',
-        city: 'Bloomington',
-        postalCode: '13315-3600',
-        id: '85b45c72-095c-42a5-b3a0-03c22b46e4e4',
-        buildingName: '',
-        paymentDueDate: '',
-        closeingDay: '',
-        prefecture: '',
-      },
-      {
-        customerName: 'Reilly',
+        name: '㈲エスユー',
         email: 'Jeanie.Fritsch-Gerhold@example.com',
         phoneNumber: '736.214.3844 x30389',
-        street: '77355 Joan Ford',
+        streetAddress: '77355 Joan Ford',
         city: 'Donnellychester',
         postalCode: '81709',
-        id: '42b3a0d8-a6ac-4e47-baff-e0c1b6a5dc15',
+        id: 1,
         buildingName: '',
-        paymentDueDate: '',
-        closeingDay: '',
+        paymentDeadline: '',
+        closingDay: '',
         prefecture: '',
+        companyCode: '1',
+        companyType: '',
+        fax: '',
       },
       {
-        customerName: 'Obie',
+        name: 'ニデックマシンツ－ル㈱',
         email: 'Frances63@gmail.com',
         phoneNumber: '754.624.2886 x63507',
-        street: '31270 Mona Cove',
+        streetAddress: '31270 Mona Cove',
         city: 'Nienowmouth',
         postalCode: '33605',
-        id: '7b5c4dff-7a91-4cb9-9844-2ac94707ac12',
+        id: 2,
         buildingName: '',
-        paymentDueDate: '',
-        closeingDay: '',
+        paymentDeadline: '',
+        closingDay: '',
         prefecture: '',
+        companyCode: '2',
+        companyType: '',
+        fax: '',
       },
       {
-        customerName: 'Linnea',
+        name: 'Linnea',
         email: 'Justine4@example.com',
         phoneNumber: '(324) 453-4660 x2611',
-        street: '403 McClure Village',
+        streetAddress: '403 McClure Village',
         city: 'Kiehnfort',
         postalCode: '23134-2161',
-        id: '72364c15-779c-4d5a-8065-02cdda4d4c6b',
+        id: 3,
         buildingName: '',
-        paymentDueDate: '',
-        closeingDay: '',
+        paymentDeadline: '',
+        closingDay: '',
         prefecture: '',
+        companyCode: '72364c15-779c-4d5a-8065-02cdda4d4c6b',
+        companyType: '',
+        fax: '',
       },
       {
-        customerName: 'Kassandra',
+        name: 'Kassandra',
         email: 'Ruthe.Gutmann@gmail.com',
         phoneNumber: '644-667-3041 x7722',
-        street: '43756 3rd Avenue',
+        streetAddress: '43756 3rd Avenue',
         city: 'Cristianton',
         postalCode: '89109',
-        id: '3812404b-f8e1-41c2-97ba-be1f8c9ad7f7',
+        id: 4,
         buildingName: '',
-        paymentDueDate: '',
-        closeingDay: '',
+        paymentDeadline: '',
+        closingDay: '',
         prefecture: '',
+        companyCode: '3812404b-f8e1-41c2-97ba-be1f8c9ad7f7',
+        companyType: '',
+        fax: '',
       },
     ],
   }

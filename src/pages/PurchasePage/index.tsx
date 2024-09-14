@@ -276,6 +276,7 @@ export default function PurchasePage() {
                 startIcon={<AddIcon />}
                 size='large'
                 onClick={handleAddClick}
+                sx={{ visibility: 'hidden' }}
               >
                 追加
               </StyledButton>
@@ -284,6 +285,7 @@ export default function PurchasePage() {
                 startIcon={<DeleteIcon />}
                 size='large'
                 onClick={handleDeleteClick}
+                sx={{ visibility: 'hidden' }}
               >
                 削除
               </StyledButton>
@@ -294,6 +296,7 @@ export default function PurchasePage() {
                 startIcon={<EditIcon />}
                 size='large'
                 onClick={handleEditClick}
+                sx={{ visibility: 'hidden' }}
               >
                 編集
               </StyledButton>

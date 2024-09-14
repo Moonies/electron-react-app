@@ -34,7 +34,7 @@ export const mockData = [
   },
   {
     id: '2305474',
-    customerCompanyId: '',
+    customerCompanyId: '2',
     customerCompanyName: 'ニデックマシンツ－ル㈱',
     quotationRequestDate: '2024/07/01',
     paymentDueDate: '2024/01/30',
@@ -85,7 +85,7 @@ export const mockData = [
   },
   {
     id: '2305479',
-    customerCompanyId: '',
+    customerCompanyId: '2',
     customerCompanyName: 'ニデックマシンツ－ル㈱',
     quotationRequestDate: '2024/07/01',
     paymentDueDate: '2024/07/19',
@@ -120,7 +120,7 @@ export const mockData = [
   },
   {
     id: '2305274',
-    customerCompanyId: '',
+    customerCompanyId: '2',
     customerCompanyName: 'ニデックマシンツ－ル㈱',
     quotationRequestDate: '2024/07/01',
     paymentDueDate: '2024/07/19',
@@ -173,7 +173,7 @@ export const mockData = [
   },
   {
     id: '102101',
-    customerCompanyId: '',
+    customerCompanyId: '1',
     customerCompanyName: '㈲エスユー',
     quotationRequestDate: '2024/07/01',
     paymentDueDate: '2024/05/23',

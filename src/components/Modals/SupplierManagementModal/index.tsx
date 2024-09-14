@@ -31,16 +31,29 @@ interface SupplierManagementModalProps {
   mode: 'add' | 'edit'
 }
 const defaultFormData: AddNewSupplierProps = {
-  customerName: '',
-  closeingDay: '',
+  // customerName: '',
+  // closeingDay: '',
+  // phoneNumber: '',
+  // postalCode: '',
+  // prefecture: '',
+  // city: '',
+  // street: '',
+  // buildingName: '',
+  // paymentDueDate: '',
+  // email: '',
   phoneNumber: '',
   postalCode: '',
   prefecture: '',
   city: '',
-  street: '',
   buildingName: '',
-  paymentDueDate: '',
   email: '',
+  closingDay: '',
+  paymentDeadline: '',
+  companyCode: '',
+  companyType: '',
+  fax: '',
+  name: '',
+  streetAddress: '',
 }
 export default function SupplierManagementModal({
   open,
@@ -116,16 +129,16 @@ export default function SupplierManagementModal({
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <TextField
               label='名称'
-              value={formData.customerName}
-              onChange={e => handleChange('customerName', e.target.value)}
+              value={formData.name}
+              onChange={e => handleChange('name', e.target.value)}
               fullWidth
               margin='normal'
               // sx={{ flex: 1 }}
             />
             <TextField
               label='締日'
-              value={formData.closeingDay}
-              onChange={e => handleChange('closeingDay', e.target.value)}
+              value={formData.closingDay}
+              onChange={e => handleChange('closingDay', e.target.value)}
               // fullWidth
               margin='normal'
               select
@@ -210,8 +223,8 @@ export default function SupplierManagementModal({
             <TextField
               label='番地'
               type='text'
-              value={formData.street}
-              onChange={e => handleChange('street', parseFloat(e.target.value))}
+              value={formData.streetAddress}
+              onChange={e => handleChange('streetAddress', parseFloat(e.target.value))}
               // fullWidth
               margin='normal'
             />

@@ -2,20 +2,19 @@ import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 
 export interface UserData {
+  // id:number
   userId: string
   username: string
   fullName: string
-  password?: string
-  role: string
+  password: string
+  roles: string
 }
 
 export interface GetUserListProps {
   username?: string
 }
 
-export default async function getUserList({
-  username,
-}: GetUserListProps): Promise<ApiResponse<UserData[]>> {
+export default async function getUserList(): Promise<ApiResponse<UserData[]>> {
   // when use real API
   // try {
   //   const response = await axiosInstance.get<ApiResponse<UserData[]>>('/api/users')
@@ -45,35 +44,35 @@ export default async function getUserList({
           fullName: '平井昌司',
           username: 'Lenora-66b058a49973bc5b41e4eca0',
           password: '825h7Tmp4QCyIaZ',
-          role: 'normal',
+          roles: 'normal',
         },
         {
           userId: '66b058a49973bc5b41e4eca1',
           fullName: 'Alf',
           username: 'Alf-66b058a49973bc5b41e4eca1',
           password: 'GEv2xZjf3NZZTLZ',
-          role: 'senior',
+          roles: 'senior',
         },
         {
           userId: 'AA0011',
           fullName: '村田幸恵',
           username: 'Jensen-66b058a49973bc5b41e4eca2',
           password: 'GMSH3C0qBIMoQGN',
-          role: 'manager',
+          roles: 'manager',
         },
         {
           userId: '66b058a49973bc5b41e4eca3',
           fullName: 'Karelle',
           username: 'Karelle-66b058a49973bc5b41e4eca3',
           password: 'ednHHCXywJzA0ej',
-          role: 'administator',
+          roles: 'administator',
         },
         {
           userId: '66b058a49973bc5b41e4eca4',
           fullName: 'Ethyl',
           username: 'Ethyl-66b058a49973bc5b41e4eca4',
           password: 'ZewRPqNC4nuDiUB',
-          role: 'normal',
+          roles: 'normal',
         },
       ]
       resolve({ code: 200, message: 'success', data: data })
@@ -84,7 +83,7 @@ export default async function getUserList({
       //     username: 'admin',
       //     name: 'Admin',
       //     lastname: 'eiei',
-      //     role: 'Administator',
+      //     roles: 'Administator',
       //     token: 'abcd001',
       //   }
       //   resolve({ code: 200, message: 'success', data: data })

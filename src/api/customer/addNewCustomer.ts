@@ -1,18 +1,21 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 
 export interface AddNewCustomerProps {
-  customerName: string
-  closeingDay: string | dayjs.Dayjs
+  closingDay: string
+  paymentDeadline: string | Dayjs
+  city: string
+  companyCode: string
+  companyType: string
+  email: string
+  fax?: string
+  name: string
   phoneNumber: string
   postalCode: string
   prefecture: string
-  city: string
-  street: string
-  buildingName: string
-  paymentDueDate: string | dayjs.Dayjs
-  email: string
+  streetAddress: string
+  buildingName?: string
 }
 
 export default async function addNewCustomer({}: AddNewCustomerProps): Promise<ApiResponse<null>> {

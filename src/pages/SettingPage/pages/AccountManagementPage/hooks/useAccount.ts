@@ -39,7 +39,7 @@ export default function useAccount() {
   )
 
   const getUserList = async () => {
-    const result = await withLoading(api.user().getUserList({ username: 'aaaa' }))
+    const result = await withLoading(api.user().getUserList())
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }

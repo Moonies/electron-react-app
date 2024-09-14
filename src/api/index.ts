@@ -10,7 +10,7 @@ import { default as supplierApi } from './supplier'
 import { default as componentApi } from './component'
 import { default as purchaseApi } from './purchase'
 import { default as orderApi } from './order'
-
+import { default as prefectureApi } from './perfecture'
 import axios, { AxiosInstance } from 'axios'
 
 export interface ApiResponse<T> {
@@ -55,4 +55,5 @@ export const api = {
   component: componentApi,
   purchase: purchaseApi,
   order: orderApi,
+  prefecture: prefectureApi,
 }

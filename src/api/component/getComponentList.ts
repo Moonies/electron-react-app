@@ -8,7 +8,7 @@ export interface ComponentData {
   componentName: string
   lastestPriceDate: string | dayjs.Dayjs
   price: string
-  productId: string
+  // productId: string
   quantity: number
 }
 
@@ -25,7 +25,7 @@ export default async function getComponentList(): Promise<ApiResponse<ComponentD
         componentName: 'Kulas - Will',
         lastestPriceDate: '1983-06-25T21:19:48.183Z',
         price: '10.00',
-        productId: '66b4118dcb5d152039f74148',
+        // productId: '66b4118dcb5d152039f74148',
         quantity: 0,
       },
       {
@@ -34,7 +34,7 @@ export default async function getComponentList(): Promise<ApiResponse<ComponentD
         componentName: 'Gleason - Schimmel',
         lastestPriceDate: '1985-09-15T08:16:17.251Z',
         price: '510.00',
-        productId: '66b4118dcb5d152039f7414a',
+        // productId: '66b4118dcb5d152039f7414a',
         quantity: 0,
       },
       {
@@ -43,7 +43,7 @@ export default async function getComponentList(): Promise<ApiResponse<ComponentD
         componentName: 'Mayer - Mohr',
         lastestPriceDate: '1972-11-20T16:29:05.736Z',
         price: '114.00',
-        productId: '66b4118dcb5d152039f7414c',
+        // productId: '66b4118dcb5d152039f7414c',
         quantity: 0,
       },
       {
@@ -52,7 +52,7 @@ export default async function getComponentList(): Promise<ApiResponse<ComponentD
         componentName: 'Brekke Group',
         lastestPriceDate: '1982-11-15T03:50:33.006Z',
         price: '854.00',
-        productId: '66b4118dcb5d152039f7414e',
+        // productId: '66b4118dcb5d152039f7414e',
         quantity: 0,
       },
       {
@@ -61,7 +61,7 @@ export default async function getComponentList(): Promise<ApiResponse<ComponentD
         componentName: 'Kessler Group',
         lastestPriceDate: '1992-09-25T13:28:27.957Z',
         price: '959.00',
-        productId: '66b4118dcb5d152039f74150',
+        // productId: '66b4118dcb5d152039f74150',
         quantity: 0,
       },
     ],

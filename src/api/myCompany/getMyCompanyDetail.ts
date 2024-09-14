@@ -3,18 +3,32 @@ import { axiosInstance, ApiResponse } from 'api'
 import { mockData } from './_mockSealData'
 
 export interface MyCompanyDetail {
-  companyName: string
-  companyPhoneNumber: string
-  companyEmail: string
-  corporateNumber: string
-  companyBankAccount: string
-  companyPostCode: string
-  companyPerfecture: string
-  companyCity: string
-  companyAddressCode: string
-  companyBuildingDetail: string
-  companyFax?: string
-  seal: string
+  // companyName: string
+  // companyPhoneNumber: string
+  // companyEmail: string
+  // corporateNumber: string
+  // companyBankAccount: string
+  // companyPostCode: string
+  // companyPerfecture: string
+  // companyCity: string
+  // companyAddressCode: string
+  // companyBuildingDetail: string
+  // companyFax?: string
+  // seal: string
+
+  accountNumber: string
+  city: string
+  corporationNumber: string
+  email: string
+  fax?: string
+  id: number
+  name: string
+  phoneNumber: string
+  postalCode: string
+  prefecture: string
+  streetAddress: string
+  bildingName?: string
+  tax: number
 }
 export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompanyDetail>> {
   // when use real API
@@ -41,18 +55,30 @@ export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompan
     setTimeout(() => {
       //test only
       let data = {
-        companyName: '株式会社さんせん清水',
-        companyPhoneNumber: '0900000000',
-        companyEmail: 'info@sansenshimizu.com',
-        corporateNumber: '1234567890',
-        companyBankAccount: '002004003',
-        companyPostCode: '6110915',
-        companyPerfecture: '京都市',
-        companyCity: '伏見区',
-        companyAddressCode: '淀際目町335-5',
-        companyBuildingDetail: 'aatower',
-        companyFax: '07003151547',
-        seal: mockData,
+        accountNumber: '002004003',
+        city: '伏見区',
+        corporationNumber: '1234567890',
+        email: 'info@sansenshimizu.com',
+        fax: '07003151547',
+        id: 0,
+        name: '株式会社さんせん清水',
+        phoneNumber: '0900000000',
+        postalCode: '6110915',
+        prefecture: '京都市',
+        streetAddress: '淀際目町335-5',
+        tax: 10,
+        // companyName: '株式会社さんせん清水',
+        // companyPhoneNumber: '0900000000',
+        // companyEmail: 'info@sansenshimizu.com',
+        // corporateNumber: '1234567890',
+        // companyBankAccount: '002004003',
+        // companyPostCode: '6110915',
+        // companyPerfecture: '京都市',
+        // companyCity: '伏見区',
+        // companyAddressCode: '淀際目町335-5',
+        // companyBuildingDetail: 'aatower',
+        // companyFax: '07003151547',
+        // seal: mockData,
       }
 
       resolve({ code: 200, message: 'success', data: data })

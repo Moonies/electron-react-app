@@ -208,7 +208,7 @@ export default function PurchaseModal({
   }
 
   const findCustomerById = (customerId: string | null) => {
-    return supplierCompanyListData?.find(customer => customer.id === customerId) || null
+    return supplierCompanyListData?.find(customer => customer.companyCode === customerId) || null
   }
 
   return (
@@ -295,11 +295,11 @@ export default function PurchaseModal({
                   const { key, ...optionProps } = props
                   return (
                     <Box key={key} component='li' {...optionProps}>
-                      {option.customerName}
+                      {option.name}
                     </Box>
                   )
                 }}
-                getOptionLabel={option => option.customerName}
+                getOptionLabel={option => option.name}
                 sx={{ width: '35%', marginTop: 2 }}
                 renderInput={params => <TextField {...params} label='顧客名称' />}
                 readOnly={modalMode === 'view'}

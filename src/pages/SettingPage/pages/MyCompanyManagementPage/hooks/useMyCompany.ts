@@ -3,18 +3,6 @@ import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import useLoading from 'hooks/useLoading'
 import { useState } from 'react'
 
-const initialData = {
-  companyName: '',
-  companyPhoneNumber: '',
-  companyEmail: '',
-  corporateNumber: '',
-  companyBankAccount: '',
-  companyPostCode: '',
-  companyPerfecture: '',
-  companyCity: '',
-  companyAddressCode: '',
-  companyBuildingDetail: '',
-}
 export default function useMyCompany() {
   const [myCompanyDetail, setMyCompanyDetail] = useState<Partial<MyCompanyDetail | null>>()
   const { withLoading } = useLoading()

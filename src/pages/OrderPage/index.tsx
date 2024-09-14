@@ -20,10 +20,11 @@ import useOrder from './hooks/useOrder'
 import OrderModal from 'components/Modals/OrderModal'
 import { OrderData } from 'api/order/getOrderList'
 import useExportOrder from './hooks/useExportOrder'
-import { pdf, PDFDownloadLink, usePDF, BlobProvider } from '@react-pdf/renderer'
+import { pdf, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer'
 import { DeliverySlipData, PDFDocument, PDFGenerator } from './components/SlipDeliveryOrder'
 import useLoading from 'hooks/useLoading'
 import { OrderStatus } from 'api/order'
+import SelectTypeOrderDialog from 'components/Dialogs/SelectTypeOrderDialog'
 
 export default function OrderPage() {
   const {
@@ -50,9 +51,10 @@ export default function OrderPage() {
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
   const { exportSaleSelected, prepareSlipData } = useExportOrder()
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [orderType, setOrderType] = useState<string>()
   const [showPDF, setShowPDF] = useState(false)
   const { setLoading } = useLoading()
-  // const [instance, updateInstance] = usePDF({})
 
   const [slipsData, setSlipsData] = useState<DeliverySlipData>()
 
@@ -307,6 +309,7 @@ export default function OrderPage() {
                 startIcon={<AddIcon />}
                 size='large'
                 onClick={handleAddClick}
+                // onClick={() => setDialogOpen(true)}
               >
                 追加
               </StyledButton>
@@ -378,6 +381,17 @@ export default function OrderPage() {
           onConfirm={handleModalConfirm}
           initialData={selectedOrder}
           mode={modalMode}
+        />
+      )}
+      {dialogOpen && (
+        <SelectTypeOrderDialog
+          onClose={() => setDialogOpen(false)}
+          onSubmit={orderType => {
+            setOrderType(orderType)
+            setDialogOpen(false)
+            handleAddClick()
+          }}
+          open={dialogOpen}
         />
       )}
       {/* {showPDF && slipsData && (

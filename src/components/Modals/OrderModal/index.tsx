@@ -38,6 +38,7 @@ import AddnewProductDialog from 'components/Dialogs/AddNewProductListDialog'
 import { TransitionProps } from '@mui/material/transitions'
 import useLoading from 'hooks/useLoading'
 import { UserData } from 'api/user/getUserList'
+import customer from 'api/customer'
 interface Option {
   label: string
   id: number
@@ -176,7 +177,7 @@ export default function OrderModal({
   }
 
   const findCustomerById = (customerId: string | null) => {
-    return customerListData?.find(customer => customer.id === customerId) || null
+    return customerListData?.find(customer => customer.companyCode === customerId) || null
   }
 
   const statusList = [
@@ -291,20 +292,20 @@ export default function OrderModal({
                   const { key, ...optionProps } = props
                   return (
                     <Box key={key} component='li' {...optionProps}>
-                      {option.customerName}
+                      {option.name}
                     </Box>
                   )
                 }}
-                getOptionLabel={option => option.customerName}
+                getOptionLabel={option => option.name}
                 sx={{ width: '35%', marginTop: 2 }}
-                renderInput={params => <TextField {...params} label='担当者' />}
+                renderInput={params => <TextField {...params} label='顧客名' />}
                 readOnly={modalMode === 'view'}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
+                isOptionEqualToValue={(option, value) => option.companyCode === value.companyCode}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
                     setFormData(prev => ({
                       ...prev,
-                      customerCompanyId: newValue.id,
+                      customerCompanyId: newValue.companyCode,
                     }))
                   }
                 }}
