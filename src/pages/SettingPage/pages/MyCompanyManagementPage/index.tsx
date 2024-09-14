@@ -32,8 +32,8 @@ export default function MyCompanyManagementPage() {
   }, [myCompanyDetail])
 
   const handleClickGetPostCode = () => {
-    console.log(formCompanyDetail?.companyPostCode)
-    getPostCode(formCompanyDetail?.companyPostCode ?? '')
+    // console.log(formCompanyDetail?.companyPostCode)
+    getPostCode(formCompanyDetail?.postalCode ?? '')
   }
 
   const handleSaveClick = async () => {
@@ -76,8 +76,8 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='companyName'
             label='企業名称'
-            value={formCompanyDetail?.companyName ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyName) }}
+            value={formCompanyDetail.name ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.name) }}
             // onChange={e => handleChange('companyName', e.target.value)}
             onChange={handleChange}
           />
@@ -85,8 +85,8 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='companyPhoneNumber'
             label='電話番号'
-            value={formCompanyDetail?.companyPhoneNumber ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyPhoneNumber) }}
+            value={formCompanyDetail.phoneNumber ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.phoneNumber) }}
             // onChange={e => handleChange('companyTelNumber', e.target.value)}
             onChange={handleChange}
           />
@@ -94,8 +94,8 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='companyEmail'
             label='メール'
-            value={formCompanyDetail?.companyEmail ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyEmail) }}
+            value={formCompanyDetail.email ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.email) }}
             type='email'
             // onChange={e => handleChange('mail', e.target.value)}
             onChange={handleChange}
@@ -106,8 +106,8 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='corporateNumber'
             label='法人番号'
-            value={formCompanyDetail?.corporateNumber ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.corporateNumber) }}
+            value={formCompanyDetail.corporationNumber ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.corporationNumber) }}
             // onChange={e => handleChange('corporateNumber', e.target.value)}
             onChange={handleChange}
           />
@@ -115,8 +115,8 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='companyBankAccount'
             label='口座番号'
-            value={formCompanyDetail?.companyBankAccount ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyBankAccount) }}
+            value={formCompanyDetail.accountNumber ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.accountNumber) }}
             // onChange={e => handleChange('companyBankAccount', e.target.value)}
             onChange={handleChange}
           />
@@ -129,8 +129,8 @@ export default function MyCompanyManagementPage() {
             // fullWidth
             name='companyPostCode'
             label='郵便番号'
-            value={formCompanyDetail?.companyPostCode ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyPostCode) }}
+            value={formCompanyDetail.postalCode ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.postalCode) }}
             // onChange={e => handleChange('postCode', e.target.value)}
             onChange={handleChange}
           />
@@ -149,16 +149,16 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='companyPerfecture'
             label='首都府県'
-            value={formCompanyDetail?.companyPerfecture ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyPerfecture) }}
+            value={formCompanyDetail.prefecture ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.prefecture) }}
             // onChange={e => handleChange('prefecture',e.target.value)}
           />
           <TextField
             fullWidth
             name='companyCity'
             label='市区町村'
-            value={formCompanyDetail?.companyCity ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyCity) }}
+            value={formCompanyDetail.city ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.city) }}
             // onChange={e => handleChange('city',e.target.value)}
           />
         </Box>
@@ -167,8 +167,8 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='companyAddressCode'
             label='番地'
-            value={formCompanyDetail?.companyAddressCode ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyAddressCode) }}
+            value={formCompanyDetail.streetAddress ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail.streetAddress) }}
             // onChange={e => handleChange('addressCode', e.target.value)}
             onChange={handleChange}
           />
@@ -176,8 +176,8 @@ export default function MyCompanyManagementPage() {
             fullWidth
             name='companyBuildingDetail'
             label='建物名・部屋番号'
-            value={formCompanyDetail?.companyBuildingDetail ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.companyBuildingDetail) }}
+            value={formCompanyDetail.bildingName ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.bildingName) }}
             // onChange={e => handleChange('buildName', e.target.value)}
             onChange={handleChange}
           />

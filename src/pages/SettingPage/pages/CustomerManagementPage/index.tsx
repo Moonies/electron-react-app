@@ -82,7 +82,7 @@ export default function CustomerManagementPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれた　 ${selectedData.customerName}　を削除してもよろしいですか?`,
+          message: `この選ばれた　 ${selectedData.name}　を削除してもよろしいですか?`,
         })
         if (confirmed) {
           // Perform delete operation

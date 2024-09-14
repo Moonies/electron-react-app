@@ -29,7 +29,7 @@ interface AccountManagementModalProps {
 }
 const defaultFormData: AddNewUserData = {
   fullName: '',
-  role: '',
+  roles: '',
   username: '',
   password: '',
 }
@@ -40,7 +40,7 @@ export default function AccountManagementModal({
   initialData,
   mode,
 }: AccountManagementModalProps) {
-  const [formData, setFormData] = useState<AddNewUserData>(defaultFormData)
+  const [formData, setFormData] = useState<AddNewUserData | UserData>(defaultFormData)
 
   const roleList = [
     {
@@ -141,9 +141,9 @@ export default function AccountManagementModal({
             <TextField
               label='役柄'
               type='text'
-              value={formData.role}
+              value={formData.roles}
               defaultValue={undefined}
-              onChange={e => handleChange('role', e.target.value)}
+              onChange={e => handleChange('roles', e.target.value)}
               // fullWidth
               margin='normal'
               select

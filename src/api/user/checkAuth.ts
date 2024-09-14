@@ -3,11 +3,12 @@ import { axiosInstance, ApiResponse } from 'api'
 
 export interface AuthData {
   id: number
+  // id:number
+  userId: string
   username: string
-  name: string
-  lastname: string
-  email?: string
-  role: string
+  fullName: string
+  password: string
+  roles: string
   token: string
 }
 
@@ -41,10 +42,12 @@ export default async function CheckAuth(
       let data = {
         id: 1,
         username: 'admin',
-        name: 'Admin',
-        lastname: 'eiei',
-        role: 'Administator',
+        roles: 'Administator',
         token: 'abcd001',
+        // id:number
+        userId: '',
+        fullName: '',
+        password: 'abc11011',
       }
       resolve({ code: 200, message: 'success', data: data })
 

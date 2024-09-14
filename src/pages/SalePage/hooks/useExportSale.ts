@@ -75,12 +75,12 @@ export default function useExportSale() {
     const { data } = await api.myCompany().getMyCompanyDetail()
     if (data) {
       return {
-        name: data.companyName,
-        email: data.companyEmail,
-        fullAddress: data.companyPerfecture + data.companyCity + data.companyAddressCode,
-        phoneNumber: formatPhoneNumber(data.companyPhoneNumber),
-        postCode: formatPostcode(data.companyPostCode),
-        fax: formatPhoneNumber(data.companyFax),
+        name: data.name,
+        email: data.email,
+        fullAddress: data.prefecture + data.city + data.streetAddress,
+        phoneNumber: formatPhoneNumber(data.phoneNumber),
+        postCode: formatPostcode(data.postalCode),
+        fax: formatPhoneNumber(data.fax),
       }
       // setExportDetail(prev => ({ ...prev, sender: newSender }))
     }

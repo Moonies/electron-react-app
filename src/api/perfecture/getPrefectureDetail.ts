@@ -1,35 +1,25 @@
-import axios from 'axios'
+import React from 'react'
 import { ApiResponse } from 'api'
-import { mockdata } from './_mockdata'
-import { ComponentData } from 'api/component/getComponentList'
 
-type ProductDetailComponent = {
-  id: string
-  componentNumber: string
-  componentName: string
-  price: number
-  quantity: number
-}
-export interface ProductDataDetail {
-  productId: string
-  productName: string
-  stockQuantity: number
-  productCost: number
-  productPrice: number
-  productUnit: string
-  component: ProductDetailComponent[]
+type prefectureDetail = {
+  city: string
+  prefeucture: string
+  postalCode: string
 }
 
-export default async function getProductData(
-  keyword: string
-): Promise<ApiResponse<{ data: ProductDataDetail[] }>> {
-  //for beta:test
+export default async function getPrefectureDetail(
+  postalCode: string
+): Promise<ApiResponse<{ prefectureDetail: prefectureDetail }>> {
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
     message: 'Success',
     data: {
-      data: mockdata,
+      prefectureDetail: {
+        city: '',
+        postalCode: '',
+        prefeucture: '',
+      },
     },
   }
   // when use real API

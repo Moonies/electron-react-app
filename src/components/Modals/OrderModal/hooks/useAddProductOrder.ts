@@ -164,7 +164,7 @@ export default function useAddOrder(orderDeta: OrderData) {
   )
 
   const getUserList = async () => {
-    const result = await api.user().getUserList({})
+    const result = await api.user().getUserList()
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }

@@ -4,8 +4,8 @@ import { axiosInstance, ApiResponse } from 'api'
 export interface AddNewUserData {
   username: string
   fullName: string
-  password?: string
-  role: string
+  password: string
+  roles: string
 }
 
 export interface GetUserListProps {
