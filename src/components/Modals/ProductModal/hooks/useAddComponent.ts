@@ -1,62 +1,59 @@
 import { debounce } from '@mui/material'
 import {
   GridColDef,
-  GridActionsCellItem,
-  GridRowModes,
-  GridRowModesModel,
-  GridRowId,
-  GridRowModel,
-  GridRowsProp,
   GridEventListener,
   GridRowEditStopReasons,
+  GridRowId,
+  GridRowModel,
+  GridRowModes,
+  GridRowModesModel,
+  GridRowsProp,
 } from '@mui/x-data-grid'
-import { ComponentData } from 'api/component/getComponentList'
-import { CustomerData } from 'api/customer/getCustomerList'
+import { ComponentData } from 'api/component/getComponentData'
 import { api } from 'api/index'
-import { OrderData } from 'api/order/getOrderList'
 import { ProductDataDetail } from 'api/product/getProductData'
-import { PurchaseData } from 'api/purchase/getPurchaseList'
-import { SupplierData } from 'api/supplier/getSupplierList'
-import { UserData } from 'api/user/getUserList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
-import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
 import useLoading from 'hooks/useLoading'
-
 import { useCallback, useMemo, useState } from 'react'
+import { formatJPY } from 'utils/formatUtils'
 
-export default function useAddComponent(purchaseData: PurchaseData) {
+export default function useAddComponent() {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
-  const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>(
-    purchaseData.component
-  )
-  const [componentData, setComponentData] = useState<ComponentData[]>([])
-  const [userListData, setUserListData] = useState<UserData[]>([])
-  const [supplierCompanyListData, setSupplierCompanyListData] = useState<SupplierData[]>([])
-  const { withLoading, setLoading } = useLoading()
+  const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>([])
+  const { setLoading } = useLoading()
 
-  const handleAddNewComponent = (newComponent: NewComponentDetail) => {
+  const handleAddNewComponent = async (newComponent: NewComponentDetail) => {
+    setLoading(true)
     let currentIndex = newComponentListData.length
     let currentComponentData = newComponentListData
-    //should be get componentbyId for check and create new Id
+    let totalAmount = await getTotalRemainComponent(newComponent.id)
+
     if (currentComponentData.length > 0) {
       const resultIndex = currentComponentData.findIndex(
         item => item.componentNumber === newComponent.componentNumber
       )
       if (resultIndex !== -1) {
-        let newRow = currentComponentData.map((product, index) =>
+        let newRow = currentComponentData.map((component, index) =>
           index === resultIndex
-            ? { ...product, quantity: product.quantity + newComponent.quantity }
-            : product
+            ? {
+                ...component,
+                quantity: component.quantity + newComponent.quantity,
+                totalQuantity: totalAmount,
+              }
+            : { ...component, totalQuantity: totalAmount }
         )
         setNewComponentListData(newRow)
       } else {
         // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
+        setNewComponentListData(prev => [...prev, { ...newComponent, totalQuantity: totalAmount }])
       }
     } else {
+      setNewComponentListData(prev => [...prev, { ...newComponent, totalQuantity: totalAmount }])
+
       // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
     }
+    setLoading(false)
   }
-
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true
@@ -98,28 +95,13 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
+  const getTotalRemainComponent = useCallback(async (componentId: string) => {
+    const { data } = await api.component().getTotalAmountComponent(componentId)
 
-  const debouncedFetchOptions = useCallback(
-    debounce(async (query: string) => {
-      if (query.length >= 2) {
-        setLoading(true)
-        try {
-          const fetchedOptions = await api.component().getComponentList()
-          setComponentData(fetchedOptions.data ?? [])
-        } catch (error) {
-          console.error('Error fetching options:', error)
-        } finally {
-          setLoading(false)
-        }
-      }
-    }, 300),
-    []
-  )
+    return data?.totalAmount ?? 0
 
-  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-  })
+    // setNewComponentListData({ ...updatedProducts })
+  }, [])
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -143,12 +125,18 @@ export default function useAddComponent(purchaseData: PurchaseData) {
         editable: true,
       },
       {
+        field: 'totalQuantity',
+        headerName: '合計残り',
+        headerAlign: 'center',
+        flex: 1,
+      },
+      {
         field: 'unitPrice',
         headerName: '単価',
         type: 'number',
         headerAlign: 'center',
         flex: 1,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueFormatter: value => formatJPY(Number(value)),
       },
       {
         field: 'totalPrice',
@@ -156,7 +144,7 @@ export default function useAddComponent(purchaseData: PurchaseData) {
         type: 'number',
         headerAlign: 'center',
         flex: 1,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueFormatter: value => formatJPY(Number(value)),
         valueGetter: (value, row) => {
           return row.quantity * row.unitPrice
         },
@@ -171,38 +159,17 @@ export default function useAddComponent(purchaseData: PurchaseData) {
     ],
     []
   )
-
-  const getUserList = async () => {
-    const result = await api.user().getUserList()
-    if (result.code === 200 && result.data) {
-      setUserListData(result.data)
-    }
-  }
-  const getCustomerList = async () => {
-    const result = await api.supplier().getSupplierList()
-    if (result.data && result.code === 200) {
-      setSupplierCompanyListData(result.data)
-    }
-  }
   return {
-    columns,
-    newComponentListData,
-    rowModesModel,
+    handleAddNewComponent,
+    handleRowEditStop,
+    handleEditClick,
+    handleSaveClick,
+    handleDeleteClick,
+    handleCancelClick,
     processRowUpdate,
     handleRowModesModelChange,
-    handleRowEditStop,
-    setRowModesModel,
-    setNewComponentListData,
-    handleSaveClick,
-    handleCancelClick,
-    handleEditClick,
-    handleDeleteClick,
-    debouncedFetchOptions,
-    componentData,
-    handleAddNewComponent,
-    userListData,
-    supplierCompanyListData,
-    getUserList,
-    getCustomerList,
+    newComponentListData,
+    rowModesModel,
+    columns,
   }
 }

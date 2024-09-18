@@ -17,7 +17,7 @@ import dayjs from 'dayjs'
 import React, { useCallback, useEffect, useState } from 'react'
 
 export type NewComponentDetail = {
-  id?: string
+  id: string
   componentNumber: string
   componentName: string
   quantity: number
@@ -29,20 +29,18 @@ interface ComponentDataExtended extends ComponentData {
   inputValue?: string
 }
 
-type AutocompleteOption = ComponentDataExtended | string
-
 interface DialogProductProps {
   open: boolean
   onClose: () => void
   onSubmit: (inputProduct: NewComponentDetail) => void
 }
 
-export default function AddnewComponentListDialog({ open, onClose, onSubmit }: DialogProductProps) {
+export default function AddNewComponentListDialog({ open, onClose, onSubmit }: DialogProductProps) {
   const [formData, setFormData] = useState<NewComponentDetail>({
     id: '',
     componentNumber: '',
     componentName: '',
-    quantity: 0,
+    quantity: 1,
     unitPrice: 0,
   })
   const [loading, setLoading] = useState(false)
@@ -89,7 +87,7 @@ export default function AddnewComponentListDialog({ open, onClose, onSubmit }: D
         }
       }}
     >
-      <DialogTitle>Please Select Product</DialogTitle>
+      <DialogTitle>Please Select Component</DialogTitle>
       <form onSubmit={submitProduct}>
         <DialogContent>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
@@ -97,43 +95,17 @@ export default function AddnewComponentListDialog({ open, onClose, onSubmit }: D
               options={componentList}
               renderOption={(props, option) => {
                 const { key, ...optionProps } = props
-                //newValue
-                // if (typeof option === 'string') {
-                //   return (
-                //     <Box key={key} component='li' {...optionProps}>
-                //       {option}
-                //     </Box>
-                //   )
-                // }
-                // if ('inputValue' in option) {
-                //   return (
-                //     <Box key={key} component='li' {...optionProps}>
-                //       Add "{option.inputValue}"
-                //     </Box>
-                //   )
-                // }
-                // return (
-                //   <Box key={key} component='li' {...optionProps}>
-                //     {option.componentNumber + '  :  ' + option.componentName + `(${option.price})`}
-                //   </Box>
-                // )
                 return (
                   <Box key={key} component='li' {...optionProps}>
-                    {option.componentName.startsWith('Add "')
+                    {option.componentNumber}: {option.componentName} (¥{option.price})
+                    {/* cannot use before confirmed */}
+                    {/* {option.componentName.startsWith('Add "')
                       ? option.componentName
-                      : `${option.componentNumber}: ${option.componentName} (¥${option.price})`}
+                      : `${option.componentNumber}: ${option.componentName} (¥${option.price})`} */}
                   </Box>
                 )
               }}
               getOptionLabel={option => {
-                //newvalue
-                // if (typeof option === 'string') {
-                //   return option
-                // }
-                // if ('inputValue' in option) {
-                //   return option.inputValue || ''
-                // }
-                // return option.componentNumber + '  :  ' + option.componentName
                 return typeof option === 'string' ? option : option.componentNumber
               }}
               freeSolo
@@ -159,86 +131,42 @@ export default function AddnewComponentListDialog({ open, onClose, onSubmit }: D
                 setFormData(prev => ({ ...prev, componentNumber: newInputValue }))
               }}
               onChange={(event, newValue) => {
-                //newValue
-                // if (typeof newValue === 'string') {
-                //   setIsNewValue(true)
-                //   setFormData(prev => ({
-                //     ...prev,
-                //     componentNumber: newValue,
-                //     componentName: '',
-                //     price: 0,
-                //   }))
-                // } else if (newValue && 'inputValue' in newValue) {
-                //   setIsNewValue(true)
-                //   setFormData(prev => ({
-                //     ...prev,
-                //     componentNumber: newValue.inputValue || '',
-                //     componentName: '',
-                //     price: 0,
-                //   }))
-                // } else if (newValue) {
-                //   setIsNewValue(false)
-                //   setFormData({
-                //     id: newValue.id,
-                //     componentNumber: newValue.componentNumber,
-                //     componentName: newValue.componentName,
-                //     quantity: 0,
-                //     price: newValue.price,
-                //   })
-                // } else {
-                //   setIsNewValue(false)
-                //   setFormData(prev => ({
-                //     ...prev,
-                //     componentNumber: '',
-                //     componentName: '',
-                //     price: 0,
-                //   }))
-                // }
                 if (newValue && typeof newValue !== 'string') {
-                  newValue.componentName.startsWith('Add "')
-                    ? setIsNewValue(true)
-                    : setIsNewValue(false)
+                  // cannot use before confirmed
+                  // newValue.componentName.startsWith('Add "')
+                  //   ? setIsNewValue(true)
+                  //   : setIsNewValue(false)
                   setFormData({
+                    id: newValue.id,
                     componentNumber: newValue.componentNumber,
-                    componentName: newValue.componentName.startsWith('Add "')
-                      ? '' // Clear componentName if it's a new value
-                      : newValue.componentName,
-                    quantity: 0,
+                    componentName: newValue.componentName,
+                    // cannot use before confirmed
+                    // componentName: newValue.componentName.startsWith('Add "')
+                    //   ? '' // Clear componentName if it's a new value
+                    //   : newValue.componentName,
+                    quantity: 1,
                     unitPrice: newValue.price,
                   })
                 }
               }}
-              filterOptions={(options, params) => {
-                // const filtered = filter(options, params)
-                // const { inputValue } = params
-                // const isExisting = options.some(
-                //   option => typeof option !== 'string' && inputValue === option.componentNumber
-                // )
-                // if (inputValue !== '' && !isExisting) {
-                //   filtered.push({
-                //     inputValue,
-                //     componentName: `Add "${inputValue}"`,
-                //     componentNumber: inputValue,
-                //     id: '',
-                //     price: 0,
-                //   })
-                // }
-                // return filtered
-                const filtered = options.filter(option =>
-                  option.componentNumber.toLowerCase().includes(params.inputValue.toLowerCase())
-                )
-                if (params.inputValue !== '' && !filtered.length) {
-                  filtered.push({
-                    componentNumber: params.inputValue,
-                    componentName: `Add "${params.inputValue}"`,
-                    price: 0,
-                  } as ComponentData)
-                }
-                return filtered
-              }}
+              // cannot use before confirmed
+              // filterOptions={(options, params) => {
+              //   const filtered = options.filter(option =>
+              //     option.componentNumber.toLowerCase().includes(params.inputValue.toLowerCase())
+              //   )
+              //   if (params.inputValue !== '' && !filtered.length) {
+              //     filtered.push({
+              //       componentNumber: params.inputValue,
+              //       componentName: `Add "${params.inputValue}"`,
+              //       price: 0,
+              //     } as ComponentData)
+              //   }
+              //   return filtered
+              // }}
               value={formData.componentNumber || null}
             />
-            {isNewValue && (
+            {/* cannot use before confirmed */}
+            {/* {isNewValue && (
               <>
                 <TextField
                   label='商品名'
@@ -256,7 +184,7 @@ export default function AddnewComponentListDialog({ open, onClose, onSubmit }: D
                   required
                 />
               </>
-            )}
+            )} */}
             <TextField
               label='数量'
               type='number'
@@ -264,6 +192,7 @@ export default function AddnewComponentListDialog({ open, onClose, onSubmit }: D
               onChange={e =>
                 setFormData(prev => ({ ...prev, quantity: parseFloat(e.target.value) }))
               }
+              sx={{ width: '30%' }}
             />
           </Box>
         </DialogContent>

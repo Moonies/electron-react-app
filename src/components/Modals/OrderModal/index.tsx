@@ -39,6 +39,7 @@ import { TransitionProps } from '@mui/material/transitions'
 import useLoading from 'hooks/useLoading'
 import { UserData } from 'api/user/getUserList'
 import customer from 'api/customer'
+import SlideTransition from 'components/Transition/Slide'
 interface Option {
   label: string
   id: number
@@ -79,6 +80,7 @@ export default function OrderModal({
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
   const addNewProductDataGridRef = useGridApiRef()
   const { setLoading } = useLoading()
+  const { Slide } = SlideTransition({ direction: 'up' })
 
   const {
     columns,
@@ -194,18 +196,6 @@ export default function OrderModal({
     }
   }, [modalMode])
 
-  const Transition = useCallback(
-    forwardRef(function Transition(
-      props: TransitionProps & {
-        children: React.ReactElement<any, any>
-      },
-      ref: React.Ref<unknown>
-    ) {
-      return <Slide direction='up' ref={ref} {...props} />
-    }),
-    []
-  )
-
   return (
     <Dialog
       open={open}
@@ -216,7 +206,7 @@ export default function OrderModal({
       }}
       disableEscapeKeyDown
       fullScreen
-      TransitionComponent={Transition}
+      TransitionComponent={Slide}
       keepMounted
       scroll={'paper'}
       fullWidth

@@ -16,6 +16,7 @@ import {
   Edit as EditIcon,
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
+  ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import DataTable from 'components/DataTable'
 import useProduct from './hooks/useProduct'
@@ -30,7 +31,7 @@ export default function ProductPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedProduct, setSelectedProduct] = useState<ProductData | undefined>(undefined)
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
   const {
@@ -43,6 +44,7 @@ export default function ProductPage() {
     handleChange,
     handlePaginationModelChange,
     paginationModel,
+    getComponentDetailList,
   } = useProduct()
   const dispatch = useDispatch()
 
@@ -125,6 +127,23 @@ export default function ProductPage() {
     // After successful add/edit, refetch the data
     // await fetchSalesData(paginationModel);
   }
+
+  const handleViewDetailClick = useCallback(async () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = productData.find(product => product.productId === selectedId)
+      if (selectedData) {
+        // selectedData.component.map(item => {
+        // const result = await getComponentDetailList(item.id)
+        // })
+        setSelectedProduct(selectedData)
+        setModalOpen(true)
+        setModalMode('view')
+      }
+    } else {
+      notificationModal.error('詳細を表示するには、表の行を選択してください。')
+    }
+  }, [selectionModel])
 
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
@@ -245,8 +264,8 @@ export default function ProductPage() {
                 visible
               </StyledButton> */}
             </Box>
-            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
                 size='large'
@@ -254,24 +273,33 @@ export default function ProductPage() {
               >
                 not support in aplha thest
                 自動アプロード
+              </StyledButton> */}
+              <StyledButton
+                variant='outlined'
+                startIcon={<DetailIcon />}
+                size='large'
+                onClick={handleViewDetailClick}
+                // sx={{ visibility: 'hidden' }}
+              >
+                詳細
               </StyledButton>
               <StyledButton
                 variant='outlined'
-                startIcon={<EditIcon />}
+                // startIcon={<EditIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
                 visible
               </StyledButton>
-              <StyledButton
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
                 // onClick={handleExportPdf}
               >
                 データ出力
-              </StyledButton>
-            </Box> */}
+              </StyledButton> */}
+            </Box>
           </Box>
         </Box>
         <DataTable

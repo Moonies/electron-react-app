@@ -104,6 +104,12 @@ export default function useProduct() {
     setPaginationModel(newModel)
     //call APi
   }
+
+  const getComponentDetailList = async (componentId: string) => {
+    //get component detail
+    //get total remain
+  }
+
   return {
     columns,
     prepareCategorySearch,
@@ -114,5 +120,6 @@ export default function useProduct() {
     handleChange,
     handlePaginationModelChange,
     paginationModel,
+    getComponentDetailList,
   }
 }

@@ -4,7 +4,7 @@ export const mockData = [
     componentNumber: 'HW327351070',
     componentName: 'STOPPER',
     price: 1250,
-    quantity: 0,
+    quantity: 100,
   },
   {
     id: 'HW206241140',
