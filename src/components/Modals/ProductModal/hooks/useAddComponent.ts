@@ -12,15 +12,19 @@ import {
 import { ComponentData } from 'api/component/getComponentData'
 import { api } from 'api/index'
 import { ProductDataDetail } from 'api/product/getProductData'
+import { ProductData } from 'api/product/getProductList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
 import useLoading from 'hooks/useLoading'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
 
-export default function useAddComponent() {
+export default function useAddComponent(productData: ProductData) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
   const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>([])
   const { setLoading } = useLoading()
+  useEffect(() => {
+    prepareComponent()
+  }, [productData])
 
   const handleAddNewComponent = async (newComponent: NewComponentDetail) => {
     setLoading(true)
@@ -95,6 +99,25 @@ export default function useAddComponent() {
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
+
+  const prepareComponent = async () => {
+    setLoading(true)
+    try {
+      // Fetch details for each item
+      const updateComponent = await Promise.all(
+        productData.component.map(async component => {
+          const totalRemain = await getTotalRemainComponent(component.id)
+          return { ...component, totalQuantity: totalRemain }
+        })
+      )
+      // setItems(itemsWithDetails);
+      setNewComponentListData(updateComponent)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    }
+    setLoading(false)
+  }
+
   const getTotalRemainComponent = useCallback(async (componentId: string) => {
     const { data } = await api.component().getTotalAmountComponent(componentId)
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -53,6 +53,7 @@ const defaultFormData: ProductData = {
   productCost: 0,
   productPrice: 0,
   productUnit: '',
+  component: [],
 }
 const ProductModal: React.FC<SalesModalProps> = ({
   open,
@@ -61,7 +62,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
   initialData,
   mode,
 }) => {
-  const [formData, setFormData] = useState<ProductData>(defaultFormData)
+  const [formData, setFormData] = useState<ProductData>(initialData ?? defaultFormData)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
   const [openDialog, setOpenDialog] = useState(false)
@@ -83,20 +84,11 @@ const ProductModal: React.FC<SalesModalProps> = ({
     handleSaveClick,
     processRowUpdate,
     rowModesModel,
-    // geTotalRemainComponent,
-  } = useAddComponent()
+  } = useAddComponent(formData)
 
   useEffect(() => {
-    if (modalMode !== 'add' && initialData) {
-      setFormData(initialData)
-    } else {
-      setFormData(defaultFormData)
-    }
-  }, [defaultFormData, initialData])
-
-  // useEffect(() => {
-  //   geTotalRemainComponent(newComponentListData)
-  // }, [newComponentListData])
+    if (modalMode === 'add') setFormData(defaultFormData)
+  }, [defaultFormData])
 
   const handleChange = (field: keyof ProductData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -188,6 +180,9 @@ const ProductModal: React.FC<SalesModalProps> = ({
     }
   }, [modalMode])
 
+  const calculateProfitMargin = useCallback((cost: number, price: number) => {
+    return price - cost
+  }, [])
   const CustomFooterStatusComponent = (totalPriceColumnField: string) => {
     return (
       <Box sx={{ p: 1, display: 'flex' }}>
@@ -284,9 +279,12 @@ const ProductModal: React.FC<SalesModalProps> = ({
             <TextField
               label='粗利益'
               type='number'
-              value={formData.productPrice}
+              value={calculateProfitMargin(formData.productCost, formData.productPrice)}
               onChange={e => handleChange('productPrice', parseFloat(e.target.value))}
               // fullWidth
+              InputProps={{
+                readOnly: true,
+              }}
               margin='normal'
               // sx={{ width: '20%' }}
             />

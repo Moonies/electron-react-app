@@ -7,7 +7,7 @@ type ProductDetailComponent = {
   id: string
   componentNumber: string
   componentName: string
-  price: number
+  unitPrice: number
   quantity: number
 }
 export interface ProductDataDetail {
