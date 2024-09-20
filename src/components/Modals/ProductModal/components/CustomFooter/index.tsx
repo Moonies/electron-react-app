@@ -32,7 +32,7 @@ const CustomFooter: React.FC = () => {
           width: '100%',
         }}
       >
-        <Typography variant='subtitle1'>Total Price: {formatJPY(totalPrice)}</Typography>
+        <Typography variant='subtitle1'>合計　: {formatJPY(totalPrice)}</Typography>
       </Box>
     </GridFooterContainer>
   )

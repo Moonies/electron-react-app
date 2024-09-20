@@ -72,7 +72,14 @@ export default function useProduct() {
         // minWidth: 200,
         valueFormatter: value => currencyFormatter.format(Number(value)),
       },
-      { field: 'grossProfitMargin', headerName: '粗利益率', headerAlign: 'center' },
+      {
+        field: 'grossProfitMargin',
+        headerName: '粗利益率',
+        headerAlign: 'center',
+        valueGetter: (value, row) => {
+          return (((row.productPrice - row.productCost) / row.productCost) * 100).toFixed(3) + '%'
+        },
+      },
       {
         field: 'productUnit',
         headerName: '単位',

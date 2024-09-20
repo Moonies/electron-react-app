@@ -144,6 +144,7 @@ export default function useAddComponent(productData: ProductData) {
         field: 'quantity',
         headerName: '数量',
         headerAlign: 'center',
+        type: 'number',
         flex: 1,
         editable: true,
       },

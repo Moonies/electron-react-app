@@ -247,22 +247,24 @@ export default function ProductPage() {
               >
                 編集
               </StyledButton>
-              <StyledButton
+              {/* waiting for comfirm */}
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
                 // onClick={handleExportPdf}
               >
                 データ出力
-              </StyledButton>
-              {/* <StyledButton
-                variant='outlined'
-                startIcon={<EditIcon />}
-                size='large'
-                sx={{ visibility: 'hidden' }}
-              >
-                visible
               </StyledButton> */}
+              <StyledButton
+                variant='outlined'
+                startIcon={<DetailIcon />}
+                size='large'
+                onClick={handleViewDetailClick}
+                // sx={{ visibility: 'hidden' }}
+              >
+                詳細
+              </StyledButton>
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               {/* <StyledButton
@@ -274,7 +276,8 @@ export default function ProductPage() {
                 not support in aplha thest
                 自動アプロード
               </StyledButton> */}
-              <StyledButton
+              {/* waiting for confirm */}
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<DetailIcon />}
                 size='large'
@@ -282,15 +285,15 @@ export default function ProductPage() {
                 // sx={{ visibility: 'hidden' }}
               >
                 詳細
-              </StyledButton>
-              <StyledButton
+              </StyledButton> */}
+              {/* <StyledButton
                 variant='outlined'
                 // startIcon={<EditIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
                 visible
-              </StyledButton>
+              </StyledButton> */}
               {/* <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}
@@ -310,6 +313,7 @@ export default function ProductPage() {
           apiref={productDataGridRef}
           getRowId={row => row.productId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+          // sx={{ mt: 4 }}
         />
       </Box>
 

@@ -8,7 +8,7 @@ export interface SearchCriteriaProductList {
   keyword: string
 }
 
-type ComponentDetail = {
+export type ComponentDetail = {
   id: string
   componentNumber: string
   componentName: string

@@ -24,7 +24,7 @@ import {
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
-import { ProductData } from 'api/product/getProductList'
+import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import SlideTransition from 'components/Transition/Slide'
 import DataTable from 'components/DataTable'
 import useLoading from 'hooks/useLoading'
@@ -97,7 +97,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      await onConfirm(formData)
+      await onConfirm({ ...formData, component: newComponentListData as ComponentDetail[] })
       onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
@@ -183,13 +183,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
   const calculateProfitMargin = useCallback((cost: number, price: number) => {
     return price - cost
   }, [])
-  const CustomFooterStatusComponent = (totalPriceColumnField: string) => {
-    return (
-      <Box sx={{ p: 1, display: 'flex' }}>
-        <Typography>Test Footer</Typography>
-      </Box>
-    )
-  }
+
   return (
     <Dialog
       open={open}
