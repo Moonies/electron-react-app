@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -16,17 +16,35 @@ import {
   Typography,
   IconButton,
 } from '@mui/material'
-import { Close as CloseIcon } from '@mui/icons-material'
+import {
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
-import { ProductData } from 'api/product/getProductList'
+import { ComponentDetail, ProductData } from 'api/product/getProductList'
+import SlideTransition from 'components/Transition/Slide'
+import DataTable from 'components/DataTable'
+import useLoading from 'hooks/useLoading'
+import useAddComponent from './hooks/useAddComponent'
+import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
+import {
+  GridActionsCellItem,
+  GridRowModes,
+  GridRowSelectionModel,
+  useGridApiRef,
+} from '@mui/x-data-grid'
+import CustomFooter from './components/CustomFooter'
+import { ComponentData } from 'api/component/getComponentList'
 
 interface SalesModalProps {
   open: boolean
   onClose: () => void
   onConfirm: (data: ProductData) => Promise<void>
   initialData?: ProductData
-  mode: 'add' | 'edit'
+  mode: 'add' | 'edit' | 'view'
 }
 const defaultFormData: ProductData = {
   productId: '',
@@ -35,6 +53,7 @@ const defaultFormData: ProductData = {
   productCost: 0,
   productPrice: 0,
   productUnit: '',
+  component: [],
 }
 const ProductModal: React.FC<SalesModalProps> = ({
   open,
@@ -43,17 +62,33 @@ const ProductModal: React.FC<SalesModalProps> = ({
   initialData,
   mode,
 }) => {
-  const [formData, setFormData] = useState<ProductData>(defaultFormData)
-  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState<ProductData>(initialData ?? defaultFormData)
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
+  const [openDialog, setOpenDialog] = useState(false)
+
+  // const [loading, setLoading] = useState(false)
+  const { setLoading } = useLoading()
+  const { Slide } = SlideTransition({ direction: 'up' })
+  const addNewComponentDataGridRef = useGridApiRef()
+
+  const {
+    newComponentListData,
+    columns,
+    handleAddNewComponent,
+    handleCancelClick,
+    handleDeleteClick,
+    handleEditClick,
+    handleRowEditStop,
+    handleRowModesModelChange,
+    handleSaveClick,
+    processRowUpdate,
+    rowModesModel,
+  } = useAddComponent(formData)
 
   useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      setFormData(initialData)
-    } else {
-      console.log('first')
-      setFormData(defaultFormData)
-    }
-  }, [defaultFormData, initialData])
+    if (modalMode === 'add') setFormData(defaultFormData)
+  }, [defaultFormData])
 
   const handleChange = (field: keyof ProductData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -62,7 +97,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      await onConfirm(formData)
+      await onConfirm({ ...formData, component: newComponentListData as ComponentDetail[] })
       onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
@@ -91,6 +126,64 @@ const ProductModal: React.FC<SalesModalProps> = ({
     },
   ]
 
+  const updatedColumns = columns.map(column => {
+    if (column.field === 'actions') {
+      return {
+        ...column,
+        getActions: ({ id }: any) => {
+          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
+
+          if (isInEditMode) {
+            return [
+              <GridActionsCellItem
+                icon={<SaveIcon />}
+                label='Save'
+                sx={{
+                  color: 'primary.main',
+                }}
+                onClick={handleSaveClick(id)}
+              />,
+              <GridActionsCellItem
+                icon={<CloseIcon />}
+                label='Cancel'
+                className='textPrimary'
+                onClick={handleCancelClick(id)}
+                color='inherit'
+              />,
+            ]
+          }
+
+          return [
+            <GridActionsCellItem
+              icon={<EditIcon />}
+              label='Edit'
+              className='textPrimary'
+              onClick={handleEditClick(id)}
+              color='inherit'
+            />,
+            <GridActionsCellItem
+              icon={<DeleteIcon />}
+              label='Delete'
+              onClick={handleDeleteClick(id)}
+              color='inherit'
+            />,
+          ]
+        },
+      }
+    }
+    return column
+  })
+
+  const columnVisibilityModel = useMemo(() => {
+    return {
+      actions: modalMode !== 'view',
+    }
+  }, [modalMode])
+
+  const calculateProfitMargin = useCallback((cost: number, price: number) => {
+    return price - cost
+  }, [])
+
   return (
     <Dialog
       open={open}
@@ -101,12 +194,16 @@ const ProductModal: React.FC<SalesModalProps> = ({
       }}
       disableEscapeKeyDown
       fullWidth
-      maxWidth='md'
+      fullScreen
+      // maxWidth='md'
+      keepMounted
+      scroll={'paper'}
+      TransitionComponent={Slide}
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6'>
-            {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
+            {modalMode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
           </Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
@@ -133,6 +230,26 @@ const ProductModal: React.FC<SalesModalProps> = ({
               margin='normal'
               // sx={{ width: '20%' }}
             />
+            <TextField
+              label='単位'
+              type='text'
+              value={formData.productUnit}
+              defaultValue={undefined}
+              onChange={e => handleChange('productUnit', e.target.value)}
+              // fullWidth
+              margin='normal'
+              select
+              sx={{ width: '40%' }}
+              InputLabelProps={{
+                component: 'span',
+              }}
+            >
+              {productUnitList.map(item => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </TextField>
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <TextField
@@ -156,15 +273,29 @@ const ProductModal: React.FC<SalesModalProps> = ({
             <TextField
               label='粗利益'
               type='number'
-              value={formData.productPrice}
+              value={calculateProfitMargin(formData.productCost, formData.productPrice)}
               onChange={e => handleChange('productPrice', parseFloat(e.target.value))}
               // fullWidth
+              InputProps={{
+                readOnly: true,
+              }}
               margin='normal'
               // sx={{ width: '20%' }}
             />
+            {modalMode !== 'add' && (
+              <TextField
+                label='在庫数'
+                type='number'
+                value={formData.stockQuantity}
+                onChange={e => handleChange('stockQuantity', parseFloat(e.target.value))}
+                // fullWidth
+                margin='normal'
+                // sx={{ width: '20%' }}
+              />
+            )}
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
-            <TextField
+            {/* <TextField
               label='在庫数'
               type='number'
               value={formData.stockQuantity}
@@ -172,8 +303,8 @@ const ProductModal: React.FC<SalesModalProps> = ({
               // fullWidth
               margin='normal'
               // sx={{ width: '20%' }}
-            />
-            <TextField
+            /> */}
+            {/* <TextField
               label='単位'
               type='text'
               value={formData.productUnit}
@@ -192,8 +323,53 @@ const ProductModal: React.FC<SalesModalProps> = ({
                   {item.label}
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
           </Box>
+          <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+            <Box display={'flex'} alignItems={'end'}>
+              <Button
+                onClick={() => setOpenDialog(true)}
+                variant='outlined'
+                sx={theme => ({
+                  color: 'white',
+                  visibility: modalMode === 'view' ? 'hidden' : 'inherit',
+                  // height: '50%',
+                })}
+              >
+                Add Component
+              </Button>
+            </Box>
+          </Box>
+          <DataTable
+            data={newComponentListData}
+            columns={updatedColumns}
+            apiref={addNewComponentDataGridRef}
+            // getRowId={row => row.productNumber}
+            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+            sx={{ height: 475, mt: 2 }}
+            editMode='row'
+            rowModesModel={rowModesModel}
+            onRowModesModelChange={handleRowModesModelChange}
+            onRowEditStop={handleRowEditStop}
+            processRowUpdate={processRowUpdate}
+            disableColumnSelector
+            columnVisibilityModel={columnVisibilityModel}
+            isCellEditable={() => modalMode !== 'view'}
+            slots={{
+              footer: CustomFooter,
+            }}
+          />
+          {openDialog && (
+            <AddNewComponentListDialog
+              open={openDialog}
+              onClose={() => setOpenDialog(false)}
+              onSubmit={newComponent => {
+                setOpenDialog(false)
+                handleAddNewComponent(newComponent)
+              }}
+              // initialData={selectedOrder}
+            />
+          )}
         </Box>
       </DialogContent>
       <DialogActions>

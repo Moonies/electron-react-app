@@ -42,7 +42,7 @@ import {
   GridRowSelectionModel,
   useGridApiRef,
 } from '@mui/x-data-grid'
-import AddnewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
+import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import useLoading from 'hooks/useLoading'
 interface Option {
   label: string
@@ -238,7 +238,7 @@ export default function PurchaseModal({
                 : '追加モーダルウィンドウ'}
           </Typography>
           <Box display={'flex'} gap={4}>
-            {modalMode === 'view' && (
+            {/* {modalMode === 'view' && (
               <IconButton
                 edge='end'
                 color='inherit'
@@ -247,7 +247,7 @@ export default function PurchaseModal({
               >
                 <EditIcon />
               </IconButton>
-            )}
+            )} */}
             <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
               <CloseIcon />
             </IconButton>
@@ -426,7 +426,7 @@ export default function PurchaseModal({
               isCellEditable={() => modalMode !== 'view'}
             />
             {openDialog && (
-              <AddnewComponentListDialog
+              <AddNewComponentListDialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
                 onSubmit={newProduct => {

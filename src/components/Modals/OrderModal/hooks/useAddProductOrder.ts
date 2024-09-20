@@ -90,22 +90,22 @@ export default function useAddOrder(orderDeta: OrderData) {
     setRowModesModel(newRowModesModel)
   }
 
-  const debouncedFetchOptions = useCallback(
-    debounce(async (query: string) => {
-      if (query.length >= 2) {
-        setLoading(true)
-        try {
-          const fetchedOptions = await api.product().getProductData(query)
-          setProductData(fetchedOptions.data?.data ?? [])
-        } catch (error) {
-          console.error('Error fetching options:', error)
-        } finally {
-          setLoading(false)
-        }
-      }
-    }, 300),
-    []
-  )
+  // const debouncedFetchOptions = useCallback(
+  //   debounce(async (query: string) => {
+  //     if (query.length >= 2) {
+  //       setLoading(true)
+  //       try {
+  //         const fetchedOptions = await api.product().getProductData(query)
+  //         setProductData(fetchedOptions.data?.data ?? [])
+  //       } catch (error) {
+  //         console.error('Error fetching options:', error)
+  //       } finally {
+  //         setLoading(false)
+  //       }
+  //     }
+  //   }, 300),
+  //   []
+  // )
 
   const currencyFormatter = new Intl.NumberFormat('ja-JP', {
     style: 'currency',
@@ -188,7 +188,6 @@ export default function useAddOrder(orderDeta: OrderData) {
     handleCancelClick,
     handleEditClick,
     handleDeleteClick,
-    debouncedFetchOptions,
     productData,
     handleAddNewProduct,
     userListData,

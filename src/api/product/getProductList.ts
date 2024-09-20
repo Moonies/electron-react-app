@@ -8,6 +8,13 @@ export interface SearchCriteriaProductList {
   keyword: string
 }
 
+export type ComponentDetail = {
+  id: string
+  componentNumber: string
+  componentName: string
+  unitPrice: number
+  quantity: number
+}
 export interface ProductData {
   productId: string
   productName: string
@@ -15,6 +22,7 @@ export interface ProductData {
   productCost: number
   productPrice: number
   productUnit: string
+  component: ComponentDetail[]
 }
 
 export default async function getProductList(

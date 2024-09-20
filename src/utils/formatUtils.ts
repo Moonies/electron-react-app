@@ -29,3 +29,10 @@ export const formatPostcode = (postcode: string | null | undefined): string => {
 
   return `〒${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
 }
+
+export const formatJPY = (amount: number): string => {
+  return new Intl.NumberFormat('ja-JP', {
+    style: 'currency',
+    currency: 'JPY',
+  }).format(amount)
+}

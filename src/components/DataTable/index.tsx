@@ -68,7 +68,12 @@ const DataTable = React.memo<TableProps>(
           // autosizeOnMount
           paginationMode={totalRows ? 'server' : 'client'} //when change to fetch by api should be 'server' only
           autosizeOptions={autosizeOption}
-          getCellClassName={params => (params.colDef.type === 'number' ? 'right' : 'center')}
+          getCellClassName={params => {
+            if (params.colDef.field.includes('quantity')) {
+              return 'center'
+            }
+            return params.colDef.type === 'number' ? 'right' : 'center'
+          }}
           // sx={sx}
           {...props}
         />

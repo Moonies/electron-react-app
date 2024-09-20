@@ -1,35 +1,27 @@
 import axios from 'axios'
 import { ApiResponse } from 'api'
-import { mockdata } from './_mockdata'
-import { ComponentData } from 'api/component/getComponentList'
+import dayjs from 'dayjs'
+import { mockData } from './_mockdata'
 
-type ProductDetailComponent = {
-  id: string
+export interface ComponentData {
   componentNumber: string
   componentName: string
-  unitPrice: number
-  quantity: number
-}
-export interface ProductDataDetail {
-  productId: string
-  productName: string
-  stockQuantity: number
-  productCost: number
-  productPrice: number
-  productUnit: string
-  component: ProductDetailComponent[]
+  totalAmount: number
 }
 
-export default async function getProductData(
-  keyword: string
-): Promise<ApiResponse<{ data: ProductDataDetail[] }>> {
+export default async function getComponentIdList(
+  query: string
+): Promise<ApiResponse<ComponentData>> {
   //for beta:test
+  //use props query to filter in component
   await new Promise(resolve => setTimeout(resolve, 1000))
   return {
     code: 200,
     message: 'Success',
     data: {
-      data: mockdata,
+      componentNumber: 'HW327351070',
+      componentName: 'STOPPER',
+      totalAmount: 100,
     },
   }
   // when use real API
