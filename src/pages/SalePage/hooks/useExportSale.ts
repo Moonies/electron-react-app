@@ -41,13 +41,13 @@ export default function useExportSale() {
   const { setLoading } = useLoading()
   const printColumnList: GridColDef[] = useMemo(
     () => [
+      { field: 'productNumber', headerName: '図面番号' },
       { field: 'productName', headerName: '品名' },
-      { field: 'productNumber', headerName: '図番' },
+      { field: 'quantity', headerName: '数量' },
       {
         field: 'productPrice',
         headerName: '単価',
       },
-      { field: 'quantity', headerName: '数量' },
       {
         field: 'totalPrice',
         headerName: '金額',

@@ -159,7 +159,7 @@ export default function CustomerManagementPage() {
                 <TextField
                   fullWidth
                   name='keyword'
-                  label='検索'
+                  label='キーワード検索'
                   value={filterValue}
                   onChange={e => setFilterValue(e.target.value)}
                   InputProps={{

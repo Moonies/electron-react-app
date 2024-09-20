@@ -175,7 +175,7 @@ export default function ProductPage() {
                 name='category'
                 value={searchCriteria.category}
                 select
-                label='範疇'
+                label='範疇項目'
                 id='category-sale'
                 onChange={e => handleChange('category', e.target.value as string)}
                 sx={{ width: '30%' }}
@@ -195,7 +195,7 @@ export default function ProductPage() {
                 <TextField
                   fullWidth
                   name='keyword'
-                  label='検索'
+                  label='キーワード検索'
                   value={searchCriteria.keyword}
                   onChange={e => handleChange('keyword', e.target.value)}
                   InputProps={{

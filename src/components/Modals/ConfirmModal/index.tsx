@@ -30,8 +30,8 @@ export const ConfirmModalProvider: React.FC<ConfirmModalProviderProps> = ({ chil
     isOpen: false,
     title: '',
     message: '',
-    confirmText: '確認します',
-    cancelText: 'キャンセル',
+    confirmText: 'はい',
+    cancelText: 'いいえ',
   })
   const [resolveCallback, setResolveCallback] = useState<((value: boolean) => void) | null>(null)
 
@@ -40,8 +40,8 @@ export const ConfirmModalProvider: React.FC<ConfirmModalProviderProps> = ({ chil
       setModalState({
         isOpen: true,
         ...options,
-        confirmText: options.confirmText || '確認します',
-        cancelText: options.cancelText || 'キャンセル',
+        confirmText: options.confirmText || 'はい',
+        cancelText: options.cancelText || 'いいえ',
       })
       setResolveCallback(() => resolve)
     })

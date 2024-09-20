@@ -40,6 +40,7 @@ import useLoading from 'hooks/useLoading'
 import { UserData } from 'api/user/getUserList'
 import customer from 'api/customer'
 import SlideTransition from 'components/Transition/Slide'
+import CustomFooter from './components/CustomerFooter'
 interface Option {
   label: string
   id: number
@@ -216,7 +217,7 @@ export default function OrderModal({
           <Typography variant='h6'>
             {/* {modalMode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'} */}
             {modalMode === 'view'
-              ? '受注データモーダルウィンドウ'
+              ? '受注詳細'
               : modalMode === 'edit'
                 ? '編集モーダルウィンドウ'
                 : '追加モーダルウィンドウ'}
@@ -267,7 +268,7 @@ export default function OrderModal({
                 required
               />
               {/* <TextField
-                label='顧客名称'
+                label='顧客名'
                 value={formData.customerCompanyName}
                 onChange={e => handleChange('customerCompanyName', e.target.value)}
                 margin='normal'
@@ -383,7 +384,7 @@ export default function OrderModal({
                 }}
                 getOptionLabel={option => option.fullName}
                 sx={{ width: '35%' }}
-                renderInput={params => <TextField {...params} label='承認者' />}
+                renderInput={params => <TextField {...params} label='担当者' />}
                 readOnly={modalMode === 'view'}
                 isOptionEqualToValue={(option, value) => option.userId === value.userId}
                 onChange={(event, newValue) => {
@@ -412,6 +413,9 @@ export default function OrderModal({
               disableColumnSelector
               columnVisibilityModel={columnVisibilityModel}
               isCellEditable={() => modalMode !== 'view'}
+              slots={{
+                footer: CustomFooter,
+              }}
             />
           </Box>
           {openDialog && (

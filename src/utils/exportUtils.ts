@@ -17,9 +17,8 @@ export enum PrintType {
 }
 export enum PrintTitle {
   SALE = '請求書',
-  NonOrder = '見積書',
   ORDER = '納品書',
-  // DELIVERY = '見積書',
+  PENDING = '見積書',
   // SHIPPING = '出荷伝票',
   PURCHASE = '仕入票',
 }
@@ -228,7 +227,10 @@ export const exportToPdf = (columns: GridColDef[], rows: object[], exportDetail:
       doc.setFontSize(18)
       // const customerName = '株式会社さんせん清水'
       doc.text(exportDetail.receiver.name, margin + 5, 40, { maxWidth: 75 })
-      drawVerticalText(doc, '御中', 95, 37, 14) // Draw '御中' vertically
+      //normal format
+      doc.setFontSize(14)
+      doc.text('御中', 95, 40)
+      // drawVerticalText(doc, '御中', 95, 37, 14) // Draw '御中' vertically
       doc.setDrawColor(0)
       doc.setLineWidth(0.5)
       doc.line(margin, 45, 90, 45)

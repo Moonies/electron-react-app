@@ -19,7 +19,7 @@ export default function DashboardPage() {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant='h4'>Welcome to Hayaraku</Typography>
+            <Typography variant='h4'>早楽経営へよこそ</Typography>
           </Paper>
         </Grid>
 

@@ -77,7 +77,7 @@ export default function usePurchase() {
       },
       { field: 'supplierCompanyName', headerName: '仕入先', headerAlign: 'center', flex: 1 },
       { field: 'quotationRequestDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'orderRequestEmployeeName', headerName: '担当者名', headerAlign: 'center' },
+      { field: 'orderRequestEmployeeName', headerName: '担当者', headerAlign: 'center' },
       { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       { field: 'purchaseApprovedDate', headerName: '見積書依頼', headerAlign: 'center' },
       { field: 'purchaseReciptDate', headerName: '入庫承認済', headerAlign: 'center' },

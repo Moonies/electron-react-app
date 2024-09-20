@@ -33,7 +33,7 @@ export default function useMenu() {
   const [selectedMenu, setSelectedMenu] = useState('/')
 
   const menuItem: MenuItem[] = [
-    { text: 'Dashboard', icon: Dashboard, path: '/' },
+    { text: 'お知らせ', icon: Dashboard, path: '/' },
     { text: '売上管理', icon: ShoppingCart, path: '/sales' },
     {
       text: '受注管理',
