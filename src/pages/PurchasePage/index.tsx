@@ -170,7 +170,7 @@ export default function PurchasePage() {
                 name='category'
                 value={searchCriteria.category}
                 select
-                label='範疇'
+                label='範疇項目'
                 id='category-sale'
                 onChange={e => handleChange('category', e.target.value as string)}
                 sx={{ width: '30%' }}
@@ -188,11 +188,11 @@ export default function PurchasePage() {
               </TextField>
               <TextField
                 name='keyword'
-                label='検索'
+                label='キーワード検索'
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
               />
-              <TextField
+              {/* <TextField
                 name='ststus'
                 value={searchCriteria.status ?? ''}
                 select
@@ -211,16 +211,7 @@ export default function PurchasePage() {
                     {convertStatus(item)}
                   </MenuItem>
                 ))}
-              </TextField>
-              <Button
-                variant='contained'
-                endIcon={<SearchIcon />}
-                onClick={handleSearch}
-                // sx={{ whiteSpace: 'nowrap' }}
-                size='large'
-              >
-                検索
-              </Button>
+              </TextField> */}
             </Box>
             <Box
               display={'flex'}
@@ -230,7 +221,7 @@ export default function PurchasePage() {
               flex={1}
             >
               <DatePicker
-                label='Start Date'
+                label='開始日'
                 value={dayjs(searchCriteria.startDate)}
                 format='YYYY/MM/DD'
                 onChange={(date: Dayjs | null) =>
@@ -238,7 +229,7 @@ export default function PurchasePage() {
                 }
               />
               <DatePicker
-                label='End Date'
+                label='終了日'
                 format='YYYY/MM/DD'
                 value={dayjs(searchCriteria.endDate)}
                 onChange={(date: Dayjs | null) =>
@@ -262,16 +253,25 @@ export default function PurchasePage() {
           <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
             sx={{
-              width: '30%',
+              // width: '30%',
               display: 'flex',
               // justifyContent: 'flex-end',
               // alignItems: 'flex-start',
               flexDirection: 'column',
+              marginRight: 4,
             }}
             gap={1}
           >
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
               <StyledButton
+                variant='outlined'
+                startIcon={<SearchIcon />}
+                size='large'
+                onClick={handleSearch}
+              >
+                検索
+              </StyledButton>
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<AddIcon />}
                 size='large'
@@ -288,10 +288,10 @@ export default function PurchasePage() {
                 sx={{ visibility: 'hidden' }}
               >
                 削除
-              </StyledButton>
+              </StyledButton> */}
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<EditIcon />}
                 size='large'
@@ -299,7 +299,7 @@ export default function PurchasePage() {
                 sx={{ visibility: 'hidden' }}
               >
                 編集
-              </StyledButton>
+              </StyledButton> */}
               <StyledButton
                 variant='outlined'
                 startIcon={<DetailIcon />}
@@ -310,15 +310,15 @@ export default function PurchasePage() {
                 詳細
               </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              <StyledButton
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
                 自動アプロード
-              </StyledButton>
+              </StyledButton> */}
               <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}

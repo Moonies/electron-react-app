@@ -35,6 +35,7 @@ export default function OrderPage() {
     orderData,
     columns,
     prepareCategorySearch,
+    prepareCategoryStatus,
     handlePaginationModelChange,
     categorySearch,
     statusOrder,
@@ -71,6 +72,7 @@ export default function OrderPage() {
 
   useEffect(() => {
     prepareCategorySearch
+    prepareCategoryStatus
   }, [])
 
   const handleAddClick = () => {
@@ -161,7 +163,7 @@ export default function OrderPage() {
       const selectedData = orderData.find(order => order.id === selectedId)
       // if(selectedData?.status === OrderStatus.CANCEL) has condition??
       if (selectedData) {
-        if (selectedData.status === OrderStatus.ORDER) {
+        if (selectedData.status === OrderStatus.DELIVERY) {
           const newSlipData = await prepareSlipData(selectedData)
           if (newSlipData !== undefined) {
             const blob = await pdf(
@@ -215,7 +217,7 @@ export default function OrderPage() {
                 name='category'
                 value={searchCriteria.category}
                 select
-                label='範疇'
+                label='範疇項目'
                 id='category-order'
                 onChange={e => handleChange('category', e.target.value as string)}
                 sx={{ width: '30%' }}
@@ -234,7 +236,7 @@ export default function OrderPage() {
               <TextField
                 // fullWidth
                 name='keyword'
-                label='検索'
+                label='キーワード検索'
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
               />
@@ -275,7 +277,7 @@ export default function OrderPage() {
               // flex={1}
             >
               <DatePicker
-                label='Start Date'
+                label='開始日'
                 value={dayjs(searchCriteria.startDate)}
                 format='YYYY/MM/DD'
                 onChange={(date: Dayjs | null) =>
@@ -283,7 +285,7 @@ export default function OrderPage() {
                 }
               />
               <DatePicker
-                label='End Date'
+                label='終了日'
                 format='YYYY/MM/DD'
                 value={dayjs(searchCriteria.endDate)}
                 onChange={(date: Dayjs | null) =>

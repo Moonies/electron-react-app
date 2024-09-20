@@ -18,7 +18,7 @@ export default function useOrder() {
   const [orderData, setOrderData] = useState<OrderData[]>([])
   // const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
-  const statusOrder = Object.values(OrderStatus)
+  const [statusOrder, setStatusOrder] = useState<OrderStatus[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10,
@@ -32,27 +32,27 @@ export default function useOrder() {
   })
 
   const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
-  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-  })
 
   const convertStatus = (status: string) => {
     switch (status) {
       case OrderStatus.RECEIVED:
-        return '未発注'
-      case OrderStatus.NonOrder:
+        return '発注'
+      case OrderStatus.PENDING:
         return '見積'
-      case OrderStatus.OVER_DUE_DATE:
+      case OrderStatus.DELAY:
         return '納期超過'
-      case OrderStatus.INSTORE:
-        return '入庫済'
-      case OrderStatus.DELIVERED:
-        return '出荷済'
-      case OrderStatus.CANCEL:
+      case OrderStatus.CONFIRMED:
+        return '未発注'
+      case OrderStatus.PROCESSING:
+        return 'processing'
+      // case OrderStatus.INSTORE:
+      //   return '入庫済'
+      // case OrderStatus.DELIVERED:
+      //   return '出荷済'
+      case OrderStatus.CANCELLED:
         return 'キャンセル'
       default:
-        return ''
+        return status
     }
   }
 
@@ -72,8 +72,8 @@ export default function useOrder() {
       { field: 'customerCompanyName', headerName: '発注先', headerAlign: 'center', flex: 1 },
       { field: 'orderId', headerName: '注番', headerAlign: 'center' },
       { field: 'registDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'orderRequestEmployeeName', headerName: '担当者名', headerAlign: 'center' },
-      { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
+      { field: 'orderRequestEmployeeName', headerName: '担当者', headerAlign: 'center' },
+      // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
       { field: 'shippingmentDate', headerName: '出荷日付', headerAlign: 'center' },
       { field: 'paymentDueDate', headerName: '支払期限', headerAlign: 'center' },
@@ -89,6 +89,21 @@ export default function useOrder() {
     })
     setCategorySearch(result)
   }, [])
+
+  const prepareCategoryStatus = useMemo(() => {
+    let result: OrderStatus[] = []
+    Object.values(OrderStatus).forEach(item => {
+      if (
+        item === OrderStatus.IN_STORE ||
+        item === OrderStatus.DELIVERY ||
+        item === OrderStatus.ORDERED
+      )
+        return
+      result.push(item)
+    })
+    setStatusOrder(result)
+  }, [])
+
   const handleChange = (name: string, value: string | Date) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
@@ -158,6 +173,7 @@ export default function useOrder() {
     orderData,
     columns,
     prepareCategorySearch,
+    prepareCategoryStatus,
     categorySearch,
     handlePaginationModelChange,
     statusOrder,

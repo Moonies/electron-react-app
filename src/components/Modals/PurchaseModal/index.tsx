@@ -232,7 +232,7 @@ export default function PurchaseModal({
           <Typography variant='h6'>
             {/* {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'} */}
             {modalMode === 'view'
-              ? '仕入データモーダルウィンドウ'
+              ? '仕入詳細'
               : modalMode === 'edit'
                 ? '編集モーダルウィンドウ'
                 : '追加モーダルウィンドウ'}
@@ -283,7 +283,7 @@ export default function PurchaseModal({
                 }}
               />
               {/* <TextField
-              label='顧客名称'
+              label='顧客名'
               value={formData.supplierCompanyName}
               onChange={e => handleChange('supplierCompanyName', e.target.value)}
               margin='normal'
@@ -301,7 +301,7 @@ export default function PurchaseModal({
                 }}
                 getOptionLabel={option => option.name}
                 sx={{ width: '35%', marginTop: 2 }}
-                renderInput={params => <TextField {...params} label='顧客名称' />}
+                renderInput={params => <TextField {...params} label='顧客名' />}
                 readOnly={modalMode === 'view'}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {

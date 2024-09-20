@@ -42,13 +42,13 @@ export default function useExportOrder() {
   const { notificationModal } = useNotification()
   const printColumnList: GridColDef[] = useMemo(
     () => [
+      { field: 'productNumber', headerName: '図面番号' },
       { field: 'productName', headerName: '品名' },
-      { field: 'productNumber', headerName: '図番' },
+      { field: 'quantity', headerName: '数量' },
       {
         field: 'productPrice',
         headerName: '単価',
       },
-      { field: 'quantity', headerName: '数量' },
       {
         field: 'totalPrice',
         headerName: '金額',
@@ -88,14 +88,14 @@ export default function useExportOrder() {
 
   const convertTitle = useCallback((typeOrder: string | null): string => {
     switch (typeOrder) {
-      case OrderStatus.DELIVERED:
+      case OrderStatus.DELIVERY:
         return PrintTitle.SALE
       case OrderStatus.RECEIVED:
-        return PrintTitle.ORDER
-      case OrderStatus.NonOrder:
-        return PrintTitle.NonOrder
-      case OrderStatus.INSTORE:
         return PrintTitle.PURCHASE
+      case OrderStatus.PENDING:
+        return PrintTitle.PENDING
+      case OrderStatus.ORDERED:
+        return PrintTitle.ORDER
       default:
         return ''
     }

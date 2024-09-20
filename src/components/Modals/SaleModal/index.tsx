@@ -26,6 +26,7 @@ import DataTable from 'components/DataTable'
 import useLoading from 'hooks/useLoading'
 import useSaleDetail from './hooks/useSaleDetail'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
+import CustomFooter from './components/CustomeFooter/inex'
 
 interface SalesModalProps {
   open: boolean
@@ -107,7 +108,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>売上データモーダルウィンドウ</Typography>
+          <Typography variant='h6'>売上詳細</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>
@@ -138,7 +139,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
               required
             />
             <TextField
-              label='顧客名称'
+              label='顧客名'
               sx={{ width: '35%', marginTop: 2 }}
               InputProps={{
                 readOnly: mode === 'view',
@@ -190,7 +191,7 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
               InputProps={{
                 readOnly: mode === 'view',
               }}
-              label='承認者'
+              label='担当者'
               value={formData.orderApprovedEmployeeName}
             />
           </Box>
@@ -202,6 +203,9 @@ const SalesModal: React.FC<SalesModalProps> = ({ open, onClose, onConfirm, initi
           // getRowId={row => row.productNumber}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
           sx={{ height: 500, mt: 2 }}
+          slots={{
+            footer: CustomFooter,
+          }}
         />
       </DialogContent>
     </Dialog>

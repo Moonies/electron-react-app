@@ -229,10 +229,10 @@ export default function SalePage() {
                 name='category'
                 value={searchCriteria.category}
                 select
-                label='範疇'
+                label='範疇項目'
                 id='category-sale'
                 onChange={e => handleChange('category', e.target.value as string)}
-                sx={{ width: '30%' }}
+                sx={{ width: '40%' }}
                 InputLabelProps={{
                   id: 'category-sale-label',
                   htmlFor: 'category',
@@ -248,7 +248,7 @@ export default function SalePage() {
               <TextField
                 fullWidth
                 name='keyword'
-                label='検索'
+                label='キーワード検索'
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
                 // InputProps={{
@@ -270,7 +270,7 @@ export default function SalePage() {
               flex={1}
             >
               <DatePicker
-                label='Start Date'
+                label='開始日'
                 value={dayjs(searchCriteria.startDate)}
                 format='YYYY/MM/DD'
                 onChange={(date: Dayjs | null) =>
@@ -278,7 +278,7 @@ export default function SalePage() {
                 }
               />
               <DatePicker
-                label='End Date'
+                label='終了日'
                 format='YYYY/MM/DD'
                 value={dayjs(searchCriteria.endDate)}
                 onChange={(date: Dayjs | null) =>
@@ -302,11 +302,12 @@ export default function SalePage() {
             {salesSummary && (
               <>
                 <Typography variant='h6'>
-                  売上総合: {currencyFormatter.format(Number(salesSummary.totalSales))}
+                  総売上高: {currencyFormatter.format(Number(salesSummary.totalSales))}
                 </Typography>
-                <Typography variant='h6'>
+                {/* summary of(product price-(cost*quantity)) */}
+                {/* <Typography variant='h6'>
                   粗利: {currencyFormatter.format(Number(salesSummary.averageOrderValue))}
-                </Typography>
+                </Typography> */}
               </>
             )}
           </Box>
