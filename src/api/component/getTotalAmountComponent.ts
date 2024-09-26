@@ -9,7 +9,7 @@ export interface ComponentData {
   totalAmount: number
 }
 
-export default async function getComponentIdList(
+export default async function getTotalAmountComponent(
   query: string
 ): Promise<ApiResponse<ComponentData>> {
   //for beta:test

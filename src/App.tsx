@@ -25,7 +25,7 @@ import AccountManagementPage from 'pages/SettingPage/pages/AccountManagementPage
 import MyCompanyManagementPage from 'pages/SettingPage/pages/MyCompanyManagementPage'
 import CustomerManagementPage from 'pages/SettingPage/pages/CustomerManagementPage'
 import SupplierManagementPage from 'pages/SettingPage/pages/SupplierManagementPage'
-import ComponentManagementPage from 'pages/SettingPage/pages/ComponentManagementPage'
+import ComponentManagementPage from 'pages/ComponentPage'
 import IpSettingModal from 'components/Modals/IpSettingModal'
 import useApiConfig from 'hooks/useApiConfig'
 import IpConfigManegementPage from 'pages/SettingPage/pages/IpConfigManagementPage'
@@ -104,13 +104,13 @@ export default function App() {
                   <Route path='/kpi' element={<KpiPage />} />
                   <Route path='/reports' element={<ReportPage />} />
                   <Route path='/products' element={<ProductPage />} />
+                  <Route path='/component' element={<ComponentManagementPage />} />
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
                   <Route path='/settings/account' element={<AccountManagementPage />} />
                   <Route path='/settings/mycompany' element={<MyCompanyManagementPage />} />
                   <Route path='/settings/customer' element={<CustomerManagementPage />} />
                   <Route path='/settings/supplier' element={<SupplierManagementPage />} />
                   <Route path='/settings/server' element={<IpConfigManegementPage />} />
-                  <Route path='/settings/component' element={<ComponentManagementPage />} />
 
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
                 </Routes>
