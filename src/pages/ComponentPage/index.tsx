@@ -14,6 +14,8 @@ import {
   Clear as ClearIcon,
   Add as AddIcon,
   Edit as EditIcon,
+  Search as SearchIcon,
+  ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import DataTable from 'components/DataTable'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
@@ -21,7 +23,10 @@ import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
 import { ComponentData } from 'api/component/getComponentList'
 import useComponent from './hooks/useComponent'
-import ComponentManagementModal from 'components/Modals/ComponentManagementModal'
+import ComponentManagementModal, {
+  ComponentDetail,
+} from 'components/Modals/ComponentManagementModal'
+import useLoading from 'hooks/useLoading'
 
 export default function ComponentManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -31,7 +36,16 @@ export default function ComponentManagementPage() {
   const { openConfirmModal } = useConfirmModal()
   const componentDataGridRef = useGridApiRef()
   const [filterValue, setFilterValue] = useState('')
-  const [selectedComponent, setSelectedComponent] = useState<ComponentData>()
+  const [selectedComponent, setSelectedComponent] = useState<ComponentDetail>({
+    id: '',
+    componentNumber: '',
+    componentName: '',
+    lastestPriceDate: '',
+    price: 0,
+    inStock: 0,
+    purchaseOrderList: [],
+  })
+  const { setLoading } = useLoading()
 
   const {
     columns,
@@ -39,24 +53,31 @@ export default function ComponentManagementPage() {
     componentListData,
     paginationModel,
     handlePaginationModelChange,
+    categorySearch,
+    handleChange,
+    prepareCategorySearch,
+    searchCriteria,
+    handleSearch,
+    getComponentDetail,
   } = useComponent()
 
-  useEffect(() => {
-    if (componentDataGridRef.current) {
-      componentDataGridRef.current.autosizeColumns({
-        includeHeaders: true,
-        includeOutliers: true,
-        expand: true,
-      })
-    }
-  }, [componentListData])
+  // useEffect(() => {
+  //   if (componentDataGridRef.current) {
+  //     componentDataGridRef.current.autosizeColumns({
+  //       includeHeaders: true,
+  //       includeOutliers: true,
+  //       expand: true,
+  //     })
+  //   }
+  // }, [componentListData])
 
   useEffect(() => {
-    getComponentListData()
+    // getComponentListData()
+    prepareCategorySearch
   }, [])
 
   const handleAddClick = () => {
-    setSelectedComponent(undefined)
+    // setSelectedComponent(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -67,7 +88,7 @@ export default function ComponentManagementPage() {
       const selectedData = componentListData.find(item => item.id === selectedId)
       if (selectedData) {
         setModalMode('edit')
-        setSelectedComponent(selectedData)
+        // setSelectedComponent(selectedData)
         setModalOpen(true)
       }
     } else {
@@ -129,6 +150,28 @@ export default function ComponentManagementPage() {
     )
   }
 
+  const handleViewDetailClick = async () => {
+    setLoading(true)
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = componentListData.find(item => item.id === selectedId)
+      if (selectedData) {
+        const componentList = await getComponentDetail(selectedData.id)
+        if (componentList) {
+          let newInitComponent: ComponentDetail = {
+            ...selectedData,
+            purchaseOrderList: componentList.purchaseOrderList,
+          }
+          setSelectedComponent(newInitComponent)
+          setModalOpen(true)
+        }
+      }
+    } else {
+      notificationModal.error('削除する行をテーブルから選択してください')
+    }
+    setLoading(false)
+  }
+
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
@@ -155,6 +198,26 @@ export default function ComponentManagementPage() {
             }}
           >
             <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
+              <TextField
+                name='category'
+                value={searchCriteria.category}
+                select
+                label='範疇項目'
+                id='category-sale'
+                onChange={e => handleChange('category', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-sale-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                {categorySearch?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
               <Box display={'flex'} flex={1}>
                 <TextField
                   fullWidth
@@ -180,18 +243,41 @@ export default function ComponentManagementPage() {
           <Divider orientation='vertical' sx={{ marginLeft: 'auto' }}></Divider>
           <Box
             sx={{
-              width: '30%',
+              // width: '30%',
               display: 'flex',
               flexDirection: 'column',
+              marginRight: 4,
             }}
             gap={1}
           >
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+              <StyledButton
+                variant='outlined'
+                startIcon={<SearchIcon />}
+                size='large'
+                onClick={handleSearch}
+              >
+                検索
+              </StyledButton>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+              <StyledButton
+                variant='outlined'
+                startIcon={<DetailIcon />}
+                size='large'
+                onClick={handleViewDetailClick}
+              >
+                詳細
+              </StyledButton>
+            </Box>
+
+            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
                 variant='outlined'
                 startIcon={<AddIcon />}
                 size='large'
                 onClick={handleAddClick}
+                sx={{ visibility: 'hidden' }}
               >
                 追加
               </StyledButton>
@@ -200,6 +286,7 @@ export default function ComponentManagementPage() {
                 startIcon={<DeleteIcon />}
                 size='large'
                 onClick={handleDeleteClick}
+                sx={{ visibility: 'hidden' }}
               >
                 削除
               </StyledButton>
@@ -210,6 +297,7 @@ export default function ComponentManagementPage() {
                 startIcon={<EditIcon />}
                 size='large'
                 onClick={handleEditClick}
+                sx={{ visibility: 'hidden' }}
               >
                 編集
               </StyledButton>
@@ -221,11 +309,11 @@ export default function ComponentManagementPage() {
               >
                 visible
               </StyledButton>
-            </Box>
+            </Box> */}
           </Box>
         </Box>
         <DataTable
-          data={filteredRows()}
+          data={componentListData}
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
@@ -239,9 +327,7 @@ export default function ComponentManagementPage() {
         <ComponentManagementModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
-          onConfirm={handleModalConfirm}
           initialData={selectedComponent}
-          mode={modalMode}
         />
       )}
     </Box>

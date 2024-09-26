@@ -1,85 +1,77 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Autocomplete,
   Box,
   Typography,
   IconButton,
+  Divider,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
-import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
-import { StyledButton } from 'styles/styles'
-import useLoading from 'hooks/useLoading'
-import { api } from 'api/index'
-import { SupplierData } from 'api/supplier/getSupplierList'
-import { AddNewComponentProps } from 'api/component/addNewComponent'
-import { ComponentData } from 'api/component/getComponentList'
-
+import { Description as MemoIcon } from '@mui/icons-material'
+import { ComponentData, PurchaseOrderDetail } from 'api/component/getComponentDetail'
+import { Dayjs } from 'dayjs'
+import DataTable from 'components/DataTable'
+import { GridActionsCellItem, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
+import useComponent from './hooks/useComponent'
+import ViewMemoDialog from 'components/Dialogs/ViewMemoDialog'
+export type ComponentDetail = {
+  id: string
+  componentNumber: string
+  componentName: string
+  lastestPriceDate: string | Dayjs
+  price: number
+  inStock: number
+  purchaseOrderList: PurchaseOrderDetail[]
+}
 interface ComponentManagementModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: AddNewComponentProps | ComponentData) => Promise<void>
-  initialData?: ComponentData
-  mode: 'add' | 'edit'
+  initialData: ComponentDetail
 }
-interface UpdateComponentData {
-  price: string
-  closeingDate: string
-  purchaseId: string
-  id: string
-  componentName: string
-}
-const defaultFormData: AddNewComponentProps | ComponentData = {
-  price: '',
-  lastestPriceDate: '',
-  purchaseId: '',
-  id: '',
-  componentName: '',
-  componentNumber: '',
-}
+
 export default function ComponentManagementModal({
   open,
   onClose,
-  onConfirm,
   initialData,
-  mode,
 }: ComponentManagementModalProps) {
-  const [formData, setFormData] = useState<AddNewComponentProps | ComponentData>(defaultFormData)
-  const { withLoading } = useLoading()
+  const [formData, setFormData] = useState(initialData)
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
+  const componentDataGridRef = useGridApiRef()
+  const { columns, paginationModel, handlePaginationModelChange } = useComponent()
+  const [selectedMemo, setSelctedMemo] = useState('')
+  const [openDialog, setOpenDialog] = useState(false)
 
-  const dateNumber = Array.from(Array(30).keys())
+  const viewMemo = useCallback((memo: string) => {
+    setSelctedMemo(memo)
+    setOpenDialog(true)
+  }, [])
+  const updatedColumns = columns.map(column => {
+    if (column.field === 'actions') {
+      return {
+        ...column,
+        getActions: (params: any) => {
+          const hasMemo = params.row.memo
 
-  useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      setFormData(initialData)
-    } else {
-      setFormData(defaultFormData)
+          if (hasMemo) {
+            return [
+              <GridActionsCellItem
+                icon={<MemoIcon />}
+                label='Memo'
+                className='textPrimary'
+                onClick={() => viewMemo(hasMemo)}
+                color='inherit'
+              />,
+            ]
+          }
+          return []
+        },
+      }
     }
-  }, [defaultFormData, initialData])
-
-  const handleChange = (field: keyof AddNewComponentProps, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleSubmit = async () => {
-    try {
-      await onConfirm(formData)
-      onClose()
-    } catch (error) {
-      console.error('Error submitting data:', error)
-      // Handle error (e.g., show error message)
-    } finally {
-    }
-  }
+    return column
+  })
 
   return (
     <Dialog
@@ -91,13 +83,11 @@ export default function ComponentManagementModal({
       }}
       disableEscapeKeyDown
       fullWidth
-      maxWidth='md'
+      maxWidth='xl'
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>
-            {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
-          </Typography>
+          <Typography variant='h6'>部品詳細</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>
@@ -107,64 +97,63 @@ export default function ComponentManagementModal({
         <Box display={'flex'} flexDirection={'column'}>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <TextField
-              label='component number'
+              label='部品番号'
               value={formData.componentNumber}
-              onChange={e => handleChange('componentNumber', e.target.value)}
               fullWidth
               margin='normal'
+              inputProps={{ readOnly: true }}
               // sx={{ flex: 1 }}
             />
             <TextField
-              label='component name'
+              label='部品名'
               value={formData.componentName}
-              onChange={e => handleChange('componentName', e.target.value)}
               fullWidth
               margin='normal'
+              inputProps={{ readOnly: true }}
               // sx={{ flex: 1 }}
             />
             <TextField
-              label='price'
+              label='単価'
               value={formData.price}
-              onChange={e => handleChange('price', e.target.value)}
               fullWidth
               margin='normal'
+              inputProps={{ readOnly: true }}
+
               // sx={{ flex: 1 }}
             />
             <TextField
-              label='単価時点'
-              value={formData.lastestPriceDate}
-              onChange={e => handleChange('lastestPriceDate', e.target.value)}
+              label='在庫数'
+              value={formData.inStock}
               fullWidth
               margin='normal'
-              select
-              // sx={{ width: '30%' }}
-              InputLabelProps={{
-                component: 'span',
-              }}
-            >
-              {dateNumber.map(item => (
-                <MenuItem key={item} value={item + 1}>
-                  {item + 1}
-                </MenuItem>
-              ))}
-            </TextField>
+              inputProps={{ readOnly: true }}
+
+              // sx={{ flex: 1 }}
+            />
           </Box>
+          <Box p={2}>
+            <Typography variant='h5' noWrap>
+              <Divider textAlign='left'>購入歴</Divider>
+            </Typography>
+          </Box>
+          <DataTable
+            data={formData.purchaseOrderList}
+            columns={updatedColumns}
+            paginationModel={paginationModel}
+            onPaginationModelChange={handlePaginationModelChange}
+            apiref={componentDataGridRef}
+            getRowId={row => row.orderId}
+            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+          />
+          {openDialog && (
+            <ViewMemoDialog
+              message={selectedMemo}
+              onClose={() => setOpenDialog(false)}
+              open={openDialog}
+            />
+          )}
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} variant='contained'>
-          キャンセル
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant='outlined'
-          sx={{
-            color: 'white',
-          }}
-        >
-          保存
-        </Button>
-      </DialogActions>
     </Dialog>
   )
 }

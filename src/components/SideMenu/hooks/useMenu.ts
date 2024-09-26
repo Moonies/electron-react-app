@@ -62,6 +62,11 @@ export default function useMenu() {
     { text: 'レポート', icon: Assessment, path: '/reports' },
     { text: '商品管理', icon: Category, path: '/products' },
     {
+      text: '仕入単価管理',
+      icon: PrecisionManufacturing,
+      path: '/component',
+    },
+    {
       text: '設定',
       icon: Settings,
       children: [
@@ -89,11 +94,6 @@ export default function useMenu() {
           text: 'サーバー情報',
           icon: Storage,
           path: '/settings/server',
-        },
-        {
-          text: '仕入単価管理',
-          icon: PrecisionManufacturing,
-          path: '/settings/component',
         },
       ],
     },

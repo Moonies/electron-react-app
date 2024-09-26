@@ -10,7 +10,7 @@ export interface ComponentData {
   price: number
 }
 
-export default async function getComponentIdList(
+export default async function getComponentData(
   query: string
 ): Promise<ApiResponse<ComponentData[]>> {
   //for beta:test
