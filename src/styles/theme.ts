@@ -52,6 +52,13 @@ const themeOptions: ThemeOptions = {
           '& .MuiInputLabel-root.Mui-focused': {
             color: 'white',
           },
+          '& .MuiInputBase-input': {
+            WebkitTouchCallout: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+            userSelect: 'none',
+          },
         }),
       },
     },

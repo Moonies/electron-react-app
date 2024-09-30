@@ -22,7 +22,8 @@ function createWindow() {
     mainWindow.webContents.openDevTools()
     mainWindow.removeMenu()
   } else {
-    mainWindow.removeMenu()
+    // mainWindow.webContents.openDevTools()
+    // mainWindow.removeMenu()
     mainWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, '../index.html'),

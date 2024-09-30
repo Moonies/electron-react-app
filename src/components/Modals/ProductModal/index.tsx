@@ -15,6 +15,7 @@ import {
   Box,
   Typography,
   IconButton,
+  debounce,
 } from '@mui/material'
 import {
   Close as CloseIcon,
@@ -38,23 +39,40 @@ import {
 } from '@mui/x-data-grid'
 import CustomFooter from './components/CustomFooter'
 import { ComponentData } from 'api/component/getComponentList'
+import NumericFormatCustom from 'components/NumericFormat'
 
 interface SalesModalProps {
   open: boolean
   onClose: () => void
   onConfirm: (data: ProductData) => Promise<void>
-  initialData?: ProductData
+  initialData?: ProductDetail
   mode: 'add' | 'edit' | 'view'
 }
-const defaultFormData: ProductData = {
+type ProductDetail = {
+  productId: string
+  productName: string
+  stockQuantity: number
+  productCost: number
+  productPrice: number
+  productUnit: string
+  productPriceMargin?: number
+  component: ComponentDetail[]
+}
+const defaultFormData: ProductDetail = {
   productId: '',
   productName: '',
   stockQuantity: 0,
   productCost: 0,
   productPrice: 0,
+  productPriceMargin: 0,
   productUnit: '',
   component: [],
 }
+interface CustomProps {
+  onChange: (event: { target: { name: string; value: string } }) => void
+  name: string
+}
+
 const ProductModal: React.FC<SalesModalProps> = ({
   open,
   onClose,
@@ -62,11 +80,11 @@ const ProductModal: React.FC<SalesModalProps> = ({
   initialData,
   mode,
 }) => {
-  const [formData, setFormData] = useState<ProductData>(initialData ?? defaultFormData)
+  const [formData, setFormData] = useState(initialData ?? defaultFormData)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
   const [openDialog, setOpenDialog] = useState(false)
-
+  const [isFormatted, setIsFormatted] = useState(false)
   // const [loading, setLoading] = useState(false)
   const { setLoading } = useLoading()
   const { Slide } = SlideTransition({ direction: 'up' })
@@ -90,15 +108,15 @@ const ProductModal: React.FC<SalesModalProps> = ({
     if (modalMode === 'add') setFormData(defaultFormData)
   }, [defaultFormData])
 
-  const handleChange = (field: keyof ProductData, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleChange = (field: keyof ProductDetail, value: string | number) => {
+    // setFormData({ ...formData, [field]: value })
+    debouncedUpdate(field as keyof ProductDetail, value)
   }
 
   const handleSubmit = async () => {
-    setLoading(true)
+    // setLoading(true)
     try {
       await onConfirm({ ...formData, component: newComponentListData as ComponentDetail[] })
-      onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
@@ -180,9 +198,13 @@ const ProductModal: React.FC<SalesModalProps> = ({
     }
   }, [modalMode])
 
-  const calculateProfitMargin = useCallback((cost: number, price: number) => {
-    return price - cost
-  }, [])
+  // setFormData(prev => ({ ...prev, ['productPriceMargin']: price - cost }))
+  const calculateProfitMargin = (cost: number, price: number) => price - cost
+
+  //break for app crash
+  const debouncedUpdate = debounce((field: keyof ProductDetail, value: string | number) => {
+    setFormData({ ...formData, [field]: value })
+  }, 300)
 
   return (
     <Dialog
@@ -254,30 +276,48 @@ const ProductModal: React.FC<SalesModalProps> = ({
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <TextField
               label='原価'
-              type='number'
               value={formData.productCost}
-              onChange={e => handleChange('productCost', parseFloat(e.target.value))}
+              onChange={e =>
+                handleChange('productCost', e.target.value ? parseFloat(e.target.value) : 0)
+              }
               // fullWidth
               margin='normal'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+                inputProps: {
+                  maxLength: 13,
+                },
+              }}
+              onContextMenu={e => e.preventDefault()} // Optionally prevent context menu
+              variant='outlined'
               // sx={{ width: '20%' }}
             />
             <TextField
               label='単価'
-              type='number'
               value={formData.productPrice}
-              onChange={e => handleChange('productPrice', parseFloat(e.target.value))}
+              onChange={e =>
+                handleChange('productPrice', e.target.value ? parseFloat(e.target.value) : 0)
+              }
               // fullWidth
               margin='normal'
+              onTouchStart={e => e.preventDefault()}
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+                inputProps: {
+                  maxLength: 13,
+                },
+              }}
+
               // sx={{ width: '20%' }}
             />
             <TextField
               label='粗利益'
-              type='number'
               value={calculateProfitMargin(formData.productCost, formData.productPrice)}
-              onChange={e => handleChange('productPrice', parseFloat(e.target.value))}
+              // onChange={e => handleChange('productPriceMargin', parseFloat(e.target.value))}
               // fullWidth
               InputProps={{
                 readOnly: true,
+                inputComponent: NumericFormatCustom as any,
               }}
               margin='normal'
               // sx={{ width: '20%' }}
