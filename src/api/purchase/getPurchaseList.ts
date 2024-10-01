@@ -28,7 +28,7 @@ export interface PurchaseData {
   component: ComponentList[]
   orderRequestEmployeeId: string
   orderRequestEmployeeName: string
-  orderApprovedEmployeeId: string
+  orderApprovedEmployeeId: number
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs
   purchaseApprovedDate: string | dayjs.Dayjs
@@ -74,7 +74,8 @@ export default async function getPurchaseList({
     code: 200,
     message: 'Success',
     data: {
-      data: mockData,
+      // data: mockData,
+      data: [],
       totalRow: 0,
     },
   }

@@ -1,12 +1,18 @@
-import { GridColDef } from '@mui/x-data-grid'
+import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { api } from 'api/index'
+import { AddNewUserData } from 'api/user/addNewUser'
 import { UserData } from 'api/user/getUserList'
+// import { UpdateUserData } from 'api/user/updateUser'
 import useLoading from 'hooks/useLoading'
+import useNotification from 'hooks/useNotification'
 import { useMemo, useState } from 'react'
 
 interface PaginationModel {
   page: number
   pageSize: number
+}
+interface CachedData {
+  [key: string]: UserData[]
 }
 
 export default function useAccount() {
@@ -15,21 +21,23 @@ export default function useAccount() {
     page: 0,
     pageSize: 10,
   })
+  const [cachedData, setCachedData] = useState<CachedData>({})
+  const { notificationModal } = useNotification()
 
-  const { withLoading } = useLoading()
+  const { withLoading, setLoading } = useLoading()
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'username', headerName: 'ユーザーネーム', headerAlign: 'center' },
+      { field: 'identifier', headerName: 'ユーザーネーム', headerAlign: 'center' },
       {
         field: 'password',
         headerName: 'パスワード',
         headerAlign: 'center',
         // minWidth: 200,
       },
-      { field: 'fullName', headerName: '名前', headerAlign: 'center' },
+      { field: 'name', headerName: '名前', headerAlign: 'center' },
       {
-        field: 'role',
+        field: 'roles',
         headerName: '役柄',
         headerAlign: 'center',
         // minWidth: 200,
@@ -38,16 +46,69 @@ export default function useAccount() {
     []
   )
 
-  const getUserList = async () => {
-    const result = await withLoading(api.user().getUserList())
+  const getUserList = async ({ page, pageSize }: GridPaginationModel) => {
+    const result = await withLoading(api.user().getUserList({ page, pageSize }))
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
   }
 
+  const addNewUser = async (newUserData: AddNewUserData) => {
+    setLoading(true)
+    const result = await api.user().addNewUser(newUserData)
+    if (result.code === 200) {
+      notificationModal.success('追加完了しました。')
+      getUserList(paginationModel)
+    }
+    setLoading(false)
+  }
+
+  const deleteUser = async (selectedUserId: number) => {
+    setLoading(true)
+    const result = await api.user().deleteUser(selectedUserId)
+    if (result.code === 200) {
+      notificationModal.success('削除完了しました。')
+      getUserList(paginationModel)
+    }
+    setLoading(false)
+  }
+
+  const updateUser = async (newDataUser: UserData) => {
+    setLoading(true)
+    const result = await api.user().updateUser(newDataUser)
+    if (result.code === 200) {
+      notificationModal.success('編集完了しました。')
+      getUserList(paginationModel)
+    }
+    setLoading(false)
+  }
+
   const handlePaginationModelChange = (newModel: PaginationModel) => {
     setPaginationModel(newModel)
+    if (newModel.pageSize !== paginationModel.pageSize) {
+      // If page size has changed, reset to the first page
+      setPaginationModel({ page: 0, pageSize: newModel.pageSize })
+      // Clear the cache when page size changes
+      setCachedData({})
+    } else {
+      setPaginationModel(newModel)
+    }
+    const cacheKey = `${newModel.page}-${newModel.pageSize}`
+    if (cachedData[cacheKey]) {
+      setUserListData(cachedData[cacheKey])
+      return
+    }
+    getUserList(newModel)
     //call APi
   }
-  return { columns, getUserList, userListData, paginationModel, handlePaginationModelChange }
+  return {
+    columns,
+    getUserList,
+    userListData,
+    paginationModel,
+    handlePaginationModelChange,
+    addNewUser,
+    deleteUser,
+    updateUser,
+  }
 }

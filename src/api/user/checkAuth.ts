@@ -3,23 +3,24 @@ import { axiosInstance, ApiResponse } from 'api'
 
 export interface AuthData {
   id: number
-  // id:number
-  userId: string
-  username: string
-  fullName: string
+  // userId: string
+  // username: string
+  // fullName: string
+  name: string
+  indetifier: string
   password: string
   roles: string
-  token: string
+  // token: string
 }
 
 export default async function CheckAuth(
-  username: string,
+  indetifier: string,
   password: string
 ): Promise<ApiResponse<AuthData>> {
   // when use real API
   // try {
-  //   const response = await axiosInstance.get<ApiResponse<AuthData>>('/api/users')
-  //   return { code: 200, message: 'success', data: response.data.data }
+  //   const response = await axiosInstance.post('/api/users/login', { indetifier, password })
+  //   return { code: 200, message: 'success', data: response.data }
   // } catch (error) {
   //   if (axios.isAxiosError(error) && error.response) {
   //     return {
@@ -41,12 +42,13 @@ export default async function CheckAuth(
       //test only
       let data = {
         id: 1,
-        username: 'admin',
+        name: 'admin',
         roles: 'Administator',
-        token: 'abcd001',
+        // token: 'abcd001',
         // id:number
-        userId: '',
-        fullName: '',
+        // userId: '',
+        // fullName: '',
+        indetifier: '',
         password: 'abc11011',
       }
       resolve({ code: 200, message: 'success', data: data })

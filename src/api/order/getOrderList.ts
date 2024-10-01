@@ -31,7 +31,7 @@ export interface OrderData {
   product: ProductList[]
   orderRequestEmployeeId: string
   orderRequestEmployeeName: string
-  orderApprovedEmployeeId: string
+  orderApprovedEmployeeId: number
   orderApprovedEmployeeName: string
   quotationRequestDate: string | Dayjs
   registDate: string | Dayjs
@@ -65,7 +65,8 @@ export default async function getOrderList({
     code: 200,
     message: 'Success',
     data: {
-      data: mockData,
+      // data: mockData,
+      data: [],
       totalRow: 0,
     },
   }

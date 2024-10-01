@@ -60,7 +60,7 @@ const defaultFormData: OrderData = {
   product: [],
   orderRequestEmployeeId: '',
   orderRequestEmployeeName: '',
-  orderApprovedEmployeeId: '',
+  orderApprovedEmployeeId: 0,
   orderApprovedEmployeeName: '',
   quotationRequestDate: dayjs(),
   paymentDueDate: dayjs(),
@@ -175,8 +175,8 @@ export default function OrderModal({
     }
   }
 
-  const findUserById = (userId: string | null) => {
-    return userListData?.find(user => user.userId === userId) || null
+  const findUserById = (userId: number | null) => {
+    return userListData?.find(user => user.id === userId) || null
   }
 
   const findCustomerById = (customerId: string | null) => {
@@ -378,20 +378,20 @@ export default function OrderModal({
                   const { key, ...optionProps } = props
                   return (
                     <Box key={key} component='li' {...optionProps}>
-                      {option.fullName}
+                      {option.name}
                     </Box>
                   )
                 }}
-                getOptionLabel={option => option.fullName}
+                getOptionLabel={option => option.name}
                 sx={{ width: '35%' }}
                 renderInput={params => <TextField {...params} label='担当者' />}
                 readOnly={modalMode === 'view'}
-                isOptionEqualToValue={(option, value) => option.userId === value.userId}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
                     setFormData(prev => ({
                       ...prev,
-                      orderApprovedEmployeeId: newValue.userId,
+                      orderApprovedEmployeeId: newValue.id,
                     }))
                   }
                 }}

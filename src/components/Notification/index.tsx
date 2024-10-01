@@ -10,12 +10,15 @@ import {
   Button,
   DialogContentText,
   Slide,
+  IconButton,
 } from '@mui/material'
 import { RootState } from 'store/index'
 import { clearNotification } from 'store/notificationSlice'
 import { StyledAlert } from './styles'
 import { red } from '@mui/material/colors'
 import { TransitionProps } from '@mui/material/transitions'
+import { Box } from '@mui/system'
+import { Close as CloseIcon } from '@mui/icons-material'
 
 const Notification: React.FC = () => {
   const dispatch = useDispatch()
@@ -77,14 +80,20 @@ const Notification: React.FC = () => {
             })(),
           })}
         >
-          {severity === 'error' ? 'Error' : 'Notification'}
+          <Box display='flex' alignItems='center' justifyContent='space-between'>
+            {/* {severity === 'error' ? 'Error' : 'Notification'} */}
+            {severity === 'error' ? 'エラー' : '通知表'}
+            <IconButton edge='end' color='inherit' onClick={handleClose} aria-label='close'>
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <DialogContent>
           <DialogContentText>{message}</DialogContentText>
         </DialogContent>
-        <DialogActions>
+        {/* <DialogActions>
           <Button onClick={handleClose}>Close</Button>
-        </DialogActions>
+        </DialogActions> */}
       </Dialog>
     )
   }

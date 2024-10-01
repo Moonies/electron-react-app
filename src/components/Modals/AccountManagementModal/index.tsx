@@ -28,10 +28,12 @@ interface AccountManagementModalProps {
   mode: 'add' | 'edit'
 }
 const defaultFormData: AddNewUserData = {
-  fullName: '',
+  name: '',
   roles: '',
-  username: '',
+  identifier: '',
+  // username: '',
   password: '',
+  userNumber: '',
 }
 export default function AccountManagementModal({
   open,
@@ -45,27 +47,27 @@ export default function AccountManagementModal({
   const roleList = [
     {
       value: 'normal',
-      label: 'normal-level',
+      label: '一般',
     },
     {
       value: 'senior',
-      label: 'senior-level',
+      label: '課長',
     },
     {
       value: 'manager',
-      label: 'manager-level',
+      label: 'マネジャー',
     },
     {
       value: 'admin',
-      label: 'administator-level',
+      label: '管理人',
     },
   ]
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
+      console.log(initialData)
       setFormData(initialData)
     } else {
-      console.log('first')
       setFormData(defaultFormData)
     }
   }, [defaultFormData, initialData])
@@ -77,7 +79,7 @@ export default function AccountManagementModal({
   const handleSubmit = async () => {
     try {
       await onConfirm(formData)
-      onClose()
+      // onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
@@ -112,13 +114,13 @@ export default function AccountManagementModal({
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <TextField
               label='ユーザーネーム'
-              value={formData.username}
-              onChange={e => handleChange('username', e.target.value)}
+              value={formData.identifier}
+              onChange={e => handleChange('identifier', e.target.value)}
               fullWidth
               margin='normal'
               // sx={{ flex: 1 }}
             />
-            <TextField
+            {/* <TextField
               label='パスワード'
               type='text'
               value={formData.password}
@@ -126,14 +128,23 @@ export default function AccountManagementModal({
               fullWidth
               margin='normal'
               // sx={{ width: '20%' }}
-            />
+            /> */}
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
+            {/* <TextField
+              label='社員番号'
+              type='text'
+              value={formData.userNumber}
+              onChange={e => handleChange('name', e.target.value)}
+              // fullWidth
+              margin='normal'
+              // sx={{ width: '20%' }}
+            /> */}
             <TextField
               label='名前'
               type='text'
-              value={formData.fullName}
-              onChange={e => handleChange('fullName', parseFloat(e.target.value))}
+              value={formData.name}
+              onChange={e => handleChange('name', e.target.value)}
               // fullWidth
               margin='normal'
               // sx={{ width: '20%' }}
@@ -142,7 +153,7 @@ export default function AccountManagementModal({
               label='役柄'
               type='text'
               value={formData.roles}
-              defaultValue={undefined}
+              // defaultValue={undefined}
               onChange={e => handleChange('roles', e.target.value)}
               // fullWidth
               margin='normal'

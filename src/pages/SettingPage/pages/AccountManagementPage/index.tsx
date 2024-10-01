@@ -22,6 +22,7 @@ import useNotification from 'hooks/useNotification'
 import useAccount from './hooks/useAccount'
 import AccountManagementModal from 'components/Modals/AccountManagementModal'
 import { UserData } from 'api/user/getUserList'
+import { AddNewUserData } from 'api/user/addNewUser'
 
 export default function AccountManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -33,8 +34,16 @@ export default function AccountManagementPage() {
   const [filterValue, setFilterValue] = useState('')
   const [selectedUser, setSelectedUser] = useState<UserData | undefined>()
 
-  const { columns, getUserList, userListData, paginationModel, handlePaginationModelChange } =
-    useAccount()
+  const {
+    columns,
+    getUserList,
+    userListData,
+    paginationModel,
+    handlePaginationModelChange,
+    addNewUser,
+    deleteUser,
+    updateUser,
+  } = useAccount()
 
   useEffect(() => {
     if (accountDataGridRef.current) {
@@ -47,7 +56,7 @@ export default function AccountManagementPage() {
   }, [userListData])
 
   useEffect(() => {
-    getUserList()
+    getUserList(paginationModel)
   }, [])
 
   const handleAddClick = () => {
@@ -59,7 +68,7 @@ export default function AccountManagementPage() {
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = userListData.find(user => user.userId === selectedId)
+      const selectedData = userListData.find(user => user.id === selectedId)
       if (selectedData) {
         setModalMode('edit')
         setSelectedUser(selectedData)
@@ -73,16 +82,16 @@ export default function AccountManagementPage() {
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = userListData.find(user => user.userId === selectedId)
+      const selectedData = userListData.find(user => user.id === selectedId)
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: 'Are you sure you want to delete this User Name : ' + selectedData.username,
+          message: 'Are you sure you want to delete this User Name : ' + selectedData.name,
         })
         if (confirmed) {
-          // Perform delete operation
-          console.log('Delete confirmed')
+          deleteUser(selectedData.id)
         } else {
+          //something else
           console.log('Delete cancelled')
         }
       }
@@ -91,7 +100,7 @@ export default function AccountManagementPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: any) => {
+  const handleModalConfirm = async (data: AddNewUserData | UserData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -100,16 +109,17 @@ export default function AccountManagementPage() {
         message: 'Are you sure you want to add data.',
       })
       if (confirmed) {
-        // Perform delete operation
-        console.log('Add confirmed')
-      } else {
-        console.log('Add cancelled')
+        addNewUser(data).finally(() => setModalOpen(false))
       }
-      // addNewSaleData()
-    } else {
+    } else if (modalMode === 'edit') {
+      const confirmed = await openConfirmModal({
+        title: '確認してください',
+        message: 'Are you sure you want to update data.',
+      })
+      if (confirmed) {
+        updateUser(data as UserData).finally(() => setModalOpen(false))
+      }
     }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
   }
 
   const filteredRows = () => {
@@ -210,7 +220,7 @@ export default function AccountManagementPage() {
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={accountDataGridRef}
-          getRowId={row => row.userId}
+          // getRowId={row => row.userId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>

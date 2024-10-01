@@ -17,13 +17,14 @@ export interface ApiResponse<T> {
   code: number
   message: string
   data: T | null | undefined
+  // _embedded: T | null | undefined
 }
 
 // Determine the base URL based on the environment
 const getBaseUrl = () => {
   if (process.env.NODE_ENV === 'development') {
     // Use Docker host in development
-    return 'http://192.168.68.126:8080'
+    return 'http://192.168.68.126:8044'
   } else if (process.env.NODE_ENV === 'production') {
     // Use the production URL in production
     return 'https://api.yourdomain.com'
