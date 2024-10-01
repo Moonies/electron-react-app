@@ -22,7 +22,8 @@ import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
 import { StyledButton } from 'styles/styles'
 import useLoading from 'hooks/useLoading'
 import { api } from 'api/index'
-import MarkInput from 'components/MarkInput'
+import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
+import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
 
 interface CustomerManagementModalProps {
   open: boolean
@@ -165,7 +166,7 @@ export default function CustomerManagementModal({
               fullWidth
               margin='normal'
               InputProps={{
-                inputComponent: MarkInput as any,
+                inputComponent: MarkInputPhoneNumber as any,
               }}
             />
             <TextField
@@ -187,6 +188,9 @@ export default function CustomerManagementModal({
               // fullWidth
               margin='normal'
               // select
+              InputProps={{
+                inputComponent: MarkInputPostalCode as any,
+              }}
             />
             <StyledButton
               variant='outlined'

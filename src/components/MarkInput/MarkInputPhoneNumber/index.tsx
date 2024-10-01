@@ -6,7 +6,7 @@ interface CustomProps {
   name: string
 }
 
-const MarkInput = React.forwardRef<HTMLInputElement, CustomProps>(
+const MarkInputPhoneNumber = React.forwardRef<HTMLInputElement, CustomProps>(
   function TextMaskCustom(props, ref) {
     const { onChange, ...other } = props
 
@@ -25,4 +25,4 @@ const MarkInput = React.forwardRef<HTMLInputElement, CustomProps>(
   }
 )
 
-export default MarkInput
+export default MarkInputPhoneNumber

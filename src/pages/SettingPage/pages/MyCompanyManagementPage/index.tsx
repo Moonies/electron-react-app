@@ -16,6 +16,9 @@ import useNotification from 'hooks/useNotification'
 import useMyCompany from './hooks/useMyCompany'
 import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import { isShrink } from 'utils/inputUtils'
+import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
+import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
+import MarkInputCorporateNumber from 'components/MarkInput/MarkInputCorporateNumber'
 
 export default function MyCompanyManagementPage() {
   const { notificationModal } = useNotification()
@@ -89,6 +92,9 @@ export default function MyCompanyManagementPage() {
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.phoneNumber) }}
             // onChange={e => handleChange('companyTelNumber', e.target.value)}
             onChange={handleChange}
+            InputProps={{
+              inputComponent: MarkInputPhoneNumber as any,
+            }}
           />
           <TextField
             fullWidth
@@ -110,6 +116,12 @@ export default function MyCompanyManagementPage() {
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.corporationNumber) }}
             // onChange={e => handleChange('corporateNumber', e.target.value)}
             onChange={handleChange}
+            InputProps={{
+              inputComponent: MarkInputCorporateNumber as any,
+              inputProps: {
+                maxLength: 12,
+              },
+            }}
           />
           <TextField
             fullWidth
@@ -133,6 +145,9 @@ export default function MyCompanyManagementPage() {
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.postalCode) }}
             // onChange={e => handleChange('postCode', e.target.value)}
             onChange={handleChange}
+            InputProps={{
+              inputComponent: MarkInputPostalCode as any,
+            }}
           />
           <StyledButton
             variant='outlined'

@@ -6,12 +6,7 @@ import {
   DialogActions,
   TextField,
   Button,
-  CircularProgress,
-  Select,
   MenuItem,
-  FormControl,
-  InputLabel,
-  Autocomplete,
   Box,
   Typography,
   IconButton,
@@ -22,9 +17,8 @@ import {
   Edit as EditIcon,
   Save as SaveIcon,
   Delete as DeleteIcon,
+  Add as AddIcon,
 } from '@mui/icons-material'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import dayjs from 'dayjs'
 import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import SlideTransition from 'components/Transition/Slide'
 import DataTable from 'components/DataTable'
@@ -40,6 +34,7 @@ import {
 import CustomFooter from './components/CustomFooter'
 import { ComponentData } from 'api/component/getComponentList'
 import NumericFormatCustom from 'components/NumericFormat'
+import { StyledButton } from 'styles/styles'
 
 interface SalesModalProps {
   open: boolean
@@ -68,10 +63,6 @@ const defaultFormData: ProductDetail = {
   productUnit: '',
   component: [],
 }
-interface CustomProps {
-  onChange: (event: { target: { name: string; value: string } }) => void
-  name: string
-}
 
 const ProductModal: React.FC<SalesModalProps> = ({
   open,
@@ -84,8 +75,6 @@ const ProductModal: React.FC<SalesModalProps> = ({
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
   const [openDialog, setOpenDialog] = useState(false)
-  const [isFormatted, setIsFormatted] = useState(false)
-  // const [loading, setLoading] = useState(false)
   const { setLoading } = useLoading()
   const { Slide } = SlideTransition({ direction: 'up' })
   const addNewComponentDataGridRef = useGridApiRef()
@@ -114,7 +103,6 @@ const ProductModal: React.FC<SalesModalProps> = ({
   }
 
   const handleSubmit = async () => {
-    // setLoading(true)
     try {
       await onConfirm({ ...formData, component: newComponentListData as ComponentDetail[] })
     } catch (error) {
@@ -215,7 +203,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
         }
       }}
       disableEscapeKeyDown
-      fullWidth
+      // fullWidth
       fullScreen
       // maxWidth='md'
       keepMounted
@@ -334,40 +322,18 @@ const ProductModal: React.FC<SalesModalProps> = ({
               />
             )}
           </Box>
-          <Box display={'flex'} flexDirection={'row'} gap={2}>
-            {/* <TextField
-              label='在庫数'
-              type='number'
-              value={formData.stockQuantity}
-              onChange={e => handleChange('stockQuantity', parseFloat(e.target.value))}
-              // fullWidth
-              margin='normal'
-              // sx={{ width: '20%' }}
-            /> */}
-            {/* <TextField
-              label='単位'
-              type='text'
-              value={formData.productUnit}
-              defaultValue={undefined}
-              onChange={e => handleChange('productUnit', e.target.value)}
-              // fullWidth
-              margin='normal'
-              select
-              sx={{ width: '40%' }}
-              InputLabelProps={{
-                component: 'span',
-              }}
-            >
-              {productUnitList.map(item => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </TextField> */}
-          </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
             <Box display={'flex'} alignItems={'end'}>
-              <Button
+              <StyledButton
+                variant='outlined'
+                startIcon={<AddIcon />}
+                size='large'
+                onClick={() => setOpenDialog(true)}
+                sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+              >
+                部品追加
+              </StyledButton>
+              {/* <Button
                 onClick={() => setOpenDialog(true)}
                 variant='outlined'
                 sx={theme => ({
@@ -376,8 +342,8 @@ const ProductModal: React.FC<SalesModalProps> = ({
                   // height: '50%',
                 })}
               >
-                Add Component
-              </Button>
+                部品追加
+              </Button> */}
             </Box>
           </Box>
           <DataTable
