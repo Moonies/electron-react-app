@@ -225,15 +225,13 @@ export default function AccountManagementPage() {
         />
       </Box>
 
-      {modalOpen && (
-        <AccountManagementModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onConfirm={handleModalConfirm}
-          initialData={selectedUser}
-          mode={modalMode}
-        />
-      )}
+      <AccountManagementModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleModalConfirm}
+        initialData={selectedUser}
+        mode={modalMode}
+      />
     </Box>
   )
 }

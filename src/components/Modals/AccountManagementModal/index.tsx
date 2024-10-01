@@ -173,7 +173,7 @@ export default function AccountManagementModal({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant='contained'>
+        <Button onClick={onClose} variant='contained' aria-label='close'>
           キャンセル
         </Button>
         <Button
