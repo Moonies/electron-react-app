@@ -69,6 +69,8 @@ export const ConfirmModalProvider: React.FC<ConfirmModalProviderProps> = ({ chil
             handleCancel()
           }
         }}
+        aria-labelledby='confirm-dialog-title'
+        aria-describedby='confirm-dialog-description'
       >
         <DialogTitle
           sx={theme => ({

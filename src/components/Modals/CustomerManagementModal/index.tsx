@@ -22,6 +22,8 @@ import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
 import { StyledButton } from 'styles/styles'
 import useLoading from 'hooks/useLoading'
 import { api } from 'api/index'
+import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
+import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
 
 interface CustomerManagementModalProps {
   open: boolean
@@ -158,11 +160,14 @@ export default function CustomerManagementModal({
             </TextField>
             <TextField
               label='電話番号'
-              type='text'
+              // type='text'
               value={formData.phoneNumber}
               onChange={e => handleChange('phoneNumber', e.target.value)}
               fullWidth
               margin='normal'
+              InputProps={{
+                inputComponent: MarkInputPhoneNumber as any,
+              }}
             />
             <TextField
               label='メール'
@@ -183,6 +188,9 @@ export default function CustomerManagementModal({
               // fullWidth
               margin='normal'
               // select
+              InputProps={{
+                inputComponent: MarkInputPostalCode as any,
+              }}
             />
             <StyledButton
               variant='outlined'

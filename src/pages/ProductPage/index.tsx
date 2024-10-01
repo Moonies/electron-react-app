@@ -116,6 +116,7 @@ export default function ProductPage() {
         message: 'Are you sure you want to add data.',
       })
       if (confirmed) {
+        setModalOpen(false)
         // Perform delete operation
         console.log('Add confirmed')
       } else {

@@ -22,6 +22,8 @@ import useLoading from 'hooks/useLoading'
 import { api } from 'api/index'
 import { AddNewSupplierProps } from 'api/supplier/addNewSupplier'
 import { SupplierData } from 'api/supplier/getSupplierList'
+import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
+import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
 
 interface SupplierManagementModalProps {
   open: boolean
@@ -160,6 +162,9 @@ export default function SupplierManagementModal({
               onChange={e => handleChange('phoneNumber', e.target.value)}
               fullWidth
               margin='normal'
+              InputProps={{
+                inputComponent: MarkInputPhoneNumber as any,
+              }}
             />
             <TextField
               label='メール'
@@ -180,6 +185,9 @@ export default function SupplierManagementModal({
               // fullWidth
               margin='normal'
               // select
+              InputProps={{
+                inputComponent: MarkInputPostalCode as any,
+              }}
             />
             <StyledButton
               variant='outlined'
