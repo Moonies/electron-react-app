@@ -12,7 +12,7 @@ export interface NewOrder {
   customerCompanyId: string
   product: ProductList[]
   orderRequestEmployeeId: string
-  orderApprovedEmployeeId: string
+  orderApprovedEmployeeId: number
   quotationRequestDate: string | dayjs.Dayjs
   registDate: string | dayjs.Dayjs
   shippingmentDate: string | dayjs.Dayjs

@@ -136,6 +136,7 @@ export default function App() {
               }
               // setLoginOpen(false)
             }}
+            //when success is keep user to local storage
             onSuccess={() => setLoginOpen(false)}
           />
           <IpSettingModal open={apiConfigModal} onClose={() => handleCloseApiConfig()} />

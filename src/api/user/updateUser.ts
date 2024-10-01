@@ -1,23 +1,21 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
+import { UserData } from './getUserList'
 
-export interface AddNewUserData {
-  // username: string
-  password: string
-  identifier: string
-  name: string
-  roles: string
-  userNumber: string
-}
+// export interface UpdateUserData {
+//   // username: string
+//   id: number
+//   password: string
+//   identifier: string
+//   name: string
+//   roles: string
+//   userNumber: string
+// }
 
-export interface GetUserListProps {
-  username: string
-}
-
-export default async function getUserList(newDataUser: AddNewUserData): Promise<ApiResponse<null>> {
+export default async function updateUser(newDataUser: UserData): Promise<ApiResponse<null>> {
   // when use real API
   try {
-    const response = await axiosInstance.post('/api/users', { ...newDataUser })
+    const response = await axiosInstance.patch('/api/users', { ...newDataUser })
     return { code: 200, message: 'success', data: response.data.data }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {

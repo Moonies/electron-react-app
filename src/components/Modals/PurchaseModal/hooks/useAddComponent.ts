@@ -173,7 +173,7 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   )
 
   const getUserList = async () => {
-    const result = await api.user().getUserList()
+    const result = await api.user().getUserList({})
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
