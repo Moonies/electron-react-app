@@ -96,7 +96,7 @@ export default function CustomerManagementModal({
   }
   //when function has to be more 1 function should move to hook
   const handlePostCodeClick = async () => {
-    const result = await withLoading(api.postCode().getPostCode({ postCode: formData.postalCode }))
+    const result = await withLoading(api.postCode().getPostCode(formData.postalCode))
     if (result.code === 200) {
       //data is now for test and mock
       setFormData(prev => ({

@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Box,
+  Button,
   Container,
   Divider,
   IconButton,
@@ -10,33 +11,55 @@ import {
   Typography,
 } from '@mui/material'
 import { StyledButton } from 'styles/styles'
-import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
+import {
+  SaveAs as SaveIcon,
+  Search as SearchIcon,
+  CloudUpload as CloudUploadIcon,
+} from '@mui/icons-material'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
-import useMyCompany from './hooks/useMyCompany'
-import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
+import useMyCompany, { MyCompanyDetail } from './hooks/useMyCompany'
+// import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import { isShrink } from 'utils/inputUtils'
 import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
 import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
 import MarkInputCorporateNumber from 'components/MarkInput/MarkInputCorporateNumber'
+import { VisuallyHiddenInput } from './styles'
+import { deConvertPostalCode } from 'utils/formatUtils'
+
+interface UploadedImage {
+  file: File
+  previewUrl: string
+}
 
 export default function MyCompanyManagementPage() {
-  const { notificationModal } = useNotification()
+  const { notificationModal, notificationSnackbar } = useNotification()
   const { openConfirmModal } = useConfirmModal()
-  const [formCompanyDetail, setFormCompanyDetail] = useState<Partial<MyCompanyDetail>>({})
-  const { getMyCompanyDetail, myCompanyDetail, getPostCode } = useMyCompany()
+  // const [formCompanyDetail, setFormCompanyDetail] = useState<Partial<MyCompanyDetail>>({})
+  const {
+    getMyCompanyDetail,
+    formCompanyDetail,
+    getPostCode,
+    updateCompanyDetail,
+    addNewMyCompanyDetail,
+    setFormCompanyDetail,
+  } = useMyCompany()
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
+
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
   useEffect(() => {
     getMyCompanyDetail()
   }, [])
 
-  useEffect(() => {
-    setFormCompanyDetail({ ...myCompanyDetail })
-  }, [myCompanyDetail])
+  // useEffect(() => {
+  //   setFormCompanyDetail({ ...myCompanyDetail })
+  // }, [myCompanyDetail])
 
   const handleClickGetPostCode = () => {
     // console.log(formCompanyDetail?.companyPostCode)
-    getPostCode(formCompanyDetail?.postalCode ?? '')
+    getPostCode(deConvertPostalCode(formCompanyDetail?.postalCode ?? ''))
   }
 
   const handleSaveClick = async () => {
@@ -48,16 +71,86 @@ export default function MyCompanyManagementPage() {
     })
     if (confirmed) {
       // Perform update operation
+      if (formCompanyDetail.id) {
+        updateCompanyDetail(formCompanyDetail as MyCompanyDetail, uploadedImage?.file)
+      } else {
+        addNewMyCompanyDetail(formCompanyDetail as MyCompanyDetail, uploadedImage?.file)
+      }
       console.log('Add confirmed')
     } else {
       console.log('Add cancelled')
     }
   }
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
+    // console.log(name, value)
     setFormCompanyDetail(prev => ({ ...prev, [name]: value }))
   }
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        console.log(file.type)
+        notificationSnackbar.error('file type is not impage file.')
+        // setError(`File ${file.name} is not an allowed image type. Please select a JPEG, PNG, GIF, or WebP image.`);
+        event.target.value = ''
+        return
+      }
+      try {
+        //if company id should auto update but at confirm is shuold be update
+
+        console.log('Upload successful')
+        const newImage: UploadedImage = {
+          file,
+          previewUrl: URL.createObjectURL(file),
+        }
+        setUploadedImage(newImage)
+      } catch (error) {
+        // setPreviewUrl(null)
+        if (error instanceof Error) {
+          console.log(error.message)
+        } else {
+          console.log('An unknown error occurred')
+        }
+      }
+    }
+    // Reset the file input
+    event.target.value = ''
+  }
+
+  const taxList = [
+    {
+      value: 8,
+      label: '8%',
+    },
+    {
+      value: 10,
+      label: '10%',
+    },
+  ]
+
+  const clearFileUpload = () => {
+    if (uploadedImage) {
+      URL.revokeObjectURL(uploadedImage.previewUrl)
+    }
+    setUploadedImage(null)
+
+    // setUploadedImage(null);
+    // setPreviewUrl(null)
+    // setError(null);
+    // if (fileInputRef.current) {
+    //   fileInputRef.current.value = '';
+    // }
+  }
+  useEffect(() => {
+    return () => {
+      if (uploadedImage) {
+        URL.revokeObjectURL(uploadedImage.previewUrl)
+      }
+    }
+  }, [uploadedImage])
 
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
@@ -77,7 +170,7 @@ export default function MyCompanyManagementPage() {
         <Box display={'flex'} flexDirection='row' gap={2}>
           <TextField
             fullWidth
-            name='companyName'
+            name='name'
             label='企業名称'
             value={formCompanyDetail.name ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.name) }}
@@ -86,7 +179,7 @@ export default function MyCompanyManagementPage() {
           />
           <TextField
             fullWidth
-            name='companyPhoneNumber'
+            name='phoneNumber'
             label='電話番号'
             value={formCompanyDetail.phoneNumber ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.phoneNumber) }}
@@ -98,7 +191,7 @@ export default function MyCompanyManagementPage() {
           />
           <TextField
             fullWidth
-            name='companyEmail'
+            name='email'
             label='メール'
             value={formCompanyDetail.email ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.email) }}
@@ -110,7 +203,7 @@ export default function MyCompanyManagementPage() {
         <Box display={'flex'} flexDirection='row' gap={2}>
           <TextField
             fullWidth
-            name='corporateNumber'
+            name='corporationNumber'
             label='法人番号'
             value={formCompanyDetail.corporationNumber ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.corporationNumber) }}
@@ -125,7 +218,7 @@ export default function MyCompanyManagementPage() {
           />
           <TextField
             fullWidth
-            name='companyBankAccount'
+            name='accountNumber'
             label='口座番号'
             value={formCompanyDetail.accountNumber ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.accountNumber) }}
@@ -133,17 +226,74 @@ export default function MyCompanyManagementPage() {
             onChange={handleChange}
           />
         </Box>
+        <Box display={'flex'} flexDirection='row' gap={2} justifyContent='space-between'>
+          <Box display={'flex'} sx={{ width: '30%' }}>
+            <TextField
+              id='outlined-select-currency-native'
+              select
+              label='Tax'
+              fullWidth
+              value={formCompanyDetail.tax ?? ''}
+              InputLabelProps={{
+                component: 'span',
+              }}
+            >
+              {taxList.map(option => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
+          <Box display={'flex'} gap={4}>
+            {uploadedImage && (
+              <img
+                src={uploadedImage.previewUrl}
+                alt='Preview'
+                style={{ width: 120, height: 120 }}
+              />
+            )}
+            <Box display={'flex'} flexDirection={'column'} alignItems='flex-start' mr={4} gap={4}>
+              <Button
+                component='label'
+                role={undefined}
+                variant='contained'
+                tabIndex={-1}
+                startIcon={<CloudUploadIcon />}
+              >
+                Upload Seal
+                <VisuallyHiddenInput
+                  type='file'
+                  onChange={handleFileChange}
+                  accept={ALLOWED_TYPES.join(',')}
+                />
+              </Button>
+              {uploadedImage && (
+                <Button
+                  component='label'
+                  variant='outlined'
+                  tabIndex={-1}
+                  onClick={clearFileUpload}
+                  // startIcon={<CloudUploadIcon />}
+                >
+                  Remove
+                </Button>
+              )}
+            </Box>
+          </Box>
+        </Box>
         <Typography variant='h5' p={2}>
           住所
         </Typography>
         <Box display={'flex'} flexDirection='row' gap={2} alignItems='center'>
           <TextField
             // fullWidth
-            name='companyPostCode'
+            name='postalCode'
             label='郵便番号'
             value={formCompanyDetail.postalCode ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.postalCode) }}
             // onChange={e => handleChange('postCode', e.target.value)}
+
             onChange={handleChange}
             InputProps={{
               inputComponent: MarkInputPostalCode as any,
@@ -162,7 +312,7 @@ export default function MyCompanyManagementPage() {
         <Box display={'flex'} gap={2}>
           <TextField
             fullWidth
-            name='companyPerfecture'
+            name='prefecture'
             label='首都府県'
             value={formCompanyDetail.prefecture ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.prefecture) }}
@@ -170,7 +320,7 @@ export default function MyCompanyManagementPage() {
           />
           <TextField
             fullWidth
-            name='companyCity'
+            name='city'
             label='市区町村'
             value={formCompanyDetail.city ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.city) }}
@@ -180,7 +330,7 @@ export default function MyCompanyManagementPage() {
         <Box display={'flex'} gap={2}>
           <TextField
             fullWidth
-            name='companyAddressCode'
+            name='streetAddress'
             label='番地'
             value={formCompanyDetail.streetAddress ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.streetAddress) }}
@@ -189,10 +339,10 @@ export default function MyCompanyManagementPage() {
           />
           <TextField
             fullWidth
-            name='companyBuildingDetail'
+            name='buildingName'
             label='建物名・部屋番号'
-            value={formCompanyDetail.bildingName ?? ''}
-            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.bildingName) }}
+            value={formCompanyDetail.buildingName ?? ''}
+            InputLabelProps={{ shrink: isShrink(formCompanyDetail?.buildingName) }}
             // onChange={e => handleChange('buildName', e.target.value)}
             onChange={handleChange}
           />

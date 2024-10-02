@@ -2,7 +2,19 @@ import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 import { mockData } from './_mockSealData'
 
-export interface MyCompanyDetail {
+export interface UpdateMyCompanyDetailData {
+  // companyName: string
+  // companyPhoneNumber: string
+  // companyEmail: string
+  // corporateNumber: string
+  // companyBankAccount: string
+  // companyPostCode: string
+  // companyPerfecture: string
+  // companyCity: string
+  // companyAddressCode: string
+  // companyBuildingDetail: string
+  // companyFax?: string
+  // seal: string
   id: number
   companyInfo: {
     name: string
@@ -15,34 +27,19 @@ export interface MyCompanyDetail {
     }
     phoneNumber: string
     email: string
-    fax?: string
+    fax: string
   }
   accountNumber: string
   corporationNumber: string
   tax: number
-  // accountNumber: string
-  // corporationNumber: string
-  // tax: number
-
-  // accountNumber: string
-  // city: string
-  // corporationNumber: string
-  // email: string
-  // fax?: string
-  // id: number
-  // name: string
-  // phoneNumber: string
-  // postalCode: string
-  // prefecture: string
-  // streetAddress: string
-  // bildingName?: string
-  // tax: number
 }
-export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompanyDetail>> {
+export default async function updateMyCompanyDetail(
+  data: UpdateMyCompanyDetailData
+): Promise<ApiResponse<{}>> {
   // when use real API
   try {
-    const response = await axiosInstance.get('/api/company')
-    return { code: 200, message: 'success', data: response.data._embedded.company[0] }
+    const response = await axiosInstance.patch('/api/company/' + data.id, { ...data })
+    return { code: 200, message: 'success', data: response.data.data }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {
@@ -75,7 +72,18 @@ export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompan
   //       prefecture: '京都市',
   //       streetAddress: '淀際目町335-5',
   //       tax: 10,
-
+  //       // companyName: '株式会社さんせん清水',
+  //       // companyPhoneNumber: '0900000000',
+  //       // companyEmail: 'info@sansenshimizu.com',
+  //       // corporateNumber: '1234567890',
+  //       // companyBankAccount: '002004003',
+  //       // companyPostCode: '6110915',
+  //       // companyPerfecture: '京都市',
+  //       // companyCity: '伏見区',
+  //       // companyAddressCode: '淀際目町335-5',
+  //       // companyBuildingDetail: 'aatower',
+  //       // companyFax: '07003151547',
+  //       // seal: mockData,
   //     }
 
   //     resolve({ code: 200, message: 'success', data: data })

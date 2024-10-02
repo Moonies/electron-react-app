@@ -65,7 +65,6 @@ export default function AccountManagementModal({
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
-      console.log(initialData)
       setFormData(initialData)
     } else {
       setFormData(defaultFormData)

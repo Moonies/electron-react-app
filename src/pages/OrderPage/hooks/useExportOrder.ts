@@ -76,12 +76,15 @@ export default function useExportOrder() {
     const { data } = await api.myCompany().getMyCompanyDetail()
     if (data) {
       return {
-        name: data.name,
-        email: data.email,
-        fullAddress: data.prefecture + data.city + data.streetAddress,
-        phoneNumber: formatPhoneNumber(data.phoneNumber),
-        postCode: formatPostcode(data.postalCode),
-        fax: formatPhoneNumber(data.fax),
+        name: data.companyInfo.name,
+        email: data.companyInfo.email,
+        fullAddress:
+          data.companyInfo.address.prefecture +
+          data.companyInfo.address.city +
+          data.companyInfo.address.streetAddress,
+        phoneNumber: formatPhoneNumber(data.companyInfo.phoneNumber),
+        postCode: formatPostcode(data.companyInfo.address.postalCode),
+        fax: formatPhoneNumber(data.companyInfo.fax),
       }
     }
   }

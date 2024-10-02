@@ -7,7 +7,7 @@ export interface MyCompnaSeal {
 export default async function getMyCompanySeal(): Promise<ApiResponse<MyCompnaSeal>> {
   // when use real API
   // try {
-  //   const response = await axiosInstance.get<ApiResponse<UserData[]>>('/api/users')
+  //   const response = await axiosInstance.get('/api/company/')
   //   return { code: 200, message: 'success', data: response.data.data }
   // } catch (error) {
   //   if (axios.isAxiosError(error) && error.response) {
