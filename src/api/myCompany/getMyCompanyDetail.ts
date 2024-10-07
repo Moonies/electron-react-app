@@ -41,8 +41,8 @@ export interface MyCompanyDetail {
 export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompanyDetail>> {
   // when use real API
   try {
-    const response = await axiosInstance.get('/api/company')
-    return { code: 200, message: 'success', data: response.data._embedded.company[0] }
+    const response = await axiosInstance.get('/api/company/1')
+    return { code: 200, message: 'success', data: response.data }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

@@ -21,10 +21,17 @@ export type MyCompanyDetail = {
   corporationNumber: string
   tax: number
 }
+
+interface UploadedImage {
+  file?: File
+  previewUrl: string
+}
+
 export default function useMyCompany() {
   const [formCompanyDetail, setFormCompanyDetail] = useState<Partial<MyCompanyDetail>>({})
   const { withLoading, setLoading } = useLoading()
   const { notificationModal, notificationSnackbar } = useNotification()
+  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
 
   const getMyCompanyDetail = async () => {
     const result = await withLoading(api.myCompany().getMyCompanyDetail())
@@ -33,7 +40,7 @@ export default function useMyCompany() {
         id: result.data.id,
         accountNumber: result.data.accountNumber,
         corporationNumber: result.data.corporationNumber,
-        tax: 10,
+        tax: result.data.tax,
         city: result.data.companyInfo.address.city,
         postalCode: result.data.companyInfo.address.postalCode,
         prefecture: result.data.companyInfo.address.prefecture,
@@ -44,7 +51,9 @@ export default function useMyCompany() {
         name: result.data.companyInfo.name,
         phoneNumber: result.data.companyInfo.phoneNumber,
       }
+
       setFormCompanyDetail(newData)
+      getSeal(result.data.id)
     }
   }
 
@@ -58,7 +67,7 @@ export default function useMyCompany() {
         ['city']: result.data?.city,
       }))
     } else {
-      notificationSnackbar.error('postalCode is not correct')
+      notificationSnackbar.error(result.message)
       setFormCompanyDetail(prev => ({
         ...prev,
         ['postalCode']: postCode,
@@ -74,7 +83,7 @@ export default function useMyCompany() {
     let newData: NewMyCompanyDetailData = {
       accountNumber: data.accountNumber,
       corporationNumber: data.corporationNumber,
-      tax: 10,
+      tax: data.tax,
       companyInfo: {
         address: {
           city: data.city,
@@ -89,10 +98,11 @@ export default function useMyCompany() {
         phoneNumber: data.phoneNumber,
       },
     }
-    const result = await api.myCompany().addNewMyCompnayDetail(newData)
-    if (result.code === 200) {
+    const result = await api.myCompany().addNewMyCompanyDetail(newData)
+    console.log(result)
+    if (result.code === 200 && result.data) {
       if (file) {
-        // updateSeal(file, result.data.id)
+        updateSeal(file, result.data.id)
       }
     }
     setLoading(false)
@@ -126,11 +136,21 @@ export default function useMyCompany() {
       notificationModal.success('編集完了しました。')
     }
   }
+
   const updateSeal = async (sealFile: File, myCompanyId: number) => {
+    console.log('upload file', sealFile)
     //if company id should auto update but at confirm is shuold be update
     const result = await api.myCompany().updateMyCompanySeal({ id: myCompanyId, seal: sealFile })
     if (result.code === 200 && result.data) {
       notificationModal.success('編集完了しました。')
+    }
+  }
+
+  const getSeal = async (myCompanyId: number) => {
+    const result = await api.myCompany().getMyCompanySeal(myCompanyId)
+    console.log(result)
+    if (result.code === 200 && result.data?.seal) {
+      setUploadedImage({ previewUrl: result.data.seal })
     }
   }
 
@@ -141,5 +161,7 @@ export default function useMyCompany() {
     getPostCode,
     updateCompanyDetail,
     addNewMyCompanyDetail,
+    uploadedImage,
+    setUploadedImage,
   }
 }

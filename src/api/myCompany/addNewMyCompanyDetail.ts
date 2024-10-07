@@ -22,7 +22,7 @@ export interface NewMyCompanyDetailData {
 type ResultAddNewMyCompany = {
   id: number
 }
-export default async function addNewMyCompnayDetail(
+export default async function addNewMyCompanyDetail(
   data: NewMyCompanyDetailData
 ): Promise<ApiResponse<ResultAddNewMyCompany>> {
   // when use real API

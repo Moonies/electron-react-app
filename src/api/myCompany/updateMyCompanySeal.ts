@@ -11,11 +11,16 @@ export default async function updateMyCompanySeal({
 }: UpdateMyCompanySeal): Promise<ApiResponse<{}>> {
   // when use real API
   try {
-    const response = await axiosInstance.put('/api/company/' + id + '/seal', seal, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await axiosInstance.put(
+      '/api/company/' + id + '/seal',
+      { file: seal },
+      {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
     return { code: 200, message: 'success', data: response.data.data }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -31,12 +36,4 @@ export default async function updateMyCompanySeal({
       data: null,
     }
   }
-
-  //for beta:test
-  // await new Promise(resolve => setTimeout(resolve, 1000))
-  // return {
-  //   code: 200,
-  //   message: 'Success',
-  //   data: { seal: mockData },
-  // }
 }

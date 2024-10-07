@@ -3,18 +3,6 @@ import { axiosInstance, ApiResponse } from 'api'
 import { mockData } from './_mockSealData'
 
 export interface UpdateMyCompanyDetailData {
-  // companyName: string
-  // companyPhoneNumber: string
-  // companyEmail: string
-  // corporateNumber: string
-  // companyBankAccount: string
-  // companyPostCode: string
-  // companyPerfecture: string
-  // companyCity: string
-  // companyAddressCode: string
-  // companyBuildingDetail: string
-  // companyFax?: string
-  // seal: string
   id: number
   companyInfo: {
     name: string
@@ -39,7 +27,7 @@ export default async function updateMyCompanyDetail(
   // when use real API
   try {
     const response = await axiosInstance.patch('/api/company/' + data.id, { ...data })
-    return { code: 200, message: 'success', data: response.data.data }
+    return { code: 200, message: 'success', data: response.data }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

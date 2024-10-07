@@ -28,7 +28,7 @@ import { VisuallyHiddenInput } from './styles'
 import { deConvertPostalCode } from 'utils/formatUtils'
 
 interface UploadedImage {
-  file: File
+  file?: File
   previewUrl: string
 }
 
@@ -43,19 +43,17 @@ export default function MyCompanyManagementPage() {
     updateCompanyDetail,
     addNewMyCompanyDetail,
     setFormCompanyDetail,
+    uploadedImage,
+    setUploadedImage,
   } = useMyCompany()
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
+  // const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
 
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
   useEffect(() => {
     getMyCompanyDetail()
   }, [])
-
-  // useEffect(() => {
-  //   setFormCompanyDetail({ ...myCompanyDetail })
-  // }, [myCompanyDetail])
 
   const handleClickGetPostCode = () => {
     // console.log(formCompanyDetail?.companyPostCode)
@@ -101,11 +99,12 @@ export default function MyCompanyManagementPage() {
       try {
         //if company id should auto update but at confirm is shuold be update
 
-        console.log('Upload successful')
+        // console.log('Upload successful', file)
         const newImage: UploadedImage = {
           file,
           previewUrl: URL.createObjectURL(file),
         }
+        console.log(newImage.previewUrl)
         setUploadedImage(newImage)
       } catch (error) {
         // setPreviewUrl(null)
@@ -132,7 +131,7 @@ export default function MyCompanyManagementPage() {
   ]
 
   const clearFileUpload = () => {
-    if (uploadedImage) {
+    if (uploadedImage && uploadedImage.previewUrl) {
       URL.revokeObjectURL(uploadedImage.previewUrl)
     }
     setUploadedImage(null)
@@ -233,10 +232,12 @@ export default function MyCompanyManagementPage() {
               select
               label='Tax'
               fullWidth
+              name='tax'
               value={formCompanyDetail.tax ?? ''}
               InputLabelProps={{
                 component: 'span',
               }}
+              onChange={handleChange}
             >
               {taxList.map(option => (
                 <MenuItem key={option.value} value={option.value}>
