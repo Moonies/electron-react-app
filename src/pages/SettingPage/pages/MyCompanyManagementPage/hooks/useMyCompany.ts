@@ -113,7 +113,7 @@ export default function useMyCompany() {
       accountNumber: data.accountNumber,
       corporationNumber: data.corporationNumber,
       id: data.id,
-      tax: 10,
+      tax: data.tax,
       companyInfo: {
         address: {
           city: data.city,
