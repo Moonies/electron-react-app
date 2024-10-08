@@ -19,6 +19,7 @@ import BarChart, { DataPoint } from 'components/Chart/BarChart'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import KpiSettingModal from 'components/Modals/KpiSettingModal'
 import { isShrink } from 'utils/inputUtils'
+import useNotification from 'hooks/useNotification'
 
 export default function KpiPage() {
   const [errors, setErrors] = useState<Partial<FinancialKpiData>>({})
@@ -35,14 +36,16 @@ export default function KpiPage() {
     currentYear,
     reverseResultFormat,
     initFormData,
+    saveSettingKpi,
   } = useKpi()
   const [formData, setFormData] = useState<FinancialKpiData>(initFormData)
   const { openWindow } = useKpiGrpah()
   const [planHeaderText, setPlanHeaderText] = useState('')
   const [actualHeaderText, setActualHeaderText] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
-
+  const [planType, setPlanType] = useState<'time' | 'plan'>('time')
   const { openConfirmModal } = useConfirmModal()
+  const { notificationModal } = useNotification()
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
@@ -91,7 +94,7 @@ export default function KpiPage() {
   }
 
   const handleClickGetData = () => {
-    getKpiData()
+    getKpiData(planType)
   }
 
   const handleOpenChart = () => {
@@ -125,10 +128,16 @@ export default function KpiPage() {
   const handleSetting = (id: number) => {
     let newText = id === 1 ? currentYear - 1 + ' 年実績' : currentYear + ' 計画'
     setPlanHeaderText(newText)
+    setPlanType(id === 1 ? 'time' : 'plan')
   }
 
-  const handleModalConfirm = (inputYear: string) => {
-    setModalOpen(false)
+  const handleModalConfirm = (inputYear: number) => {
+    if (inputYear < currentYear || inputYear > currentYear + 1) {
+      notificationModal.warning('KPI設定は今年又は次の年だけ設定できます')
+    } else {
+      setModalOpen(false)
+      saveSettingKpi(inputYear, formSetting)
+    }
   }
 
   useEffect(() => {
