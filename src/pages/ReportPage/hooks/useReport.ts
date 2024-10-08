@@ -149,28 +149,28 @@ export default function useReport() {
   }
 
   const getSaleReport = async (searchCriteria: ReportSearchCriteria) => {
-    const result = await withLoading(api.report().getSaleReportData(searchCriteria))
+    const result = await withLoading(api.report.getSaleReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setSaleChartData(result.data)
     }
   }
 
   const getProfitReport = async (searchCriteria: ReportSearchCriteria) => {
-    const result = await withLoading(api.report().getProfitReportData(searchCriteria))
+    const result = await withLoading(api.report.getProfitReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setProfitChartData(result.data)
     }
   }
 
   const getBestSaleProductReport = async (searchCriteria: ReportSearchCriteria) => {
-    const result = await withLoading(api.report().getBestSaleProductReportData(searchCriteria))
+    const result = await withLoading(api.report.getBestSaleProductReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setBestSaleProductChartData(result.data)
     }
   }
 
   const getWorstSaleProductReport = async (searchCriteria: ReportSearchCriteria) => {
-    const result = await withLoading(api.report().getWorstSaleProductReportData(searchCriteria))
+    const result = await withLoading(api.report.getWorstSaleProductReportData(searchCriteria))
     if (result.code === 200 && result.data) {
       setWorstSaleProductChartData(result.data)
     }

@@ -119,7 +119,7 @@ export default function useAddComponent(productData: ProductData) {
   }
 
   const getTotalRemainComponent = useCallback(async (componentId: string) => {
-    const { data } = await api.component().getTotalAmountComponent(componentId)
+    const { data } = await api.component.getTotalAmountComponent(componentId)
 
     return data?.totalAmount ?? 0
 

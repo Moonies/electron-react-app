@@ -101,7 +101,7 @@ export default function useProduct() {
   }, [])
 
   const handleSearch = useCallback(async () => {
-    const result = await withLoading(api.product().getProductList(searchCriteria))
+    const result = await withLoading(api.product.getProductList(searchCriteria))
     if (result.code === 200 && result.data) {
       setProductData(result.data.data)
     }

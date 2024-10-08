@@ -47,7 +47,7 @@ export default function useAccount() {
   )
 
   const getUserList = async ({ page, pageSize }: GridPaginationModel) => {
-    const result = await withLoading(api.user().getUserList({ page, pageSize }))
+    const result = await withLoading(api.user.getUserList({ page, pageSize }))
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
@@ -55,7 +55,7 @@ export default function useAccount() {
 
   const addNewUser = async (newUserData: AddNewUserData) => {
     setLoading(true)
-    const result = await api.user().addNewUser(newUserData)
+    const result = await api.user.addNewUser(newUserData)
     if (result.code === 200) {
       notificationModal.success('追加完了しました。')
       getUserList(paginationModel)
@@ -65,7 +65,7 @@ export default function useAccount() {
 
   const deleteUser = async (selectedUserId: number) => {
     setLoading(true)
-    const result = await api.user().deleteUser(selectedUserId)
+    const result = await api.user.deleteUser(selectedUserId)
     if (result.code === 200) {
       notificationModal.success('削除完了しました。')
       getUserList(paginationModel)
@@ -75,7 +75,7 @@ export default function useAccount() {
 
   const updateUser = async (newDataUser: UserData) => {
     setLoading(true)
-    const result = await api.user().updateUser(newDataUser)
+    const result = await api.user.updateUser(newDataUser)
     if (result.code === 200) {
       notificationModal.success('編集完了しました。')
       getUserList(paginationModel)

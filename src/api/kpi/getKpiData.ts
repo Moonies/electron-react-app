@@ -20,6 +20,7 @@ const mockdata = {
 }
 
 export default async function GetKpiData(selectedYear: number): Promise<ApiResponse<KpiData>> {
+  console.log('income')
   //for beta:test
   // await new Promise(resolve => setTimeout(resolve, 1000))
   // return {

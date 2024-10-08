@@ -104,7 +104,7 @@ export default function useSales() {
 
   const getSaleList = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
-    const result = await api.sale().getSaleList(searchCriteria)
+    const result = await api.sale.getSaleList(searchCriteria)
     if (result.code === 200 && result.data) {
       setSalesSummary(result.data.summary)
       setSaleData(result.data.data)

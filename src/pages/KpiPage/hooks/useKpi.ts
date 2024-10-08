@@ -127,13 +127,13 @@ export default function useKpi() {
       })
       //update
       if (confirmed) {
-        const result = await withLoading(api.kpi().saveKpiData({ id: kpiId, ...convertNewKpiData }))
+        const result = await withLoading(api.kpi.saveKpiData({ id: kpiId, ...convertNewKpiData }))
         if (result.code === 200) notificationModal.success('編集完了しました。')
       }
     } else {
       //new
       const result = await withLoading(
-        api.kpi().addNewKpiData({ year: inputYear, ...convertNewKpiData } as AddNewKpiData)
+        api.kpi.addNewKpiData({ year: inputYear, ...convertNewKpiData } as AddNewKpiData)
       )
       if (result.code === 200) notificationModal.success('新KPIを挿入完了しました。')
     }
@@ -141,6 +141,7 @@ export default function useKpi() {
   }
 
   const getKpiData = async (planType: 'time' | 'plan') => {
+    console.log(planType)
     let selectedYear = planType === 'time' ? currentYear - 1 : currentYear
     setLoading(true)
     if (planType === 'time') {
@@ -172,7 +173,7 @@ export default function useKpi() {
   }
 
   const getKpiCurrentYear = async (year: number) => {
-    const result = await api.kpi().getKpiData(year)
+    const result = await api.kpi.getKpiData(year)
     if (result.code === 200 && result.data) {
       return {
         actualSalesRevenue: result.data.plannedSales,
@@ -188,7 +189,7 @@ export default function useKpi() {
   }
 
   const getKpiPreviousYear = async (year: number) => {
-    const result = await api.kpi().getKpiData(year)
+    const result = await api.kpi.getKpiData(year)
     if (result.code === 200 && result.data) {
       return {
         planSalesRevenue: result.data.plannedSales,
@@ -204,7 +205,7 @@ export default function useKpi() {
   }
 
   const checkSettingYear = async (year: number) => {
-    const result = await api.kpi().getKpiData(year)
+    const result = await api.kpi.getKpiData(year)
     if (result.code === 200 && result.data)
       return { isExistSettingKpi: true, kpiId: result.data.id }
     return { isExistSettingKpi: false, kpiId: result.data?.id }

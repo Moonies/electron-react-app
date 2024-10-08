@@ -58,7 +58,7 @@ export default function useExportOrder() {
   )
 
   const getCustomerDetail = async (customerId: string) => {
-    const { data } = await api.customer().getCustomerDetailById(customerId)
+    const { data } = await api.customer.getCustomerDetailById(customerId)
     if (data) {
       return {
         id: data.id,
@@ -73,7 +73,7 @@ export default function useExportOrder() {
   }
 
   const getMyCompanyDetail = async () => {
-    const { data } = await api.myCompany().getMyCompanyDetail()
+    const { data } = await api.myCompany.getMyCompanyDetail()
     if (data) {
       return {
         name: data.name,

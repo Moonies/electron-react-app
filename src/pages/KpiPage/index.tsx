@@ -94,6 +94,7 @@ export default function KpiPage() {
   }
 
   const handleClickGetData = () => {
+    console.log('first')
     getKpiData(planType)
   }
 

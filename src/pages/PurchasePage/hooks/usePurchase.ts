@@ -97,7 +97,7 @@ export default function usePurchase() {
   const getPurchaseListData = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
     //call api
-    const result = await api.purchase().getPurchaseList(searchCriteria)
+    const result = await api.purchase.getPurchaseList(searchCriteria)
     if (result.code === 200 && result.data) {
       setPurchaseData(result.data.data)
     }

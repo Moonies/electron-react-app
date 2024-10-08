@@ -12,25 +12,33 @@ import { default as purchaseApi } from './purchase'
 import { default as orderApi } from './order'
 import { default as prefectureApi } from './perfecture'
 import axios, { AxiosInstance } from 'axios'
+import useApiConfig from 'hooks/useApiConfig'
+import { useMemo } from 'react'
 
 export interface ApiResponse<T> {
   code: number
   message: string
   data: T | null | undefined
-  // _embedded: T | null | undefined
 }
 
 // Determine the base URL based on the environment
 const getBaseUrl = () => {
+  const storedConfig = localStorage.getItem('apiConfig')
+  let parsedConfig
+  if (storedConfig) {
+    parsedConfig = JSON.parse(storedConfig)
+  }
+  console.log(parsedConfig.baseUrl)
   if (process.env.NODE_ENV === 'development') {
     // Use Docker host in development
-    return 'http://192.168.68.126:8044'
+    // return 'http://192.168.68.126:8044'
+    return `http://${parsedConfig.baseUrl}`
   } else if (process.env.NODE_ENV === 'production') {
     // Use the production URL in production
     return 'https://api.yourdomain.com'
   }
   // Default fallback
-  return 'http://localhost:3000'
+  // return 'http://localhost:3000'
 }
 
 export const axiosInstance: AxiosInstance = axios.create({
@@ -44,17 +52,17 @@ export const axiosInstance: AxiosInstance = axios.create({
 })
 
 export const api = {
-  user: userApi,
-  kpi: kpiApi,
-  product: productApi,
-  sale: saleApi,
-  report: reportApi,
-  myCompany: myCompanyApi,
-  postCode: postCodeApi,
-  customer: customerApi,
-  supplier: supplierApi,
-  component: componentApi,
-  purchase: purchaseApi,
-  order: orderApi,
-  prefecture: prefectureApi,
+  user: userApi(),
+  kpi: kpiApi(),
+  product: productApi(),
+  sale: saleApi(),
+  report: reportApi(),
+  myCompany: myCompanyApi(),
+  postCode: postCodeApi(),
+  customer: customerApi(),
+  supplier: supplierApi(),
+  component: componentApi(),
+  purchase: purchaseApi(),
+  order: orderApi(),
+  prefecture: prefectureApi(),
 }

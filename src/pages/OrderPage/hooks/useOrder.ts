@@ -145,7 +145,7 @@ export default function useOrder() {
     }
     // console.log(data)
     //call api
-    const result = await api.order().addNewOrder(data)
+    const result = await api.order.addNewOrder(data)
   }
 
   const editOrder = async (FormData: OrderData) => {
@@ -159,7 +159,7 @@ export default function useOrder() {
   const getPurchaseListData = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
     //call api
-    const result = await api.order().getOrderList(searchCriteria)
+    const result = await api.order.getOrderList(searchCriteria)
     if (result.code === 200 && result.data) {
       setOrderData(result.data.data)
     }

@@ -17,7 +17,7 @@ export default function SubPrintOrderDetail({ product, slipData }: DeliverySlipO
   useEffect(() => {
     //may be pass by props
     async function getSeal() {
-      const result = await api.myCompany().getMyConpanySeal()
+      const result = await api.myCompany.getMyConpanySeal()
       if (result.code === 200 && result.data) setBase64String(result.data.seal)
     }
     getSeal()
