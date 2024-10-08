@@ -143,14 +143,29 @@ export default function useKpi() {
   const getKpiData = async (planType: 'time' | 'plan') => {
     let selectedYear = planType === 'time' ? currentYear - 1 : currentYear
     setLoading(true)
-    const [currentYearKpiData, previousYearKpiData] = await Promise.all([
-      getKpiCurrentYear(currentYear),
-      getKpiPreviousYear(selectedYear),
-    ])
-    if (currentYearKpiData && previousYearKpiData) {
-      let convertCurrentData = processObject(currentYearKpiData, value => value / convertDivider)
-      let convertPreviousData = processObject(previousYearKpiData, value => value / convertDivider)
-      setKpiData({ ...convertPreviousData, ...convertCurrentData })
+    if (planType === 'time') {
+      const [currentYearKpiData, previousYearKpiData] = await Promise.all([
+        getKpiCurrentYear(currentYear),
+        getKpiPreviousYear(selectedYear),
+      ])
+      if (currentYearKpiData && previousYearKpiData) {
+        let convertCurrentData = processObject(currentYearKpiData, value => value / convertDivider)
+        let convertPreviousData = processObject(
+          previousYearKpiData,
+          value => value / convertDivider
+        )
+        setKpiData({ ...convertPreviousData, ...convertCurrentData })
+      }
+    } else {
+      setKpiData(initFormData)
+      const previousYearKpiData = await getKpiPreviousYear(selectedYear)
+      if (previousYearKpiData) {
+        let convertPreviousData = processObject(
+          previousYearKpiData,
+          value => value / convertDivider
+        )
+        setKpiData(prev => ({ ...prev, ...convertPreviousData }))
+      }
     }
 
     setLoading(false)
