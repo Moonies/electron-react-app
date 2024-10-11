@@ -23,7 +23,7 @@ import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import SlideTransition from 'components/Transition/Slide'
 import DataTable from 'components/DataTable'
 import useLoading from 'hooks/useLoading'
-import useAddComponent from './hooks/useAddComponent'
+import useAddComponent, { ProductDetail } from './hooks/useAddComponent'
 import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import {
   GridActionsCellItem,
@@ -39,22 +39,14 @@ import { StyledButton } from 'styles/styles'
 interface SalesModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: ProductData) => Promise<void>
+  onConfirm: (data: ProductDetail) => Promise<void>
   initialData?: ProductDetail
   mode: 'add' | 'edit' | 'view'
 }
-type ProductDetail = {
-  productId: string
-  productName: string
-  stockQuantity: number
-  productCost: number
-  productPrice: number
-  productUnit: string
-  productPriceMargin?: number
-  component: ComponentDetail[]
-}
+
 const defaultFormData: ProductDetail = {
-  productId: '',
+  // id:undefined,
+  productNumber: '',
   productName: '',
   stockQuantity: 0,
   productCost: 0,
@@ -225,8 +217,8 @@ const ProductModal: React.FC<SalesModalProps> = ({
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <TextField
               label='商品番号'
-              value={formData.productId}
-              onChange={e => handleChange('productId', e.target.value)}
+              value={formData.productNumber}
+              onChange={e => handleChange('productNumber', e.target.value)}
               fullWidth
               margin='normal'
               // sx={{ flex: 1 }}

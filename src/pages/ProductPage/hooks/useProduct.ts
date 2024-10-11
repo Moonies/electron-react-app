@@ -3,6 +3,7 @@ import { ProductData, SearchCriteriaProductList } from 'api/product/getProductLi
 import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
+import { orderHistory } from 'api/product/getProductOrderHistory'
 
 interface PaginationModel {
   page: number
@@ -12,6 +13,13 @@ interface PaginationModel {
 interface CategoryProductSearch {
   value: string
   display: string
+}
+
+export type ProductHistoryData = {
+  id: number
+  productNumber: string
+  productName: string
+  orderHistoryList: orderHistory[]
 }
 
 export default function useProduct() {
@@ -54,7 +62,7 @@ export default function useProduct() {
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'productId', headerName: '図番', flex: 1, headerAlign: 'center' },
+      { field: 'productNumber', headerName: '図番', flex: 1, headerAlign: 'center' },
       { field: 'productName', headerName: '品名', flex: 1, headerAlign: 'center' },
       {
         field: 'productPrice',
@@ -117,6 +125,14 @@ export default function useProduct() {
     //get total remain
   }
 
+  const getProductOrderHistoryList = async (productId: string) => {
+    const result = await api.product.getProductOrderHistory(productId)
+    if (result.code === 200 && result.data) {
+      return result.data
+    }
+    return undefined
+  }
+
   return {
     columns,
     prepareCategorySearch,
@@ -128,5 +144,6 @@ export default function useProduct() {
     handlePaginationModelChange,
     paginationModel,
     getComponentDetailList,
+    getProductOrderHistoryList,
   }
 }

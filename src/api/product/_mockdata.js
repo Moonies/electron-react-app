@@ -1,6 +1,7 @@
 export const mockdata = [
   {
-    productId: 'A02VA24893',
+    id: 0,
+    productNumber: 'A02VA24893',
     productName: 'POSITIONING PIN',
     stockQuantity: 3,
     productCost: 5800,
@@ -38,7 +39,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'GK010301042',
+    id: 1,
+    productNumber: 'GK010301042',
     productName: 'COVER',
     stockQuantity: 0,
     productCost: 19450,
@@ -90,7 +92,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HC142292011',
+    id: 2,
+    productNumber: 'HC142292011',
     productName: 'BRACKET',
     stockQuantity: 1,
     productCost: 10790,
@@ -142,7 +145,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HC337901021',
+    id: 3,
+    productNumber: 'HC337901021',
     productName: 'FLANGE',
     stockQuantity: 12,
     productCost: 8325,
@@ -194,7 +198,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HC406101050',
+    id: 4,
+    productNumber: 'HC406101050',
     productName: 'RAIL (L)',
     stockQuantity: 0,
     productCost: 81150,
@@ -246,7 +251,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HC406101070',
+    id: 5,
+    productNumber: 'HC406101070',
     productName: 'LINK',
     stockQuantity: 0,
     productCost: 12670,
@@ -298,7 +304,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HC406301010',
+    id: 6,
+    productNumber: 'HC406301010',
     productName: 'PULL ROD',
     stockQuantity: 0,
     productCost: 17446.67,
@@ -350,7 +357,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HC717901420',
+    id: 7,
+    productNumber: 'HC717901420',
     productName: 'MOTOR PLATE',
     stockQuantity: 0,
     productCost: 22910,
@@ -402,7 +410,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HC717902441',
+    id: 8,
+    productNumber: 'HC717902441',
     productName: 'CUTTER SUPPORT',
     stockQuantity: 0,
     productCost: 12730,
@@ -454,7 +463,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HQ322181230',
+    id: 9,
+    productNumber: 'HQ322181230',
     productName: 'SPACER',
     stockQuantity: 0,
     productCost: 4705,
@@ -506,7 +516,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HQ322181340',
+    id: 10,
+    productNumber: 'HQ322181340',
     productName: 'PLATE',
     stockQuantity: 0,
     productCost: 29010,
@@ -558,7 +569,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR306102091',
+    id: 11,
+    productNumber: 'HR306102091',
     productName: 'JOINT',
     stockQuantity: 11,
     productCost: 5058,
@@ -610,7 +622,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR312182410',
+    id: 12,
+    productNumber: 'HR312182410',
     productName: 'PLATE',
     stockQuantity: 0,
     productCost: 18020,
@@ -662,7 +675,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR322131070',
+    id: 13,
+    productNumber: 'HR322131070',
     productName: 'SUPPORT ARM',
     stockQuantity: 0,
     productCost: 12565,
@@ -714,7 +728,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR335103342',
+    id: 14,
+    productNumber: 'HR335103342',
     productName: 'HOUSING',
     stockQuantity: 1,
     productCost: 32942,
@@ -766,7 +781,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR33710103A',
+    id: 15,
+    productNumber: 'HR33710103A',
     productName: 'PLATE',
     stockQuantity: 2,
     productCost: 61850,
@@ -818,7 +834,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR352181150',
+    id: 16,
+    productNumber: 'HR352181150',
     productName: 'COVER',
     stockQuantity: 0,
     productCost: 9600,
@@ -870,7 +887,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR352181640',
+    id: 17,
+    productNumber: 'HR352181640',
     productName: 'RING COVER',
     stockQuantity: 0,
     productCost: 63970,
@@ -922,7 +940,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR356195220',
+    id: 18,
+    productNumber: 'HR356195220',
     productName: 'DOG RAIL SPEC',
     stockQuantity: 1,
     productCost: 2500,
@@ -975,7 +994,8 @@ export const mockdata = [
   },
   {
     // 外注: '外',
-    productId: 'HR507101071',
+    id: 19,
+    productNumber: 'HR507101071',
     productName: 'HOUSHING',
     stockQuantity: 0,
     productCost: 84835,
@@ -1028,7 +1048,8 @@ export const mockdata = [
   },
   {
     // 外注: '外',
-    productId: 'HR541111510',
+    id: 20,
+    productNumber: 'HR541111510',
     productName: 'NOZZLE HOLDER',
     stockQuantity: 0,
     productCost: 4840,
@@ -1080,7 +1101,8 @@ export const mockdata = [
     ],
   },
   {
-    productId: 'HR806102001',
+    id: 21,
+    productNumber: 'HR806102001',
     productName: 'BRACKET',
     stockQuantity: 0,
     productCost: 64950,
