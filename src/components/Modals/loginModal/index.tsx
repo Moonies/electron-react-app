@@ -21,7 +21,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await withLoading(api.user().checkAuth(username, password))
+    const result = await withLoading(api.user.checkAuth(username, password))
 
     if (result.code === 200 && result.data) {
       dispatch(login(result.data))

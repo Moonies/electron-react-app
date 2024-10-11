@@ -59,7 +59,7 @@ export default function AddNewComponentListDialog({ open, onClose, onSubmit }: D
       if (query.length >= 2) {
         setLoading(true)
         try {
-          const { data } = await api.component().getComponentData(query)
+          const { data } = await api.component.getComponentData(query)
           setComponentList(data ?? [])
         } catch (error) {
           console.error('Error fetching options:', error)

@@ -95,7 +95,7 @@ export default function useAddOrder(orderDeta: OrderData) {
   //     if (query.length >= 2) {
   //       setLoading(true)
   //       try {
-  //         const fetchedOptions = await api.product().getProductData(query)
+  //         const fetchedOptions = await api.product.getProductData(query)
   //         setProductData(fetchedOptions.data?.data ?? [])
   //       } catch (error) {
   //         console.error('Error fetching options:', error)
@@ -164,13 +164,13 @@ export default function useAddOrder(orderDeta: OrderData) {
   )
 
   const getUserList = async () => {
-    const result = await api.user().getUserList({})
+    const result = await api.user.getUserList({})
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
   }
   const getCustomerList = async () => {
-    const result = await api.customer().getCustomerList()
+    const result = await api.customer.getCustomerList()
     if (result.data && result.code === 200) {
       setCustomerListData(result.data)
     }

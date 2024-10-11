@@ -61,14 +61,14 @@ export default function useComponent() {
   }, [searchCriteria, withLoading])
 
   const getComponentListData = async () => {
-    const result = await withLoading(api.component().getComponentList())
+    const result = await withLoading(api.component.getComponentList())
     if (result.code === 200 && result.data) {
       setComponentListData(result.data)
     }
   }
 
   const getComponentDetail = async (componentId: string) => {
-    const result = await api.component().getComponentDetail(componentId)
+    const result = await api.component.getComponentDetail(componentId)
     if (result.code === 200 && result.data) {
       return result.data
     }

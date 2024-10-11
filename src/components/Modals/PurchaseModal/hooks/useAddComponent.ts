@@ -104,7 +104,7 @@ export default function useAddComponent(purchaseData: PurchaseData) {
       if (query.length >= 2) {
         setLoading(true)
         try {
-          const fetchedOptions = await api.component().getComponentList()
+          const fetchedOptions = await api.component.getComponentList()
           setComponentData(fetchedOptions.data ?? [])
         } catch (error) {
           console.error('Error fetching options:', error)
@@ -173,13 +173,13 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   )
 
   const getUserList = async () => {
-    const result = await api.user().getUserList({})
+    const result = await api.user.getUserList({})
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
   }
   const getCustomerList = async () => {
-    const result = await api.supplier().getSupplierList()
+    const result = await api.supplier.getSupplierList()
     if (result.data && result.code === 200) {
       setSupplierCompanyListData(result.data)
     }

@@ -3,6 +3,9 @@ import { api } from 'api/index'
 import dayjs from 'dayjs'
 import useLoading from 'hooks/useLoading'
 import { KpiData } from 'api/kpi/getKpiData'
+import { AddNewKpiData } from 'api/kpi/addNewKpiData'
+import useNotification from 'hooks/useNotification'
+import { useConfirmModal } from 'hooks/useConfirmModal'
 
 export interface FinancialKpiData {
   planSalesRevenue: number | null
@@ -41,21 +44,15 @@ export interface SettingPlanFinancialKpiData {
   settingOrdinaryProfit?: number
 }
 
-const calculatedFields: (keyof FinancialKpiData)[] = [
-  'planMarginalProfit',
-  'planMarginalProfitRate',
-  'planOrdinaryProfit',
-  'actualMarginalProfit',
-  'actualMarginalProfitRate',
-  'actualOrdinaryProfit',
-  'resultOrdinaryProfit',
-  'resultSalesRevenue',
-  'resultSalesRevenueIncreaseRate',
-  'resultFixedCosts',
-  'resultOperatingIncome',
-  'resultOperatingExpenses',
-  'resultSubTotal',
-]
+// Define a type for the object
+type MyObject = {
+  [key: string]: number | null
+}
+
+// Define a type for the processed object that maintains the same structure
+type ProcessedObject<T extends MyObject> = {
+  [K in keyof T]: number | null
+}
 export default function useKpi() {
   const initFormData = {
     planSalesRevenue: null,
@@ -78,18 +75,23 @@ export default function useKpi() {
   const convertDivider = 1000000
   const currentYear = dayjs().get('year')
   const { withLoading, setLoading } = useLoading()
+  const { openConfirmModal } = useConfirmModal()
+  const { notificationModal } = useNotification()
 
-  function convertToPercentages(obj: KpiData): FinancialKpiData {
-    const result: FinancialKpiData = initFormData
+  // Function to process the object
+  const processObject = <T extends MyObject>(
+    obj: T,
+    operation: (value: number) => number
+  ): ProcessedObject<T> => {
+    const processed: Partial<ProcessedObject<T>> = {}
 
     for (const [key, value] of Object.entries(obj)) {
-      if (key in result) {
-        ;(result as any)[key] =
-          value !== null && value !== undefined ? value / convertDivider : null
-      }
+      processed[key as keyof T] = value !== null ? operation(value) : null
     }
-    return result
+
+    return processed as ProcessedObject<T>
   }
+
   const isUndefined = (rawData: number | undefined | null): number =>
     rawData === undefined || rawData === null ? 0 : rawData
 
@@ -106,15 +108,110 @@ export default function useKpi() {
     return value.includes('▲') ? Number(value.replace('▲', '-')) : Number(value)
   }
 
-  const getKpiData = async () => {
-    const result = await withLoading(api.kpi().getKpiData({ selectedYear: currentYear }))
-    if (result.code == 200 && result.data) {
-      let convertKpiData = convertToPercentages(result.data)
-      setKpiData({ ...convertKpiData })
+  const saveSettingKpi = async (inputYear: number, settingInput: SettingPlanFinancialKpiData) => {
+    setLoading(true)
+    const { isExistSettingKpi, kpiId } = await checkSettingYear(inputYear)
+    let newKpiData = {
+      plannedFixedCost: settingInput.settingFixedCosts ?? null,
+      plannedNonOperatingExpense: settingInput.settingOperatingExpenses ?? null,
+      plannedNonOperatingIncome: settingInput.settingOperatingIncome ?? null,
+      plannedSales: settingInput.settingSalesRevenue,
+      plannedVariableCost: settingInput.settingVariableCosts,
+    }
+    let convertNewKpiData: KpiData = processObject(newKpiData, value => value * convertDivider)
+    if (isExistSettingKpi && kpiId) {
+      setLoading(false)
+      const confirmed = await openConfirmModal({
+        title: '確認してください',
+        message: `${inputYear}のKPIが存在していますが、置き換えますか？`,
+      })
+      //update
+      if (confirmed) {
+        const result = await withLoading(api.kpi.saveKpiData({ id: kpiId, ...convertNewKpiData }))
+        if (result.code === 200) notificationModal.success('編集完了しました。')
+      }
+    } else {
+      //new
+      const result = await withLoading(
+        api.kpi.addNewKpiData({ year: inputYear, ...convertNewKpiData } as AddNewKpiData)
+      )
+      if (result.code === 200) notificationModal.success('新KPIを挿入完了しました。')
+    }
+    setLoading(false)
+  }
+
+  const getKpiData = async (planType: 'time' | 'plan') => {
+    console.log(planType)
+    let selectedYear = planType === 'time' ? currentYear - 1 : currentYear
+    setLoading(true)
+    if (planType === 'time') {
+      const [currentYearKpiData, previousYearKpiData] = await Promise.all([
+        getKpiCurrentYear(currentYear),
+        getKpiPreviousYear(selectedYear),
+      ])
+      if (currentYearKpiData && previousYearKpiData) {
+        let convertCurrentData = processObject(currentYearKpiData, value => value / convertDivider)
+        let convertPreviousData = processObject(
+          previousYearKpiData,
+          value => value / convertDivider
+        )
+        setKpiData({ ...convertPreviousData, ...convertCurrentData })
+      }
+    } else {
+      setKpiData(initFormData)
+      const previousYearKpiData = await getKpiPreviousYear(selectedYear)
+      if (previousYearKpiData) {
+        let convertPreviousData = processObject(
+          previousYearKpiData,
+          value => value / convertDivider
+        )
+        setKpiData(prev => ({ ...prev, ...convertPreviousData }))
+      }
+    }
+
+    setLoading(false)
+  }
+
+  const getKpiCurrentYear = async (year: number) => {
+    const result = await api.kpi.getKpiData(year)
+    if (result.code === 200 && result.data) {
+      return {
+        actualSalesRevenue: result.data.plannedSales,
+        actualVariableCosts: result.data.plannedVariableCost,
+        actualFixedCosts: result.data.plannedFixedCost,
+        // actualMarginalProfit?: number
+        // actualMarginalProfitRate?: string
+        actualOperatingIncome: result.data.plannedNonOperatingIncome,
+        actualOperatingExpenses: result.data.plannedNonOperatingExpense,
+        // actualOrdinaryProfit?: number
+      }
     }
   }
 
-  const kpiCalculate = (formInput: KpiData) => {
+  const getKpiPreviousYear = async (year: number) => {
+    const result = await api.kpi.getKpiData(year)
+    if (result.code === 200 && result.data) {
+      return {
+        planSalesRevenue: result.data.plannedSales,
+        planVariableCosts: result.data.plannedVariableCost,
+        planFixedCosts: result.data.plannedFixedCost,
+        // planMarginalProfit?: number
+        // planMarginalProfitRate?: string
+        planOperatingIncome: result.data.plannedNonOperatingIncome,
+        planOperatingExpenses: result.data.plannedNonOperatingExpense,
+        // planOrdinaryProfit?:
+      }
+    }
+  }
+
+  const checkSettingYear = async (year: number) => {
+    const result = await api.kpi.getKpiData(year)
+    if (result.code === 200 && result.data)
+      return { isExistSettingKpi: true, kpiId: result.data.id }
+    return { isExistSettingKpi: false, kpiId: result.data?.id }
+  }
+
+  const kpiCalculate = (formInput: FinancialKpiData) => {
     setLoading(true)
     let result: FinancialKpiData = formInput
     let planMarginalProfit,
@@ -219,5 +316,6 @@ export default function useKpi() {
     currentYear,
     reverseResultFormat,
     initFormData,
+    saveSettingKpi,
   }
 }

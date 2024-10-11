@@ -11,14 +11,25 @@ import {
 } from '@mui/x-data-grid'
 import { ComponentData } from 'api/component/getComponentData'
 import { api } from 'api/index'
-import { ProductDataDetail } from 'api/product/getProductData'
-import { ProductData } from 'api/product/getProductList'
+import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
 import useLoading from 'hooks/useLoading'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
 
-export default function useAddComponent(productData: ProductData) {
+export type ProductDetail = {
+  id?: number
+  productNumber: string
+  productName: string
+  stockQuantity: number
+  productCost: number
+  productPrice: number
+  productUnit: string
+  productPriceMargin?: number
+  component: ComponentDetail[]
+}
+
+export default function useAddComponent(productData: ProductDetail) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
   const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>([])
   const { setLoading } = useLoading()
@@ -119,7 +130,7 @@ export default function useAddComponent(productData: ProductData) {
   }
 
   const getTotalRemainComponent = useCallback(async (componentId: string) => {
-    const { data } = await api.component().getTotalAmountComponent(componentId)
+    const { data } = await api.component.getTotalAmountComponent(componentId)
 
     return data?.totalAmount ?? 0
 

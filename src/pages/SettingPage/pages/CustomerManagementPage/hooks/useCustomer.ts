@@ -34,7 +34,7 @@ export default function useCustomer() {
   )
 
   const getCusomerListData = async () => {
-    const result = await withLoading(api.customer().getCustomerList())
+    const result = await withLoading(api.customer.getCustomerList())
     if (result.code === 200 && result.data) {
       setCustomerListData(result.data)
     }

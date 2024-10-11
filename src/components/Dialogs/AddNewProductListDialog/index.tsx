@@ -55,7 +55,7 @@ export default function AddnewProductDialog({
       if (query.length >= 2) {
         setLoading(true)
         try {
-          const fetchedOptions = await api.product().getProductData(query)
+          const fetchedOptions = await api.product.getProductData(query)
           setProductList(fetchedOptions.data?.data ?? [])
         } catch (error) {
           console.error('Error fetching options:', error)
@@ -93,7 +93,10 @@ export default function AddnewProductDialog({
                 const { key, ...optionProps } = props
                 return (
                   <Box key={key} component='li' {...optionProps}>
-                    {option.productId + '  :  ' + option.productName + `(${option.productPrice})`}
+                    {option.productNumber +
+                      '  :  ' +
+                      option.productName +
+                      `(${option.productPrice})`}
                   </Box>
                 )
               }}
@@ -101,8 +104,8 @@ export default function AddnewProductDialog({
                 if (typeof option === 'string') {
                   return option
                 }
-                if (option && option.productId) {
-                  return option.productId
+                if (option && option.productNumber) {
+                  return option.productNumber
                 }
                 return ''
               }}
@@ -132,13 +135,13 @@ export default function AddnewProductDialog({
                 if (typeof newValue === 'object' && newValue !== null) {
                   setFormData(prev => ({
                     ...prev,
-                    productNumber: newValue.productId || null,
+                    productNumber: newValue.productNumber || null,
                     productName: newValue.productName || null,
                     productPrice: newValue.productPrice || 0,
                   }))
                 }
               }}
-              isOptionEqualToValue={(option, value) => option.productId === value.productId}
+              isOptionEqualToValue={(option, value) => option.productNumber === value.productNumber}
               value={formData?.productNumber}
             />
             <TextField

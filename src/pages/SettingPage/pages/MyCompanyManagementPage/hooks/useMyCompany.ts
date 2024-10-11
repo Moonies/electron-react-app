@@ -34,7 +34,7 @@ export default function useMyCompany() {
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
 
   const getMyCompanyDetail = async () => {
-    const result = await withLoading(api.myCompany().getMyCompanyDetail())
+    const result = await withLoading(api.myCompany.getMyCompanyDetail())
     if (result.code === 200 && result.data) {
       let newData: MyCompanyDetail = {
         id: result.data.id,
@@ -58,7 +58,7 @@ export default function useMyCompany() {
   }
 
   const getPostCode = async (postCode: string) => {
-    const result = await withLoading(api.postCode().getPostCode(postCode))
+    const result = await withLoading(api.postCode.getPostCode(postCode))
     if (result.code === 200 && result.data) {
       setFormCompanyDetail(prev => ({
         ...prev,
@@ -98,7 +98,7 @@ export default function useMyCompany() {
         phoneNumber: data.phoneNumber,
       },
     }
-    const result = await api.myCompany().addNewMyCompanyDetail(newData)
+    const result = await api.myCompany.addNewMyCompanyDetail(newData)
     console.log(result)
     if (result.code === 200 && result.data) {
       if (file) {
@@ -128,7 +128,7 @@ export default function useMyCompany() {
         phoneNumber: data.phoneNumber,
       },
     }
-    const result = await api.myCompany().updateMyCompanyDetail(newData)
+    const result = await api.myCompany.updateMyCompanyDetail(newData)
     if (result.code === 200 && result.data) {
       if (file) {
         updateSeal(file, newData.id)
@@ -140,14 +140,14 @@ export default function useMyCompany() {
   const updateSeal = async (sealFile: File, myCompanyId: number) => {
     console.log('upload file', sealFile)
     //if company id should auto update but at confirm is shuold be update
-    const result = await api.myCompany().updateMyCompanySeal({ id: myCompanyId, seal: sealFile })
+    const result = await api.myCompany.updateMyCompanySeal({ id: myCompanyId, seal: sealFile })
     if (result.code === 200 && result.data) {
       notificationModal.success('編集完了しました。')
     }
   }
 
   const getSeal = async (myCompanyId: number) => {
-    const result = await api.myCompany().getMyCompanySeal(myCompanyId)
+    const result = await api.myCompany.getMyCompanySeal(myCompanyId)
     console.log(result)
     if (result.code === 200 && result.data?.seal) {
       setUploadedImage({ previewUrl: result.data.seal })

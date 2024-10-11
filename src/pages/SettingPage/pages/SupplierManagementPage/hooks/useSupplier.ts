@@ -36,7 +36,7 @@ export default function useSupplier() {
   const handlePaginationModelChange = (newModel: GridPaginationModel) => {}
 
   const getSupplierListData = async () => {
-    const result = await withLoading(api.supplier().getSupplierList())
+    const result = await withLoading(api.supplier.getSupplierList())
     if (result.code === 200 && result.data) {
       setSupplierListData(result.data)
     }

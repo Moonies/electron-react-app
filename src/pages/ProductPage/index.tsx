@@ -17,23 +17,29 @@ import {
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
   ContentPasteSearch as DetailIcon,
+  ManageSearch as ManageSearchIcon,
 } from '@mui/icons-material'
 import DataTable from 'components/DataTable'
-import useProduct from './hooks/useProduct'
+import useProduct, { ProductHistoryData } from './hooks/useProduct'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import ProductModal from 'components/Modals/ProductModal'
 import { ProductData } from 'api/product/getProductList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { useDispatch } from 'react-redux'
 import useNotification from 'hooks/useNotification'
+import { ProductDetail } from 'components/Modals/ProductModal/hooks/useAddComponent'
+import ProductHistoryModal from 'components/Modals/ProductHistoryModal'
+import useLoading from 'hooks/useLoading'
 
 export default function ProductPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedProduct, setSelectedProduct] = useState<ProductData | undefined>(undefined)
+  const [productHistory, setProductHistory] = useState<ProductHistoryData>()
   const [modalOpen, setModalOpen] = useState(false)
+  const [modalHistory, setModalHistory] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
+  const { setLoading } = useLoading()
   const {
     categorySearch,
     columns,
@@ -45,8 +51,8 @@ export default function ProductPage() {
     handlePaginationModelChange,
     paginationModel,
     getComponentDetailList,
+    getProductOrderHistoryList,
   } = useProduct()
-  const dispatch = useDispatch()
 
   const productDataGridRef = useGridApiRef()
 
@@ -74,7 +80,7 @@ export default function ProductPage() {
   const handleEditClick = useCallback(() => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = productData.find(product => product.productId === selectedId)
+      const selectedData = productData.find(product => product.id === selectedId)
       if (selectedData) {
         setModalMode('edit')
         setSelectedProduct(selectedData)
@@ -88,11 +94,11 @@ export default function ProductPage() {
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = productData.find(product => product.productId === selectedId)
+      const selectedData = productData.find(product => product.id === selectedId)
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれたの商品番号　 ${selectedData.productId}　を削除してもよろしいですか?`,
+          message: `この選ばれたの商品番号　 ${selectedData.productNumber}　を削除してもよろしいですか?`,
           // message: 'Are you sure you want to delete this Product Number: ' + selectedData.productId,
         })
         if (confirmed) {
@@ -107,7 +113,7 @@ export default function ProductPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: ProductData) => {
+  const handleModalConfirm = async (data: ProductDetail) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -132,7 +138,7 @@ export default function ProductPage() {
   const handleViewDetailClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = productData.find(product => product.productId === selectedId)
+      const selectedData = productData.find(product => product.id === selectedId)
       if (selectedData) {
         // selectedData.component.map(item => {
         // const result = await getComponentDetailList(item.id)
@@ -143,6 +149,32 @@ export default function ProductPage() {
       }
     } else {
       notificationModal.error('詳細を表示するには、表の行を選択してください。')
+    }
+  }, [selectionModel])
+
+  const handleHistoryClick = useCallback(async () => {
+    if (selectionModel.length === 1) {
+      setLoading(true)
+      const selectedId = selectionModel[0]
+      const selectedData = productData.find(product => product.id === selectedId)
+      console.log(selectedData)
+      let productHistoryData: ProductHistoryData
+      if (selectedData) {
+        const result = await getProductOrderHistoryList(selectedData.productNumber)
+        if (result) {
+          productHistoryData = {
+            id: selectedData.id,
+            productName: selectedData.productName,
+            productNumber: selectedData.productNumber,
+            orderHistoryList: result,
+          }
+          setProductHistory(productHistoryData)
+        }
+        setModalHistory(true)
+        setLoading(false)
+      }
+    } else {
+      notificationModal.error('商品履歴を表示するには、表の行を選択してください。')
     }
   }, [selectionModel])
 
@@ -199,15 +231,15 @@ export default function ProductPage() {
                   label='キーワード検索'
                   value={searchCriteria.keyword}
                   onChange={e => handleChange('keyword', e.target.value)}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton onClick={handleSearch} edge='end'>
-                          <SearchIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
+                  // InputProps={{
+                  //   endAdornment: (
+                  //     <InputAdornment position='end'>
+                  //       <IconButton onClick={handleSearch} edge='end'>
+                  //         <SearchIcon />
+                  //       </IconButton>
+                  //     </InputAdornment>
+                  //   ),
+                  // }}
                 />
               </Box>
             </Box>
@@ -221,6 +253,25 @@ export default function ProductPage() {
             }}
             gap={1}
           >
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              <StyledButton
+                variant='outlined'
+                startIcon={<SearchIcon />}
+                size='large'
+                onClick={handleSearch}
+              >
+                検索
+              </StyledButton>
+              <StyledButton
+                variant='outlined'
+                startIcon={<ManageSearchIcon />}
+                size='large'
+                onClick={handleHistoryClick}
+                // sx={{ visibility: 'hidden' }}
+              >
+                商品履歴
+              </StyledButton>
+            </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
                 variant='outlined'
@@ -257,6 +308,7 @@ export default function ProductPage() {
               >
                 データ出力
               </StyledButton> */}
+              {/* 製品注文履歴 */}
               <StyledButton
                 variant='outlined'
                 startIcon={<DetailIcon />}
@@ -267,43 +319,6 @@ export default function ProductPage() {
                 詳細
               </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              {/* <StyledButton
-                variant='outlined'
-                startIcon={<UploadFileIcon />}
-                size='large'
-                sx={{ visibility: 'hidden' }}
-              >
-                not support in aplha thest
-                自動アプロード
-              </StyledButton> */}
-              {/* waiting for confirm */}
-              {/* <StyledButton
-                variant='outlined'
-                startIcon={<DetailIcon />}
-                size='large'
-                onClick={handleViewDetailClick}
-                // sx={{ visibility: 'hidden' }}
-              >
-                詳細
-              </StyledButton> */}
-              {/* <StyledButton
-                variant='outlined'
-                // startIcon={<EditIcon />}
-                size='large'
-                sx={{ visibility: 'hidden' }}
-              >
-                visible
-              </StyledButton> */}
-              {/* <StyledButton
-                variant='outlined'
-                startIcon={<PrintIcon />}
-                size='large'
-                // onClick={handleExportPdf}
-              >
-                データ出力
-              </StyledButton> */}
-            </Box>
           </Box>
         </Box>
         <DataTable
@@ -312,7 +327,7 @@ export default function ProductPage() {
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={productDataGridRef}
-          getRowId={row => row.productId}
+          // getRowId={row => row.productId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
           // sx={{ mt: 4 }}
         />
@@ -325,6 +340,13 @@ export default function ProductPage() {
           onConfirm={handleModalConfirm}
           initialData={selectedProduct}
           mode={modalMode}
+        />
+      )}
+      {modalHistory && productHistory && (
+        <ProductHistoryModal
+          open={modalHistory}
+          onClose={() => setModalHistory(false)}
+          initialData={productHistory}
         />
       )}
     </Box>

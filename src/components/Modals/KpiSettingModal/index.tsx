@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 interface KpiSettingModalProps {
   open: boolean
   onClose: () => void
-  onSubmit: (inputYear: string) => void
+  onSubmit: (inputYear: number) => void
 }
 
 export default function KpiSettingModal({ open, onClose, onSubmit }: KpiSettingModalProps) {
@@ -19,7 +19,7 @@ export default function KpiSettingModal({ open, onClose, onSubmit }: KpiSettingM
       setErrors('year format is wrong !! ex.20xx')
       return false
     } else {
-      onSubmit(inputYear)
+      onSubmit(parseInt(inputYear))
     }
   }
   return (
@@ -42,7 +42,7 @@ export default function KpiSettingModal({ open, onClose, onSubmit }: KpiSettingM
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} variant='contained'>
+          <Button onClick={onClose} variant='contained' aria-label='close'>
             キャンセル
           </Button>
           <Button type='submit' color='primary' variant='outlined' sx={{ color: 'white' }}>
