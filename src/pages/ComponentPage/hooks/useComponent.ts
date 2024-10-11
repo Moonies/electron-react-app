@@ -4,7 +4,7 @@ import { api } from 'api/index'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
 
-interface CategoryProductSearch {
+type CategoryProductSearch = {
   value: string
   display: string
 }
@@ -55,7 +55,22 @@ export default function useComponent() {
   }
 
   const handleSearch = useCallback(async () => {
-    //if condition when search put in here
+    console.log(searchCriteria)
+    //if condition when search put in here, may be is not use when column filed is equal column in table
+    // let newCategory: string
+    // switch (searchCriteria.category) {
+    //   case 'componentNumber':
+    //     break
+    //   case 'componentName':
+    //     break
+    //   case 'price':
+    //     break
+    //   case 'inStock':
+    //     break
+
+    //   default:
+    //     break
+    // }
     // getComponentListData(paginationModel)
     getComponentListData()
   }, [searchCriteria, withLoading])

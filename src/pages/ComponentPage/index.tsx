@@ -61,16 +61,6 @@ export default function ComponentManagementPage() {
     getComponentDetail,
   } = useComponent()
 
-  // useEffect(() => {
-  //   if (componentDataGridRef.current) {
-  //     componentDataGridRef.current.autosizeColumns({
-  //       includeHeaders: true,
-  //       includeOutliers: true,
-  //       expand: true,
-  //     })
-  //   }
-  // }, [componentListData])
-
   useEffect(() => {
     // getComponentListData()
     prepareCategorySearch
@@ -223,8 +213,8 @@ export default function ComponentManagementPage() {
                   fullWidth
                   name='keyword'
                   label='キーワード検索'
-                  value={filterValue}
-                  onChange={e => setFilterValue(e.target.value)}
+                  // value={filterValue}
+                  onChange={e => handleChange('keyword', e.target.value)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position='end'>
