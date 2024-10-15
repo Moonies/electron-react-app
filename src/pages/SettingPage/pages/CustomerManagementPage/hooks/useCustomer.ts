@@ -8,7 +8,7 @@ export default function useCustomer() {
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 100,
   })
 
   const { withLoading } = useLoading()

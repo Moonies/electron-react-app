@@ -11,24 +11,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs'
 import React, { useEffect, useRef, useState } from 'react'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Line,
-  Bar,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  TooltipProps,
-  BarChart,
-  ReferenceLine,
-  Brush,
-} from 'recharts'
 import BestSaleProductChart from './components/BestSaleProductChart'
-import CustomTooltip from './components/CustomTooltip'
 import ProgressChart from './components/ProgressChart'
 import SubHeader from './components/SubHeader'
 import useReport from './hooks/useReport'

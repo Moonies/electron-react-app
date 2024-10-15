@@ -13,7 +13,7 @@ interface CategorySaleSearch {
 }
 
 export default function useOrder() {
-  const dateThreeMonthsAgo = dayjs().subtract(6, 'month').toDate()
+  const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
   const { withLoading, setLoading } = useLoading()
   const [orderData, setOrderData] = useState<OrderData[]>([])
   // const [cachedData, setCachedData] = useState<CachedData>({})
@@ -104,7 +104,7 @@ export default function useOrder() {
     setStatusOrder(result)
   }, [])
 
-  const handleChange = (name: string, value: string | Date) => {
+  const handleChange = (name: string, value: string | Date | null) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 

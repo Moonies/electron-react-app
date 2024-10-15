@@ -78,6 +78,19 @@ const Notification: React.FC = () => {
                   return theme.palette.info.main
               }
             })(),
+            color: (() => {
+              switch (severity) {
+                case 'error':
+                  return theme.palette.error.contrastText
+                case 'warning':
+                  return theme.palette.warning.contrastText
+                case 'success':
+                  return theme.palette.success.contrastText
+                case 'info':
+                default:
+                  return theme.palette.info.contrastText
+              }
+            })(),
           })}
         >
           <Box display='flex' alignItems='center' justifyContent='space-between'>

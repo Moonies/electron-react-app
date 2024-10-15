@@ -12,7 +12,7 @@ interface CategorySaleSearch {
 }
 
 export default function usePurchase() {
-  const dateThreeMonthsAgo = dayjs().subtract(6, 'month').toDate()
+  const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
   const { withLoading, setLoading } = useLoading()
   const [purchaseData, setPurchaseData] = useState<PurchaseData[]>([])
   // const [cachedData, setCachedData] = useState<CachedData>({})
@@ -31,7 +31,7 @@ export default function usePurchase() {
     status: null,
   })
 
-  const handleChange = (name: string, value: string | Date) => {
+  const handleChange = (name: string, value: string | Date | null) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 

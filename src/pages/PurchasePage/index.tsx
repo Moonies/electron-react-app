@@ -140,6 +140,40 @@ export default function PurchasePage() {
     // await fetchSalesData(paginationModel);
   }
 
+  const handleStartDateChange = (date: Dayjs | null) => {
+    const newStartDate = date ? date.startOf('day').toDate() : null
+
+    handleChange('startDate', newStartDate)
+
+    if (
+      searchCriteria.endDate &&
+      newStartDate &&
+      dayjs(newStartDate).isAfter(dayjs(searchCriteria.endDate), 'day')
+    ) {
+      notificationModal.warning(
+        'Start date cannot be after the end date. End date has been cleared.'
+      )
+      handleChange('endDate', null)
+    }
+  }
+
+  const handleEndDateChange = (date: Dayjs | null) => {
+    const newEndDate = date ? date.endOf('day').toDate() : null
+
+    handleChange('endDate', newEndDate)
+
+    if (
+      searchCriteria.startDate &&
+      newEndDate &&
+      dayjs(newEndDate).isBefore(dayjs(searchCriteria.startDate), 'day')
+    ) {
+      notificationModal.warning(
+        'End date cannot be before the start date. Start date has been cleared.'
+      )
+      handleChange('startDate', null)
+    }
+  }
+
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
@@ -224,17 +258,19 @@ export default function PurchasePage() {
                 label='開始日'
                 value={dayjs(searchCriteria.startDate)}
                 format='YYYY/MM/DD'
-                onChange={(date: Dayjs | null) =>
-                  handleChange('startDate', date?.toDate() || new Date())
-                }
+                // onChange={(date: Dayjs | null) =>
+                //   handleChange('startDate', date?.toDate() || new Date())
+                // }
+                onAccept={handleStartDateChange}
               />
               <DatePicker
                 label='終了日'
                 format='YYYY/MM/DD'
                 value={dayjs(searchCriteria.endDate)}
-                onChange={(date: Dayjs | null) =>
-                  handleChange('endDate', date?.toDate() || new Date())
-                }
+                // onChange={(date: Dayjs | null) =>
+                //   handleChange('endDate', date?.toDate() || new Date())
+                // }
+                onAccept={handleEndDateChange}
               />
             </Box>
           </Box>

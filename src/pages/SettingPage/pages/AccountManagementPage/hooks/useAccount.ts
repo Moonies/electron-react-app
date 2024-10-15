@@ -19,7 +19,7 @@ export default function useAccount() {
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [paginationModel, setPaginationModel] = useState<PaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 100,
   })
   const [cachedData, setCachedData] = useState<CachedData>({})
   const { notificationModal } = useNotification()
