@@ -8,7 +8,7 @@ export default function useSupplier() {
   const [supplierListData, setSupplierListData] = useState<SupplierData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 100,
   })
 
   const { withLoading } = useLoading()
