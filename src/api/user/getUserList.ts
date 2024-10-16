@@ -3,12 +3,13 @@ import { axiosInstance, ApiResponse } from 'api'
 
 export interface UserData {
   id: number
-  identifier: string
+  // identifier: string
   name: string
   // fullName: string
   password: string
   roles: string
-  userNumber: string
+  number: string
+  mail: string
 }
 export interface SearchCriteria {
   page?: number
@@ -22,7 +23,7 @@ export default async function getUserList({
   // when use real API
   try {
     const response = await axiosInstance.get('/api/users?page=' + page + '&size=' + pageSize)
-    return { code: 200, message: 'success', data: response.data.content.users }
+    return { code: 200, message: 'success', data: response.data.content }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

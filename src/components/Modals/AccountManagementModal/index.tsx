@@ -30,10 +30,11 @@ interface AccountManagementModalProps {
 const defaultFormData: AddNewUserData = {
   name: '',
   roles: '',
-  identifier: '',
+  // identifier: '',
   // username: '',
   password: '',
-  userNumber: '',
+  number: '',
+  mail: '',
 }
 export default function AccountManagementModal({
   open,
@@ -111,34 +112,53 @@ export default function AccountManagementModal({
       <DialogContent>
         <Box display={'flex'} flexDirection={'column'}>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
-            <TextField
+            {/* <TextField
               label='ユーザーネーム'
               value={formData.identifier}
               onChange={e => handleChange('identifier', e.target.value)}
               fullWidth
               margin='normal'
               // sx={{ flex: 1 }}
+            /> */}
+            <TextField
+              label='メール'
+              value={formData.mail}
+              onChange={e => handleChange('mail', e.target.value)}
+              fullWidth
+              margin='normal'
+              // sx={{ width: '70%' }}
             />
-            {/* <TextField
+            <TextField
               label='パスワード'
-              type='text'
-              value={formData.password}
+              type='password'
+              value={formData.password ?? ''}
               onChange={e => handleChange('password', e.target.value)}
               fullWidth
               margin='normal'
+
               // sx={{ width: '20%' }}
-            /> */}
+            />
           </Box>
+          {/* <Box display={'flex'} flexDirection={'row'} gap={2}>
+            <TextField
+              label='メール'
+              value={formData.mail}
+              onChange={e => handleChange('mail', e.target.value)}
+              // fullWidth
+              margin='normal'
+              sx={{ width: '70%' }}
+            />
+          </Box> */}
           <Box display={'flex'} flexDirection={'row'} gap={2}>
-            {/* <TextField
+            <TextField
               label='社員番号'
               type='text'
-              value={formData.userNumber}
-              onChange={e => handleChange('name', e.target.value)}
+              value={formData.number}
+              onChange={e => handleChange('number', e.target.value)}
               // fullWidth
               margin='normal'
               // sx={{ width: '20%' }}
-            /> */}
+            />
             <TextField
               label='名前'
               type='text'

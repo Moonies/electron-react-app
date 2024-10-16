@@ -60,7 +60,7 @@ export default function AccountManagementPage() {
   }, [])
 
   const handleAddClick = () => {
-    // setSelectedProduct(undefined)
+    setSelectedUser(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
