@@ -13,7 +13,7 @@ export default function useApiConfig() {
 
   const updateConfig = (newConfig: ApiConfig) => {
     dispatch(setConfig(newConfig))
-    localStorage.setItem('apiConfig', JSON.stringify(newConfig))
+    // localStorage.setItem('apiConfig', JSON.stringify(newConfig))
   }
 
   const resetConfig = () => {
@@ -22,7 +22,7 @@ export default function useApiConfig() {
 
   const loadConfig = () => {
     const storedConfig = localStorage.getItem('apiConfig')
-    if (storedConfig) {
+    if (storedConfig && storedConfig !== null) {
       const parsedConfig = JSON.parse(storedConfig)
       dispatch(setConfig(parsedConfig))
       return true
