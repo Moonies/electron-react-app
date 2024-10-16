@@ -1,4 +1,6 @@
+import { PaletteOptions } from '@mui/material'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { AuthData } from 'api/user/checkAuth'
 
 interface AuthState {
   isAuthenticated: boolean
@@ -26,6 +28,12 @@ const authSlice = createSlice({
     },
   },
 })
+// Custom action creator to get the initialized auth state
+export const getInitializedAuthState = (): AuthData | null => {
+  const storedUser = localStorage.getItem('user')
+  return storedUser ? (JSON.parse(storedUser) as AuthData) : null
+}
 
 export const { login, logout } = authSlice.actions
+
 export default authSlice.reducer

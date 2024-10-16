@@ -13,6 +13,7 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: false,
     },
+
     // autoHideMenuBar: true,
     resizable: true,
   })
@@ -22,8 +23,8 @@ function createWindow() {
     mainWindow.webContents.openDevTools()
     mainWindow.removeMenu()
   } else {
-    // mainWindow.webContents.openDevTools()
-    // mainWindow.removeMenu()
+    mainWindow.webContents.openDevTools()
+    mainWindow.removeMenu()
     mainWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, '../index.html'),
@@ -91,35 +92,4 @@ ipcMain.handle('printComponent', (event, url) => {
     })
   })
   return 'done in main'
-})
-
-// Auto-updater events
-autoUpdater.on('update-available', () => {
-  dialog
-    .showMessageBox({
-      type: 'info',
-      title: 'Update Available',
-      message: 'A new version of the app is available. Do you want to update now?',
-      buttons: ['Yes', 'No'],
-    })
-    .then(result => {
-      if (result.response === 0) {
-        autoUpdater.downloadUpdate()
-      }
-    })
-})
-
-autoUpdater.on('update-downloaded', () => {
-  dialog
-    .showMessageBox({
-      type: 'info',
-      title: 'Update Ready',
-      message: 'Install and restart now?',
-      buttons: ['Yes', 'Later'],
-    })
-    .then(result => {
-      if (result.response === 0) {
-        autoUpdater.quitAndInstall(false, true)
-      }
-    })
 })
