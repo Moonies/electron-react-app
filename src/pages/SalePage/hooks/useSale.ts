@@ -15,7 +15,7 @@ interface CachedData {
 }
 
 export default function useSales() {
-  const dateThreeMonthsAgo = dayjs().subtract(6, 'month').toDate()
+  const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
 
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     category: '',
@@ -35,7 +35,7 @@ export default function useSales() {
   const [totalRows, setTotalRows] = useState(0)
   const { withLoading, setLoading } = useLoading()
 
-  const handleChange = (name: string, value: string | Date) => {
+  const handleChange = (name: string, value: string | Date | null) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 

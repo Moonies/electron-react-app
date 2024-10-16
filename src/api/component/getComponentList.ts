@@ -73,7 +73,7 @@ export default async function getComponentList(): Promise<ApiResponse<ComponentD
   }
   // when use real API
   // try {
-  //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });
+  //     const response = await axios.post<ApiResponse<AuthData>>('/api/component?'+category+'.contains='+keyword, { username, password });
   //     return response.data;
   // } catch (error) {
   //     if (axios.isAxiosError(error) && error.response) {

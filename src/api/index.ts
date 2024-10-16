@@ -25,18 +25,20 @@ export interface ApiResponse<T> {
 const getBaseUrl = () => {
   const storedConfig = localStorage.getItem('apiConfig')
   let parsedConfig
-  if (storedConfig) {
+  //end point can be change depens on user
+  if (storedConfig && storedConfig !== null) {
     parsedConfig = JSON.parse(storedConfig)
-  }
-  console.log(parsedConfig.baseUrl)
-  if (process.env.NODE_ENV === 'development') {
-    // Use Docker host in development
-    // return 'http://192.168.68.126:8044'
     return `http://${parsedConfig.baseUrl}`
-  } else if (process.env.NODE_ENV === 'production') {
-    // Use the production URL in production
-    return 'https://api.yourdomain.com'
   }
+  return 'http://localhost:3000'
+  // if (process.env.NODE_ENV === 'development') {
+  //   // Use Docker host in development
+  //   // return 'http://192.168.68.126:8044'
+  //   return `http://${parsedConfig.baseUrl}`
+  // } else if (process.env.NODE_ENV === 'production') {
+  //   // Use the production URL in production
+  //   return 'https://api.yourdomain.com'
+  // }
   // Default fallback
   // return 'http://localhost:3000'
 }

@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material'
-import { login } from 'store/authSlice'
 import { api } from 'api'
 import useLoading from 'hooks/useLoading'
-import { showNotification } from 'store/notificationSlice'
 import { useNavigate } from 'react-router-dom'
+import useNotification from 'hooks/useNotification'
+import useAuth from 'hooks/useAuth'
 
 interface LoginModalProps {
   open: boolean
@@ -16,7 +15,8 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const dispatch = useDispatch()
+  const { notificationSnackbar, notificationModal } = useNotification()
+  const { setUserLogin, removeUserLogin } = useAuth()
   const { withLoading } = useLoading()
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,29 +24,19 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => 
     const result = await withLoading(api.user.checkAuth(username, password))
 
     if (result.code === 200 && result.data) {
-      dispatch(login(result.data))
-      dispatch(
-        showNotification({
-          message: result.message,
-          type: 'snackbar',
-          severity: 'success',
-        })
-      )
+      // dispatch(login(result.data))
+      setUserLogin(result.data)
+      notificationSnackbar.success(result.message)
       navigate('/')
       onSuccess()
     } else {
-      dispatch(
-        showNotification({
-          message: 'Authentication failed:' + result.message,
-          type: 'modal',
-          severity: 'error',
-        })
-      )
+      notificationModal.error('Authentication failed:' + result.message)
     }
   }
 
   const handleClose = (event: object, reason: string) => {
     if (reason !== 'backdropClick') {
+      removeUserLogin()
       onClose
     }
   }

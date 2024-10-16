@@ -5,14 +5,24 @@ import { StyledButton } from 'styles/styles'
 import useApiConfig, { ApiConfig } from 'hooks/useApiConfig'
 import { useEffect, useState } from 'react'
 import { isShrink } from 'utils/inputUtils'
+import { useConfirmModal } from 'hooks/useConfirmModal'
 
 export default function IpConfigManegementPage() {
   const { loadConfig, updateConfig, config } = useApiConfig()
   const [ipConfig, setIpConfig] = useState(config)
+  const { openConfirmModal } = useConfirmModal()
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     let newApiConfig = { baseUrl: ipConfig?.baseUrl ?? '', apiKey: ipConfig?.apiKey }
     updateConfig(newApiConfig)
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message:
+        'このプログラムを安全かつ継続的に使用できるように IP を変更する場合は、再起動する必要があります。\n今すぐ再起動しますか?',
+    })
+    if (confirmed) {
+      window.location.reload()
+    }
   }
 
   useEffect(() => {

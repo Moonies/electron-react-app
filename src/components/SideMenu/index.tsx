@@ -7,11 +7,13 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Typography,
 } from '@mui/material'
 import { Link } from 'react-router-dom'
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import useMenu, { MenuItem } from './hooks/useMenu'
+import packageInfo from '../../../package.json'
 import React, { useState } from 'react'
 
 export default function SideMenu({}: React.HTMLProps<HTMLInputElement>) {
@@ -82,6 +84,11 @@ export default function SideMenu({}: React.HTMLProps<HTMLInputElement>) {
         }}
       >
         <List>{menuItem.map((item, index) => renderMenuItem(item as MenuItem, index))}</List>
+      </Box>
+      <Box display={'flex'} mt='auto'>
+        <Typography align='center' sx={{ width: '100%' }} color='primary'>
+          App version {packageInfo.version}
+        </Typography>
       </Box>
     </Drawer>
   )

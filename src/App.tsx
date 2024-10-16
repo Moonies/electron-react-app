@@ -31,20 +31,12 @@ import useApiConfig from 'hooks/useApiConfig'
 import IpConfigManegementPage from 'pages/SettingPage/pages/IpConfigManagementPage'
 import PurchasePage from 'pages/PurchasePage'
 import OrderPage from 'pages/OrderPage'
-
+import electronBridge from './electronBridge'
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
 console.error = (...args: any) => {
   if (/defaultProps/.test(args[0])) return
   error(...args)
-}
-declare global {
-  interface Window {
-    electronAPI: {
-      getApiConfig: () => Promise<string | null>
-      saveApiConfig: (apiUrl: string) => Promise<boolean>
-    }
-  }
 }
 
 interface ApiConfig {
@@ -59,7 +51,7 @@ export default function App() {
   const { isLoading } = useLoadingRedux()
   const [apiConfigModal, setApiConfigmodal] = useState<boolean>(false)
   const { loadConfig, isConfigSet } = useApiConfig()
-
+  const [loginSuccess, setLoginSuccess] = useState(false)
   useEffect(() => {
     const configLoaded = loadConfig()
     if (!configLoaded) {
@@ -67,6 +59,19 @@ export default function App() {
     } else {
       console.log(isAuthenticated)
       setLoginOpen(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('user')
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [])
 
@@ -84,9 +89,9 @@ export default function App() {
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Router>
           <Box display={'flex'} flex={1} minHeight={'100vh'}>
-            <Header />
-            <SideMenu />
             <ConfirmModalProvider>
+              <Header loginStatus={loginSuccess} />
+              <SideMenu />
               <Box
                 component={'main'}
                 sx={{ backgroundColor: theme => theme.palette.secondary.Main }}
@@ -105,7 +110,6 @@ export default function App() {
                   <Route path='/reports' element={<ReportPage />} />
                   <Route path='/products' element={<ProductPage />} />
                   <Route path='/component' element={<ComponentManagementPage />} />
-                  {/* <Route path="/settings" element={<SettingPage />} /> */}
                   <Route path='/settings/account' element={<AccountManagementPage />} />
                   <Route path='/settings/mycompany' element={<MyCompanyManagementPage />} />
                   <Route path='/settings/customer' element={<CustomerManagementPage />} />
@@ -121,23 +125,13 @@ export default function App() {
             open={loginOpen}
             onClose={() => {
               //exit programe etc.
-              if (window.Electron) {
-                const { ipcRenderer } = window.require('electron')
-                // We're in Electron
-                ipcRenderer.send('close', [])
-              } else {
-                // We're in a web browser
-                window.close()
-                // If window.close() doesn't work (it often doesn't in modern browsers),
-                // we can redirect to a blank page
-                if (!window.closed) {
-                  window.location.href = 'about:blank'
-                }
-              }
-              // setLoginOpen(false)
+              electronBridge.closeApp()
             }}
             //when success is keep user to local storage
-            onSuccess={() => setLoginOpen(false)}
+            onSuccess={() => {
+              setLoginOpen(false)
+              setLoginSuccess(true)
+            }}
           />
           <IpSettingModal open={apiConfigModal} onClose={() => handleCloseApiConfig()} />
           <LoadingOverlay open={isLoading} />
