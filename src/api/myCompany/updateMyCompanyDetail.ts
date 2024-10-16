@@ -3,7 +3,7 @@ import { axiosInstance, ApiResponse } from 'api'
 import { mockData } from './_mockSealData'
 
 export interface UpdateMyCompanyDetailData {
-  id: number
+  id: string
   companyInfo: {
     name: string
     buildingName: string

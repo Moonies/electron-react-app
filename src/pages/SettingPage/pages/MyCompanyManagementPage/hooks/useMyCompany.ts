@@ -5,9 +5,10 @@ import { UpdateMyCompanyDetailData } from 'api/myCompany/updateMyCompanyDetail'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
 import { useState } from 'react'
+import { deConvertPostalCode } from 'utils/formatUtils'
 
 export type MyCompanyDetail = {
-  id: number
+  id: string
   name: string
   buildingName: string
   streetAddress: string
@@ -87,7 +88,7 @@ export default function useMyCompany() {
       companyInfo: {
         address: {
           city: data.city,
-          postalCode: data.postalCode,
+          postalCode: deConvertPostalCode(data.postalCode),
           prefecture: data.prefecture,
           streetAddress: data.streetAddress,
         },
@@ -104,6 +105,8 @@ export default function useMyCompany() {
       if (file) {
         updateSeal(file, result.data.id)
       }
+    } else {
+      notificationSnackbar.error(result.message)
     }
     setLoading(false)
   }
@@ -132,25 +135,41 @@ export default function useMyCompany() {
     if (result.code === 200 && result.data) {
       if (file) {
         updateSeal(file, newData.id)
+      } else {
+        //delete seal
+        if (uploadedImage?.previewUrl) {
+          deleteSeal(newData.id)
+        }
       }
       notificationModal.success('編集完了しました。')
     }
   }
 
-  const updateSeal = async (sealFile: File, myCompanyId: number) => {
-    console.log('upload file', sealFile)
+  const updateSeal = async (sealFile: File, myCompanyId: string) => {
     //if company id should auto update but at confirm is shuold be update
     const result = await api.myCompany.updateMyCompanySeal({ id: myCompanyId, seal: sealFile })
     if (result.code === 200 && result.data) {
       notificationModal.success('編集完了しました。')
+    } else {
+      notificationSnackbar.error(result.message)
     }
   }
 
-  const getSeal = async (myCompanyId: number) => {
+  const getSeal = async (myCompanyId: string) => {
     const result = await api.myCompany.getMyCompanySeal(myCompanyId)
-    console.log(result)
     if (result.code === 200 && result.data?.seal) {
       setUploadedImage({ previewUrl: result.data.seal })
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
+  const deleteSeal = async (myCompanyId: string) => {
+    const result = await api.myCompany.deleteMyCompanySeal(myCompanyId)
+    if (result.code === 200) {
+      //may be something but now is not process
+    } else {
+      notificationSnackbar.error(result.message)
     }
   }
 

@@ -5,29 +5,22 @@ export interface MyCompnaSeal {
   seal: string
 }
 
-export default async function getMyCompanySeal(id: number): Promise<ApiResponse<MyCompnaSeal>> {
+export default async function getMyCompanySeal(id: string): Promise<ApiResponse<MyCompnaSeal>> {
   // when use real API
   try {
     const response = await axiosInstance.get('/api/company/' + id + '/seal', {
-      headers: {
-        // 'Content-Type': 'image/png',
-        // Accept: 'application/json',
-        'response-Type': 'arraybuffer',
-      },
+      headers: {},
+      responseType: 'blob',
     })
-    // Create a Blob from the ArrayBuffer
-    const blob = new Blob([response.data], { type: 'image/png' })
+    const imageObjectURL = URL.createObjectURL(response.data)
 
-    // Create a URL for the Blob
-    const url = URL.createObjectURL(blob)
-    console.log(url)
-    return { code: 200, message: 'success', data: { seal: url } }
+    return { code: 200, message: 'success', data: { seal: imageObjectURL } }
   } catch (error) {
-    console.log(error)
+    //in blob file when return has a special respone
     if (axios.isAxiosError(error) && error.response) {
       return {
         code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
+        message: error.message || 'An error occurred during authentication',
         data: null,
       }
     }

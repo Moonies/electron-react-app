@@ -2,7 +2,7 @@ import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 import { mockData } from './_mockSealData'
 export interface UpdateMyCompanySeal {
-  id: number
+  id: string
   seal: File
 }
 export default async function updateMyCompanySeal({

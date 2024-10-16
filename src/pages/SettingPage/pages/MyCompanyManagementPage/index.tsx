@@ -61,8 +61,6 @@ export default function MyCompanyManagementPage() {
   }
 
   const handleSaveClick = async () => {
-    // Implement add/edit functionality
-    // console.log('Confirmed data:', formCompanyDetail)
     const confirmed = await openConfirmModal({
       title: '確認してください',
       message: 'Are you sure you want to save data.',
@@ -74,9 +72,7 @@ export default function MyCompanyManagementPage() {
       } else {
         addNewMyCompanyDetail(formCompanyDetail as MyCompanyDetail, uploadedImage?.file)
       }
-      console.log('Add confirmed')
     } else {
-      console.log('Add cancelled')
     }
   }
 
@@ -135,13 +131,6 @@ export default function MyCompanyManagementPage() {
       URL.revokeObjectURL(uploadedImage.previewUrl)
     }
     setUploadedImage(null)
-
-    // setUploadedImage(null);
-    // setPreviewUrl(null)
-    // setError(null);
-    // if (fileInputRef.current) {
-    //   fileInputRef.current.value = '';
-    // }
   }
   useEffect(() => {
     return () => {
@@ -273,7 +262,7 @@ export default function MyCompanyManagementPage() {
                 <Button
                   component='label'
                   variant='outlined'
-                  tabIndex={-1}
+                  // tabIndex={-1}
                   onClick={clearFileUpload}
                   // startIcon={<CloudUploadIcon />}
                 >

@@ -1,9 +1,8 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
-import { mockData } from './_mockSealData'
 
 export interface MyCompanyDetail {
-  id: number
+  id: string
   companyInfo: {
     name: string
     buildingName: string
@@ -20,29 +19,12 @@ export interface MyCompanyDetail {
   accountNumber: string
   corporationNumber: string
   tax: number
-  // accountNumber: string
-  // corporationNumber: string
-  // tax: number
-
-  // accountNumber: string
-  // city: string
-  // corporationNumber: string
-  // email: string
-  // fax?: string
-  // id: number
-  // name: string
-  // phoneNumber: string
-  // postalCode: string
-  // prefecture: string
-  // streetAddress: string
-  // bildingName?: string
-  // tax: number
 }
 export default async function getMyCompanyDetail(): Promise<ApiResponse<MyCompanyDetail>> {
   // when use real API
   try {
-    const response = await axiosInstance.get('/api/company/1')
-    return { code: 200, message: 'success', data: response.data }
+    const response = await axiosInstance.get('/api/company')
+    return { code: 200, message: 'success', data: response.data.content[0] }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

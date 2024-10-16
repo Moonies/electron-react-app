@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 
-export default async function deleteUser(userId: number): Promise<ApiResponse<{}>> {
+export default async function deleteMyCompanySeal(id: string): Promise<ApiResponse<{}>> {
   // when use real API
   try {
-    const response = await axiosInstance.delete('/api/users/' + userId)
-    return { code: 200, message: 'success', data: response.data.content }
+    const response = await axiosInstance.delete('/api/company/' + id + '/seal')
+    return { code: 200, message: 'success', data: response.data.data }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

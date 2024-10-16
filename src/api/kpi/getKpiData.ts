@@ -31,7 +31,7 @@ export default async function GetKpiData(selectedYear: number): Promise<ApiRespo
   // when use real API
   try {
     const response = await axiosInstance.get('/api/kpi?year.equal=' + selectedYear)
-    return { code: 200, message: 'success', data: response.data._embedded.kpi[0] }
+    return { code: 200, message: 'success', data: response.data.content.kpi[0] }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

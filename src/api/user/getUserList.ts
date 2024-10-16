@@ -22,7 +22,7 @@ export default async function getUserList({
   // when use real API
   try {
     const response = await axiosInstance.get('/api/users?page=' + page + '&size=' + pageSize)
-    return { code: 200, message: 'success', data: response.data._embedded.users }
+    return { code: 200, message: 'success', data: response.data.content.users }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

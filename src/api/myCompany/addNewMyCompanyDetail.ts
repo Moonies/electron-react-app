@@ -20,7 +20,7 @@ export interface NewMyCompanyDetailData {
   tax: number
 }
 type ResultAddNewMyCompany = {
-  id: number
+  id: string
 }
 export default async function addNewMyCompanyDetail(
   data: NewMyCompanyDetailData
