@@ -28,13 +28,14 @@ export default function useAccount() {
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'identifier', headerName: 'ユーザーネーム', headerAlign: 'center' },
-      {
-        field: 'password',
-        headerName: 'パスワード',
-        headerAlign: 'center',
-        // minWidth: 200,
-      },
+      { field: 'number', headerName: '社員番号', headerAlign: 'center' },
+      { field: 'mail', headerName: 'メール', headerAlign: 'center' },
+      // {
+      //   field: 'password',
+      //   headerName: 'パスワード',
+      //   headerAlign: 'center',
+      //   // minWidth: 200,
+      // },
       { field: 'name', headerName: '名前', headerAlign: 'center' },
       {
         field: 'roles',

@@ -4,10 +4,11 @@ import { axiosInstance, ApiResponse } from 'api'
 export interface AddNewUserData {
   // username: string
   password: string
-  identifier: string
+  // identifier: string
   name: string
   roles: string
-  userNumber: string
+  number: string
+  mail: string
 }
 
 export interface GetUserListProps {
@@ -23,7 +24,7 @@ export default async function getUserList(newDataUser: AddNewUserData): Promise<
     if (axios.isAxiosError(error) && error.response) {
       return {
         code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
+        message: error.message || 'An error occurred during authentication',
         data: null,
       }
     }
