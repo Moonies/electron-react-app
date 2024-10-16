@@ -36,3 +36,7 @@ export const formatJPY = (amount: number): string => {
     currency: 'JPY',
   }).format(amount)
 }
+
+export const deConvertPostalCode = (postalCode: string) => {
+  return postalCode.replace(/[〒\-]/g, '')
+}
