@@ -21,7 +21,10 @@ import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
 import useSupplier from './hooks/useSupplier'
 import { SupplierData } from 'api/supplier/getSupplierList'
-import SupplierManagementModal from 'components/Modals/SupplierManagementModal'
+import SupplierManagementModal, {
+  ModalSupplierProps,
+} from 'components/Modals/SupplierManagementModal'
+import { deConvertPostalCode } from 'utils/formatUtils'
 
 export default function SupplierManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -31,7 +34,7 @@ export default function SupplierManagementPage() {
   const { openConfirmModal } = useConfirmModal()
   const supplierDataGridRef = useGridApiRef()
   const [filterValue, setFilterValue] = useState('')
-  const [selectedSupplier, setSelectedSupplier] = useState<SupplierData | undefined>()
+  const [selectedSupplier, setSelectedSupplier] = useState<ModalSupplierProps | undefined>()
 
   const {
     columns,
@@ -39,6 +42,9 @@ export default function SupplierManagementPage() {
     handlePaginationModelChange,
     getSupplierListData,
     supplierListData,
+    createNewSupplier,
+    deleteSelectedSupplier,
+    updateSelectedSupplier,
   } = useSupplier()
 
   useEffect(() => {
@@ -66,8 +72,24 @@ export default function SupplierManagementPage() {
       const selectedId = selectionModel[0]
       const selectedData = supplierListData.find(item => item.id === selectedId)
       if (selectedData) {
+        let selectedCustomerData: ModalSupplierProps = {
+          companyCode: selectedData.companyCode,
+          companyType: selectedData.companyType,
+          name: selectedData.companyInfo.name,
+          buildingName: selectedData.companyInfo.buildingName,
+          streetAddress: selectedData.companyInfo.address.streetAddress,
+          city: selectedData.companyInfo.address.city,
+          prefecture: selectedData.companyInfo.address.prefecture,
+          postalCode: selectedData.companyInfo.address.postalCode,
+          phoneNumber: selectedData.companyInfo.phoneNumber,
+          email: selectedData.companyInfo.email,
+          fax: selectedData.companyInfo.fax,
+          closingDay: selectedData.closingDay,
+          paymentDeadline: selectedData.paymentDeadline,
+          id: selectedData.id,
+        }
         setModalMode('edit')
-        setSelectedSupplier(selectedData)
+        setSelectedSupplier(selectedCustomerData)
         setModalOpen(true)
       }
     } else {
@@ -82,12 +104,12 @@ export default function SupplierManagementPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれた　 ${selectedData.name}　を削除してもよろしいですか?`,
+          message: `この選ばれた　 ${selectedData.companyInfo.name}　を削除してもよろしいですか?`,
           // message: 'Are you sure you want to delete this Name : ' + selectedData.customerName,
         })
         if (confirmed) {
-          // Perform delete operation
-          console.log('Delete confirmed')
+          const result = await deleteSelectedSupplier(selectedData.id)
+          if (result) getSupplierListData()
         } else {
           console.log('Delete cancelled')
         }
@@ -97,25 +119,51 @@ export default function SupplierManagementPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: any) => {
-    // Implement add/edit functionality
-    console.log('Confirmed data:', data)
-    if (modalMode === 'add') {
-      const confirmed = await openConfirmModal({
-        title: '確認してください',
-        message: 'Are you sure you want to add data.',
-      })
-      if (confirmed) {
-        // Perform delete operation
-        console.log('Add confirmed')
-      } else {
-        console.log('Add cancelled')
+  const handleModalConfirm = async (data: ModalSupplierProps) => {
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: 'Are you sure you want to add data.',
+    })
+    if (confirmed) {
+      let newSupplierData = {
+        // closingDay: data.closingDay,
+        companyCode: data.companyCode,
+        companyInfo: {
+          address: {
+            city: data.city,
+            postalCode: deConvertPostalCode(data.postalCode),
+            prefecture: data.prefecture,
+            streetAddress: data.streetAddress,
+          },
+          buildingName: data.buildingName,
+          email: data.email,
+          fax: data.fax,
+          name: data.name,
+          phoneNumber: data.phoneNumber,
+        },
+        companyType: 'supplier',
       }
-      // addNewSaleData()
+
+      if (modalMode === 'add') {
+        const result = await createNewSupplier(newSupplierData)
+        if (result) {
+          getSupplierListData()
+          setModalOpen(false)
+        }
+      } else {
+        //check id again
+        if (data.id) {
+          const result = await updateSelectedSupplier({ id: data.id, ...newSupplierData })
+          if (result) {
+            getSupplierListData()
+            setModalOpen(false)
+          }
+        }
+      }
     } else {
+      //something function or nothing
+      console.log('Add cancelled')
     }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
   }
 
   const filteredRows = () => {

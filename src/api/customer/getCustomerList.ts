@@ -28,7 +28,7 @@ export interface CustomerData {
 export default async function getCustomerList(): Promise<ApiResponse<CustomerData[]>> {
   // when use real API
   try {
-    const response = await axiosInstance.get('/api/companies')
+    const response = await axiosInstance.get('/api/companies?companyType.equal=customer')
     return { code: 200, message: 'success', data: response.data.content }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {

@@ -24,25 +24,36 @@ import { AddNewSupplierProps } from 'api/supplier/addNewSupplier'
 import { SupplierData } from 'api/supplier/getSupplierList'
 import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
 import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
+import { Dayjs } from 'dayjs'
+import MarkInputFaxNumber from 'components/MarkInput/MarkInputFaxNumber'
+import useNotification from 'hooks/useNotification'
+import { deConvertPostalCode } from 'utils/formatUtils'
 
 interface SupplierManagementModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: AddNewSupplierProps) => Promise<void>
-  initialData?: SupplierData
+  onConfirm: (data: ModalSupplierProps) => Promise<void>
+  initialData?: ModalSupplierProps
   mode: 'add' | 'edit'
 }
-const defaultFormData: AddNewSupplierProps = {
-  // customerName: '',
-  // closeingDay: '',
-  // phoneNumber: '',
-  // postalCode: '',
-  // prefecture: '',
-  // city: '',
-  // street: '',
-  // buildingName: '',
-  // paymentDueDate: '',
-  // email: '',
+
+export type ModalSupplierProps = {
+  id?: string
+  companyCode: string
+  companyType: string
+  name: string
+  buildingName: string
+  streetAddress: string
+  city: string
+  prefecture: string
+  postalCode: string
+  phoneNumber: string
+  email: string
+  fax?: string
+  closingDay: string
+  paymentDeadline: string | Dayjs
+}
+const defaultFormData: ModalSupplierProps = {
   phoneNumber: '',
   postalCode: '',
   prefecture: '',
@@ -64,8 +75,9 @@ export default function SupplierManagementModal({
   initialData,
   mode,
 }: SupplierManagementModalProps) {
-  const [formData, setFormData] = useState<AddNewSupplierProps>(defaultFormData)
+  const [formData, setFormData] = useState<ModalSupplierProps>(defaultFormData)
   const { withLoading } = useLoading()
+  const { notificationSnackbar } = useNotification()
 
   const dateNumber = Array.from(Array(30).keys())
 
@@ -77,7 +89,7 @@ export default function SupplierManagementModal({
     }
   }, [defaultFormData, initialData])
 
-  const handleChange = (field: keyof AddNewSupplierProps, value: string | number) => {
+  const handleChange = (field: keyof ModalSupplierProps, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -94,12 +106,21 @@ export default function SupplierManagementModal({
   //when function has to be more 1 function should move to hook
   const handlePostCodeClick = async () => {
     const result = await withLoading(api.postCode.getPostCode(formData.postalCode))
-    if (result.code === 200) {
+    if (result.code === 200 && result.data) {
       //data is now for test and mock
       setFormData(prev => ({
         ...prev,
-        ['prefecture']: 'aaaa',
-        ['city']: 'bbbbbb',
+        ['prefecture']: result.data?.prefecture ?? '',
+        ['city']: result.data?.city ?? '',
+        ['postalCode']: result.data?.postCode ?? deConvertPostalCode(formData.postalCode),
+      }))
+    } else {
+      notificationSnackbar.warning('postalCode not found')
+      setFormData(prev => ({
+        ...prev,
+        ['prefecture']: '',
+        ['city']: '',
+        ['postalCode']: deConvertPostalCode(formData.postalCode),
       }))
     }
   }
@@ -138,6 +159,14 @@ export default function SupplierManagementModal({
               // sx={{ flex: 1 }}
             />
             <TextField
+              label='会社コード'
+              value={formData.companyCode}
+              onChange={e => handleChange('companyCode', e.target.value)}
+              fullWidth
+              margin='normal'
+              // sx={{ flex: 1 }}
+            />
+            {/* <TextField
               label='締日'
               value={formData.closingDay}
               onChange={e => handleChange('closingDay', e.target.value)}
@@ -154,7 +183,7 @@ export default function SupplierManagementModal({
                   {item + 1}
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
             <TextField
               label='電話番号'
               type='text'
@@ -166,13 +195,27 @@ export default function SupplierManagementModal({
                 inputComponent: MarkInputPhoneNumber as any,
               }}
             />
+          </Box>
+          <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
             <TextField
               label='メール'
               type='text'
               value={formData.email}
-              onChange={e => handleChange('email', parseFloat(e.target.value))}
+              onChange={e => handleChange('email', e.target.value)}
               fullWidth
               margin='normal'
+            />
+            <TextField
+              label='fax'
+              type='text'
+              value={formData.fax}
+              onChange={e => handleChange('fax', e.target.value)}
+              fullWidth
+              margin='normal'
+              InputProps={{
+                inputComponent: MarkInputFaxNumber as any,
+              }}
+              sx={{ width: '70%' }}
             />
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
@@ -204,7 +247,7 @@ export default function SupplierManagementModal({
               label='都道府県'
               type='text'
               value={formData.prefecture}
-              onChange={e => handleChange('prefecture', parseFloat(e.target.value))}
+              onChange={e => handleChange('prefecture', e.target.value)}
               // fullWidth
               margin='normal'
             />
@@ -232,7 +275,7 @@ export default function SupplierManagementModal({
               label='番地'
               type='text'
               value={formData.streetAddress}
-              onChange={e => handleChange('streetAddress', parseFloat(e.target.value))}
+              onChange={e => handleChange('streetAddress', e.target.value)}
               // fullWidth
               margin='normal'
             />
