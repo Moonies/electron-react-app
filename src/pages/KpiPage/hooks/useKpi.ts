@@ -141,7 +141,6 @@ export default function useKpi() {
   }
 
   const getKpiData = async (planType: 'time' | 'plan') => {
-    console.log(planType)
     let selectedYear = planType === 'time' ? currentYear - 1 : currentYear
     setLoading(true)
     if (planType === 'time') {

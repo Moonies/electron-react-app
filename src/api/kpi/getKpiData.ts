@@ -10,17 +10,7 @@ export interface KpiData {
   plannedNonOperatingExpense: number | null
 }
 
-const mockdata = {
-  planSalesRevenue: 2000000,
-  planVariableCosts: 1000000,
-  planFixedCosts: 6000000,
-  planOperatingIncome: 4000000,
-  planOperatingExpenses: 3000000,
-  planOrdinaryProfit: 170000,
-}
-
 export default async function GetKpiData(selectedYear: number): Promise<ApiResponse<KpiData>> {
-  console.log('income')
   //for beta:test
   // await new Promise(resolve => setTimeout(resolve, 1000))
   // return {
@@ -31,7 +21,7 @@ export default async function GetKpiData(selectedYear: number): Promise<ApiRespo
   // when use real API
   try {
     const response = await axiosInstance.get('/api/kpi?year.equal=' + selectedYear)
-    return { code: 200, message: 'success', data: response.data.content.kpi[0] }
+    return { code: 200, message: 'success', data: response.data.content[0] }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {
