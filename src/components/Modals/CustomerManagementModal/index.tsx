@@ -17,48 +17,73 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { CustomerData } from 'api/customer/getCustomerList'
-import { AddNewCustomerProps } from 'api/customer/addNewCustomer'
+// import { AddNewCustomerProps } from 'api/customer/addNewCustomer'
 import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
 import { StyledButton } from 'styles/styles'
 import useLoading from 'hooks/useLoading'
 import { api } from 'api/index'
 import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
 import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
+import { Dayjs } from 'dayjs'
+import { deConvertPostalCode } from 'utils/formatUtils'
+import useNotification from 'hooks/useNotification'
+import MarkInputFaxNumber from 'components/MarkInput/MarkInputFaxNumber'
 
 interface CustomerManagementModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: AddNewCustomerProps) => Promise<void>
-  initialData?: CustomerData
+  onConfirm: (data: ModalCustomerProps) => Promise<void>
+  initialData?: ModalCustomerProps
   mode: 'add' | 'edit'
 }
-const defaultFormData: AddNewCustomerProps = {
-  phoneNumber: '',
-  postalCode: '',
-  prefecture: '',
-  city: '',
-  buildingName: '',
-  email: '',
-  closingDay: '',
-  paymentDeadline: '',
-  companyCode: '',
-  companyType: '',
-  fax: '',
-  name: '',
-  streetAddress: '',
-  // phoneNumber: undefined,
-  // postalCode: '',
-  // prefecture: '',
-  // city: '',
-  // buildingName: '',
-  // email: '',
-  // closingDay: '',
-  // paymentDeadline: '',
+
+export type ModalCustomerProps = {
+  id?: string
+  companyCode: string
+  companyType: string
+  name: string
+  buildingName: string
+  streetAddress: string
+  city: string
+  prefecture: string
+  postalCode: string
+  phoneNumber: string
+  email: string
+  fax?: string
+  closingDay: string
+  paymentDeadline: string | Dayjs
+}
+const defaultFormData: ModalCustomerProps = {
   // companyCode: '',
   // companyType: '',
-  // fax: '',
-  // name: '',
-  // streetAddress: '',
+  // companyInfo: {
+  //   name: '',
+  //   buildingName: '',
+  //   address: {
+  //     streetAddress: '',
+  //     city: '',
+  //     prefecture: '',
+  //     postalCode: '',
+  //   },
+  //   phoneNumber: '',
+  //   email: '',
+  //   fax: '',
+  // },
+  // closingDay: '',
+  // paymentDeadline: '' ,
+  companyCode: '',
+  companyType: '',
+  name: '',
+  buildingName: '',
+  streetAddress: '',
+  city: '',
+  prefecture: '',
+  postalCode: '',
+  phoneNumber: '',
+  email: '',
+  fax: '',
+  closingDay: '',
+  paymentDeadline: '',
 }
 export default function CustomerManagementModal({
   open,
@@ -67,8 +92,9 @@ export default function CustomerManagementModal({
   initialData,
   mode,
 }: CustomerManagementModalProps) {
-  const [formData, setFormData] = useState<AddNewCustomerProps>(defaultFormData)
+  const [formData, setFormData] = useState<ModalCustomerProps>(defaultFormData)
   const { withLoading } = useLoading()
+  const { notificationSnackbar } = useNotification()
 
   const dateNumber = Array.from(Array(30).keys())
 
@@ -80,14 +106,14 @@ export default function CustomerManagementModal({
     }
   }, [defaultFormData, initialData])
 
-  const handleChange = (field: keyof AddNewCustomerProps, value: string | number) => {
+  const handleChange = (field: keyof ModalCustomerProps, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async () => {
     try {
       await onConfirm(formData)
-      onClose()
+      // onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
@@ -96,13 +122,24 @@ export default function CustomerManagementModal({
   }
   //when function has to be more 1 function should move to hook
   const handlePostCodeClick = async () => {
-    const result = await withLoading(api.postCode.getPostCode(formData.postalCode))
-    if (result.code === 200) {
+    const result = await withLoading(
+      api.postCode.getPostCode(deConvertPostalCode(formData.postalCode))
+    )
+    if (result.code === 200 && result.data) {
       //data is now for test and mock
       setFormData(prev => ({
         ...prev,
-        ['prefecture']: 'aaaa',
-        ['city']: 'bbbbbb',
+        ['prefecture']: result.data?.prefecture ?? '',
+        ['city']: result.data?.city ?? '',
+        ['postalCode']: result.data?.postCode ?? deConvertPostalCode(formData.postalCode),
+      }))
+    } else {
+      notificationSnackbar.warning('postalCode not found')
+      setFormData(prev => ({
+        ...prev,
+        ['prefecture']: '',
+        ['city']: '',
+        ['postalCode']: deConvertPostalCode(formData.postalCode),
       }))
     }
   }
@@ -141,6 +178,14 @@ export default function CustomerManagementModal({
               // sx={{ flex: 1 }}
             />
             <TextField
+              label='会社コード'
+              value={formData.companyCode}
+              onChange={e => handleChange('companyCode', e.target.value)}
+              fullWidth
+              margin='normal'
+              // sx={{ flex: 1 }}
+            />
+            {/* <TextField
               label='締日'
               value={formData.closingDay}
               onChange={e => handleChange('closingDay', e.target.value)}
@@ -157,7 +202,7 @@ export default function CustomerManagementModal({
                   {item + 1}
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
             <TextField
               label='電話番号'
               // type='text'
@@ -169,13 +214,27 @@ export default function CustomerManagementModal({
                 inputComponent: MarkInputPhoneNumber as any,
               }}
             />
+          </Box>
+          <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
             <TextField
               label='メール'
               type='text'
               value={formData.email}
-              onChange={e => handleChange('email', parseFloat(e.target.value))}
+              onChange={e => handleChange('email', e.target.value)}
               fullWidth
               margin='normal'
+            />
+            <TextField
+              label='fax'
+              type='text'
+              value={formData.fax}
+              onChange={e => handleChange('fax', e.target.value)}
+              fullWidth
+              margin='normal'
+              InputProps={{
+                inputComponent: MarkInputFaxNumber as any,
+              }}
+              sx={{ width: '70%' }}
             />
           </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
@@ -207,7 +266,7 @@ export default function CustomerManagementModal({
               label='都道府県'
               type='text'
               value={formData.prefecture}
-              onChange={e => handleChange('prefecture', parseFloat(e.target.value))}
+              onChange={e => handleChange('prefecture', e.target.value)}
               // fullWidth
               margin='normal'
             />
@@ -235,7 +294,7 @@ export default function CustomerManagementModal({
               label='番地'
               type='text'
               value={formData.streetAddress}
-              onChange={e => handleChange('streetAddress', parseFloat(e.target.value))}
+              onChange={e => handleChange('streetAddress', e.target.value)}
               // fullWidth
               margin='normal'
             />
@@ -252,7 +311,7 @@ export default function CustomerManagementModal({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant='contained'>
+        <Button onClick={onClose} variant='contained' aria-label='close'>
           キャンセル
         </Button>
         <Button
@@ -261,6 +320,7 @@ export default function CustomerManagementModal({
           sx={{
             color: 'white',
           }}
+          aria-label='close'
         >
           保存
         </Button>
