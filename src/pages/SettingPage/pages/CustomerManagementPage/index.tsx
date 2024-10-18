@@ -20,8 +20,12 @@ import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
 import useCustomer from './hooks/useCustomer'
-import CustomerManagementModal from 'components/Modals/CustomerManagementModal'
+import CustomerManagementModal, {
+  ModalCustomerProps,
+} from 'components/Modals/CustomerManagementModal'
 import { CustomerData } from 'api/customer/getCustomerList'
+import { UpdateCustomerDetailProps } from 'api/customer/updateCustomerDetail'
+import { deConvertPostalCode } from 'utils/formatUtils'
 
 export default function CustomerManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -31,7 +35,7 @@ export default function CustomerManagementPage() {
   const { openConfirmModal } = useConfirmModal()
   const customerDataGridRef = useGridApiRef()
   const [filterValue, setFilterValue] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | undefined>()
+  const [selectedCustomer, setSelectedCustomer] = useState<ModalCustomerProps | undefined>()
 
   const {
     columns,
@@ -39,6 +43,10 @@ export default function CustomerManagementPage() {
     getCusomerListData,
     customerListData,
     handlePaginationModelChange,
+    handleUpdateData,
+    updateSelectedCustomer,
+    createNewCustomer,
+    deleteSelectedCustomer,
   } = useCustomer()
 
   useEffect(() => {
@@ -66,9 +74,25 @@ export default function CustomerManagementPage() {
       const selectedId = selectionModel[0]
       const selectedData = customerListData.find(item => item.id === selectedId)
       if (selectedData) {
+        let selectedCustomerData: ModalCustomerProps = {
+          companyCode: selectedData.companyCode,
+          companyType: selectedData.companyType,
+          name: selectedData.companyInfo.name,
+          buildingName: selectedData.companyInfo.buildingName,
+          streetAddress: selectedData.companyInfo.address.streetAddress,
+          city: selectedData.companyInfo.address.city,
+          prefecture: selectedData.companyInfo.address.prefecture,
+          postalCode: selectedData.companyInfo.address.postalCode,
+          phoneNumber: selectedData.companyInfo.phoneNumber,
+          email: selectedData.companyInfo.email,
+          fax: selectedData.companyInfo.fax,
+          closingDay: selectedData.closingDay,
+          paymentDeadline: selectedData.paymentDeadline,
+          id: selectedData.id,
+        }
         setModalMode('edit')
-        setSelectedCustomer(selectedData)
         setModalOpen(true)
+        setSelectedCustomer(selectedCustomerData)
       }
     } else {
       notificationModal.error('編集する表の行を選択してください。')
@@ -82,11 +106,12 @@ export default function CustomerManagementPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれた　 ${selectedData.name}　を削除してもよろしいですか?`,
+          message: `この選ばれた　 ${selectedData.companyInfo.name}　を削除してもよろしいですか?`,
         })
         if (confirmed) {
           // Perform delete operation
-          console.log('Delete confirmed')
+          const result = await deleteSelectedCustomer(selectedData.id)
+          if (result) getCusomerListData()
         } else {
           console.log('Delete cancelled')
         }
@@ -96,25 +121,53 @@ export default function CustomerManagementPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: any) => {
+  const handleModalConfirm = async (data: ModalCustomerProps) => {
     // Implement add/edit functionality
-    console.log('Confirmed data:', data)
-    if (modalMode === 'add') {
-      const confirmed = await openConfirmModal({
-        title: '確認してください',
-        message: 'Are you sure you want to add data.',
-      })
-      if (confirmed) {
-        // Perform delete operation
-        console.log('Add confirmed')
-      } else {
-        console.log('Add cancelled')
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: 'Are you sure you want to add data.',
+    })
+    if (confirmed) {
+      let newCustomerData = {
+        // closingDay: data.closingDay,
+        companyCode: data.companyCode,
+        companyInfo: {
+          address: {
+            city: data.city,
+            postalCode: deConvertPostalCode(data.postalCode),
+            prefecture: data.prefecture,
+            streetAddress: data.streetAddress,
+          },
+          buildingName: data.buildingName,
+          email: data.email,
+          fax: data.fax,
+          name: data.name,
+          phoneNumber: data.phoneNumber,
+        },
+        companyType: 'customer',
+        // paymentDeadline: data.paymentDeadline,
       }
-      // addNewSaleData()
+      // Perform delete operation
+      if (modalMode === 'add') {
+        // console.log(newCustomerData)
+        const result = await createNewCustomer(newCustomerData)
+        if (result) {
+          getCusomerListData()
+          setModalOpen(false)
+        }
+      } else {
+        if (data.id) {
+          //check id again when modalMode !== 'add'
+          const result = await updateSelectedCustomer({ id: data.id, ...newCustomerData })
+          if (result) {
+            getCusomerListData()
+            setModalOpen(false)
+          }
+        }
+      }
     } else {
+      console.log('Add cancelled')
     }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
   }
 
   const filteredRows = () => {

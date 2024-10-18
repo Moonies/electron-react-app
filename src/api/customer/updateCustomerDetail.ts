@@ -2,7 +2,8 @@ import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
 
-export interface AddNewCustomerProps {
+export interface UpdateCustomerDetailProps {
+  id: string
   companyCode: string
   companyType: string
   companyInfo: {
@@ -22,13 +23,13 @@ export interface AddNewCustomerProps {
   // paymentDeadline: string | Dayjs
 }
 
-export default async function addNewCustomer(
-  data: AddNewCustomerProps
+export default async function updateCustomerDetail(
+  data: UpdateCustomerDetailProps
 ): Promise<ApiResponse<null>> {
   // when use real API
   try {
-    const response = await axiosInstance.post('/api/companies', { ...data })
-    return { code: 200, message: 'success', data: response.data.data }
+    const response = await axiosInstance.patch('/api/companies', { ...data })
+    return { code: 200, message: 'success', data: response.data.content }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {

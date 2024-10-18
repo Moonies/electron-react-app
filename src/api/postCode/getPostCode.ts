@@ -21,7 +21,7 @@ export default async function getPostCode(postCode: string): Promise<ApiResponse
     return {
       code: 200,
       message: 'success',
-      data: response.data.content[0] ?? undefined,
+      data: response.data.content[0],
     }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
