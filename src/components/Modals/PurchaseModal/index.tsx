@@ -295,11 +295,11 @@ export default function PurchaseModal({
                   const { key, ...optionProps } = props
                   return (
                     <Box key={key} component='li' {...optionProps}>
-                      {option.name}
+                      {option.companyInfo.name}
                     </Box>
                   )
                 }}
-                getOptionLabel={option => option.name}
+                getOptionLabel={option => option.companyInfo.name}
                 sx={{ width: '35%', marginTop: 2 }}
                 renderInput={params => <TextField {...params} label='顧客名' />}
                 readOnly={modalMode === 'view'}
