@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { Description as MemoIcon } from '@mui/icons-material'
-import { ComponentData, PurchaseOrderDetail } from 'api/component/getComponentDetail'
+import { PurchaseOrderHistory } from 'api/component/getComponentPurchaseHistory'
 import { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
 import { GridActionsCellItem, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
@@ -24,7 +24,7 @@ export type ComponentDetail = {
   lastestPriceDate: string | Dayjs
   price: number
   inStock: number
-  purchaseOrderList: PurchaseOrderDetail[]
+  purchaseOrderList: PurchaseOrderHistory[]
 }
 interface ComponentManagementModalProps {
   open: boolean

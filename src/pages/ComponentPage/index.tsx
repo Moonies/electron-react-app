@@ -150,7 +150,7 @@ export default function ComponentManagementPage() {
         if (componentList) {
           let newInitComponent: ComponentDetail = {
             ...selectedData,
-            purchaseOrderList: componentList.purchaseOrderList,
+            purchaseOrderList: componentList,
           }
           setSelectedComponent(newInitComponent)
           setModalOpen(true)

@@ -2,6 +2,7 @@ import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { ComponentData, SearchCriteriaComponentList } from 'api/component/getComponentList'
 import { api } from 'api/index'
 import useLoading from 'hooks/useLoading'
+import useNotification from 'hooks/useNotification'
 import React, { useCallback, useMemo, useState } from 'react'
 
 type CategoryProductSearch = {
@@ -22,12 +23,12 @@ export default function useComponent() {
   })
 
   const { withLoading } = useLoading()
-
+  const { notificationSnackbar } = useNotification()
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'componentNumber', headerName: '商品番号', headerAlign: 'center', flex: 1 },
+      { field: 'number', headerName: '商品番号', headerAlign: 'center', flex: 1 },
 
-      { field: 'componentName', headerName: '商品名', headerAlign: 'center', flex: 1 },
+      { field: 'name', headerName: '商品名', headerAlign: 'center', flex: 1 },
       {
         field: 'price',
         headerName: '単価',
@@ -35,8 +36,8 @@ export default function useComponent() {
         flex: 1,
         // minWidth: 200,
       },
-      { field: 'inStock', headerName: '数量', headerAlign: 'center', flex: 1 },
-      { field: 'lastestPriceDate', headerName: '単価時点', headerAlign: 'center', flex: 1 },
+      { field: 'quantity', headerName: '数量', headerAlign: 'center', flex: 1 },
+      { field: 'latestPriceDecisionDate', headerName: '単価時点', headerAlign: 'center', flex: 1 },
     ],
     []
   )
@@ -76,7 +77,7 @@ export default function useComponent() {
   }, [searchCriteria, withLoading])
 
   const getComponentListData = async () => {
-    const result = await withLoading(api.component.getComponentList())
+    const result = await withLoading(api.component.getComponentList(searchCriteria))
     if (result.code === 200 && result.data) {
       setComponentListData(result.data)
     }
@@ -86,6 +87,8 @@ export default function useComponent() {
     const result = await api.component.getComponentDetail(componentId)
     if (result.code === 200 && result.data) {
       return result.data
+    } else {
+      notificationSnackbar.error(result.message)
     }
   }
   const handlePaginationModelChange = () => {}

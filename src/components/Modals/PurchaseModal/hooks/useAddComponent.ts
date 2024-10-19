@@ -104,7 +104,7 @@ export default function useAddComponent(purchaseData: PurchaseData) {
       if (query.length >= 2) {
         setLoading(true)
         try {
-          const fetchedOptions = await api.component.getComponentList()
+          const fetchedOptions = await api.component.getComponentList({ keyword: query })
           setComponentData(fetchedOptions.data ?? [])
         } catch (error) {
           console.error('Error fetching options:', error)
