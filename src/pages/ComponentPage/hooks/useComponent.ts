@@ -1,9 +1,12 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+import { AddNewComponentProps } from 'api/component/addNewComponent'
 import { ComponentData, SearchCriteriaComponentList } from 'api/component/getComponentList'
+import { UpdateComponentProps } from 'api/component/updateComponents'
 import { api } from 'api/index'
 import useLoading from 'hooks/useLoading'
+import useNotification from 'hooks/useNotification'
 import React, { useCallback, useMemo, useState } from 'react'
-
+import { formatJPY } from 'utils/formatUtils'
 type CategoryProductSearch = {
   value: string
   display: string
@@ -21,22 +24,23 @@ export default function useComponent() {
     pageSize: 10,
   })
 
-  const { withLoading } = useLoading()
-
+  const { withLoading, setLoading } = useLoading()
+  const { notificationSnackbar } = useNotification()
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'componentNumber', headerName: '商品番号', headerAlign: 'center', flex: 1 },
+      { field: 'number', headerName: '商品番号', headerAlign: 'center', flex: 1 },
 
-      { field: 'componentName', headerName: '商品名', headerAlign: 'center', flex: 1 },
+      { field: 'name', headerName: '商品名', headerAlign: 'center', flex: 1 },
       {
         field: 'price',
         headerName: '単価',
         headerAlign: 'center',
         flex: 1,
+        valueFormatter: value => formatJPY(Number(value)),
         // minWidth: 200,
       },
-      { field: 'inStock', headerName: '数量', headerAlign: 'center', flex: 1 },
-      { field: 'lastestPriceDate', headerName: '単価時点', headerAlign: 'center', flex: 1 },
+      { field: 'quantity', headerName: '数量', headerAlign: 'center', flex: 1 },
+      { field: 'latestPriceDecisionDate', headerName: '単価時点', headerAlign: 'center', flex: 1 },
     ],
     []
   )
@@ -55,28 +59,12 @@ export default function useComponent() {
   }
 
   const handleSearch = useCallback(async () => {
-    console.log(searchCriteria)
-    //if condition when search put in here, may be is not use when column filed is equal column in table
-    // let newCategory: string
-    // switch (searchCriteria.category) {
-    //   case 'componentNumber':
-    //     break
-    //   case 'componentName':
-    //     break
-    //   case 'price':
-    //     break
-    //   case 'inStock':
-    //     break
-
-    //   default:
-    //     break
-    // }
-    // getComponentListData(paginationModel)
+    //if have another event
     getComponentListData()
   }, [searchCriteria, withLoading])
 
   const getComponentListData = async () => {
-    const result = await withLoading(api.component.getComponentList())
+    const result = await withLoading(api.component.getComponentList(searchCriteria))
     if (result.code === 200 && result.data) {
       setComponentListData(result.data)
     }
@@ -85,9 +73,35 @@ export default function useComponent() {
   const getComponentDetail = async (componentId: string) => {
     const result = await api.component.getComponentDetail(componentId)
     if (result.code === 200 && result.data) {
+      setLoading(false)
       return result.data
+    } else {
+      notificationSnackbar.error(result.message)
     }
   }
+
+  const addNewComponent = async (newComponentData: AddNewComponentProps) => {
+    const result = await api.component.addNewComponent(newComponentData)
+    if (result.code === 200) {
+      setLoading(false)
+      notificationSnackbar.success('追加完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
+  const updateComponent = async (newComponentDetail: UpdateComponentProps) => {
+    const result = await api.component.updateComponents(newComponentDetail)
+    if (result.code === 200) {
+      setLoading(false)
+      notificationSnackbar.success('編集完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
   const handlePaginationModelChange = () => {}
   return {
     paginationModel,
@@ -101,5 +115,7 @@ export default function useComponent() {
     prepareCategorySearch,
     handleSearch,
     getComponentDetail,
+    addNewComponent,
+    updateComponent,
   }
 }

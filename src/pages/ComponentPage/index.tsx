@@ -25,26 +25,20 @@ import { ComponentData } from 'api/component/getComponentList'
 import useComponent from './hooks/useComponent'
 import ComponentManagementModal, {
   ComponentDetail,
+  NewComponent,
 } from 'components/Modals/ComponentManagementModal'
 import useLoading from 'hooks/useLoading'
+import dayjs from 'dayjs'
 
 export default function ComponentManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalOpen, setModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
   const componentDataGridRef = useGridApiRef()
   const [filterValue, setFilterValue] = useState('')
-  const [selectedComponent, setSelectedComponent] = useState<ComponentDetail>({
-    id: '',
-    componentNumber: '',
-    componentName: '',
-    lastestPriceDate: '',
-    price: 0,
-    inStock: 0,
-    purchaseOrderList: [],
-  })
+  const [selectedComponent, setSelectedComponent] = useState<ComponentDetail>()
   const { setLoading } = useLoading()
 
   const {
@@ -59,6 +53,8 @@ export default function ComponentManagementPage() {
     searchCriteria,
     handleSearch,
     getComponentDetail,
+    addNewComponent,
+    updateComponent,
   } = useComponent()
 
   useEffect(() => {
@@ -67,7 +63,7 @@ export default function ComponentManagementPage() {
   }, [])
 
   const handleAddClick = () => {
-    // setSelectedComponent(undefined)
+    setSelectedComponent(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -77,8 +73,17 @@ export default function ComponentManagementPage() {
       const selectedId = selectionModel[0]
       const selectedData = componentListData.find(item => item.id === selectedId)
       if (selectedData) {
+        console.log(selectedData)
+        let newInitComponent: ComponentDetail = {
+          componentName: selectedData.name,
+          componentNumber: selectedData.number,
+          id: selectedData.id,
+          inStock: selectedData.inStock,
+          price: selectedData.price,
+        }
+        console.log(newInitComponent)
         setModalMode('edit')
-        // setSelectedComponent(selectedData)
+        setSelectedComponent(newInitComponent)
         setModalOpen(true)
       }
     } else {
@@ -93,7 +98,7 @@ export default function ComponentManagementPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれた　 ${selectedData.componentName}　を削除してもよろしいですか?`,
+          message: `この選ばれた　 ${selectedData.name}　を削除してもよろしいですか?`,
         })
         if (confirmed) {
           // Perform delete operation
@@ -107,25 +112,38 @@ export default function ComponentManagementPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: any) => {
+  const handleModalConfirm = async (data: NewComponent) => {
     // Implement add/edit functionality
-    console.log('Confirmed data:', data)
-    if (modalMode === 'add') {
-      const confirmed = await openConfirmModal({
-        title: '確認してください',
-        message: 'Are you sure you want to add data.',
-      })
-      if (confirmed) {
-        // Perform delete operation
-        console.log('Add confirmed')
-      } else {
-        console.log('Add cancelled')
+    // console.log('Confirmed data:', data)
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: 'Are you sure you want to add data.',
+    })
+    if (confirmed) {
+      setLoading(true)
+      let newDataComponent = {
+        name: data.name,
+        number: data.number,
+        price: data.price,
+        latestPriceDecisionDate: dayjs().format('YYYY-MM-DD'), //today
       }
-      // addNewSaleData()
-    } else {
+      if (modalMode === 'add') {
+        const result = await addNewComponent(newDataComponent)
+        if (result) {
+          getComponentListData()
+          setModalOpen(false)
+        }
+      } else {
+        //edit case and check id again
+        if (data.id) {
+          const result = await updateComponent({ id: data.id, ...newDataComponent })
+          if (result) {
+            getComponentListData()
+            setModalOpen(false)
+          }
+        }
+      }
     }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
   }
 
   const handleClear = () => {
@@ -149,9 +167,14 @@ export default function ComponentManagementPage() {
         const componentList = await getComponentDetail(selectedData.id)
         if (componentList) {
           let newInitComponent: ComponentDetail = {
-            ...selectedData,
-            purchaseOrderList: componentList.purchaseOrderList,
+            componentName: selectedData.name,
+            componentNumber: selectedData.number,
+            id: selectedData.id,
+            inStock: selectedData.inStock,
+            price: selectedData.price,
+            purchaseOrderList: componentList,
           }
+          setModalMode('view')
           setSelectedComponent(newInitComponent)
           setModalOpen(true)
         }
@@ -231,7 +254,7 @@ export default function ComponentManagementPage() {
             </Box>
           </Box>
           <Divider orientation='vertical' sx={{ marginLeft: 'auto' }}></Divider>
-          <Box
+          {/* <Box
             sx={{
               // width: '30%',
               display: 'flex',
@@ -260,14 +283,43 @@ export default function ComponentManagementPage() {
                 詳細
               </StyledButton>
             </Box>
+          </Box> */}
 
-            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+          <Box
+            sx={{
+              width: '30%',
+              display: 'flex',
+              // justifyContent: 'flex-end',
+              // alignItems: 'flex-start',
+              flexDirection: 'column',
+            }}
+            gap={1}
+          >
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              <StyledButton
+                variant='outlined'
+                startIcon={<SearchIcon />}
+                size='large'
+                onClick={handleSearch}
+              >
+                検索
+              </StyledButton>
+              <StyledButton
+                variant='outlined'
+                startIcon={<DetailIcon />}
+                size='large'
+                onClick={handleViewDetailClick}
+              >
+                詳細
+              </StyledButton>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
                 variant='outlined'
                 startIcon={<AddIcon />}
                 size='large'
                 onClick={handleAddClick}
-                sx={{ visibility: 'hidden' }}
+                // sx={{ visibility: 'hidden' }}
               >
                 追加
               </StyledButton>
@@ -276,7 +328,7 @@ export default function ComponentManagementPage() {
                 startIcon={<DeleteIcon />}
                 size='large'
                 onClick={handleDeleteClick}
-                sx={{ visibility: 'hidden' }}
+                // sx={{ visibility: 'hidden' }}
               >
                 削除
               </StyledButton>
@@ -287,7 +339,7 @@ export default function ComponentManagementPage() {
                 startIcon={<EditIcon />}
                 size='large'
                 onClick={handleEditClick}
-                sx={{ visibility: 'hidden' }}
+                // sx={{ visibility: 'hidden' }}
               >
                 編集
               </StyledButton>
@@ -299,7 +351,7 @@ export default function ComponentManagementPage() {
               >
                 visible
               </StyledButton>
-            </Box> */}
+            </Box>
           </Box>
         </Box>
         <DataTable
@@ -317,7 +369,9 @@ export default function ComponentManagementPage() {
         <ComponentManagementModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
+          onConfirm={handleModalConfirm}
           initialData={selectedComponent}
+          modalMode={modalMode}
         />
       )}
     </Box>
