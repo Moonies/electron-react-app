@@ -9,9 +9,9 @@ export interface SearchCriteriaComponentList {
 
 export interface ComponentData {
   id: string
-  componentNumber: string
-  componentName: string
-  lastestPriceDate: string | dayjs.Dayjs
+  name: string
+  number: string
+  latestPriceDecisionDate: string | dayjs.Dayjs
   price: number
   // productId: string
   inStock: number

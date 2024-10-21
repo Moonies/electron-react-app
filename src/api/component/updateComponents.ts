@@ -3,11 +3,11 @@ import { axiosInstance, ApiResponse } from 'api'
 import dayjs from 'dayjs'
 
 export interface UpdateComponentProps {
-  price: string
-  lastestPriceDate: string | dayjs.Dayjs
-  purchaseId: string
-  componentName: string
-  componentNumber: string
+  price: number
+  latestPriceDecisionDate: string | dayjs.Dayjs
+  id: string
+  name: string
+  number: string
 }
 
 export default async function updateComponent(
@@ -15,8 +15,8 @@ export default async function updateComponent(
 ): Promise<ApiResponse<null>> {
   // when use real API
   try {
-    const response = await axiosInstance.patch('/api/components')
-    return { code: 200, message: 'success', data: response.data.data }
+    const response = await axiosInstance.patch('/api/components/' + data.id, { ...data })
+    return { code: 200, message: 'success', data: response.data }
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       return {
