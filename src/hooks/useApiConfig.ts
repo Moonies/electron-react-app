@@ -24,8 +24,8 @@ export default function useApiConfig() {
     const storedConfig = localStorage.getItem('apiConfig')
     if (storedConfig && storedConfig !== null) {
       const parsedConfig = JSON.parse(storedConfig)
-      dispatch(setConfig(parsedConfig))
-      return true
+      // dispatch(setConfig(parsedConfig))
+      return parsedConfig
     }
     return false
   }

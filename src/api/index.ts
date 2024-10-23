@@ -11,12 +11,13 @@ import { default as componentApi } from './component'
 import { default as purchaseApi } from './purchase'
 import { default as orderApi } from './order'
 import { default as prefectureApi } from './perfecture'
+import { default as roleApi } from './role'
 import axios, { AxiosInstance } from 'axios'
 import useApiConfig from 'hooks/useApiConfig'
 import { useMemo } from 'react'
 
 export interface ApiResponse<T> {
-  code: number
+  code: number | string
   message: string
   data: T | null | undefined
 }
@@ -43,6 +44,15 @@ const getBaseUrl = () => {
   // return 'http://localhost:3000'
 }
 
+const getToken = () => {
+  const storedConfig = localStorage.getItem('token')
+  let parsedConfig
+  //end point can be change depens on user
+  if (storedConfig && storedConfig !== null) {
+    parsedConfig = JSON.parse(storedConfig)
+    return parsedConfig.token
+  }
+}
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: getBaseUrl(),
   timeout: 10000, // 10 seconds
@@ -52,6 +62,20 @@ export const axiosInstance: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// Set up interceptor to ensure token is always current
+axiosInstance.interceptors.request.use(
+  config => {
+    const token = getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}` // Best practice: use Authorization header
+    }
+    return config
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
 
 export const api = {
   user: userApi(),
@@ -67,4 +91,5 @@ export const api = {
   purchase: purchaseApi(),
   order: orderApi(),
   prefecture: prefectureApi(),
+  role: roleApi(),
 }

@@ -1,12 +1,13 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { AuthData } from 'api/user/checkAuth'
-import { login, getInitializedAuthState, logout } from 'store/authSlice'
+import { login, getInitializedAuthState, logout, setToken as token } from 'store/authSlice'
+import { UserDetail } from 'api/user/getUserDetail'
 
 export default function useAuth() {
   const dispatch = useDispatch()
 
-  const setUserLogin = (userData: AuthData) => {
+  const setUserLogin = (userData: UserDetail) => {
     dispatch(login(userData))
   }
 
@@ -16,5 +17,9 @@ export default function useAuth() {
     dispatch(logout())
   }
 
-  return { setUserLogin, getCurrentUser, removeUserLogin }
+  const setToken = (tokenData: AuthData) => {
+    dispatch(token(tokenData))
+  }
+
+  return { setUserLogin, getCurrentUser, removeUserLogin, setToken }
 }

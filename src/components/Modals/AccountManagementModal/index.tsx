@@ -19,19 +19,29 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material'
 import { UserData } from 'api/user/getUserList'
 import { AddNewUserData } from 'api/user/addNewUser'
+import { api } from 'api/index'
+import { RoleData } from 'api/role/getRoleList'
 
+export type ModalInitalData = {
+  name: string
+  role: string
+  username: string
+  number: string
+  mail: string
+  password?: string
+}
 interface AccountManagementModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: AddNewUserData) => Promise<void>
-  initialData?: UserData
+  onConfirm: (data: ModalInitalData) => Promise<void>
+  initialData?: ModalInitalData
   mode: 'add' | 'edit'
 }
-const defaultFormData: AddNewUserData = {
+const defaultFormData: ModalInitalData = {
   name: '',
-  roles: '',
+  role: '',
   // identifier: '',
-  // username: '',
+  username: '',
   password: '',
   number: '',
   mail: '',
@@ -43,39 +53,41 @@ export default function AccountManagementModal({
   initialData,
   mode,
 }: AccountManagementModalProps) {
-  const [formData, setFormData] = useState<AddNewUserData | UserData>(defaultFormData)
-
-  const roleList = [
-    {
-      value: 'normal',
-      label: '一般',
-    },
-    {
-      value: 'senior',
-      label: '課長',
-    },
-    {
-      value: 'manager',
-      label: 'マネジャー',
-    },
-    {
-      value: 'admin',
-      label: '管理人',
-    },
-  ]
+  const [formData, setFormData] = useState<ModalInitalData>(initialData ?? defaultFormData)
+  const [roleList, setRoleList] = useState<RoleData[]>([])
+  // const roleList = [
+  //   {
+  //     value: 'normal',
+  //     label: '一般',
+  //   },
+  //   {
+  //     value: 'senior',
+  //     label: '課長',
+  //   },
+  //   {
+  //     value: 'manager',
+  //     label: 'マネジャー',
+  //   },
+  //   {
+  //     value: 'admin',
+  //     label: '管理人',
+  //   },
+  // ]
 
   useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      setFormData(initialData)
-    } else {
-      setFormData(defaultFormData)
-    }
-  }, [defaultFormData, initialData])
+    getRoleList()
+  }, [])
 
   const handleChange = (field: keyof AddNewUserData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const getRoleList = async () => {
+    const result = await api.role.getRoleList()
+    if (result.code === 200 && result.data) {
+      setRoleList(result.data)
+    }
+  }
   const handleSubmit = async () => {
     try {
       await onConfirm(formData)
@@ -171,9 +183,9 @@ export default function AccountManagementModal({
             <TextField
               label='役柄'
               type='text'
-              value={formData.roles}
+              value={formData.role}
               // defaultValue={undefined}
-              onChange={e => handleChange('roles', e.target.value)}
+              onChange={e => handleChange('role', e.target.value)}
               // fullWidth
               margin='normal'
               select
@@ -183,7 +195,7 @@ export default function AccountManagementModal({
               }}
             >
               {roleList.map(item => (
-                <MenuItem key={item.value} value={item.value}>
+                <MenuItem key={item.id} value={item.name}>
                   {item.label}
                 </MenuItem>
               ))}

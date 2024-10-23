@@ -20,7 +20,7 @@ import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
 import useAccount from './hooks/useAccount'
-import AccountManagementModal from 'components/Modals/AccountManagementModal'
+import AccountManagementModal, { ModalInitalData } from 'components/Modals/AccountManagementModal'
 import { UserData } from 'api/user/getUserList'
 import { AddNewUserData } from 'api/user/addNewUser'
 
@@ -32,7 +32,7 @@ export default function AccountManagementPage() {
   const { openConfirmModal } = useConfirmModal()
   const accountDataGridRef = useGridApiRef()
   const [filterValue, setFilterValue] = useState('')
-  const [selectedUser, setSelectedUser] = useState<UserData | undefined>()
+  const [selectedUser, setSelectedUser] = useState<ModalInitalData>()
 
   const {
     columns,
@@ -70,8 +70,16 @@ export default function AccountManagementPage() {
       const selectedId = selectionModel[0]
       const selectedData = userListData.find(user => user.id === selectedId)
       if (selectedData) {
+        let initialData: ModalInitalData = {
+          mail: selectedData.mail,
+          name: selectedData.name,
+          number: selectedData.number,
+          role: selectedData.roles,
+          username: selectedData.username,
+          // password:
+        }
         setModalMode('edit')
-        setSelectedUser(selectedData)
+        setSelectedUser(initialData)
         setModalOpen(true)
       }
     } else {
@@ -100,7 +108,7 @@ export default function AccountManagementPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: AddNewUserData | UserData) => {
+  const handleModalConfirm = async (data: ModalInitalData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -109,7 +117,7 @@ export default function AccountManagementPage() {
         message: 'Are you sure you want to add data.',
       })
       if (confirmed) {
-        addNewUser(data).finally(() => setModalOpen(false))
+        // addNewUser(data).finally(() => setModalOpen(false))
       }
     } else if (modalMode === 'edit') {
       const confirmed = await openConfirmModal({
@@ -117,7 +125,7 @@ export default function AccountManagementPage() {
         message: 'Are you sure you want to update data.',
       })
       if (confirmed) {
-        updateUser(data as UserData).finally(() => setModalOpen(false))
+        // updateUser(data as UserData).finally(() => setModalOpen(false))
       }
     }
   }

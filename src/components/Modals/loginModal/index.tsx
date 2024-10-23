@@ -5,32 +5,61 @@ import useLoading from 'hooks/useLoading'
 import { useNavigate } from 'react-router-dom'
 import useNotification from 'hooks/useNotification'
 import useAuth from 'hooks/useAuth'
+import useApiConfig from 'hooks/useApiConfig'
 
 interface LoginModalProps {
   open: boolean
   onClose: () => void
   onSuccess: () => void
+  onError: (result: string) => void
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onError }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const { notificationSnackbar, notificationModal } = useNotification()
-  const { setUserLogin, removeUserLogin } = useAuth()
+  const { setUserLogin, removeUserLogin, setToken } = useAuth()
+  const { resetConfig } = useApiConfig()
   const { withLoading } = useLoading()
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // navigate('/')
+    // onSuccess()
+
     const result = await withLoading(api.user.checkAuth(username, password))
 
     if (result.code === 200 && result.data) {
       // dispatch(login(result.data))
-      setUserLogin(result.data)
-      notificationSnackbar.success(result.message)
-      navigate('/')
-      onSuccess()
+      setToken(result.data)
+      const resultUser = await api.user.getUserDetail(username, password)
+      if (resultUser.code === 200 && resultUser.data) {
+        setUserLogin(resultUser.data)
+        notificationSnackbar.success(result.message)
+        navigate('/')
+        onSuccess()
+      } else {
+        notificationModal.error(resultUser.message)
+      }
     } else {
-      notificationModal.error('Authentication failed:' + result.message)
+      switch (result.code) {
+        case 403:
+          resetConfig()
+          notificationSnackbar.error('Authentication failed:' + result.message)
+          onError('baseUrl')
+          break
+        case 'ERR_NETWORK':
+          notificationModal.error(
+            'Authentication failed:' + result.message + '\n Please Check IP Again'
+          )
+          onError('baseUrl')
+          break
+        default:
+          notificationSnackbar.error('Authentication failed:' + result.message)
+
+          break
+      }
+      // notificationModal.error('Authentication failed:' + result.message)
     }
   }
 

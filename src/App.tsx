@@ -57,7 +57,7 @@ export default function App() {
     if (!configLoaded) {
       setApiConfigmodal(true)
     } else {
-      console.log(isAuthenticated)
+      // console.log(isAuthenticated)
       setLoginOpen(true)
     }
   }, [])
@@ -80,6 +80,19 @@ export default function App() {
     // check connection or something
     if (!isAuthenticated) {
       setLoginOpen(true)
+    }
+  }
+
+  const handleError = (errorCase: string) => {
+    switch (errorCase) {
+      case 'baseUrl':
+        setLoginOpen(false)
+        setApiConfigmodal(true)
+        break
+
+      default:
+        null
+        break
     }
   }
 
@@ -127,6 +140,7 @@ export default function App() {
               //exit programe etc.
               electronBridge.closeApp()
             }}
+            onError={handleError}
             //when success is keep user to local storage
             onSuccess={() => {
               setLoginOpen(false)

@@ -11,6 +11,7 @@ import {
   DialogContentText,
   Slide,
   IconButton,
+  Typography,
 } from '@mui/material'
 import { RootState } from 'store/index'
 import { clearNotification } from 'store/notificationSlice'
@@ -62,6 +63,7 @@ const Notification: React.FC = () => {
         fullWidth={true}
         keepMounted
         TransitionComponent={Transition}
+        sx={{ zIndex: theme => theme.zIndex.modal + 1 }}
       >
         <DialogTitle
           sx={theme => ({
@@ -102,7 +104,7 @@ const Notification: React.FC = () => {
           </Box>
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>{message}</DialogContentText>
+          <Typography sx={{ whiteSpace: 'pre-line' }}>{message}</Typography>
         </DialogContent>
         {/* <DialogActions>
           <Button onClick={handleClose}>Close</Button>

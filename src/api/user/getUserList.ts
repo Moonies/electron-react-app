@@ -3,7 +3,7 @@ import { axiosInstance, ApiResponse } from 'api'
 
 export interface UserData {
   id: number
-  // identifier: string
+  username: string
   name: string
   // fullName: string
   password: string
