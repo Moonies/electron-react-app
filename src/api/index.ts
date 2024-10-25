@@ -13,8 +13,6 @@ import { default as orderApi } from './order'
 import { default as prefectureApi } from './perfecture'
 import { default as roleApi } from './role'
 import axios, { AxiosInstance } from 'axios'
-import useApiConfig from 'hooks/useApiConfig'
-import { useMemo } from 'react'
 
 export interface ApiResponse<T> {
   code: number | string
@@ -78,7 +76,7 @@ axiosInstance.interceptors.request.use(
 )
 
 export const api = {
-  user: userApi(),
+  // user: userApi(),
   kpi: kpiApi(),
   product: productApi(),
   sale: saleApi(),
@@ -91,5 +89,5 @@ export const api = {
   purchase: purchaseApi(),
   order: orderApi(),
   prefecture: prefectureApi(),
-  role: roleApi(),
+  // role: roleApi(),
 }

@@ -60,7 +60,7 @@ const defaultFormData: OrderData = {
   product: [],
   orderRequestEmployeeId: '',
   orderRequestEmployeeName: '',
-  orderApprovedEmployeeId: 0,
+  orderApprovedEmployeeId: '',
   orderApprovedEmployeeName: '',
   quotationRequestDate: dayjs(),
   paymentDueDate: dayjs(),
@@ -175,7 +175,7 @@ export default function OrderModal({
     }
   }
 
-  const findUserById = (userId: number | null) => {
+  const findUserById = (userId: string | null) => {
     return userListData?.find(user => user.id === userId) || null
   }
 

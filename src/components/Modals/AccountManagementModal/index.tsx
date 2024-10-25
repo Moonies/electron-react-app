@@ -6,8 +6,6 @@ import {
   DialogActions,
   TextField,
   Button,
-  CircularProgress,
-  Select,
   MenuItem,
   FormControl,
   InputLabel,
@@ -17,14 +15,14 @@ import {
   IconButton,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
-import { UserData } from 'api/user/getUserList'
 import { AddNewUserData } from 'api/user/addNewUser'
-import { api } from 'api/index'
 import { RoleData } from 'api/role/getRoleList'
+import useHttp from 'hooks/useHttp'
 
 export type ModalInitalData = {
+  id?: string
   name: string
-  role: string
+  roleId: string
   username: string
   number: string
   mail: string
@@ -39,7 +37,7 @@ interface AccountManagementModalProps {
 }
 const defaultFormData: ModalInitalData = {
   name: '',
-  role: '',
+  roleId: '',
   // identifier: '',
   username: '',
   password: '',
@@ -55,27 +53,10 @@ export default function AccountManagementModal({
 }: AccountManagementModalProps) {
   const [formData, setFormData] = useState<ModalInitalData>(initialData ?? defaultFormData)
   const [roleList, setRoleList] = useState<RoleData[]>([])
-  // const roleList = [
-  //   {
-  //     value: 'normal',
-  //     label: '一般',
-  //   },
-  //   {
-  //     value: 'senior',
-  //     label: '課長',
-  //   },
-  //   {
-  //     value: 'manager',
-  //     label: 'マネジャー',
-  //   },
-  //   {
-  //     value: 'admin',
-  //     label: '管理人',
-  //   },
-  // ]
-
+  const { api } = useHttp()
   useEffect(() => {
     getRoleList()
+    console.log(formData)
   }, [])
 
   const handleChange = (field: keyof AddNewUserData, value: string | number) => {
@@ -124,22 +105,22 @@ export default function AccountManagementModal({
       <DialogContent>
         <Box display={'flex'} flexDirection={'column'}>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
-            {/* <TextField
+            <TextField
               label='ユーザーネーム'
-              value={formData.identifier}
-              onChange={e => handleChange('identifier', e.target.value)}
+              value={formData.username}
+              onChange={e => handleChange('username', e.target.value)}
               fullWidth
               margin='normal'
               // sx={{ flex: 1 }}
-            /> */}
-            <TextField
+            />
+            {/* <TextField
               label='メール'
               value={formData.mail}
               onChange={e => handleChange('mail', e.target.value)}
               fullWidth
               margin='normal'
               // sx={{ width: '70%' }}
-            />
+            /> */}
             <TextField
               label='パスワード'
               type='password'
@@ -151,7 +132,15 @@ export default function AccountManagementModal({
               // sx={{ width: '20%' }}
             />
           </Box>
-          {/* <Box display={'flex'} flexDirection={'row'} gap={2}>
+          <Box display={'flex'} flexDirection={'row'} gap={2}>
+            {/* <TextField
+              label='名前'
+              value={formData.name}
+              onChange={e => handleChange('name', e.target.value)}
+              fullWidth
+              margin='normal'
+              // sx={{ flex: 1 }}
+            /> */}
             <TextField
               label='メール'
               value={formData.mail}
@@ -160,7 +149,7 @@ export default function AccountManagementModal({
               margin='normal'
               sx={{ width: '70%' }}
             />
-          </Box> */}
+          </Box>
           <Box display={'flex'} flexDirection={'row'} gap={2}>
             <TextField
               label='社員番号'
@@ -174,7 +163,7 @@ export default function AccountManagementModal({
             <TextField
               label='名前'
               type='text'
-              value={formData.name}
+              value={formData.name ?? ''}
               onChange={e => handleChange('name', e.target.value)}
               // fullWidth
               margin='normal'
@@ -182,10 +171,10 @@ export default function AccountManagementModal({
             />
             <TextField
               label='役柄'
-              type='text'
-              value={formData.role}
-              // defaultValue={undefined}
-              onChange={e => handleChange('role', e.target.value)}
+              // type='text'
+              // value={formData.roleId}
+              defaultValue={undefined}
+              onChange={e => handleChange('roleId', e.target.value)}
               // fullWidth
               margin='normal'
               select
@@ -195,7 +184,7 @@ export default function AccountManagementModal({
               }}
             >
               {roleList.map(item => (
-                <MenuItem key={item.id} value={item.name}>
+                <MenuItem key={item.id} value={item.id}>
                   {item.label}
                 </MenuItem>
               ))}

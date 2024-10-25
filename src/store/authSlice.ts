@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { AuthData } from 'api/user/checkAuth'
 import { UserDetail } from 'api/user/getUserDetail'
 
 interface AuthState {
@@ -39,6 +40,11 @@ const authSlice = createSlice({
 export const getInitializedAuthState = (): UserDetail | null => {
   const storedUser = localStorage.getItem('user')
   return storedUser ? (JSON.parse(storedUser) as UserDetail) : null
+}
+
+export const getCurrentToken = (): AuthData | null => {
+  const storedToken = localStorage.getItem('token')
+  return storedToken ? (JSON.parse(storedToken) as AuthData) : null
 }
 
 export const { login, logout, setToken } = authSlice.actions

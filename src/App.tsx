@@ -132,24 +132,24 @@ export default function App() {
                   {/* <Route path="/settings" element={<SettingPage />} /> */}
                 </Routes>
               </Box>
+              <LoginModal
+                open={loginOpen}
+                onClose={() => {
+                  //exit programe etc.
+                  electronBridge.closeApp()
+                }}
+                onError={handleError}
+                //when success is keep user to local storage
+                onSuccess={() => {
+                  setLoginOpen(false)
+                  setLoginSuccess(true)
+                }}
+              />
+              <IpSettingModal open={apiConfigModal} onClose={() => handleCloseApiConfig()} />
+              <LoadingOverlay open={isLoading} />
+              <Notification />
             </ConfirmModalProvider>
           </Box>
-          <LoginModal
-            open={loginOpen}
-            onClose={() => {
-              //exit programe etc.
-              electronBridge.closeApp()
-            }}
-            onError={handleError}
-            //when success is keep user to local storage
-            onSuccess={() => {
-              setLoginOpen(false)
-              setLoginSuccess(true)
-            }}
-          />
-          <IpSettingModal open={apiConfigModal} onClose={() => handleCloseApiConfig()} />
-          <LoadingOverlay open={isLoading} />
-          <Notification />
         </Router>
       </LocalizationProvider>
     </ThemeProvider>

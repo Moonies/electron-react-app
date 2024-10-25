@@ -123,6 +123,7 @@ export default function useOrder() {
       setPaginationModel(newModel)
     }
     const cacheKey = `${newModel.page}-${newModel.pageSize}`
+
     // if (cachedData[cacheKey]) {
     //   setSalesData(cachedData[cacheKey])
     //   return

@@ -11,11 +11,12 @@ import {
   GridRowEditStopReasons,
 } from '@mui/x-data-grid'
 import { CustomerData } from 'api/customer/getCustomerList'
-import { api } from 'api/index'
+// import { api } from 'api/index'
 import { OrderData } from 'api/order/getOrderList'
 import { ProductDataDetail } from 'api/product/getProductData'
 import { UserData } from 'api/user/getUserList'
 import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 
 import React, { useCallback, useMemo, useState } from 'react'
@@ -27,7 +28,7 @@ export default function useAddOrder(orderDeta: OrderData) {
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
   const { withLoading, setLoading } = useLoading()
-
+  const { api } = useHttp()
   const handleAddNewProduct = (newProduct: ProductDetail) => {
     let currentIndex = newProductListData.length
     let currentProductData = newProductListData
@@ -164,16 +165,16 @@ export default function useAddOrder(orderDeta: OrderData) {
   )
 
   const getUserList = async () => {
-    const result = await api.user.getUserList({})
+    const result = await api.user.getUserList()
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
   }
   const getCustomerList = async () => {
-    const result = await api.customer.getCustomerList()
-    if (result.data && result.code === 200) {
-      setCustomerListData(result.data)
-    }
+    // const result = await api.customer.getCustomerList()
+    // if (result.data && result.code === 200) {
+    //   setCustomerListData(result.data)
+    // }
   }
   return {
     columns,

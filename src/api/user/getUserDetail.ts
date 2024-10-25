@@ -1,6 +1,6 @@
-import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
-import { executeApi } from 'api/executeApi'
+import axios from 'axios'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface UserDetail {
   id: string
@@ -16,23 +16,21 @@ export interface UserDetail {
 }
 
 export default async function getUserDetail(
-  username: string,
-  password: string
+  httpRequest: HttpRequest,
+  username: string
+  // password: string
 ): Promise<ApiResponse<UserDetail>> {
-  const response = await executeApi(() =>
+  const response = await httpRequest(() =>
     axiosInstance.get('/api/users?username.equal=' + username)
   )
-  if (response) {
-    return { code: 200, message: 'success', data: response.content[0] }
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return {
-    code: 500,
-    message: 'Failed to add user: Invalid or no data received',
-    data: null,
-  }
+  return { code: 200, message: 'success', data: response?.data.content[0] }
 }
 
 // export default async function getUserDetail(
+//   httpRequest: HttpRequest,
 //   username: string,
 //   password: string
 // ): Promise<ApiResponse<UserDetail>> {

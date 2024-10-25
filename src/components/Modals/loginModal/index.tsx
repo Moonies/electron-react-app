@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import useNotification from 'hooks/useNotification'
 import useAuth from 'hooks/useAuth'
 import useApiConfig from 'hooks/useApiConfig'
+import useApi from 'hooks/useHttp'
 
 interface LoginModalProps {
   open: boolean
@@ -21,6 +22,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
   const { setUserLogin, removeUserLogin, setToken } = useAuth()
   const { resetConfig } = useApiConfig()
   const { withLoading } = useLoading()
+  const { api } = useApi()
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,7 +34,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
     if (result.code === 200 && result.data) {
       // dispatch(login(result.data))
       setToken(result.data)
-      const resultUser = await api.user.getUserDetail(username, password)
+      const resultUser = await api.user.getUserDetail(username)
       if (resultUser.code === 200 && resultUser.data) {
         setUserLogin(resultUser.data)
         notificationSnackbar.success(result.message)

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
-import useApiConfig from 'hooks/useApiConfig'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface AuthData {
   token: string
@@ -8,6 +8,7 @@ export interface AuthData {
 }
 
 export default async function checkAuth(
+  // httpRequest: HttpRequest,
   username: string,
   password: string
 ): Promise<ApiResponse<AuthData>> {

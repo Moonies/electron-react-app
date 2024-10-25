@@ -22,7 +22,6 @@ import useNotification from 'hooks/useNotification'
 import useAccount from './hooks/useAccount'
 import AccountManagementModal, { ModalInitalData } from 'components/Modals/AccountManagementModal'
 import { UserData } from 'api/user/getUserList'
-import { AddNewUserData } from 'api/user/addNewUser'
 
 export default function AccountManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -71,10 +70,11 @@ export default function AccountManagementPage() {
       const selectedData = userListData.find(user => user.id === selectedId)
       if (selectedData) {
         let initialData: ModalInitalData = {
+          id: selectedData.id,
           mail: selectedData.mail,
           name: selectedData.name,
           number: selectedData.number,
-          role: selectedData.roles,
+          roleId: selectedData.roleId,
           username: selectedData.username,
           // password:
         }
@@ -97,7 +97,11 @@ export default function AccountManagementPage() {
           message: 'Are you sure you want to delete this User Name : ' + selectedData.name,
         })
         if (confirmed) {
-          deleteUser(selectedData.id)
+          const respone = await deleteUser(selectedData.id)
+          if (respone) {
+            notificationModal.success('削除完了しました。')
+            getUserList(paginationModel)
+          }
         } else {
           //something else
           console.log('Delete cancelled')
@@ -111,21 +115,35 @@ export default function AccountManagementPage() {
   const handleModalConfirm = async (data: ModalInitalData) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
-    if (modalMode === 'add') {
-      const confirmed = await openConfirmModal({
-        title: '確認してください',
-        message: 'Are you sure you want to add data.',
-      })
-      if (confirmed) {
-        // addNewUser(data).finally(() => setModalOpen(false))
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: 'Are you sure you want to add data.',
+    })
+    if (confirmed) {
+      let newUserData = {
+        username: data.username,
+        password: data.password ?? '',
+        name: data.name,
+        roleId: data.roleId,
+        number: data.number,
+        mail: data.mail,
       }
-    } else if (modalMode === 'edit') {
-      const confirmed = await openConfirmModal({
-        title: '確認してください',
-        message: 'Are you sure you want to update data.',
-      })
-      if (confirmed) {
-        // updateUser(data as UserData).finally(() => setModalOpen(false))
+      if (modalMode === 'add') {
+        const respone = await addNewUser(newUserData)
+        if (respone) {
+          setModalOpen(false)
+          notificationModal.success('追加完了しました。')
+          getUserList(paginationModel)
+        }
+      } else if (modalMode === 'edit') {
+        if (data.id) {
+          const respone = await updateUser({ id: data.id, ...newUserData })
+          if (respone) {
+            setModalOpen(false)
+            notificationModal.success('編集完了しました。')
+            getUserList(paginationModel)
+          }
+        }
       }
     }
   }
@@ -233,13 +251,15 @@ export default function AccountManagementPage() {
         />
       </Box>
 
-      <AccountManagementModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onConfirm={handleModalConfirm}
-        initialData={selectedUser}
-        mode={modalMode}
-      />
+      {modalOpen && (
+        <AccountManagementModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onConfirm={handleModalConfirm}
+          initialData={selectedUser}
+          mode={modalMode}
+        />
+      )}
     </Box>
   )
 }

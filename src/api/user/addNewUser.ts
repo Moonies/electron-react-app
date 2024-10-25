@@ -1,21 +1,26 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
-import { executeApi } from 'api/executeApi'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface AddNewUserData {
   username: string
   password: string
-  // identifier: string
   name: string
-  role: string
+  roleId: string
   number: string
   mail: string
 }
 
-export default async function addNewUser(userData: AddNewUserData): Promise<ApiResponse<{}>> {
+export default async function addNewUser(
+  httpRequest: HttpRequest,
+  userData: AddNewUserData
+): Promise<ApiResponse<{}>> {
   // const response = await axiosInstance.post('/api/users', { ...newDataUser })
-  const response = await executeApi(() => axiosInstance.post('/api/users', userData))
-  return { code: 200, message: 'success', data: response.data }
+  const response = await httpRequest(() => axiosInstance.post('/api/users', { ...userData }))
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
+  }
+  return { code: 200, message: 'success', data: response?.data }
 }
 
 // export default async function getUserList(newDataUser: AddNewUserData): Promise<ApiResponse<null>> {
