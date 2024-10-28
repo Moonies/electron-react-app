@@ -1,8 +1,8 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-import { api } from 'api/index'
 import { AddNewSupplierProps } from 'api/supplier/addNewSupplier'
 import { SupplierData } from 'api/supplier/getSupplierList'
 import { UpdateSupplierDetailProps } from 'api/supplier/updateSupplierDetail'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
 import { useMemo, useState } from 'react'
@@ -13,7 +13,7 @@ export default function useSupplier() {
     page: 0,
     pageSize: 100,
   })
-
+  const { api } = useHttp()
   const { withLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
   const columns: GridColDef[] = useMemo(
@@ -88,7 +88,7 @@ export default function useSupplier() {
   }
 
   const createNewSupplier = async (newSupplier: AddNewSupplierProps) => {
-    const result = await withLoading(api.supplier.addnewSupplier(newSupplier))
+    const result = await withLoading(api.supplier.addNewSupplier(newSupplier))
     if (result.code === 200) {
       notificationSnackbar.success('追加完了しました。')
       return true

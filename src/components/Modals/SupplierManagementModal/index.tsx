@@ -105,7 +105,9 @@ export default function SupplierManagementModal({
   }
   //when function has to be more 1 function should move to hook
   const handlePostCodeClick = async () => {
-    const result = await withLoading(api.postCode.getPostCode(formData.postalCode))
+    const result = await withLoading(
+      api.postCode.getPostCode(deConvertPostalCode(formData.postalCode))
+    )
     if (result.code === 200 && result.data) {
       //data is now for test and mock
       setFormData(prev => ({

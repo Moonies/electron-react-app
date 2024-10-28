@@ -32,33 +32,4 @@ export default async function addNewCustomer(
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
   return { code: 200, message: 'success', data: response?.data }
-  // when use real API
-  // try {
-  //   const response = await axiosInstance.post('/api/companies', { ...data })
-  //   return { code: 200, message: 'success', data: response.data.data }
-  // } catch (error) {
-  //   if (axios.isAxiosError(error) && error.response) {
-  //     return {
-  //       code: error.response.status,
-  //       message: error.response.data.message || 'An error occurred during authentication',
-  //       data: null,
-  //     }
-  //   }
-  //   return {
-  //     code: 500,
-  //     message: 'An unexpected error occurred',
-  //     data: null,
-  //   }
-  // }
-
-  //for beta:test
-  // return new Promise<ApiResponse<null>>((resolve, reject) => {
-  //   setTimeout(() => {
-  //     //test only
-  //     resolve({ code: 200, message: 'success', data: null })
-
-  //     //   // reject(new Error('Invalid credentials'))
-  //     // }
-  //   }, 1000)
-  // })
 }

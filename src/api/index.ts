@@ -80,7 +80,7 @@ export const api = {
   // myCompany: myCompanyApi(),
   // postCode: postCodeApi(),
   // customer: customerApi(),
-  supplier: supplierApi(),
+  // supplier: supplierApi(),
   component: componentApi(),
   purchase: purchaseApi(),
   order: orderApi(),
