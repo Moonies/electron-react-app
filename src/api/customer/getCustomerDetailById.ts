@@ -1,6 +1,7 @@
 import axios from 'axios'
-import { ApiResponse } from 'api'
+import { ApiResponse, axiosInstance } from 'api'
 import dayjs from 'dayjs'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface CustomerDetailData {
   id: string
@@ -20,30 +21,18 @@ export interface CustomerDetailData {
 }
 
 export default async function GetCustomerDetailById(
-  customerId: string
+  httpRequest: HttpRequest,
+  customerCode: string
 ): Promise<ApiResponse<CustomerDetailData>> {
-  //for beta:test
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  return {
-    code: 200,
-    message: 'Success',
-    data: {
-      customerName: '㈱アーキテクト・笹原',
-      email: 'Anastasia_McGlynn@example.com',
-      phoneNumber: '075-644-4431',
-      street: '竹田浄菩提院町',
-      addressCode: '226番地',
-      city: '伏見区',
-      postalCode: '612-8445',
-      id: '0060',
-      buildingName: '',
-      paymentDueDate: '',
-      closeingDay: '',
-      prefecture: '京都市',
-      faxNumber: '075-644-4531',
-      fullAddress: '京都市伏見区竹田浄菩提院町226番地,',
-    },
+  const response = await httpRequest(() =>
+    axiosInstance.get(
+      '/api/companies?companyType.equal=customer&companyCode.contains=' + customerCode
+    )
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
+  return { code: 200, message: 'success', data: response?.data.content }
   // when use real API
   // try {
   //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });

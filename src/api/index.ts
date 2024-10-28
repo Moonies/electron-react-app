@@ -79,7 +79,7 @@ export const api = {
   report: reportApi(),
   // myCompany: myCompanyApi(),
   // postCode: postCodeApi(),
-  customer: customerApi(),
+  // customer: customerApi(),
   supplier: supplierApi(),
   component: componentApi(),
   purchase: purchaseApi(),

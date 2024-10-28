@@ -35,10 +35,8 @@ export default function useHttp() {
     apiFunction: () => Promise<AxiosResponse>,
     disbleDisplayError = false
   ): Promise<AxiosResponse | AxiosError | undefined> => {
-    // const handleApiError = useApiError()
     try {
       const response: AxiosResponse = await apiFunction()
-      // console.log(response)
       return response
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -89,7 +87,7 @@ export default function useHttp() {
     role: roleApi(httpRequest),
     myCompany: myCompanyApi(httpRequest),
     postCode: postCodeApi(httpRequest),
-    customer: customerApi(),
+    customer: customerApi(httpRequest),
   }
 
   return { api }

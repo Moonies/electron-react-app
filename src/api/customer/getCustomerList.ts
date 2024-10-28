@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ApiResponse, axiosInstance } from 'api'
 import dayjs from 'dayjs'
+import { HttpRequest } from 'hooks/useHttp'
 
 export type CustomerCompanyDetail = {
   name: string
@@ -25,25 +26,34 @@ export interface CustomerData {
   companyInfo: CustomerCompanyDetail
 }
 
-export default async function getCustomerList(): Promise<ApiResponse<CustomerData[]>> {
-  // when use real API
-  try {
-    const response = await axiosInstance.get('/api/companies?companyType.equal=customer')
-    return { code: 200, message: 'success', data: response.data.content }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
-        data: null,
-      }
-    }
-    return {
-      code: 500,
-      message: 'An unexpected error occurred',
-      data: null,
-    }
+export default async function getCustomerList(
+  httpRequest: HttpRequest
+): Promise<ApiResponse<CustomerData[]>> {
+  const response = await httpRequest(() =>
+    axiosInstance.get('/api/companies?companyType.equal=customer')
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
+  return { code: 200, message: 'success', data: response?.data.content }
+  // when use real API
+  // try {
+  //   const response = await axiosInstance.get('/api/companies?companyType.equal=customer')
+  //   return { code: 200, message: 'success', data: response.data.content }
+  // } catch (error) {
+  //   if (axios.isAxiosError(error) && error.response) {
+  //     return {
+  //       code: error.response.status,
+  //       message: error.response.data.message || 'An error occurred during authentication',
+  //       data: null,
+  //     }
+  //   }
+  //   return {
+  //     code: 500,
+  //     message: 'An unexpected error occurred',
+  //     data: null,
+  //   }
+  // }
 
   //for beta:test
   // await new Promise(resolve => setTimeout(resolve, 1000))
