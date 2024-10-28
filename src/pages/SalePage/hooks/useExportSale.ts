@@ -13,6 +13,7 @@ import {
 import { formatPhoneNumber, formatPostcode } from 'utils/formatUtils'
 import { SaleData } from 'api/sale/getSaleList'
 import useLoading from 'hooks/useLoading'
+import useHttp from 'hooks/useHttp'
 
 const initialExportDetail: ExportDetail = {
   id: '',
@@ -39,6 +40,7 @@ const initialExportDetail: ExportDetail = {
 export default function useExportSale() {
   const [exportDetail, setExportDetail] = useState<ExportDetail>(initialExportDetail)
   const { setLoading } = useLoading()
+  const { api } = useHttp()
   const printColumnList: GridColDef[] = useMemo(
     () => [
       { field: 'productNumber', headerName: '図面番号' },

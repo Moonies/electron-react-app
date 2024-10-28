@@ -13,6 +13,7 @@ import { default as orderApi } from './order'
 import { default as prefectureApi } from './perfecture'
 import { default as roleApi } from './role'
 import axios, { AxiosInstance } from 'axios'
+import { getCurrentToken } from 'store/authSlice'
 
 export interface ApiResponse<T> {
   code: number | string
@@ -43,19 +44,14 @@ const getBaseUrl = () => {
 }
 
 const getToken = () => {
-  const storedConfig = localStorage.getItem('token')
-  let parsedConfig
-  //end point can be change depens on user
-  if (storedConfig && storedConfig !== null) {
-    parsedConfig = JSON.parse(storedConfig)
-    return parsedConfig.token
-  }
+  const authData = getCurrentToken()
+  return authData?.token
 }
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: getBaseUrl(),
   timeout: 10000, // 10 seconds
   headers: {
-    Accept: 'application/json',
+    Accept: '*/*',
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json',
   },
@@ -81,8 +77,8 @@ export const api = {
   product: productApi(),
   sale: saleApi(),
   report: reportApi(),
-  myCompany: myCompanyApi(),
-  postCode: postCodeApi(),
+  // myCompany: myCompanyApi(),
+  // postCode: postCodeApi(),
   customer: customerApi(),
   supplier: supplierApi(),
   component: componentApi(),

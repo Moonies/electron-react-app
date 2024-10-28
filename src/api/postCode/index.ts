@@ -1,4 +1,11 @@
-import { default as getPostCode } from './getPostCode'
-export default function postCode() {
-  return { getPostCode }
+import { HttpRequest } from 'hooks/useHttp'
+import { ApiResponse } from 'api'
+import { default as getPostCode, AddressData } from './getPostCode'
+
+export interface PostCodeApi {
+  getPostCode: (postCode: string) => Promise<ApiResponse<AddressData>>
+}
+
+export default function postCode(httpRequest: HttpRequest): PostCodeApi {
+  return { getPostCode: postCode => getPostCode(httpRequest, postCode) }
 }

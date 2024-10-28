@@ -19,7 +19,6 @@ import { Close as CloseIcon } from '@mui/icons-material'
 import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
 import { StyledButton } from 'styles/styles'
 import useLoading from 'hooks/useLoading'
-import { api } from 'api/index'
 import { AddNewSupplierProps } from 'api/supplier/addNewSupplier'
 import { SupplierData } from 'api/supplier/getSupplierList'
 import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
@@ -28,6 +27,7 @@ import { Dayjs } from 'dayjs'
 import MarkInputFaxNumber from 'components/MarkInput/MarkInputFaxNumber'
 import useNotification from 'hooks/useNotification'
 import { deConvertPostalCode } from 'utils/formatUtils'
+import useHttp from 'hooks/useHttp'
 
 interface SupplierManagementModalProps {
   open: boolean
@@ -78,7 +78,7 @@ export default function SupplierManagementModal({
   const [formData, setFormData] = useState<ModalSupplierProps>(defaultFormData)
   const { withLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
-
+  const { api } = useHttp()
   const dateNumber = Array.from(Array(30).keys())
 
   useEffect(() => {

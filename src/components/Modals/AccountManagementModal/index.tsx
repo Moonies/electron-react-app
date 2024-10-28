@@ -56,8 +56,16 @@ export default function AccountManagementModal({
   const { api } = useHttp()
   useEffect(() => {
     getRoleList()
-    console.log(formData)
+    console.log('Current formData:', formData)
+    console.log('Current roleList:', roleList)
   }, [])
+
+  // // Update formData when initialData changes
+  // useEffect(() => {
+  //   if (initialData) {
+  //     setFormData(initialData)
+  //   }
+  // }, [initialData])
 
   const handleChange = (field: keyof AddNewUserData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -66,6 +74,7 @@ export default function AccountManagementModal({
   const getRoleList = async () => {
     const result = await api.role.getRoleList()
     if (result.code === 200 && result.data) {
+      console.log(result.data)
       setRoleList(result.data)
     }
   }
@@ -172,8 +181,8 @@ export default function AccountManagementModal({
             <TextField
               label='役柄'
               // type='text'
-              // value={formData.roleId}
-              defaultValue={undefined}
+              value={roleList.length > 0 ? formData.roleId : ''} //for waiting roleList is loaded
+              defaultValue=''
               onChange={e => handleChange('roleId', e.target.value)}
               // fullWidth
               margin='normal'
@@ -182,7 +191,13 @@ export default function AccountManagementModal({
               InputLabelProps={{
                 component: 'span',
               }}
+              SelectProps={{
+                displayEmpty: true,
+              }}
             >
+              <MenuItem value='' disabled>
+                <em>選択してください</em>
+              </MenuItem>
               {roleList.map(item => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.label}

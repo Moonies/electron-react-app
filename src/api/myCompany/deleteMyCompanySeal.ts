@@ -1,23 +1,14 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
+import { HttpRequest } from 'hooks/useHttp'
 
-export default async function deleteMyCompanySeal(id: string): Promise<ApiResponse<{}>> {
-  // when use real API
-  try {
-    const response = await axiosInstance.delete('/api/company/' + id + '/seal')
-    return { code: 200, message: 'success', data: response.data.data }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
-        data: null,
-      }
-    }
-    return {
-      code: 500,
-      message: 'An unexpected error occurred',
-      data: null,
-    }
+export default async function deleteMyCompanySeal(
+  httpRequest: HttpRequest,
+  id: string
+): Promise<ApiResponse<{}>> {
+  const response = await httpRequest(() => axiosInstance.delete('/api/company/' + id + '/seal'))
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
+  return { code: 200, message: 'success', data: response?.data.data }
 }

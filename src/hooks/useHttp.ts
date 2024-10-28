@@ -20,7 +20,8 @@ import useAuth from './useAuth'
 import useLoading from './useLoading'
 
 export type HttpRequest = (
-  apiFunction: () => Promise<AxiosResponse>
+  apiFunction: () => Promise<AxiosResponse>,
+  disbleDisplayError?: boolean
   // options?: HttpRequestOptions
 ) => Promise<AxiosResponse | AxiosError | undefined>
 
@@ -31,7 +32,8 @@ export default function useHttp() {
   const { setLoading } = useLoading()
 
   const httpRequest = async (
-    apiFunction: () => Promise<AxiosResponse>
+    apiFunction: () => Promise<AxiosResponse>,
+    disbleDisplayError = false
   ): Promise<AxiosResponse | AxiosError | undefined> => {
     // const handleApiError = useApiError()
     try {
@@ -40,7 +42,7 @@ export default function useHttp() {
       return response
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log(error)
+        if (disbleDisplayError) return error
         if (error.response) {
           setLoading(false)
           switch (error.response.status) {
@@ -60,6 +62,7 @@ export default function useHttp() {
 
                 if (result.code === 200 && result.data) {
                   setToken(result.data)
+                  // configApiManager.getToken()
                   notificationModal.info('Please try your action again.')
                 } else {
                   notificationSnackbar.error('Authentication failed: ' + error.message)
@@ -84,6 +87,9 @@ export default function useHttp() {
   const api = {
     user: userApi(httpRequest),
     role: roleApi(httpRequest),
+    myCompany: myCompanyApi(httpRequest),
+    postCode: postCodeApi(httpRequest),
+    customer: customerApi(),
   }
 
   return { api }

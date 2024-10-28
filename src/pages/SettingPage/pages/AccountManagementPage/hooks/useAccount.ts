@@ -43,7 +43,7 @@ export default function useAccount() {
         headerName: '役柄',
         headerAlign: 'center',
         // minWidth: 200,
-        valueGetter: (value, row: UserData) => row.role.label,
+        // valueGetter: (value, row: UserData) => row.role.label, //now backend is progressing
       },
     ],
     []

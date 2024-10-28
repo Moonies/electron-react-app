@@ -100,7 +100,7 @@ export default function MyCompanyManagementPage() {
           file,
           previewUrl: URL.createObjectURL(file),
         }
-        console.log(newImage.previewUrl)
+        // console.log(newImage.previewUrl)
         setUploadedImage(newImage)
       } catch (error) {
         // setPreviewUrl(null)
