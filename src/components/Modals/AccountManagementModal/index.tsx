@@ -56,16 +56,7 @@ export default function AccountManagementModal({
   const { api } = useHttp()
   useEffect(() => {
     getRoleList()
-    console.log('Current formData:', formData)
-    console.log('Current roleList:', roleList)
   }, [])
-
-  // // Update formData when initialData changes
-  // useEffect(() => {
-  //   if (initialData) {
-  //     setFormData(initialData)
-  //   }
-  // }, [initialData])
 
   const handleChange = (field: keyof AddNewUserData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -74,7 +65,6 @@ export default function AccountManagementModal({
   const getRoleList = async () => {
     const result = await api.role.getRoleList()
     if (result.code === 200 && result.data) {
-      console.log(result.data)
       setRoleList(result.data)
     }
   }

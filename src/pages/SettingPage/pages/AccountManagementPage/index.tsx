@@ -114,7 +114,6 @@ export default function AccountManagementPage() {
 
   const handleModalConfirm = async (data: ModalInitalData) => {
     // Implement add/edit functionality
-    console.log('Confirmed data:', data)
     const confirmed = await openConfirmModal({
       title: '確認してください',
       message: 'Are you sure you want to add data.',
