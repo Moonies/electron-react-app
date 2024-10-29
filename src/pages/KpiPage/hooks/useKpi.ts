@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
-import { api } from 'api/index'
+import { useState } from 'react'
 import dayjs from 'dayjs'
 import useLoading from 'hooks/useLoading'
 import { KpiData } from 'api/kpi/getKpiData'
 import { AddNewKpiData } from 'api/kpi/addNewKpiData'
 import useNotification from 'hooks/useNotification'
 import { useConfirmModal } from 'hooks/useConfirmModal'
+import useHttp from 'hooks/useHttp'
 
 export interface FinancialKpiData {
   planSalesRevenue: number | null
@@ -77,7 +77,7 @@ export default function useKpi() {
   const { withLoading, setLoading } = useLoading()
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
-
+  const { api } = useHttp()
   // Function to process the object
   const processObject = <T extends MyObject>(
     obj: T,
@@ -148,14 +148,13 @@ export default function useKpi() {
         getKpiCurrentYear(currentYear),
         getKpiPreviousYear(selectedYear),
       ])
-      if (currentYearKpiData && previousYearKpiData) {
-        let convertCurrentData = processObject(currentYearKpiData, value => value / convertDivider)
-        let convertPreviousData = processObject(
-          previousYearKpiData,
-          value => value / convertDivider
-        )
-        setKpiData({ ...convertPreviousData, ...convertCurrentData })
-      }
+      let convertCurrentData = !!currentYearKpiData
+        ? processObject(currentYearKpiData, value => value / convertDivider)
+        : currentYearKpiData
+      let convertPreviousData = !!previousYearKpiData
+        ? processObject(previousYearKpiData, value => value / convertDivider)
+        : previousYearKpiData
+      setKpiData({ ...convertPreviousData, ...convertCurrentData })
     } else {
       setKpiData(initFormData)
       const previousYearKpiData = await getKpiPreviousYear(selectedYear)
@@ -173,6 +172,7 @@ export default function useKpi() {
 
   const getKpiCurrentYear = async (year: number) => {
     const result = await api.kpi.getKpiData(year)
+    console.log(result)
     if (result.code === 200 && result.data) {
       return {
         actualSalesRevenue: result.data.plannedSales,
@@ -183,6 +183,14 @@ export default function useKpi() {
         actualOperatingIncome: result.data.plannedNonOperatingIncome,
         actualOperatingExpenses: result.data.plannedNonOperatingExpense,
         // actualOrdinaryProfit?: number
+      }
+    } else {
+      return {
+        actualSalesRevenue: null,
+        actualVariableCosts: null,
+        actualFixedCosts: null,
+        actualOperatingIncome: null,
+        actualOperatingExpenses: null,
       }
     }
   }
@@ -199,6 +207,14 @@ export default function useKpi() {
         planOperatingIncome: result.data.plannedNonOperatingIncome,
         planOperatingExpenses: result.data.plannedNonOperatingExpense,
         // planOrdinaryProfit?:
+      }
+    } else {
+      return {
+        planSalesRevenue: null,
+        planVariableCosts: null,
+        planFixedCosts: null,
+        planOperatingIncome: null,
+        planOperatingExpenses: null,
       }
     }
   }

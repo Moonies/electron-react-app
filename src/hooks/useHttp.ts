@@ -90,6 +90,7 @@ export default function useHttp() {
     supplier: supplierApi(httpRequest),
     user: userApi(httpRequest),
     component: componentApi(httpRequest),
+    kpi: kpiApi(httpRequest),
   }
 
   return { api }

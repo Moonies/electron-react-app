@@ -73,7 +73,7 @@ axiosInstance.interceptors.request.use(
 
 export const api = {
   // user: userApi(),
-  kpi: kpiApi(),
+  // kpi: kpiApi(),
   product: productApi(),
   sale: saleApi(),
   report: reportApi(),
@@ -84,6 +84,6 @@ export const api = {
   // component: componentApi(),
   purchase: purchaseApi(),
   order: orderApi(),
-  prefecture: prefectureApi(),
+  // prefecture: prefectureApi(),
   // role: roleApi(),
 }
