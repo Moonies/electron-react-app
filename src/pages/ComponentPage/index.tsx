@@ -52,9 +52,11 @@ export default function ComponentManagementPage() {
     prepareCategorySearch,
     searchCriteria,
     handleSearch,
-    getComponentDetail,
+    getComponentPurchaseHistory,
     addNewComponent,
     updateComponent,
+    deleteComponent,
+    handleComponentPurchaseHistoryList,
   } = useComponent()
 
   useEffect(() => {
@@ -81,7 +83,6 @@ export default function ComponentManagementPage() {
           inStock: selectedData.inStock,
           price: selectedData.price,
         }
-        console.log(newInitComponent)
         setModalMode('edit')
         setSelectedComponent(newInitComponent)
         setModalOpen(true)
@@ -101,8 +102,9 @@ export default function ComponentManagementPage() {
           message: `この選ばれた　 ${selectedData.name}　を削除してもよろしいですか?`,
         })
         if (confirmed) {
-          // Perform delete operation
-          console.log('Delete confirmed')
+          // Delete confirmed
+          const response = await deleteComponent(selectedData.id)
+          if (response) getComponentListData()
         } else {
           console.log('Delete cancelled')
         }
@@ -113,8 +115,6 @@ export default function ComponentManagementPage() {
   }, [selectionModel])
 
   const handleModalConfirm = async (data: NewComponent) => {
-    // Implement add/edit functionality
-    // console.log('Confirmed data:', data)
     const confirmed = await openConfirmModal({
       title: '確認してください',
       message: 'Are you sure you want to add data.',
@@ -125,6 +125,7 @@ export default function ComponentManagementPage() {
         name: data.name,
         number: data.number,
         price: data.price,
+        inStock: data.inStock,
         latestPriceDecisionDate: dayjs().format('YYYY-MM-DD'), //today
       }
       if (modalMode === 'add') {
@@ -164,20 +165,20 @@ export default function ComponentManagementPage() {
       const selectedId = selectionModel[0]
       const selectedData = componentListData.find(item => item.id === selectedId)
       if (selectedData) {
-        const componentList = await getComponentDetail(selectedData.id)
-        if (componentList) {
-          let newInitComponent: ComponentDetail = {
-            componentName: selectedData.name,
-            componentNumber: selectedData.number,
-            id: selectedData.id,
-            inStock: selectedData.inStock,
-            price: selectedData.price,
-            purchaseOrderList: componentList,
-          }
-          setModalMode('view')
-          setSelectedComponent(newInitComponent)
-          setModalOpen(true)
+        // handleComponentPurchaseHistoryList(selectedData.name)
+        const purchaseOrderList = await handleComponentPurchaseHistoryList(selectedData.name)
+        let newInitComponent: ComponentDetail = {
+          componentName: selectedData.name,
+          componentNumber: selectedData.number,
+          id: selectedData.id,
+          inStock: selectedData.inStock,
+          price: selectedData.price,
+          lastestPriceDate: selectedData.latestPriceDecisionDate,
+          purchaseOrderList: purchaseOrderList,
         }
+        setModalMode('view')
+        setSelectedComponent(newInitComponent)
+        setModalOpen(true)
       }
     } else {
       notificationModal.error('削除する行をテーブルから選択してください')

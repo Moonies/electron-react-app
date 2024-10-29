@@ -81,7 +81,7 @@ export const api = {
   // postCode: postCodeApi(),
   // customer: customerApi(),
   // supplier: supplierApi(),
-  component: componentApi(),
+  // component: componentApi(),
   purchase: purchaseApi(),
   order: orderApi(),
   prefecture: prefectureApi(),

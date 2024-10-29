@@ -89,7 +89,7 @@ export default function useHttp() {
     role: roleApi(httpRequest),
     supplier: supplierApi(httpRequest),
     user: userApi(httpRequest),
-    component: componentApi(),
+    component: componentApi(httpRequest),
   }
 
   return { api }

@@ -1,12 +1,14 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { AddNewComponentProps } from 'api/component/addNewComponent'
 import { ComponentData, SearchCriteriaComponentList } from 'api/component/getComponentList'
+import { PurchaseOrderHistory } from 'api/component/getComponentPurchaseHistory'
 import { UpdateComponentProps } from 'api/component/updateComponents'
-import { api } from 'api/index'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
+
 type CategoryProductSearch = {
   value: string
   display: string
@@ -23,7 +25,7 @@ export default function useComponent() {
     page: 0,
     pageSize: 10,
   })
-
+  const { api } = useHttp()
   const { withLoading, setLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
   const columns: GridColDef[] = useMemo(
@@ -39,7 +41,7 @@ export default function useComponent() {
         valueFormatter: value => formatJPY(Number(value)),
         // minWidth: 200,
       },
-      { field: 'quantity', headerName: '数量', headerAlign: 'center', flex: 1 },
+      { field: 'inStock', headerName: '数量', headerAlign: 'center', flex: 1, type: 'number' },
       { field: 'latestPriceDecisionDate', headerName: '単価時点', headerAlign: 'center', flex: 1 },
     ],
     []
@@ -58,11 +60,49 @@ export default function useComponent() {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 
+  const prepareComponents = (
+    componentPurchaseHistory: PurchaseOrderHistory[],
+    componentName: string
+  ) => {
+    const selectedComponentHistory = componentPurchaseHistory
+      .map(purchaseHistory => {
+        const selectedComponent = purchaseHistory.components.find(
+          item => item.name === componentName
+        )
+
+        if (selectedComponent) {
+          return {
+            ...purchaseHistory,
+            components: [selectedComponent], // Keep only selected component
+          }
+        }
+        return null // Return null if no selected component found
+      })
+      .filter(Boolean) // Remove null entries
+
+    return selectedComponentHistory
+  }
+
   const handleSearch = useCallback(async () => {
     //if have another event
     getComponentListData()
   }, [searchCriteria, withLoading])
 
+  const handleComponentPurchaseHistoryList = async (componentName: string) => {
+    const purchaseHistoryResponse = await getComponentPurchaseHistory(componentName)
+    let componentDetail
+    if (purchaseHistoryResponse) {
+      componentDetail = prepareComponents(purchaseHistoryResponse, componentName)
+      componentDetail = await Promise.all(
+        componentDetail.map(async item => {
+          const { data } = await api.supplier.getSupplierDetailWithId(item?.companyId ?? '')
+          console.log(data)
+          return { ...item, companyName: data?.companyInfo.name }
+        })
+      )
+      return componentDetail as PurchaseOrderHistory[]
+    }
+  }
   const getComponentListData = async () => {
     const result = await withLoading(api.component.getComponentList(searchCriteria))
     if (result.code === 200 && result.data) {
@@ -70,8 +110,8 @@ export default function useComponent() {
     }
   }
 
-  const getComponentDetail = async (componentId: string) => {
-    const result = await api.component.getComponentDetail(componentId)
+  const getComponentPurchaseHistory = async (componentName: string) => {
+    const result = await api.component.getComponentPurchaseHistory(componentName)
     if (result.code === 200 && result.data) {
       setLoading(false)
       return result.data
@@ -102,6 +142,17 @@ export default function useComponent() {
     }
   }
 
+  const deleteComponent = async (componentId: string) => {
+    const result = await api.component.deleteComponent(componentId)
+    if (result.code === 200) {
+      setLoading(false)
+      notificationSnackbar.success('削除完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
   const handlePaginationModelChange = () => {}
   return {
     paginationModel,
@@ -114,8 +165,10 @@ export default function useComponent() {
     handleChange,
     prepareCategorySearch,
     handleSearch,
-    getComponentDetail,
+    getComponentPurchaseHistory,
     addNewComponent,
     updateComponent,
+    deleteComponent,
+    handleComponentPurchaseHistoryList,
   }
 }

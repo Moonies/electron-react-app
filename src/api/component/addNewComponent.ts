@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 import dayjs from 'dayjs'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface AddNewComponentProps {
   price: number
@@ -11,8 +12,9 @@ export interface AddNewComponentProps {
 }
 
 export default async function addNewComponent(
+  httpRequest: HttpRequest,
   data: AddNewComponentProps
-): Promise<ApiResponse<null>> {
+): Promise<ApiResponse<{}>> {
   // when use real API
   try {
     const response = await axiosInstance.post('/api/components', { ...data })

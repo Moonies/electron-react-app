@@ -25,7 +25,7 @@ export type ComponentDetail = {
   id: string
   componentNumber: string
   componentName: string
-  // lastestPriceDate: string | Dayjs
+  lastestPriceDate?: string | Dayjs
   price: number
   inStock: number
   purchaseOrderList?: PurchaseOrderHistory[]
@@ -36,7 +36,7 @@ export type NewComponent = {
   name: string
   number: string
   price: number
-  // inStock:number
+  inStock: number
 }
 interface ComponentManagementModalProps {
   open: boolean
@@ -111,6 +111,7 @@ export default function ComponentManagementModal({
           number: formData?.componentNumber,
           price: formData?.price,
           id: formData?.id,
+          inStock: formData.inStock,
         }
         await onConfirm(newDataComponent)
       }
@@ -179,6 +180,9 @@ export default function ComponentManagementModal({
                 onChange={e =>
                   handleChange('price', e.target.value ? parseFloat(e.target.value) : 0)
                 }
+                helperText={
+                  modalMode === 'view' ? `latestPrice edit ${formData.lastestPriceDate}` : ''
+                }
 
                 // sx={{ flex: 1 }}
               />
@@ -187,8 +191,11 @@ export default function ComponentManagementModal({
                 value={formData?.inStock}
                 fullWidth
                 margin='normal'
-                inputProps={{ readOnly: modalMode === 'view' }}
-                // onChange={e => handleChange('inStock', e.target.value)}
+                InputProps={{
+                  inputComponent: NumericFormatCustom as any,
+                  readOnly: modalMode === 'view',
+                }}
+                onChange={e => handleChange('inStock', e.target.value)}
 
                 // sx={{ flex: 1 }}
               />
@@ -206,8 +213,8 @@ export default function ComponentManagementModal({
                   paginationModel={paginationModel}
                   onPaginationModelChange={handlePaginationModelChange}
                   apiref={componentDataGridRef}
-                  getRowId={row => row.orderId}
                   onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+                  hideFooter={true}
                 />
                 {openDialog && (
                   <ViewMemoDialog

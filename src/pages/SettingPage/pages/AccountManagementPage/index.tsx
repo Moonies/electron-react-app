@@ -97,8 +97,8 @@ export default function AccountManagementPage() {
           message: 'Are you sure you want to delete this User Name : ' + selectedData.name,
         })
         if (confirmed) {
-          const respone = await deleteUser(selectedData.id)
-          if (respone) {
+          const response = await deleteUser(selectedData.id)
+          if (response) {
             notificationModal.success('削除完了しました。')
             getUserList(paginationModel)
           }
@@ -129,16 +129,16 @@ export default function AccountManagementPage() {
         mail: data.mail,
       }
       if (modalMode === 'add') {
-        const respone = await addNewUser(newUserData)
-        if (respone) {
+        const response = await addNewUser(newUserData)
+        if (response) {
           setModalOpen(false)
           notificationModal.success('追加完了しました。')
           getUserList(paginationModel)
         }
       } else if (modalMode === 'edit') {
         if (data.id) {
-          const respone = await updateUser({ id: data.id, ...newUserData })
-          if (respone) {
+          const response = await updateUser({ id: data.id, ...newUserData })
+          if (response) {
             setModalOpen(false)
             notificationModal.success('編集完了しました。')
             getUserList(paginationModel)

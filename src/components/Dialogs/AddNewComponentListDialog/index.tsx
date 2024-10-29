@@ -12,8 +12,9 @@ import {
 } from '@mui/material'
 import { Box } from '@mui/system'
 import { ComponentData } from 'api/component/getComponentData'
-import { api } from 'api/index'
+// import { api } from 'api/index'
 import dayjs from 'dayjs'
+import useHttp from 'hooks/useHttp'
 import React, { useCallback, useEffect, useState } from 'react'
 
 export type NewComponentDetail = {
@@ -47,7 +48,7 @@ export default function AddNewComponentListDialog({ open, onClose, onSubmit }: D
   const [inputValue, setInputValue] = useState('')
   const [componentList, setComponentList] = useState<ComponentData[]>([])
   const [isNewValue, setIsNewValue] = useState(false)
-
+  const { api } = useHttp()
   const submitProduct = async (e: React.FormEvent) => {
     e.preventDefault()
     e.stopPropagation()

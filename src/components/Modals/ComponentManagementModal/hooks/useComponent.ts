@@ -1,23 +1,24 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+import { PurchaseOrderHistory } from 'api/component/getComponentPurchaseHistory'
 import { useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
 
 export default function useComponent() {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 100,
   })
 
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'orderNumber',
+        field: 'orderCode',
         headerName: '受注番号',
         headerAlign: 'center',
         flex: 1,
       },
       {
-        field: 'customerName',
+        field: 'companyName',
         headerName: '発注先',
         headerAlign: 'center',
         flex: 1,
@@ -28,6 +29,9 @@ export default function useComponent() {
         headerAlign: 'center',
         type: 'number',
         flex: 1,
+        valueGetter: (value, row: PurchaseOrderHistory) => {
+          return row.components[0].quantity
+        },
       },
       {
         field: 'price',
@@ -35,6 +39,9 @@ export default function useComponent() {
         type: 'number',
         headerAlign: 'center',
         flex: 1,
+        valueGetter: (value, row: PurchaseOrderHistory) => {
+          return row.components[0].price
+        },
         valueFormatter: value => formatJPY(Number(value)),
       },
       {

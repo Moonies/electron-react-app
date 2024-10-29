@@ -1,7 +1,14 @@
 import axios from 'axios'
 import { ApiResponse, axiosInstance } from 'api'
 import dayjs from 'dayjs'
+import { HttpRequest } from 'hooks/useHttp'
 
+type component = {
+  name: string
+  number: string
+  price: number
+  quantity: number
+}
 export type PurchaseOrderHistory = {
   id: string
   orderCode: string
@@ -18,84 +25,21 @@ export type PurchaseOrderHistory = {
   orderApprovalDate: string
   stockApprovalPendingDate: string
   stockApprovalDate: string
-  // components: [
-  //   {
-  //     name: 'BB'
-  //     number: '01'
-  //     price: 10.0
-  //     quantity: 5
-  //   }
-  // ]
+  components: component[]
   companyId: string
 }
 
-export default async function getComponentDetail(
+export default async function getComponentPurchaseHistory(
+  httpRequest: HttpRequest,
   componentName: string
 ): Promise<ApiResponse<PurchaseOrderHistory[]>> {
-  // when use real API
-  try {
-    const response = await axiosInstance.get(
-      '/api/purchases?components.name.equal=' + componentName
+  const response = await httpRequest(() =>
+    axiosInstance.get(
+      '/api/purchases?orderType.equal=Purchase&size=100&components.name.equal=' + componentName
     )
-    return { code: 200, message: 'success', data: response.data.content }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
-        data: null,
-      }
-    }
-    return {
-      code: 500,
-      message: 'An unexpected error occurred',
-      data: null,
-    }
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  //for beta:test
-  // await new Promise(resolve => setTimeout(resolve, 1000))
-  // return {
-  //   code: 200,
-  //   message: 'Success',
-  //   data: {
-  //     id: '157143',
-  //     purchaseOrderList: [
-  //       {
-  //         orderId: '1',
-  //         orderNumber: '2305542',
-  //         customerId: '9998',
-  //         customerNumber: '9998',
-  //         customerName: '諸口',
-  //         price: 6000,
-  //         quantity: 5,
-  //         orderDate: '2024/05/05',
-  //         receivedDate: '2024/05/07',
-  //         memo: 'quantity > 3, prices down 10%',
-  //       },
-  //       {
-  //         orderId: '5',
-  //         orderNumber: '2305559',
-  //         customerId: '9998',
-  //         customerNumber: '9998',
-  //         customerName: '諸口',
-  //         price: 6818,
-  //         quantity: 1,
-  //         orderDate: '2024/06/05',
-  //         receivedDate: '2024/06/07',
-  //         memo: 'different memo test',
-  //       },
-  //       {
-  //         orderId: '42',
-  //         orderNumber: '2306064',
-  //         customerId: '9998',
-  //         customerNumber: '9998',
-  //         customerName: '諸口',
-  //         price: 6818,
-  //         quantity: 1,
-  //         orderDate: '2024/06/05',
-  //         receivedDate: '2024/06/07',
-  //       },
-  //     ],
-  //   },
-  // }
+  return { code: 200, message: 'success', data: response?.data.content }
 }
