@@ -31,7 +31,7 @@ export interface OrderData {
   product: ProductList[]
   orderRequestEmployeeId: string
   orderRequestEmployeeName: string
-  orderApprovedEmployeeId: number
+  orderApprovedEmployeeId: string
   orderApprovedEmployeeName: string
   quotationRequestDate: string | Dayjs
   registDate: string | Dayjs

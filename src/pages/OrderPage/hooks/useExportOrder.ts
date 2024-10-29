@@ -1,7 +1,8 @@
 import { GridColDef } from '@mui/x-data-grid'
-import { api } from 'api/index'
+// import { api } from 'api/index'
 import { OrderStatus } from 'api/order'
 import { OrderData } from 'api/order/getOrderList'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
 import { useCallback, useMemo, useState } from 'react'
@@ -40,6 +41,7 @@ const initialExportDetail: ExportDetail = {
 export default function useExportOrder() {
   const { setLoading } = useLoading()
   const { notificationModal } = useNotification()
+  const { api } = useHttp()
   const printColumnList: GridColDef[] = useMemo(
     () => [
       { field: 'productNumber', headerName: '図面番号' },

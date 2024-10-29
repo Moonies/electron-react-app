@@ -19,7 +19,7 @@ const IpSettingModal: React.FC<SettingModalProps> = ({ open, onClose }) => {
   // const { withLoading } = useLoading()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    updateConfig({ baseUrl })
+    await updateConfig({ baseUrl })
     onClose()
 
     //test connection before call onSuccess()

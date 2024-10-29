@@ -10,9 +10,9 @@ import {
   GridRowsProp,
 } from '@mui/x-data-grid'
 import { ComponentData } from 'api/component/getComponentData'
-import { api } from 'api/index'
 import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
@@ -33,6 +33,7 @@ export default function useAddComponent(productData: ProductDetail) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
   const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>([])
   const { setLoading } = useLoading()
+  const { api } = useHttp()
   useEffect(() => {
     prepareComponent()
   }, [productData])
@@ -115,14 +116,14 @@ export default function useAddComponent(productData: ProductDetail) {
     setLoading(true)
     try {
       // Fetch details for each item
-      const updateComponent = await Promise.all(
-        productData.component.map(async component => {
-          const totalRemain = await getTotalRemainComponent(component.id)
-          return { ...component, totalQuantity: totalRemain }
-        })
-      )
+      // const updateComponent = await Promise.all(
+      //   productData.component.map(async component => {
+      //     const totalRemain = await getTotalRemainComponent(component.id)
+      //     return { ...component, totalQuantity: totalRemain }
+      //   })
+      // )
       // setItems(itemsWithDetails);
-      setNewComponentListData(updateComponent)
+      // setNewComponentListData(updateComponent)
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -130,10 +131,8 @@ export default function useAddComponent(productData: ProductDetail) {
   }
 
   const getTotalRemainComponent = useCallback(async (componentId: string) => {
-    const { data } = await api.component.getTotalAmountComponent(componentId)
-
-    return data?.totalAmount ?? 0
-
+    // const { data } = await api.component.getTotalAmountComponent(componentId)
+    // return data?.totalAmount ?? 0
     // setNewComponentListData({ ...updatedProducts })
   }, [])
 

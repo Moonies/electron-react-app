@@ -43,7 +43,6 @@ export default function CustomerManagementPage() {
     getCusomerListData,
     customerListData,
     handlePaginationModelChange,
-    handleUpdateData,
     updateSelectedCustomer,
     createNewCustomer,
     deleteSelectedCustomer,
@@ -125,7 +124,7 @@ export default function CustomerManagementPage() {
     // Implement add/edit functionality
     const confirmed = await openConfirmModal({
       title: '確認してください',
-      message: 'Are you sure you want to add data.',
+      message: 'Are you sure you want to save data.',
     })
     if (confirmed) {
       let newCustomerData = {

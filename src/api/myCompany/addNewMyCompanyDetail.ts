@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface NewMyCompanyDetailData {
   companyInfo: {
@@ -23,24 +24,12 @@ type ResultAddNewMyCompany = {
   id: string
 }
 export default async function addNewMyCompanyDetail(
+  httpRequest: HttpRequest,
   data: NewMyCompanyDetailData
 ): Promise<ApiResponse<ResultAddNewMyCompany>> {
-  // when use real API
-  try {
-    const response = await axiosInstance.post('/api/company', data)
-    return { code: 200, message: 'success', data: response.data.id }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
-        data: null,
-      }
-    }
-    return {
-      code: 500,
-      message: 'An unexpected error occurred',
-      data: null,
-    }
+  const response = await httpRequest(() => axiosInstance.post('/api/company', data))
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
+  return { code: 200, message: 'success', data: { id: response?.data } }
 }

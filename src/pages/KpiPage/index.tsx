@@ -47,6 +47,8 @@ export default function KpiPage() {
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
+  useEffect(() => console.log(kpiData), [kpiData])
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setFormData(prev => ({
@@ -94,7 +96,6 @@ export default function KpiPage() {
   }
 
   const handleClickGetData = () => {
-    console.log('first')
     getKpiData(planType)
   }
 
@@ -133,8 +134,8 @@ export default function KpiPage() {
   }
 
   const handleModalConfirm = (inputYear: number) => {
-    if (inputYear < currentYear || inputYear > currentYear + 1) {
-      notificationModal.warning('KPI設定は今年又は次の年だけ設定できます')
+    if (inputYear < currentYear - 1 || inputYear > currentYear + 1) {
+      notificationModal.warning('KPI設定は去年と今年又と次の年のみ設定できます')
     } else {
       setModalOpen(false)
       saveSettingKpi(inputYear, formSetting)

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ApiResponse, axiosInstance } from 'api'
 import dayjs from 'dayjs'
+import { HttpRequest } from 'hooks/useHttp'
 
 export type SupplierCompanyDetail = {
   name: string
@@ -25,23 +26,14 @@ export interface SupplierData {
   companyInfo: SupplierCompanyDetail
 }
 
-export default async function getSupplierList(): Promise<ApiResponse<SupplierData[]>> {
-  // when use real API
-  try {
-    const response = await axiosInstance.get('/api/companies?companyType.equal=supplier')
-    return { code: 200, message: 'success', data: response.data.content }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
-        data: null,
-      }
-    }
-    return {
-      code: 500,
-      message: 'An unexpected error occurred',
-      data: null,
-    }
+export default async function getSupplierList(
+  httpRequest: HttpRequest
+): Promise<ApiResponse<SupplierData[]>> {
+  const response = await httpRequest(() =>
+    axiosInstance.get('/api/companies?companyType.equal=supplier')
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
+  return { code: 200, message: 'success', data: response?.data.content }
 }

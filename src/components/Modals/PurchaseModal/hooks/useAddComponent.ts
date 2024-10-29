@@ -12,7 +12,6 @@ import {
 } from '@mui/x-data-grid'
 import { ComponentData } from 'api/component/getComponentList'
 import { CustomerData } from 'api/customer/getCustomerList'
-import { api } from 'api/index'
 import { OrderData } from 'api/order/getOrderList'
 import { ProductDataDetail } from 'api/product/getProductData'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
@@ -20,6 +19,7 @@ import { SupplierData } from 'api/supplier/getSupplierList'
 import { UserData } from 'api/user/getUserList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
 import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 
 import { useCallback, useMemo, useState } from 'react'
@@ -33,6 +33,7 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [supplierCompanyListData, setSupplierCompanyListData] = useState<SupplierData[]>([])
   const { withLoading, setLoading } = useLoading()
+  const { api } = useHttp()
 
   const handleAddNewComponent = (newComponent: NewComponentDetail) => {
     let currentIndex = newComponentListData.length
@@ -173,10 +174,10 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   )
 
   const getUserList = async () => {
-    const result = await api.user.getUserList({})
-    if (result.code === 200 && result.data) {
-      setUserListData(result.data)
-    }
+    // const result = await api.user.getUserList()
+    // if (result.code === 200 && result.data) {
+    //   setUserListData(result.data)
+    // }
   }
   const getCustomerList = async () => {
     const result = await api.supplier.getSupplierList()

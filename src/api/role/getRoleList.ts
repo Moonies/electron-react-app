@@ -2,19 +2,23 @@ import { axiosInstance, ApiResponse } from 'api'
 import axios from 'axios'
 import { HttpRequest } from 'hooks/useHttp'
 
-export default async function deleteUser(
-  httpRequest: HttpRequest,
-  userId: string
-): Promise<ApiResponse<{}>> {
-  const response = await httpRequest(() => axiosInstance.delete('/api/users/' + userId))
+export interface RoleData {
+  id: string
+  name: string
+  label: string
+}
+
+export default async function getRoleList(
+  httpRequest: HttpRequest
+): Promise<ApiResponse<RoleData[]>> {
+  // when use real API
+  const response = await httpRequest(() => axiosInstance.get('/api/roles'))
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
   return { code: 200, message: 'success', data: response?.data.content }
-
-  // when use real API
   // try {
-  //   const response = await axiosInstance.delete('/api/users/' + userId)
+  //   const response = await axiosInstance.get('/api/roles')
   //   return { code: 200, message: 'success', data: response.data.content }
   // } catch (error) {
   //   if (axios.isAxiosError(error) && error.response) {

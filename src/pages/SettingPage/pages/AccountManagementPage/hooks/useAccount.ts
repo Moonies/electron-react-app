@@ -1,7 +1,8 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-import { api } from 'api/index'
 import { AddNewUserData } from 'api/user/addNewUser'
 import { UserData } from 'api/user/getUserList'
+import { UpdateUserData } from 'api/user/updateUser'
+import useHttp from 'hooks/useHttp'
 // import { UpdateUserData } from 'api/user/updateUser'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
@@ -23,7 +24,7 @@ export default function useAccount() {
   })
   const [cachedData, setCachedData] = useState<CachedData>({})
   const { notificationModal } = useNotification()
-
+  const { api } = useHttp()
   const { withLoading, setLoading } = useLoading()
 
   const columns: GridColDef[] = useMemo(
@@ -38,17 +39,18 @@ export default function useAccount() {
       // },
       { field: 'name', headerName: '名前', headerAlign: 'center' },
       {
-        field: 'roles',
+        field: 'roleId',
         headerName: '役柄',
         headerAlign: 'center',
         // minWidth: 200,
+        // valueGetter: (value, row: UserData) => row.role.label, //now backend is progressing
       },
     ],
     []
   )
 
   const getUserList = async ({ page, pageSize }: GridPaginationModel) => {
-    const result = await withLoading(api.user.getUserList({ page, pageSize }))
+    const result = await withLoading(api.user.getUserList(page, pageSize))
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
@@ -57,31 +59,33 @@ export default function useAccount() {
   const addNewUser = async (newUserData: AddNewUserData) => {
     setLoading(true)
     const result = await api.user.addNewUser(newUserData)
+    // console.log(result)
     if (result.code === 200) {
-      notificationModal.success('追加完了しました。')
-      getUserList(paginationModel)
+      return true
     }
     setLoading(false)
   }
 
-  const deleteUser = async (selectedUserId: number) => {
+  const deleteUser = async (selectedUserId: string) => {
     setLoading(true)
     const result = await api.user.deleteUser(selectedUserId)
     if (result.code === 200) {
-      notificationModal.success('削除完了しました。')
-      getUserList(paginationModel)
+      return true
+      // notificationModal.success('削除完了しました。')
+      // getUserList(paginationModel)
     }
-    setLoading(false)
+    // setLoading(false)
   }
 
-  const updateUser = async (newDataUser: UserData) => {
+  const updateUser = async (newDataUser: UpdateUserData) => {
     setLoading(true)
     const result = await api.user.updateUser(newDataUser)
     if (result.code === 200) {
-      notificationModal.success('編集完了しました。')
-      getUserList(paginationModel)
+      return true
+      // notificationModal.success('編集完了しました。')
+      // getUserList(paginationModel)
     }
-    setLoading(false)
+    // setLoading(false)
   }
 
   const handlePaginationModelChange = (newModel: PaginationModel) => {

@@ -3,7 +3,7 @@ import { ApiResponse, axiosInstance } from 'api'
 import dayjs from 'dayjs'
 import { HttpRequest } from 'hooks/useHttp'
 
-export type CustomerCompanyDetail = {
+export type SupplierCompanyDetail = {
   name: string
   phoneNumber: string
   email: string
@@ -17,23 +17,24 @@ export type CustomerCompanyDetail = {
   }
 }
 
-export interface CustomerData {
+export interface SupplierDetail {
   id: string
   closingDay: string
   paymentDeadline: string | dayjs.Dayjs
   companyCode: string
   companyType: string
-  companyInfo: CustomerCompanyDetail
+  companyInfo: SupplierCompanyDetail
 }
 
-export default async function getCustomerList(
-  httpRequest: HttpRequest
-): Promise<ApiResponse<CustomerData[]>> {
+export default async function getSupplierDetailWithId(
+  httpRequest: HttpRequest,
+  companyId: string
+): Promise<ApiResponse<SupplierDetail>> {
   const response = await httpRequest(() =>
-    axiosInstance.get('/api/companies?companyType.equal=customer')
+    axiosInstance.get('/api/companies?companyType.equal=supplier&companyId.equal=' + companyId)
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content }
+  return { code: 200, message: 'success', data: response?.data.content[0] }
 }

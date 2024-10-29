@@ -1,12 +1,13 @@
-import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-import { AddNewCustomerProps } from 'api/customer/addNewCustomer'
-import { CustomerCompanyDetail, CustomerData } from 'api/customer/getCustomerList'
-import { UpdateCustomerDetailProps } from 'api/customer/updateCustomerDetail'
-import { api } from 'api/index'
-import { ModalCustomerProps } from 'components/Modals/CustomerManagementModal'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
-import React, { useMemo, useState } from 'react'
+
+import { AddNewCustomerProps } from 'api/customer/addNewCustomer'
+import { CustomerCompanyDetail, CustomerData } from 'api/customer/getCustomerList'
+import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+import { ModalCustomerProps } from 'components/Modals/CustomerManagementModal'
+import { UpdateCustomerDetailProps } from 'api/customer/updateCustomerDetail'
+import { useMemo, useState } from 'react'
 
 export default function useCustomer() {
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
@@ -14,6 +15,7 @@ export default function useCustomer() {
     page: 0,
     pageSize: 100,
   })
+  const { api } = useHttp()
 
   const { withLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
@@ -153,7 +155,6 @@ export default function useCustomer() {
     customerListData,
     getCusomerListData,
     handlePaginationModelChange,
-    handleUpdateData,
     updateSelectedCustomer,
     createNewCustomer,
     deleteSelectedCustomer,

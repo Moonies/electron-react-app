@@ -1,41 +1,29 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 import { mockData } from './_mockSealData'
+import { HttpRequest } from 'hooks/useHttp'
 export interface MyCompnaSeal {
   seal: string
 }
 
-export default async function getMyCompanySeal(id: string): Promise<ApiResponse<MyCompnaSeal>> {
-  // when use real API
-  try {
-    const response = await axiosInstance.get('/api/company/' + id + '/seal', {
-      headers: {},
-      responseType: 'blob',
-    })
-    const imageObjectURL = URL.createObjectURL(response.data)
-
-    return { code: 200, message: 'success', data: { seal: imageObjectURL } }
-  } catch (error) {
-    //in blob file when return has a special respone
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        code: error.response.status,
-        message: error.message || 'An error occurred during authentication',
-        data: null,
-      }
-    }
-    return {
-      code: 500,
-      message: 'An unexpected error occurred',
-      data: null,
-    }
+export default async function getMyCompanySeal(
+  httpRequest: HttpRequest,
+  id: string
+): Promise<ApiResponse<MyCompnaSeal>> {
+  const response = await httpRequest(
+    () =>
+      axiosInstance.get('/api/company/' + id + '/seal', {
+        responseType: 'blob',
+        headers: {
+          ...axiosInstance.defaults.headers.common, // Keep other default headers
+          'Content-Type': 'image/jpeg',
+        },
+      }),
+    true
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-
-  //for beta:test
-  // await new Promise(resolve => setTimeout(resolve, 1000))
-  // return {
-  //   code: 200,
-  //   message: 'Success',
-  //   data: { seal: mockData },
-  // }
+  const imageObjectURL = URL.createObjectURL(response?.data)
+  return { code: 200, message: 'success', data: { seal: imageObjectURL } }
 }

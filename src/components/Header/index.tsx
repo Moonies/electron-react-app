@@ -5,13 +5,14 @@ import useAuth from 'hooks/useAuth'
 import { AuthData } from 'api/user/checkAuth'
 import { useNavigate } from 'react-router-dom'
 import { useConfirmModal } from 'hooks/useConfirmModal'
+import { UserDetail } from 'api/user/getUserDetail'
 
 interface HeaderProps {
   loginStatus: boolean
 }
 const Header: React.FC<HeaderProps> = ({ loginStatus }) => {
   const { getCurrentUser, removeUserLogin } = useAuth()
-  const [userDetail, setUserDetail] = useState<AuthData | null>()
+  const [userDetail, setUserDetail] = useState<UserDetail | null>()
   const navigate = useNavigate()
   const { openConfirmModal } = useConfirmModal()
 
@@ -38,7 +39,9 @@ const Header: React.FC<HeaderProps> = ({ loginStatus }) => {
           早楽経営
         </Typography>
         <Box display={'flex'} ml='auto' gap={4}>
-          <Typography alignContent={'center'}>user: {userDetail?.id}</Typography>
+          <Typography alignContent={'center'}>
+            user: {userDetail?.number}- {userDetail?.name}
+          </Typography>
           <Button onClick={handleLogout}>Logout</Button>
         </Box>
       </Toolbar>

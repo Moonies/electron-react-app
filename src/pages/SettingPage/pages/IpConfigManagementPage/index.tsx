@@ -1,15 +1,15 @@
 import { Divider, TextField, Typography } from '@mui/material'
 import { Box, Container } from '@mui/system'
-import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
+import { SaveAs as SaveIcon } from '@mui/icons-material'
 import { StyledButton } from 'styles/styles'
-import useApiConfig, { ApiConfig } from 'hooks/useApiConfig'
-import { useEffect, useState } from 'react'
+import useApiConfig from 'hooks/useApiConfig'
+import { useState } from 'react'
 import { isShrink } from 'utils/inputUtils'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 
 export default function IpConfigManegementPage() {
-  const { loadConfig, updateConfig, config } = useApiConfig()
-  const [ipConfig, setIpConfig] = useState(config)
+  const { loadConfig, updateConfig } = useApiConfig()
+  const [ipConfig, setIpConfig] = useState(loadConfig())
   const { openConfirmModal } = useConfirmModal()
 
   const handleSaveClick = async () => {
@@ -24,10 +24,6 @@ export default function IpConfigManegementPage() {
       window.location.reload()
     }
   }
-
-  useEffect(() => {
-    loadConfig
-  }, [config])
 
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
@@ -46,7 +42,7 @@ export default function IpConfigManegementPage() {
       >
         <Box display={'flex'} flexDirection='row' gap={2}>
           <TextField
-            fullWidth
+            // fullWidth
             name='baseUrl'
             label='Base IP Address'
             value={ipConfig?.baseUrl ?? ''}
@@ -54,13 +50,7 @@ export default function IpConfigManegementPage() {
             // onChange={e => handleChange('baseUrl', e.target.value)}
 
             onChange={e => setIpConfig({ baseUrl: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            name='companyPhoneNumber'
-            label='API Key'
-            sx={{ visibility: 'hidden' }}
-            value={ipConfig?.apiKey ?? ''}
+            sx={{ width: '50%' }}
           />
         </Box>
         <Divider orientation='horizontal' sx={{ mt: 4 }} />

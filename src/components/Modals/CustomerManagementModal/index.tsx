@@ -21,13 +21,13 @@ import { CustomerData } from 'api/customer/getCustomerList'
 import { SaveAs as SaveIcon, Search as SearchIcon } from '@mui/icons-material'
 import { StyledButton } from 'styles/styles'
 import useLoading from 'hooks/useLoading'
-import { api } from 'api/index'
 import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
 import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
 import { Dayjs } from 'dayjs'
 import { deConvertPostalCode } from 'utils/formatUtils'
 import useNotification from 'hooks/useNotification'
 import MarkInputFaxNumber from 'components/MarkInput/MarkInputFaxNumber'
+import useHttp from 'hooks/useHttp'
 
 interface CustomerManagementModalProps {
   open: boolean
@@ -95,7 +95,7 @@ export default function CustomerManagementModal({
   const [formData, setFormData] = useState<ModalCustomerProps>(defaultFormData)
   const { withLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
-
+  const { api } = useHttp()
   const dateNumber = Array.from(Array(30).keys())
 
   useEffect(() => {

@@ -28,7 +28,7 @@ export interface PurchaseData {
   component: ComponentList[]
   orderRequestEmployeeId: string
   orderRequestEmployeeName: string
-  orderApprovedEmployeeId: number
+  orderApprovedEmployeeId: string
   orderApprovedEmployeeName: string
   quotationRequestDate: string | dayjs.Dayjs
   purchaseApprovedDate: string | dayjs.Dayjs

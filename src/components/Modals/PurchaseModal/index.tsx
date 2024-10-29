@@ -63,7 +63,7 @@ const defaultFormData: PurchaseData = {
   component: [],
   orderRequestEmployeeId: '',
   orderRequestEmployeeName: '',
-  orderApprovedEmployeeId: 0,
+  orderApprovedEmployeeId: '',
   orderApprovedEmployeeName: '',
   quotationRequestDate: dayjs(),
   purchaseApprovedDate: dayjs(),
@@ -203,7 +203,7 @@ export default function PurchaseModal({
     getCustomerList().finally(() => setLoading(false))
   }, [])
 
-  const findUserById = (userId: number) => {
+  const findUserById = (userId: string | null) => {
     return userListData?.find(user => user.id === userId) || null
   }
 

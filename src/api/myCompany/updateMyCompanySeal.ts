@@ -1,17 +1,17 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 import { mockData } from './_mockSealData'
+import { HttpRequest } from 'hooks/useHttp'
 export interface UpdateMyCompanySeal {
   id: string
   seal: File
 }
-export default async function updateMyCompanySeal({
-  id,
-  seal,
-}: UpdateMyCompanySeal): Promise<ApiResponse<{}>> {
-  // when use real API
-  try {
-    const response = await axiosInstance.put(
+export default async function updateMyCompanySeal(
+  httpRequest: HttpRequest,
+  { id, seal }: UpdateMyCompanySeal
+): Promise<ApiResponse<{}>> {
+  const response = await httpRequest(() =>
+    axiosInstance.put(
       '/api/company/' + id + '/seal',
       { file: seal },
       {
@@ -21,19 +21,9 @@ export default async function updateMyCompanySeal({
         },
       }
     )
-    return { code: 200, message: 'success', data: response.data.data }
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      return {
-        code: error.response.status,
-        message: error.response.data.message || 'An error occurred during authentication',
-        data: null,
-      }
-    }
-    return {
-      code: 500,
-      message: 'An unexpected error occurred',
-      data: null,
-    }
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
+  return { code: 200, message: 'success', data: response?.data }
 }

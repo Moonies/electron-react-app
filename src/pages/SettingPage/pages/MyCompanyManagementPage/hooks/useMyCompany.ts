@@ -1,7 +1,8 @@
-import { api } from 'api/index'
+// import { api } from 'api/index'
 import { NewMyCompanyDetailData } from 'api/myCompany/addNewMyCompanyDetail'
 // import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import { UpdateMyCompanyDetailData } from 'api/myCompany/updateMyCompanyDetail'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
 import { useState } from 'react'
@@ -33,7 +34,7 @@ export default function useMyCompany() {
   const { withLoading, setLoading } = useLoading()
   const { notificationModal, notificationSnackbar } = useNotification()
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
-
+  const { api } = useHttp()
   const getMyCompanyDetail = async () => {
     const result = await withLoading(api.myCompany.getMyCompanyDetail())
     if (result.code === 200 && result.data) {
@@ -101,9 +102,13 @@ export default function useMyCompany() {
     }
     const result = await api.myCompany.addNewMyCompanyDetail(newData)
     console.log(result)
+
     if (result.code === 200 && result.data) {
+      console.log(result.data.id)
       if (file) {
         updateSeal(file, result.data.id)
+      } else {
+        notificationSnackbar.success(result.message)
       }
     } else {
       notificationSnackbar.error(result.message)
@@ -136,9 +141,9 @@ export default function useMyCompany() {
       if (file) {
         updateSeal(file, newData.id)
       } else {
-        //delete seal
-        if (uploadedImage?.previewUrl) {
-          deleteSeal(newData.id)
+        //delete seal check
+        if (!uploadedImage?.previewUrl) {
+          await deleteSeal(newData.id)
         }
       }
       notificationModal.success('編集完了しました。')
@@ -157,10 +162,11 @@ export default function useMyCompany() {
 
   const getSeal = async (myCompanyId: string) => {
     const result = await api.myCompany.getMyCompanySeal(myCompanyId)
+    console.log(result)
     if (result.code === 200 && result.data?.seal) {
       setUploadedImage({ previewUrl: result.data.seal })
     } else {
-      notificationSnackbar.error(result.message)
+      // notificationSnackbar.error(result.message)
     }
   }
 

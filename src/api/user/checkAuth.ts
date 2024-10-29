@@ -1,72 +1,55 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface AuthData {
-  id: string
-  mail: string
-  name: string
-  number: string
-  roles: string
-  password: string
+  token: string
+  refreshToken: string
 }
 
-export default async function CheckAuth(
-  mail: string,
+export default async function checkAuth(
+  // httpRequest: HttpRequest,
+  username: string,
   password: string
 ): Promise<ApiResponse<AuthData>> {
+  const storedConfig = localStorage.getItem('apiConfig')
+  let parsedConfig
+  if (storedConfig && storedConfig !== null) {
+    parsedConfig = JSON.parse(storedConfig)
+  } else {
+    return {
+      code: 403,
+      message: 'localStorage is error or expired',
+      data: null,
+    }
+  }
   // when use real API
-  // try {
-  //   const response = await axiosInstance.post('/api/users/login', { mail, password })
-  //   return { code: 200, message: 'success', data: response.data }
-  // } catch (error) {
-  //   if (axios.isAxiosError(error) && error.response) {
-  //     return {
-  //       code: error.response.status,
-  //       message: error.response.data.message || 'An error occurred during authentication',
-  //       data: null,
-  //     }
-  //   }
-  //   return {
-  //     code: 500,
-  //     message: 'An unexpected error occurred',
-  //     data: null,
-  //   }
-  // }
+  try {
+    // const response = await axiosInstance.post('/api/auth/login', { username, password })
+    const response = await axios.post(`http://${parsedConfig.baseUrl}/api/auth/login`, {
+      username,
+      password,
+    })
 
-  //for beta:test
-  return new Promise<ApiResponse<AuthData>>((resolve, reject) => {
-    setTimeout(() => {
-      //test only
-      let data = {
-        id: 'asdasdjj12345',
-        name: 'admin',
-        roles: 'Administator',
-        // token: 'abcd001',
-        // id:number
-        // userId: '',
-        // fullName: '',
-        // indetifier: '',
-        number: '',
-        mail: '',
-        password: 'abc11011',
+    return { code: 200, message: 'success', data: response.data }
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        code: error.response.status,
+        message: error.response.data.message || 'An error occurred during authentication',
+        data: null,
       }
-      resolve({ code: 200, message: 'success', data: data })
-
-      // if (username === 'admin' && password === 'password') {
-      //   let data = {
-      //     id: 1,
-      //     username: 'admin',
-      //     name: 'Admin',
-      //     lastname: 'eiei',
-      //     role: 'Administator',
-      //     token: 'abcd001',
-      //   }
-      //   resolve({ code: 200, message: 'success', data: data })
-      // } else {
-      //   resolve({ code: 400, message: 'user or pass is not correct', data: null })
-
-      //   // reject(new Error('Invalid credentials'))
-      // }
-    }, 1000)
-  })
+    } else if (axios.isAxiosError(error)) {
+      return {
+        code: error.code ?? 500,
+        message: error.message,
+        data: null,
+      }
+    }
+    return {
+      code: 500,
+      message: 'An unexpected error occurred',
+      data: null,
+    }
+  }
 }
