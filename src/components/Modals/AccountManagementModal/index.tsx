@@ -172,7 +172,6 @@ export default function AccountManagementModal({
               label='役柄'
               // type='text'
               value={roleList.length > 0 ? formData.roleId : ''} //for waiting roleList is loaded
-              defaultValue=''
               onChange={e => handleChange('roleId', e.target.value)}
               // fullWidth
               margin='normal'
@@ -181,13 +180,7 @@ export default function AccountManagementModal({
               InputLabelProps={{
                 component: 'span',
               }}
-              SelectProps={{
-                displayEmpty: true,
-              }}
             >
-              <MenuItem value='' disabled>
-                <em>選択してください</em>
-              </MenuItem>
               {roleList.map(item => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.label}
