@@ -1,6 +1,6 @@
 {
   "name": "hayaraku-react-app",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "build/electron/main.js",
   "homepage": "./",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron:build:dev": "npm run build && npx tsc -p electron",
+    "electron:build:dev": "node version-updater.js && npm run build && npx tsc -p electron && git add package.json && git commit -m \"chore: bump version\" && git push",
     "electron:dev": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:build": "npm run build && tsc -p electron && electron-builder build --win --x64 -c electron-builder.js --publish never"
   },
