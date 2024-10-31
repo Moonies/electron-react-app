@@ -1,34 +1,41 @@
 import axios from 'axios'
-import { ApiResponse } from 'api'
+import { ApiResponse, axiosInstance } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
 import { OrderStatus } from '.'
 import { mockData } from './_mockdata'
+import { HttpRequest } from 'hooks/useHttp'
 // import { PurchaseStatus } from '.'
 // export type OrderStatus = 'DELIVERED' | 'CANCEL' | 'PENDING' | 'SHIPPING' | 'OVERDUEDATE' | 'ALL'
-export interface SearchCriteria {
+export interface OrderSearchCriteria {
   category: string
   keyword: string
-  startDate: Date
-  endDate: Date
+  startDate: string
+  endDate: string
   page?: number
   pageSize?: number
   status: `${OrderStatus}` | null
 }
-
-export type ProductList = {
-  id: string
-  productNumber: string
-  productName: string
-  quantity: number
-  productPrice: number
-  totalPrice: number
+type Company = {
+  companyType: string
+  companyInfo: {
+    name: string
+    buildingName: string
+    address: {
+      streetAddress: string
+      city: string
+      prefecture: string
+      postalCode: string
+    }
+    phoneNumber: string
+    email: string
+    fax?: string
+  }
 }
 export interface OrderData {
   id: string
-  orderId: string
-  customerCompanyId: string
-  customerCompanyName: string
-  product: ProductList[]
+  orderCode: string
+  companyId: string
+  company: Company
   orderRequestEmployeeId: string
   orderRequestEmployeeName: string
   orderApprovedEmployeeId: string
@@ -38,6 +45,7 @@ export interface OrderData {
   shippingmentDate: string | Dayjs
   paymentDueDate: string | Dayjs
   status: string | null
+  orderType: string
 }
 //for implement case only when apprved should be remove it
 function chunkArray(mockdata: OrderData[], pageSize: number, page: number) {
@@ -48,15 +56,22 @@ function chunkArray(mockdata: OrderData[], pageSize: number, page: number) {
   return result[page]
 }
 
-export default async function getOrderList({
-  category,
-  keyword,
-  startDate,
-  endDate,
-  status,
-  page = 0,
-  pageSize = 10,
-}: SearchCriteria): Promise<ApiResponse<{ data: OrderData[]; totalRow: number }>> {
+export default async function getOrderList(
+  httpRequest: HttpRequest,
+  { category, keyword, startDate, endDate, status, page = 0, pageSize = 10 }: OrderSearchCriteria
+): Promise<ApiResponse<OrderData[]>> {
+  const response = await httpRequest(() =>
+    category !== 'registrationDate' && category !== 'deliveryDate'
+      ? axiosInstance.get(
+          `/api/orders?${category}.contains=${keyword}&registrationDate.from=${startDate}&registrationDate.to=${endDate}&deliveryDate.from=${startDate}&deliveryDate.to=${endDate}`
+        )
+      : axiosInstance.get(`/api/orders?${category}.form=${startDate}&${category}.to=${endDate}`)
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
+  }
+  return { code: 200, message: 'success', data: response?.data.content }
+
   //for beta:test
   // let newMock = chunkArray(mockData, pageSize, page)
 
@@ -64,28 +79,6 @@ export default async function getOrderList({
   return {
     code: 200,
     message: 'Success',
-    data: {
-      // data: mockData,
-      data: [],
-      totalRow: 0,
-    },
+    data: [],
   }
-  // when use real API
-  // try {
-  //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });
-  //     return response.data;
-  // } catch (error) {
-  //     if (axios.isAxiosError(error) && error.response) {
-  //         return {
-  //             code: error.response.status,
-  //             message: error.response.data.message || 'An error occurred during authentication',
-  //             data: null
-  //         };
-  //     }
-  //     return {
-  //         code: 500,
-  //         message: 'An unexpected error occurred',
-  //         data: null
-  //     };
-  // }
 }

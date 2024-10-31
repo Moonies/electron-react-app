@@ -21,9 +21,9 @@ import useLoading from 'hooks/useLoading'
 
 import React, { useCallback, useMemo, useState } from 'react'
 
-export default function useAddOrder(orderDeta: OrderData) {
+export default function useAddOrder(orderDeta: any) {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({})
-  const [newProductListData, setNewProductListData] = useState<GridRowsProp>(orderDeta.product)
+  const [newProductListData, setNewProductListData] = useState<GridRowsProp>([]) //waiting task order
   const [productData, setProductData] = useState<ProductDataDetail[]>([])
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])

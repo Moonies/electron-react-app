@@ -82,8 +82,8 @@ export const api = {
   // customer: customerApi(),
   // supplier: supplierApi(),
   // component: componentApi(),
-  purchase: purchaseApi(),
-  order: orderApi(),
+  // purchase: purchaseApi(),
+  // order: orderApi(),
   // prefecture: prefectureApi(),
   // role: roleApi(),
 }

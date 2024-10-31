@@ -3,7 +3,7 @@ import { Text, View, Image as PDFImage } from '@react-pdf/renderer'
 import { api } from 'api/index'
 import { styles } from './styles'
 import { SlipDetail } from '../..'
-import { ProductList } from 'api/order/getOrderList'
+import { ProductList } from 'api/sale/getSaleList'
 import dayjs from 'dayjs'
 
 export interface DeliverySlipOrderData {

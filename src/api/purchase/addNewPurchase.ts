@@ -1,54 +1,47 @@
 import axios from 'axios'
-import { ApiResponse } from 'api'
+import { ApiResponse, axiosInstance } from 'api'
 import dayjs from 'dayjs'
+import { HttpRequest } from 'hooks/useHttp'
 
 export type componentList = {
-  id: string
-  componentNumber: string
-  componentName: string
+  // id: string
+  name: string
+  number: string
+  price: number
   quantity: number
-  unitPrice: number
-  totalPrice: number
 }
-export interface NewPurchase {
-  orderId: string
-  customerCompanyId: string
-  product: componentList[]
-  orderRequestEmployeeId: string
-  orderApprovedEmployeeId: string
-  quotationRequestDate: string | dayjs.Dayjs
-  registDate: string | dayjs.Dayjs
-  shippingmentDate: string | dayjs.Dayjs
-  paymentDueDate: string | dayjs.Dayjs
-  status: string | null
+export interface AddNewPurchase {
+  // orderCode: string //may be auto create from database
+  totalAmount: number
+  registrationDate: string
+  deliveryDate: string
+  invoiceNumber: string
+  memo: string
+  purchaseCode: string
+  quotationRequestDate: string
+  // orderApprovalPendingDate: string
+  orderApprovalDate: string
+  // stockApprovalPendingDate: string
+  stockApprovalDate: string
+  components: componentList[]
+  companyId: string
 }
 
-export default async function addNewPurchase(newPurchase: NewPurchase): Promise<ApiResponse<{}>> {
+export default async function addNewPurchase(
+  httpRequest: HttpRequest,
+  newPurchase: AddNewPurchase
+): Promise<ApiResponse<{}>> {
+  const response = await httpRequest(() => axiosInstance.post('/api/purchases', { ...newPurchase }))
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
+  }
+  return { code: 200, message: 'success', data: response?.data }
   //for beta:test
   // let newMock = chunkArray(mockData, pageSize, page)
 
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  return {
-    code: 200,
-    message: 'Success',
-    data: {},
-  }
-  // when use real API
-  // try {
-  //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });
-  //     return response.data;
-  // } catch (error) {
-  //     if (axios.isAxiosError(error) && error.response) {
-  //         return {
-  //             code: error.response.status,
-  //             message: error.response.data.message || 'An error occurred during authentication',
-  //             data: null
-  //         };
-  //     }
-  //     return {
-  //         code: 500,
-  //         message: 'An unexpected error occurred',
-  //         data: null
-  //     };
-  // }
+  // await new Promise(resolve => setTimeout(resolve, 1000))
+  // return {
+  //   code: 200,
+  //   message: 'Success',
+  //   data: {},
 }

@@ -1,8 +1,9 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-import { api } from 'api/index'
+// import { api } from 'api/index'
 import { PurchaseStatus } from 'api/purchase'
 import { PurchaseData, SearchCriteria } from 'api/purchase/getPurchaseList'
 import dayjs from 'dayjs'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -18,12 +19,12 @@ export default function usePurchase() {
   // const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
   const statusPurchase = Object.values(PurchaseStatus)
-
+  const { api } = useHttp()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10,
   })
-  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
+  const [searchCriteria, setSearchCriteria] = useState({
     category: '',
     keyword: '',
     startDate: dateThreeMonthsAgo,
@@ -96,10 +97,15 @@ export default function usePurchase() {
 
   const getPurchaseListData = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+    }
     //call api
-    const result = await api.purchase.getPurchaseList(searchCriteria)
+    const result = await api.purchase.getPurchaseList(prepareSearhCriteria)
     if (result.code === 200 && result.data) {
-      setPurchaseData(result.data.data)
+      setPurchaseData(result.data)
     }
     setLoading(false)
   }

@@ -3,7 +3,7 @@ import { Document, Page, View, PDFViewer, Image } from '@react-pdf/renderer'
 import JsBarcode from 'jsbarcode'
 import SubPrintOrderDetail from './components/SubPrintOrderDetail'
 import SubPrintDeliveryDetail from './components/SubPrintDeliveryDetail'
-import { ProductList } from 'api/order/getOrderList'
+import { ProductList } from 'api/sale/getSaleList'
 import { styles } from './styles'
 import { Dayjs } from 'dayjs'
 

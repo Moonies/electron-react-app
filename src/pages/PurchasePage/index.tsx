@@ -373,12 +373,12 @@ export default function PurchasePage() {
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={purchaseDataGridRef}
-          getRowId={row => row.purchaseId}
+          // getRowId={row => row.purchaseId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>
-
-      {modalOpen && (
+      {/* waiting for prepare new data props */}
+      {/* {modalOpen && (
         <PurchaseModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -386,7 +386,7 @@ export default function PurchasePage() {
           initialData={selectedPurchase}
           mode={modalMode}
         />
-      )}
+      )} */}
     </Box>
   )
 }

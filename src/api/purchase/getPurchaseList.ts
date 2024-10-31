@@ -1,13 +1,14 @@
 import axios from 'axios'
-import { ApiResponse } from 'api'
+import { ApiResponse, axiosInstance } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
 import { mockData } from './_mockdata'
 import { PurchaseStatus } from '.'
+import { HttpRequest } from 'hooks/useHttp'
 export interface SearchCriteria {
   category: string
   keyword: string
-  startDate: Date
-  endDate: Date
+  startDate: string
+  endDate: string
   page?: number
   pageSize?: number
   status: `${PurchaseStatus}` | null
@@ -58,27 +59,22 @@ function chunkArray(mockdata: PurchaseData[], pageSize: number, page: number) {
   return result[page]
 }
 
-export default async function getPurchaseList({
-  category,
-  keyword,
-  startDate,
-  endDate,
-  page = 0,
-  pageSize = 10,
-}: SearchCriteria): Promise<ApiResponse<{ data: PurchaseData[]; totalRow: number }>> {
+export default async function getPurchaseList(
+  httpRequest: HttpRequest,
+  { category, keyword, startDate, endDate, page = 0, pageSize = 10 }: SearchCriteria
+): Promise<ApiResponse<PurchaseData[]>> {
   //for beta:test
-  // let newMock = chunkArray(mockData, pageSize, page)
-
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  return {
-    code: 200,
-    message: 'Success',
-    data: {
-      // data: mockData,
-      data: [],
-      totalRow: 0,
-    },
+  const response = await httpRequest(() =>
+    category !== 'registrationDate' && category !== 'deliveryDate'
+      ? axiosInstance.get(
+          `/api/purchases?${category}.contains=${keyword}&registrationDate.from=${startDate}&registrationDate.to=${endDate}&deliveryDate.from=${startDate}&deliveryDate.to=${endDate}`
+        )
+      : axiosInstance.get(`/api/purchases?${category}.form=${startDate}&${category}.to=${endDate}`)
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
+  return { code: 200, message: 'success', data: response?.data.content }
   // when use real API
   // try {
   //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });

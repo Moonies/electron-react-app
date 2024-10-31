@@ -1,5 +1,7 @@
-import { default as getOrderList } from './getOrderList'
+import { default as getOrderList, OrderData, OrderSearchCriteria } from './getOrderList'
 import { default as addNewOrder } from './addNewOrder'
+import { ApiResponse } from 'api'
+import { HttpRequest } from 'hooks/useHttp'
 
 export enum OrderStatus {
   // ALL = 'all',
@@ -23,6 +25,15 @@ export enum OrderStatus {
   RECEIVED = 'received',
   IN_STORE = 'in_store',
 }
-export default function order() {
-  return { getOrderList, addNewOrder }
+
+export enum OrderType {
+  SALE = 'Sale',
+  PURCHASE = 'Purchase',
+}
+export interface OrderApi {
+  getOrderList: (params: OrderSearchCriteria) => Promise<ApiResponse<OrderData[]>>
+}
+
+export default function order(httpRequest: HttpRequest): OrderApi {
+  return { getOrderList: params => getOrderList(httpRequest, params) }
 }

@@ -25,6 +25,9 @@ import { DeliverySlipData, PDFDocument, PDFGenerator } from './components/SlipDe
 import useLoading from 'hooks/useLoading'
 import { OrderStatus } from 'api/order'
 import SelectTypeOrderDialog from 'components/Dialogs/SelectTypeOrderDialog'
+import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
+import { PurchaseData } from 'api/purchase/getPurchaseList'
+import { SaleData } from 'api/sale/getSaleList'
 
 export default function OrderPage() {
   const {
@@ -43,6 +46,9 @@ export default function OrderPage() {
     addNewOrder,
     editOrder,
     deleteOrder,
+    addNewPurchaseOrder,
+    editPurchaseOrder,
+    deletePurchaseOrder,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -50,10 +56,10 @@ export default function OrderPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
-  const { notificationModal } = useNotification()
+  const { notificationModal, notificationSnackbar } = useNotification()
   const { exportSaleSelected, prepareSlipData } = useExportOrder()
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [orderType, setOrderType] = useState<string>()
+  const [orderType, setOrderType] = useState<'Sale' | 'Purchase'>()
   const [showPDF, setShowPDF] = useState(false)
   const { setLoading } = useLoading()
 
@@ -131,25 +137,47 @@ export default function OrderPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: OrderData) => {
-    // Implement add/edit functionality
-    console.log('Confirmed data:', data)
+  const handleModalConfirm = async (data: OrderData | PurchaseModalDataProps) => {
+    if ('orderId' in data) {
+      switch (modalMode) {
+        case 'add':
+          addNewOrder(data as OrderData)
+          break
+        case 'edit':
+          editOrder(data as OrderData)
+          break
+        case 'view':
+          deleteOrder(data as OrderData)
+          break
+        default:
+          break
+      }
+    }
+
+    if ('purchaseId' in data) {
+      console.log('Confirmed data:', data)
+
+      switch (modalMode) {
+        case 'add':
+          const respone = await addNewPurchaseOrder(data as PurchaseModalDataProps)
+          if (respone) {
+            notificationSnackbar.success('Purchase Order is Success!!')
+            setModalOpen(false)
+          }
+          break
+        case 'edit':
+          // editOrder(data)
+          break
+        case 'view':
+          // deleteOrder(data)
+          break
+        default:
+          break
+      }
+    }
     if (modalMode === 'add') {
       // addNewSaleData()
     } else {
-    }
-    switch (modalMode) {
-      case 'add':
-        addNewOrder(data)
-        break
-      case 'edit':
-        editOrder(data)
-        break
-      case 'view':
-        deleteOrder(data)
-        break
-      default:
-        break
     }
     // After successful add/edit, refetch the data
     // await fetchNewOrderData(paginationModel);
@@ -267,13 +295,16 @@ export default function OrderPage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <TextField
-                // fullWidth
-                name='keyword'
-                label='キーワード検索'
-                value={searchCriteria.keyword}
-                onChange={e => handleChange('keyword', e.target.value)}
-              />
+              {searchCriteria.category !== 'registrationDate' &&
+                searchCriteria.category !== 'deliveryDate' && (
+                  <TextField
+                    // fullWidth
+                    name='keyword'
+                    label='キーワード検索'
+                    value={searchCriteria.keyword}
+                    onChange={e => handleChange('keyword', e.target.value)}
+                  />
+                )}
               <TextField
                 name='ststus'
                 value={searchCriteria.status ?? ''}
@@ -294,14 +325,6 @@ export default function OrderPage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <Button
-                variant='contained'
-                endIcon={<SearchIcon />}
-                onClick={handleSearch}
-                size='large'
-              >
-                検索
-              </Button>
             </Box>
             <Box
               display={'flex'}
@@ -314,9 +337,6 @@ export default function OrderPage() {
                 label='開始日'
                 value={dayjs(searchCriteria.startDate)}
                 format='YYYY/MM/DD'
-                // onChange={(date: Dayjs | null) =>
-                //   handleChange('startDate', date?.toDate() || new Date())
-                // }
                 onAccept={handleStartDateChange}
                 views={['year', 'month', 'day']}
               />
@@ -324,9 +344,6 @@ export default function OrderPage() {
                 label='終了日'
                 format='YYYY/MM/DD'
                 value={dayjs(searchCriteria.endDate)}
-                // onChange={(date: Dayjs | null) =>
-                //   handleChange('endDate', date?.toDate() || new Date())
-                // }
                 onAccept={handleEndDateChange}
                 views={['year', 'month', 'day']}
               />
@@ -346,10 +363,30 @@ export default function OrderPage() {
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
                 variant='outlined'
+                startIcon={<SearchIcon />}
+                size='large'
+                onClick={handleSearch}
+                // sx={{ visibility: 'hidden' }}
+              >
+                検索
+              </StyledButton>{' '}
+              <StyledButton
+                variant='outlined'
+                startIcon={<DetailIcon />}
+                size='large'
+                onClick={handleViewDetailClick}
+                // sx={{ visibility: 'hidden' }}
+              >
+                詳細
+              </StyledButton>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              <StyledButton
+                variant='outlined'
                 startIcon={<AddIcon />}
                 size='large'
-                onClick={handleAddClick}
-                // onClick={() => setDialogOpen(true)}
+                // onClick={handleAddClick}
+                onClick={() => setDialogOpen(true)}
               >
                 追加
               </StyledButton>
@@ -373,22 +410,21 @@ export default function OrderPage() {
               </StyledButton>
               <StyledButton
                 variant='outlined'
-                startIcon={<DetailIcon />}
+                startIcon={<PrintIcon />}
                 size='large'
-                onClick={handleViewDetailClick}
-                // sx={{ visibility: 'hidden' }}
+                onClick={handleExportPdf}
               >
-                詳細
+                データ出力
               </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              // current version is not support 
               <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
-                {/* current version is not support */}
                 自動アプロード
               </StyledButton>
               <StyledButton
@@ -399,7 +435,7 @@ export default function OrderPage() {
               >
                 データ出力
               </StyledButton>
-            </Box>
+            </Box> */}
           </Box>
         </Box>
         <DataTable
@@ -414,7 +450,7 @@ export default function OrderPage() {
         />
       </Box>
 
-      {modalOpen && (
+      {modalOpen && orderType === 'Sale' && (
         <OrderModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -423,6 +459,17 @@ export default function OrderPage() {
           mode={modalMode}
         />
       )}
+
+      {modalOpen && orderType === 'Purchase' && (
+        <PurchaseModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onConfirm={handleModalConfirm}
+          // initialData={selectedPurchase}
+          mode={modalMode}
+        />
+      )}
+
       {dialogOpen && (
         <SelectTypeOrderDialog
           onClose={() => setDialogOpen(false)}
@@ -434,6 +481,7 @@ export default function OrderPage() {
           open={dialogOpen}
         />
       )}
+      {/* to preview and check export pdf */}
       {/* {showPDF && slipsData && (
         <div className='mt-4' style={{ height: '80vh' }}>
           <PDFGenerator data={slipsData} render={() => setLoading(false)} />

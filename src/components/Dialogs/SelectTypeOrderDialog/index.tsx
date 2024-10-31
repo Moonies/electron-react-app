@@ -12,11 +12,11 @@ import React, { useState } from 'react'
 interface DialogSelectTypeOrder {
   open: boolean
   onClose: () => void
-  onSubmit: (typeOrder: string) => void
+  onSubmit: (typeOrder?: 'Sale' | 'Purchase') => void
 }
 
 export default function SelectTypeOrderDialog({ open, onClose, onSubmit }: DialogSelectTypeOrder) {
-  const [typeOrder, setTypeOrder] = useState<string>('')
+  const [typeOrder, setTypeOrder] = useState<'Sale' | 'Purchase'>()
   const submitType = async (e: React.FormEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -44,11 +44,11 @@ export default function SelectTypeOrderDialog({ open, onClose, onSubmit }: Dialo
             // defaultValue={''}
             required
             fullWidth
-            onChange={e => setTypeOrder(e.target.value)}
-            value={typeOrder}
+            onChange={e => setTypeOrder(e.target.value as 'Sale' | 'Purchase')}
+            value={typeOrder ?? ''}
           >
-            <MenuItem value={'sale'}>売上へ</MenuItem>
-            <MenuItem value={'purchase'}>仕入へ</MenuItem>
+            <MenuItem value={'Sale'}>売上へ</MenuItem>
+            <MenuItem value={'Purchase'}>仕入へ</MenuItem>
           </TextField>
         </DialogContent>
         <DialogActions>

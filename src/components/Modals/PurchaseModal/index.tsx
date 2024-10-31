@@ -44,18 +44,41 @@ import {
 } from '@mui/x-data-grid'
 import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import useLoading from 'hooks/useLoading'
+import CustomFooter from './components/CustomerFooter'
 interface Option {
   label: string
   id: number
 }
+export type PurchaseNewComponentList = {
+  name: string
+  number: string
+  price: number
+  quantity: number
+}
+export type PurchaseModalDataProps = {
+  purchaseId?: string
+  invoiceNumber?: string
+  supplierCompanyId: string
+  supplierCompanyName: string
+  component: PurchaseNewComponentList[]
+  orderRequestEmployeeId: string
+  orderRequestEmployeeName: string
+  orderApprovedEmployeeId: string
+  orderApprovedEmployeeName: string
+  quotationRequestDate: string | dayjs.Dayjs
+  purchaseApprovedDate: string | dayjs.Dayjs
+  stockApprovalDate: string | dayjs.Dayjs
+  totalAmount: number
+  status?: string
+}
 interface PurchaseModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: PurchaseData) => Promise<void>
-  initialData?: PurchaseData
+  onConfirm: (data: PurchaseModalDataProps) => Promise<void>
+  initialData?: PurchaseModalDataProps
   mode: 'add' | 'edit' | 'view'
 }
-const defaultFormData: PurchaseData = {
+const defaultFormData: PurchaseModalDataProps = {
   purchaseId: '',
   invoiceNumber: '',
   supplierCompanyId: '',
@@ -67,8 +90,9 @@ const defaultFormData: PurchaseData = {
   orderApprovedEmployeeName: '',
   quotationRequestDate: dayjs(),
   purchaseApprovedDate: dayjs(),
-  purchaseReciptDate: dayjs(),
-  status: null,
+  stockApprovalDate: dayjs(),
+  totalAmount: 0,
+  status: '',
 }
 export default function PurchaseModal({
   open,
@@ -77,7 +101,7 @@ export default function PurchaseModal({
   initialData,
   mode,
 }: PurchaseModalProps) {
-  const [formData, setFormData] = useState<PurchaseData>(initialData ?? defaultFormData)
+  const [formData, setFormData] = useState<PurchaseModalDataProps>(initialData ?? defaultFormData)
   const [inputValue, setInputValue] = useState('')
   // const [componentIdList, setComponentIdList] = useState<ComponentIdData[]>([])
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -105,15 +129,24 @@ export default function PurchaseModal({
     handleAddNewComponent,
   } = useAddComponent(formData)
 
-  const handleChange = (field: keyof PurchaseData, value: string | number) => {
+  const handleChange = (field: keyof PurchaseModalDataProps, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      await onConfirm(formData)
-      onClose()
+      const rows = addNewComponentDataGridRef.current.getRowModels()
+      const totalAmount = Array.from(rows.values()).reduce((sum, row) => {
+        const rowTotalPrice = row.quantity * row.price
+        return sum + rowTotalPrice
+      }, 0)
+      await onConfirm({
+        ...formData,
+        totalAmount: totalAmount,
+        component: newComponentListData as PurchaseNewComponentList[],
+      })
+      // onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
@@ -208,7 +241,7 @@ export default function PurchaseModal({
   }
 
   const findCustomerById = (customerId: string | null) => {
-    return supplierCompanyListData?.find(customer => customer.companyCode === customerId) || null
+    return supplierCompanyListData?.find(customer => customer.id === customerId) || null
   }
 
   return (
@@ -273,8 +306,8 @@ export default function PurchaseModal({
               />
               <TextField
                 label='注番'
-                value={formData.invoiceNumber}
-                onChange={e => handleChange('invoiceNumber', e.target.value)}
+                value={formData.purchaseId}
+                onChange={e => handleChange('purchaseId', e.target.value)}
                 fullWidth
                 margin='normal'
                 required
@@ -306,9 +339,10 @@ export default function PurchaseModal({
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
+                    console.log(newValue)
                     setFormData(prev => ({
                       ...prev,
-                      customerCompanyId: newValue.id,
+                      supplierCompanyId: newValue.id,
                     }))
                   }
                 }}
@@ -322,7 +356,7 @@ export default function PurchaseModal({
                 format='YYYY/MM/DD'
                 onChange={newValue =>
                   handleChange(
-                    'quotationRequestDate',
+                    'purchaseApprovedDate',
                     newValue ? newValue.format('YYYY-MM-DD') : ''
                   )
                 }
@@ -331,13 +365,10 @@ export default function PurchaseModal({
               />
               <DatePicker
                 label='入庫承認済'
-                value={dayjs(formData.purchaseReciptDate)}
+                value={dayjs(formData.stockApprovalDate)}
                 format='YYYY/MM/DD'
                 onChange={newValue =>
-                  handleChange(
-                    'quotationRequestDate',
-                    newValue ? newValue.format('YYYY-MM-DD') : ''
-                  )
+                  handleChange('stockApprovalDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
                 sx={{ marginTop: 2, width: '25%' }}
                 readOnly={modalMode === 'view'}
@@ -377,12 +408,6 @@ export default function PurchaseModal({
                   Add Component
                 </Button>
               </Box>
-              {/* <Autocomplete
-              options={_mockOption}
-              sx={{ marginTop: 2, width: '35%' }}
-              renderInput={params => <TextField {...params} label='担当者' />}
-              value={formData.orderApprovedEmployeeName}
-            /> */}
               <Autocomplete
                 options={userListData}
                 renderOption={(props, option) => {
@@ -413,7 +438,6 @@ export default function PurchaseModal({
               data={newComponentListData}
               columns={updatedColumns}
               apiref={addNewComponentDataGridRef}
-              // getRowId={row => row.productNumber}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
               sx={{ height: 475, mt: 2 }}
               editMode='row'
@@ -424,6 +448,9 @@ export default function PurchaseModal({
               disableColumnSelector
               columnVisibilityModel={columnVisibilityModel}
               isCellEditable={() => modalMode !== 'view'}
+              slots={{
+                footer: CustomFooter,
+              }}
             />
             {openDialog && (
               <AddNewComponentListDialog
