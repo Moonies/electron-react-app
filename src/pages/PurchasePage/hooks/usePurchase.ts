@@ -51,9 +51,9 @@ export default function usePurchase() {
         return '配達中'
       case PurchaseStatus.DELIVERED:
         return '入庫済'
-      case PurchaseStatus.REJECTED:
-        return '返品中'
-      case PurchaseStatus.CANCELLED:
+      // case PurchaseStatus.REJECTED:
+      //   return '返品中'
+      case PurchaseStatus.CANCEL:
         return 'キャンセル'
       default:
         return ''

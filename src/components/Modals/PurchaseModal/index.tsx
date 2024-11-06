@@ -30,7 +30,7 @@ import {
 import { debounce } from '@mui/material/utils'
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import { api } from 'api/index'
 import { TransitionProps } from '@mui/material/transitions'
@@ -45,6 +45,11 @@ import {
 import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import useLoading from 'hooks/useLoading'
 import CustomFooter from './components/CustomerFooter'
+import AddNewMemoDialog from 'components/Dialogs/AddNewMemoDialog'
+import SlideTransition from 'components/Transition/Slide'
+import { PurchaseStatus } from 'api/purchase'
+import useNotification from 'hooks/useNotification'
+import { useConfirmModal } from 'hooks/useConfirmModal'
 interface Option {
   label: string
   id: number
@@ -56,6 +61,8 @@ export type PurchaseNewComponentList = {
   quantity: number
 }
 export type PurchaseModalDataProps = {
+  id?: string
+  orderCode: string
   purchaseId?: string
   invoiceNumber?: string
   supplierCompanyId: string
@@ -65,9 +72,13 @@ export type PurchaseModalDataProps = {
   orderRequestEmployeeName: string
   orderApprovedEmployeeId: string
   orderApprovedEmployeeName: string
-  quotationRequestDate: string | dayjs.Dayjs
-  purchaseApprovedDate: string | dayjs.Dayjs
-  stockApprovalDate: string | dayjs.Dayjs
+  registrationDate: string | Dayjs
+  deliveryDate: string | Dayjs
+  // quotationRequestDate: string | Dayjs
+  // purchaseApprovedDate: string | Dayjs
+  // stockApprovalDate: string | Dayjs
+  ownerId: string
+  memo: string
   totalAmount: number
   status?: string
 }
@@ -79,6 +90,7 @@ interface PurchaseModalProps {
   mode: 'add' | 'edit' | 'view'
 }
 const defaultFormData: PurchaseModalDataProps = {
+  orderCode: '',
   purchaseId: '',
   invoiceNumber: '',
   supplierCompanyId: '',
@@ -88,11 +100,15 @@ const defaultFormData: PurchaseModalDataProps = {
   orderRequestEmployeeName: '',
   orderApprovedEmployeeId: '',
   orderApprovedEmployeeName: '',
-  quotationRequestDate: dayjs(),
-  purchaseApprovedDate: dayjs(),
-  stockApprovalDate: dayjs(),
+  // quotationRequestDate: dayjs(),
+  // purchaseApprovedDate: dayjs(),
+  // stockApprovalDate: dayjs(),
+  ownerId: '',
+  memo: '',
+  registrationDate: dayjs(),
+  deliveryDate: dayjs(),
   totalAmount: 0,
-  status: '',
+  status: PurchaseStatus.PENDING,
 }
 export default function PurchaseModal({
   open,
@@ -102,13 +118,16 @@ export default function PurchaseModal({
   mode,
 }: PurchaseModalProps) {
   const [formData, setFormData] = useState<PurchaseModalDataProps>(initialData ?? defaultFormData)
-  const [inputValue, setInputValue] = useState('')
-  // const [componentIdList, setComponentIdList] = useState<ComponentIdData[]>([])
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
+  const currentStatus = initialData?.status
   const addNewComponentDataGridRef = useGridApiRef()
-  const [openDialog, setOpenDialog] = useState(false)
+  const [openDialogAddComponent, setOpenDialogAddComponent] = useState(false)
+  const [openDialogAddMemo, setOpenDialogAddMemo] = useState(false)
+  const { Slide } = SlideTransition({ direction: 'up' })
   const { setLoading } = useLoading()
+  const { notificationModal } = useNotification()
+  const { openConfirmModal } = useConfirmModal()
 
   const {
     columns,
@@ -129,7 +148,29 @@ export default function PurchaseModal({
     handleAddNewComponent,
   } = useAddComponent(formData)
 
-  const handleChange = (field: keyof PurchaseModalDataProps, value: string | number) => {
+  useEffect(() => {
+    //when have new function or condition should to move loading
+    setLoading(true)
+    getUserList()
+    getCustomerList().finally(() => setLoading(false))
+  }, [])
+
+  const handleChange = async (field: keyof PurchaseModalDataProps, value: string | number) => {
+    if (field === 'status' && value === 'CONFIRM') {
+      const confirmed = await openConfirmModal({
+        title: 'ご注意ください',
+        message:
+          'If you change status to confirm, data can be not change. \n if your click "OK", edited data they are to be return to after edit \n if you need to update data should be not change status.',
+      })
+      if (confirmed) {
+        setFormData(initialData ?? defaultFormData)
+        setFormData(prev => ({ ...prev, [field]: value }))
+        setModalMode('view')
+      }
+
+      return
+    }
+    // setModalMode('edit')
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -156,11 +197,12 @@ export default function PurchaseModal({
   }
 
   const statusList = [
-    { label: '見積書依頼', value: 'invoice_pending' },
+    { label: '未発注', value: 'PENDING' },
+    { label: '発注', value: 'CONFIRM' },
     { label: '配達中', value: 'on_delivery' },
     { label: '入庫済', value: 'delivered' },
     { label: '返品中', value: 'rejected' },
-    { label: 'キャンセル', value: 'cancelled' },
+    { label: 'キャンセル', value: 'CANCEL' },
   ]
 
   const columnVisibilityModel = useMemo(() => {
@@ -168,18 +210,6 @@ export default function PurchaseModal({
       actions: modalMode !== 'view',
     }
   }, [modalMode])
-
-  const Transition = useCallback(
-    forwardRef(function Transition(
-      props: TransitionProps & {
-        children: React.ReactElement<any, any>
-      },
-      ref: React.Ref<unknown>
-    ) {
-      return <Slide direction='up' ref={ref} {...props} />
-    }),
-    []
-  )
 
   const updatedColumns = columns.map(column => {
     if (column.field === 'actions') {
@@ -229,19 +259,38 @@ export default function PurchaseModal({
     return column
   })
 
-  useEffect(() => {
-    //when have new function or condition should to move loading
-    setLoading(true)
-    getUserList()
-    getCustomerList().finally(() => setLoading(false))
-  }, [])
-
   const findUserById = (userId: string | null) => {
     return userListData?.find(user => user.id === userId) || null
   }
 
   const findCustomerById = (customerId: string | null) => {
     return supplierCompanyListData?.find(customer => customer.id === customerId) || null
+  }
+
+  const getAvailableStatuses = (
+    currentStatus: PurchaseStatus | string,
+    statusList: { label: string; value: string }[]
+  ) => {
+    switch (currentStatus) {
+      case 'PENDING':
+        return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.value))
+      case 'CONFIRM':
+        return statusList.filter(status => status.value !== 'PENDING')
+      case 'SHIP':
+        return statusList.filter(status => ['delivered', 'rejected'].includes(status.value))
+
+      default:
+        return statusList
+    }
+  }
+
+  const handleSelectStatus = () => {
+    console.log(formData.status)
+    if (formData.status === 'CONFIRM') {
+      notificationModal.warning(
+        'If you change status to confirm, data can be not change. \n if your edited data,than click"OK" they are to be return to after edit \n if you need to update data should be not change status.'
+      )
+    }
   }
 
   return (
@@ -256,9 +305,11 @@ export default function PurchaseModal({
       // fullWidth
       // maxWidth='md'
       fullScreen
-      TransitionComponent={Transition}
+      TransitionComponent={Slide}
       keepMounted
       scroll={'paper'}
+      aria-labelledby='purchase-modal-title'
+      aria-describedby='purchase-modal-description'
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -290,19 +341,27 @@ export default function PurchaseModal({
       <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <DialogContent>
           <Box display={'flex'} flexDirection={'column'}>
-            <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+            <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-around'}>
               <DatePicker
                 label='登録日付'
-                value={dayjs(formData.quotationRequestDate)}
-                format='YYYY/MM/DD'
+                value={dayjs(formData.registrationDate)}
+                format='YYYY-MM-DD'
                 onChange={newValue =>
-                  handleChange(
-                    'quotationRequestDate',
-                    newValue ? newValue.format('YYYY-MM-DD') : ''
-                  )
+                  handleChange('registrationDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
-                sx={{ marginTop: 2, width: '25%' }}
+                sx={{ marginTop: 2, width: '100%' }}
                 readOnly={modalMode === 'view'}
+              />
+              <TextField
+                label='受注番号'
+                value={formData.orderCode}
+                onChange={e => handleChange('orderCode', e.target.value)}
+                fullWidth
+                margin='normal'
+                required
+                inputProps={{
+                  readOnly: modalMode === 'view',
+                }}
               />
               <TextField
                 label='注番'
@@ -315,13 +374,17 @@ export default function PurchaseModal({
                   readOnly: modalMode === 'view',
                 }}
               />
-              {/* <TextField
-              label='顧客名'
-              value={formData.supplierCompanyName}
-              onChange={e => handleChange('supplierCompanyName', e.target.value)}
-              margin='normal'
-              fullWidth
-            /> */}
+              <TextField
+                label='伝票番号'
+                value={formData.invoiceNumber}
+                onChange={e => handleChange('invoiceNumber', e.target.value)}
+                fullWidth
+                margin='normal'
+                required
+                inputProps={{
+                  readOnly: modalMode === 'view',
+                }}
+              />
               <Autocomplete
                 options={supplierCompanyListData}
                 renderOption={(props, option) => {
@@ -333,7 +396,7 @@ export default function PurchaseModal({
                   )
                 }}
                 getOptionLabel={option => option.companyInfo.name}
-                sx={{ width: '35%', marginTop: 2 }}
+                sx={{ marginTop: 2 }}
                 renderInput={params => <TextField {...params} label='顧客名' />}
                 readOnly={modalMode === 'view'}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -347,10 +410,34 @@ export default function PurchaseModal({
                   }
                 }}
                 value={findCustomerById(formData.supplierCompanyId)}
+                fullWidth
               />
             </Box>
-            <Box display={'flex'} flexDirection={'row'} gap={2}>
-              <DatePicker
+            {/* {modalMode !== 'add' && (
+              <Box display={'flex'} flexDirection={'row'}>
+                <TextField
+                  label='状態'
+                  value={formData.status ?? ''}
+                  onChange={e => handleChange('status', e.target.value)}
+                  margin='normal'
+                  select
+                  sx={{ width: '30%' }}
+                  InputLabelProps={{
+                    component: 'span',
+                  }}
+                  onSelect={handleSelectStatus}
+                >
+                  {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+            )} */}
+            {/* waiting for confirm */}
+            <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent='space-between'>
+              {/* <DatePicker
                 label='発注承認済'
                 value={dayjs(formData.purchaseApprovedDate)}
                 format='YYYY/MM/DD'
@@ -362,42 +449,42 @@ export default function PurchaseModal({
                 }
                 sx={{ marginTop: 2, width: '25%' }}
                 readOnly={modalMode === 'view'}
-              />
+              /> */}
               <DatePicker
-                label='入庫承認済'
-                value={dayjs(formData.stockApprovalDate)}
-                format='YYYY/MM/DD'
+                label='手配納期'
+                value={dayjs(formData.deliveryDate) ?? ''}
+                format='YYYY-MM-DD'
                 onChange={newValue =>
-                  handleChange('stockApprovalDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+                  handleChange('deliveryDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
                 sx={{ marginTop: 2, width: '25%' }}
                 readOnly={modalMode === 'view'}
               />
-              <TextField
-                label='状態'
-                value={formData.status ?? ''}
-                onChange={e => handleChange('status', e.target.value)}
-                margin='normal'
-                select
-                sx={{ flex: 1 }}
-                InputLabelProps={{
-                  component: 'span',
-                }}
-                inputProps={{
-                  readOnly: modalMode === 'view',
-                }}
-              >
-                {statusList.map(item => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+              {modalMode !== 'add' && (
+                <TextField
+                  label='状態'
+                  value={formData.status ?? ''}
+                  onChange={e => handleChange('status', e.target.value)}
+                  margin='normal'
+                  select
+                  sx={{ width: '30%' }}
+                  InputLabelProps={{
+                    component: 'span',
+                  }}
+                  onSelect={handleSelectStatus}
+                >
+                  {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
             </Box>
             <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-              <Box display={'flex'} alignItems={'end'}>
+              <Box display={'flex'} alignItems={'end'} flex={1}>
                 <Button
-                  onClick={() => setOpenDialog(true)}
+                  onClick={() => setOpenDialogAddComponent(true)}
                   variant='outlined'
                   sx={theme => ({
                     color: 'white',
@@ -406,6 +493,15 @@ export default function PurchaseModal({
                   })}
                 >
                   Add Component
+                </Button>
+              </Box>
+              <Box display={'flex'} alignItems={'end'}>
+                <Button
+                  onClick={() => setOpenDialogAddMemo(true)}
+                  variant='outlined'
+                  sx={{ color: 'white' }}
+                >
+                  {modalMode === 'add' || modalMode === 'edit' ? 'Add memo' : 'memo'}
                 </Button>
               </Box>
               <Autocomplete
@@ -427,11 +523,11 @@ export default function PurchaseModal({
                   if (typeof newValue === 'object' && newValue !== null) {
                     setFormData(prev => ({
                       ...prev,
-                      orderApprovedEmployeeId: newValue.id,
+                      ownerId: newValue.id,
                     }))
                   }
                 }}
-                value={findUserById(formData.orderApprovedEmployeeId)}
+                value={findUserById(formData.ownerId)}
               />
             </Box>
             <DataTable
@@ -439,7 +535,7 @@ export default function PurchaseModal({
               columns={updatedColumns}
               apiref={addNewComponentDataGridRef}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
-              sx={{ height: 475, mt: 2 }}
+              sx={{ height: 450, mt: 2 }}
               editMode='row'
               rowModesModel={rowModesModel}
               onRowModesModelChange={handleRowModesModelChange}
@@ -451,21 +547,37 @@ export default function PurchaseModal({
               slots={{
                 footer: CustomFooter,
               }}
+              getRowId={row => (modalMode !== 'add' ? row.name + row.number : row.id)}
             />
-            {openDialog && (
+            {openDialogAddComponent && (
               <AddNewComponentListDialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
+                open={openDialogAddComponent}
+                onClose={() => setOpenDialogAddComponent(false)}
                 onSubmit={newProduct => {
-                  setOpenDialog(false)
+                  setOpenDialogAddComponent(false)
                   handleAddNewComponent(newProduct)
                 }}
                 // initialData={selectedOrder}
               />
             )}
+            {openDialogAddMemo && (
+              <AddNewMemoDialog
+                open={openDialogAddMemo}
+                onClose={() => setOpenDialogAddMemo(false)}
+                editable={modalMode === 'add' || modalMode === 'edit'}
+                initailData={formData.memo}
+                onSubmit={memo => {
+                  setFormData(prev => ({
+                    ...prev,
+                    memo: memo,
+                  }))
+                  setOpenDialogAddMemo(false)
+                }}
+              />
+            )}
           </Box>
         </DialogContent>
-        {modalMode !== 'view' && (
+        {currentStatus !== 'COMPLETED' && (
           <DialogActions>
             <Button
               onClick={onClose}

@@ -1,19 +1,19 @@
 import axios from 'axios'
 import { ApiResponse, axiosInstance } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
-import { OrderStatus } from '.'
+import { OrderStatus, OrderType } from '.'
 import { mockData } from './_mockdata'
 import { HttpRequest } from 'hooks/useHttp'
 // import { PurchaseStatus } from '.'
-// export type OrderStatus = 'DELIVERED' | 'CANCEL' | 'PENDING' | 'SHIPPING' | 'OVERDUEDATE' | 'ALL'
 export interface OrderSearchCriteria {
   category: string
-  keyword: string
+  keyword?: string
   startDate: string
   endDate: string
   page?: number
   pageSize?: number
-  status: `${OrderStatus}` | null
+  orderStatus?: `${OrderStatus}` | string
+  orderType?: OrderType
 }
 type Company = {
   companyType: string
@@ -58,8 +58,24 @@ function chunkArray(mockdata: OrderData[], pageSize: number, page: number) {
 
 export default async function getOrderList(
   httpRequest: HttpRequest,
-  { category, keyword, startDate, endDate, status, page = 0, pageSize = 10 }: OrderSearchCriteria
+  {
+    category,
+    keyword,
+    startDate,
+    endDate,
+    orderStatus,
+    page = 0,
+    pageSize = 10,
+    orderType = OrderType.ALL,
+  }: OrderSearchCriteria
 ): Promise<ApiResponse<OrderData[]>> {
+  if (orderType === OrderType.ALL) {
+    // api/orders
+  } else if (orderType === OrderType.SALE) {
+    // api/sales status is not completed
+  } else if (orderType === OrderType.PURCHASE) {
+    // api/purchase status is not completed
+  }
   const response = await httpRequest(() =>
     category !== 'registrationDate' && category !== 'deliveryDate'
       ? axiosInstance.get(

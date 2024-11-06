@@ -92,18 +92,20 @@ export default function useExportOrder() {
   }
 
   const convertTitle = useCallback((typeOrder: string | null): string => {
-    switch (typeOrder) {
-      case OrderStatus.DELIVERY:
-        return PrintTitle.SALE
-      case OrderStatus.RECEIVED:
-        return PrintTitle.PURCHASE
-      case OrderStatus.PENDING:
-        return PrintTitle.PENDING
-      case OrderStatus.ORDERED:
-        return PrintTitle.ORDER
-      default:
-        return ''
-    }
+    //please re-check in export task
+    // switch (typeOrder) {
+    //   case OrderStatus.DELIVERY:
+    //     return PrintTitle.SALE
+    //   case OrderStatus.RECEIVED:
+    //     return PrintTitle.PURCHASE
+    //   case OrderStatus.PENDING:
+    //     return PrintTitle.PENDING
+    //   case OrderStatus.ORDERED:
+    //     return PrintTitle.ORDER
+    //   default:
+    //     return ''
+    // }
+    return ''
   }, [])
 
   const exportSaleSelected = async (orderSelectedData: OrderData) => {

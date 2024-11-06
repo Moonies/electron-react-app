@@ -169,6 +169,7 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
         type: 'number',
         headerAlign: 'center',
         flex: 1,
+        editable: true,
         valueFormatter: value => formatJPY(Number(value)),
       },
       {
@@ -194,10 +195,10 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
   )
 
   const getUserList = async () => {
-    // const result = await api.user.getUserList()
-    // if (result.code === 200 && result.data) {
-    //   setUserListData(result.data)
-    // }
+    const result = await api.user.getUserList(0, 100)
+    if (result.code === 200 && result.data) {
+      setUserListData(result.data)
+    }
   }
   const getCustomerList = async () => {
     const result = await api.supplier.getSupplierList()

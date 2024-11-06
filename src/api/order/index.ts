@@ -4,31 +4,32 @@ import { ApiResponse } from 'api'
 import { HttpRequest } from 'hooks/useHttp'
 
 export enum OrderStatus {
-  // ALL = 'all',
-  // NonOrder = 'quatation',
-  // RECEIVED = 'ordered',
-  // OVER_DUE_DATE = 'over_due_date',
-  // ORDER = 'order',
-  // ORDERING = 'ordering', //shipping?
-  // CANCEL = 'cancel',
-
   //basic status
-  PENDING = 'pending',
-  CANCELLED = 'cancelled',
+  // PENDING = 'PENDING',
+  // CANCEL = 'CANCELLED',
   //to sale order
-  ORDERED = 'ordered',
-  PROCESSING = 'processing',
-  DELIVERY = 'delivery',
-  DELAY = 'delay',
-  //to purchase order
-  CONFIRMED = 'confirmed',
-  RECEIVED = 'received',
-  IN_STORE = 'in_store',
+  // ORDERED = 'ordered',
+  // PROCESSING = 'processing',
+  // DELIVERY = 'delivery',
+  // DELAY = 'delay',
+  // //to purchase order
+  // CONFIRM = 'CONFIRMED',
+  // RECEIVED = 'received',
+  // IN_STORE = 'in_store',
+
+  //v2 orderStatus
+  PENDING = 'PENDING',
+  CONFIRM = 'CONFIRMED',
+  SHIP = 'SHIPPING',
+  COMPLETE = 'COMPLETED',
+  REJECT = 'REJECTED',
+  CANCEL = 'CANCELLED',
 }
 
 export enum OrderType {
   SALE = 'Sale',
   PURCHASE = 'Purchase',
+  ALL = 'All', //for basic OrderStatus
 }
 export interface OrderApi {
   getOrderList: (params: OrderSearchCriteria) => Promise<ApiResponse<OrderData[]>>

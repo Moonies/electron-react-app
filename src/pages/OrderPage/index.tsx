@@ -23,7 +23,7 @@ import useExportOrder from './hooks/useExportOrder'
 import { pdf, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer'
 import { DeliverySlipData, PDFDocument, PDFGenerator } from './components/SlipDeliveryOrder'
 import useLoading from 'hooks/useLoading'
-import { OrderStatus } from 'api/order'
+import { OrderStatus, OrderType } from 'api/order'
 import SelectTypeOrderDialog from 'components/Dialogs/SelectTypeOrderDialog'
 import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
@@ -48,11 +48,13 @@ export default function OrderPage() {
     deleteOrder,
     addNewPurchaseOrder,
     editPurchaseOrder,
-    deletePurchaseOrder,
+    getPurchaseDetail,
+    handlerDeleteOrder,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedOrder, setSelectedOrder] = useState<OrderData>()
+  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseModalDataProps>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
@@ -87,14 +89,44 @@ export default function OrderPage() {
     setModalOpen(true)
   }
 
-  const handleEditClick = useCallback(() => {
+  const handleEditClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        setSelectedOrder(selectedData)
-        setModalMode('edit')
-        setModalOpen(true)
+        // console.log(selectedData.orderType)
+        if (selectedData.orderType === 'Sale') {
+          setSelectedOrder(selectedData)
+          setModalMode('edit')
+          setModalOpen(true)
+        } else {
+          const result = await getPurchaseDetail(selectedData.id)
+          if (result) {
+            let purchaseDetail: PurchaseModalDataProps = {
+              id: selectedData.id,
+              orderCode: result.orderCode,
+              purchaseId: result.purchaseCode,
+              invoiceNumber: result.invoiceNumber,
+              supplierCompanyId: result.companyId,
+              supplierCompanyName: result.company.companyInfo.name,
+              component: result.components,
+              orderRequestEmployeeId: result.createdBy,
+              orderRequestEmployeeName: '',
+              orderApprovedEmployeeId: '',
+              orderApprovedEmployeeName: '',
+              memo: result.memo,
+              registrationDate: result.registrationDate,
+              totalAmount: result.totalAmount,
+              status: result.status,
+              ownerId: result.ownerId,
+              deliveryDate: result.deliveryDate,
+            }
+            setSelectedPurchase(purchaseDetail)
+            setOrderType('Purchase')
+            setModalMode(selectedData.status === OrderStatus.PENDING ? 'edit' : 'view')
+            setModalOpen(true)
+          }
+        }
       }
     } else {
       notificationModal.error('編集する表の行を選択してください。')
@@ -108,11 +140,16 @@ export default function OrderPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれたの受注番号　 ${selectedData.id}　を削除してもよろしいですか?`,
+          message: `この選ばれたの受注番号　 ${selectedData.orderCode}　を削除してもよろしいですか?`,
           // message: 'Are you sure you want to delete this order Number: ' + selectedData.id,
         })
         if (confirmed) {
           // Perform delete operation
+          const response = await handlerDeleteOrder(selectedData)
+          if (response) {
+            notificationSnackbar.success('削除終了しました。')
+            handleSearch()
+          }
           console.log('Delete confirmed')
         } else {
           console.log('Delete cancelled')
@@ -159,15 +196,34 @@ export default function OrderPage() {
 
       switch (modalMode) {
         case 'add':
-          const respone = await addNewPurchaseOrder(data as PurchaseModalDataProps)
-          if (respone) {
-            notificationSnackbar.success('Purchase Order is Success!!')
-            setModalOpen(false)
+          {
+            const response = await addNewPurchaseOrder(data as PurchaseModalDataProps)
+            if (response) {
+              notificationSnackbar.success('Purchase Order is Success!!')
+              setModalOpen(false)
+            }
           }
           break
-        case 'edit':
-          // editOrder(data)
+        case 'edit': {
+          const response = await editPurchaseOrder(data as PurchaseModalDataProps)
+          if (response) {
+            setModalOpen(false)
+            notificationSnackbar.success('Purchase Order Update is Success!!')
+            if (data.status === OrderStatus.CONFIRM) {
+              const confirmed = await openConfirmModal({
+                title: '確認してください',
+                message: `Do you want to print 3連納品書?`,
+              })
+              if (confirmed) {
+                // Perform delete operation
+                //print condition
+              }
+            } else {
+              setModalOpen(false)
+            }
+          }
           break
+        }
         case 'view':
           // deleteOrder(data)
           break
@@ -191,7 +247,10 @@ export default function OrderPage() {
       const selectedData = orderData.find(order => order.id === selectedId)
       // if(selectedData?.status === OrderStatus.CANCEL) has condition??
       if (selectedData) {
-        if (selectedData.status === OrderStatus.DELIVERY) {
+        if (
+          selectedData.status === OrderStatus.CONFIRM &&
+          selectedData.orderType === OrderType.PURCHASE
+        ) {
           const newSlipData = await prepareSlipData(selectedData)
           if (newSlipData !== undefined) {
             const blob = await pdf(
@@ -319,35 +378,39 @@ export default function OrderPage() {
                   component: 'span',
                 }}
               >
-                {statusOrder?.map(item => (
-                  <MenuItem key={item} value={item}>
-                    {convertStatus(item)}
+                {statusOrder?.map((item, index) => (
+                  <MenuItem key={index} value={`${item.type}.${item.value}`}>
+                    {/* {convertStatus(item)} */}
+                    {item.label}
                   </MenuItem>
                 ))}
               </TextField>
             </Box>
-            <Box
-              display={'flex'}
-              flexDirection={'row'}
-              gap={2}
-              // justifyContent={'space-between'}
-              // flex={1}
-            >
-              <DatePicker
-                label='開始日'
-                value={dayjs(searchCriteria.startDate)}
-                format='YYYY/MM/DD'
-                onAccept={handleStartDateChange}
-                views={['year', 'month', 'day']}
-              />
-              <DatePicker
-                label='終了日'
-                format='YYYY/MM/DD'
-                value={dayjs(searchCriteria.endDate)}
-                onAccept={handleEndDateChange}
-                views={['year', 'month', 'day']}
-              />
-            </Box>
+            {(searchCriteria.category === 'registrationDate' ||
+              searchCriteria.category === 'deliveryDate') && (
+              <Box
+                display={'flex'}
+                flexDirection={'row'}
+                gap={2}
+                // justifyContent={'space-between'}
+                // flex={1}
+              >
+                <DatePicker
+                  label='開始日'
+                  value={dayjs(searchCriteria.startDate)}
+                  format='YYYY/MM/DD'
+                  onAccept={handleStartDateChange}
+                  views={['year', 'month', 'day']}
+                />
+                <DatePicker
+                  label='終了日'
+                  format='YYYY/MM/DD'
+                  value={dayjs(searchCriteria.endDate)}
+                  onAccept={handleEndDateChange}
+                  views={['year', 'month', 'day']}
+                />
+              </Box>
+            )}
           </Box>
           <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
@@ -463,9 +526,12 @@ export default function OrderPage() {
       {modalOpen && orderType === 'Purchase' && (
         <PurchaseModal
           open={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setSelectedPurchase(undefined)
+            setModalOpen(false)
+          }}
           onConfirm={handleModalConfirm}
-          // initialData={selectedPurchase}
+          initialData={selectedPurchase}
           mode={modalMode}
         />
       )}
