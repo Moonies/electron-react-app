@@ -22,6 +22,7 @@ export interface AddNewPurchase {
   // stockApprovalDate: string //may be auto update when update event
   components: componentList[]
   companyId: string
+  owners: string[]
 }
 
 export default async function addNewPurchase(

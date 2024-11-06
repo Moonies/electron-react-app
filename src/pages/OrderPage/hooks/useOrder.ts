@@ -36,14 +36,24 @@ export default function useOrder() {
   const [searchCriteria, setSearchCriteria] = useState({
     category: '',
     keyword: '',
+    dateType: '',
     startDate: dateThreeMonthsAgo,
     endDate: new Date(),
     status: '',
+    orderType: '',
   })
   const { api } = useHttp()
 
   const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
-
+  const dateTypeList = [
+    { value: 'registrationDate', display: '登録日付' },
+    { value: 'deliveryDate', display: '出荷日付' },
+  ]
+  const orderTypeList = [
+    { value: 'All', display: '全て' },
+    { value: 'Sale', display: '売上' },
+    { value: 'Purchase', display: '仕入' },
+  ]
   const convertStatus = (status: string, orderType: string) => {
     switch (status) {
       case OrderStatus.PENDING:
@@ -102,7 +112,7 @@ export default function useOrder() {
         headerName: '発注先',
         headerAlign: 'center',
         flex: 1,
-        valueGetter: (value, row: OrderData) => row.company.companyInfo.name,
+        valueGetter: (value, row: OrderData) => (row.company ? row.company.companyInfo.name : ''),
       },
       // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
       { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
@@ -118,7 +128,13 @@ export default function useOrder() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
-      if (item.field === 'status' || item.field === 'orderType') return
+      if (
+        item.field === 'status' ||
+        item.field === 'orderType' ||
+        item.field === 'registrationDate' ||
+        item.field === 'deliveryDate'
+      )
+        return
       result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
     })
     setCategorySearch(result)
@@ -151,7 +167,9 @@ export default function useOrder() {
     setStatusOrder(status)
   }, [])
 
-  const handleChange = (name: string, value: string | Date | null) => {
+  const handleChange = (name: string, value?: string | Date | null) => {
+    if (name === 'orderType') setSearchCriteria(prev => ({ ...prev, status: '' }))
+
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 
@@ -223,6 +241,7 @@ export default function useOrder() {
       purchaseCode: formData.purchaseId ?? '',
       components: formData.component,
       companyId: formData.supplierCompanyId,
+      owners: [formData.ownerId],
     }
     const result = await api.purchase.addNewPurchase(data)
     if (result.code === 200) return true
@@ -243,8 +262,7 @@ export default function useOrder() {
           purchaseCode: formData.purchaseId ?? '',
           components: formData.component,
           companyId: formData.supplierCompanyId,
-          ownerId: formData.ownerId,
-          // ownerId:''
+          owners: [formData.ownerId],
         }
         const response = await api.purchase.updatePurchaseDetail(data)
         if (response.code === 200) return true
@@ -281,17 +299,17 @@ export default function useOrder() {
     setLoading(true)
     const [orderType, status] = searchCriteria.status.split('.')
 
-    // console.log(searchCriteria)
+    console.log(searchCriteria)
     //call api
-    let prepareSearhCriteria: OrderSearchCriteria = {
+    let prepareSearhCriteria = {
       ...searchCriteria,
       startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
       endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
-      orderStatus: status,
-      orderType: orderType as OrderType,
+      status: status,
+      // orderType: orderType as OrderType,
     }
     console.log(prepareSearhCriteria)
-    const result = await api.order.getOrderList(prepareSearhCriteria)
+    const result = await api.order.getOrderList(prepareSearhCriteria as OrderSearchCriteria)
     if (result.code === 200 && result.data) {
       setOrderData(result.data)
     }
@@ -318,5 +336,7 @@ export default function useOrder() {
     deletePurchaseOrder,
     getPurchaseDetail,
     handlerDeleteOrder,
+    dateTypeList,
+    orderTypeList,
   }
 }

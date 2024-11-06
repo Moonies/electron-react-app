@@ -50,6 +50,8 @@ export default function OrderPage() {
     editPurchaseOrder,
     getPurchaseDetail,
     handlerDeleteOrder,
+    dateTypeList,
+    orderTypeList,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -107,8 +109,8 @@ export default function OrderPage() {
               orderCode: result.orderCode,
               purchaseId: result.purchaseCode,
               invoiceNumber: result.invoiceNumber,
-              supplierCompanyId: result.companyId,
-              supplierCompanyName: result.company.companyInfo.name,
+              supplierCompanyId: result.companyId ?? '',
+              supplierCompanyName: result.company?.companyInfo.name ?? '',
               component: result.components,
               orderRequestEmployeeId: result.createdBy,
               orderRequestEmployeeName: '',
@@ -308,6 +310,12 @@ export default function OrderPage() {
     }
   }
 
+  const filteredStatuses = statusOrder.filter(
+    status =>
+      searchCriteria.orderType === 'All' ||
+      status.type === searchCriteria.orderType ||
+      status.type === 'All'
+  )
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
@@ -354,6 +362,126 @@ export default function OrderPage() {
                   </MenuItem>
                 ))}
               </TextField>
+              <TextField
+                fullWidth
+                name='keyword'
+                label='キーワード検索'
+                value={searchCriteria.keyword}
+                onChange={e => handleChange('keyword', e.target.value)}
+              />
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
+              <TextField
+                name='orderType'
+                value={searchCriteria.orderType}
+                select
+                label='order type'
+                id='category-order'
+                onChange={e => handleChange('orderType', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-order-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                {orderTypeList?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                name='ststus'
+                value={searchCriteria.status ?? ''}
+                select
+                label='状態'
+                id='status-order'
+                onChange={e => handleChange('status', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'status-order-label',
+                  htmlFor: 'status',
+                  component: 'span',
+                }}
+              >
+                {/* <MenuItem value={''}>None</MenuItem> */}
+
+                {filteredStatuses?.map((item, index) => (
+                  <MenuItem key={index} value={`${item.type}.${item.value}`}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                name='dateType'
+                value={searchCriteria.dateType ?? ''}
+                select
+                label='date type'
+                id='category-order'
+                onChange={e => handleChange('dateType', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-order-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                <MenuItem value={''}>None</MenuItem>
+                {dateTypeList?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+            {searchCriteria.dateType && (
+              <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
+                <Box
+                  display={'flex'}
+                  flexDirection={'row'}
+                  gap={2}
+                  // justifyContent={'space-between'}
+                  // flex={1}
+                >
+                  <DatePicker
+                    label='開始日'
+                    value={dayjs(searchCriteria.startDate)}
+                    format='YYYY/MM/DD'
+                    onAccept={handleStartDateChange}
+                    views={['year', 'month', 'day']}
+                  />
+                  <DatePicker
+                    label='終了日'
+                    format='YYYY/MM/DD'
+                    value={dayjs(searchCriteria.endDate)}
+                    onAccept={handleEndDateChange}
+                    views={['year', 'month', 'day']}
+                  />
+                </Box>
+              </Box>
+            )}
+            {/* <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
+              <TextField
+                name='category'
+                value={searchCriteria.category}
+                select
+                label='範疇項目'
+                id='category-order'
+                onChange={e => handleChange('category', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-order-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                {categorySearch?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
               {searchCriteria.category !== 'registrationDate' &&
                 searchCriteria.category !== 'deliveryDate' && (
                   <TextField
@@ -380,13 +508,12 @@ export default function OrderPage() {
               >
                 {statusOrder?.map((item, index) => (
                   <MenuItem key={index} value={`${item.type}.${item.value}`}>
-                    {/* {convertStatus(item)} */}
                     {item.label}
                   </MenuItem>
                 ))}
               </TextField>
-            </Box>
-            {(searchCriteria.category === 'registrationDate' ||
+            </Box> */}
+            {/* {(searchCriteria.category === 'registrationDate' ||
               searchCriteria.category === 'deliveryDate') && (
               <Box
                 display={'flex'}
@@ -410,7 +537,7 @@ export default function OrderPage() {
                   views={['year', 'month', 'day']}
                 />
               </Box>
-            )}
+            )} */}
           </Box>
           <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box

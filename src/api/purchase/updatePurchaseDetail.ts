@@ -24,7 +24,7 @@ export interface NewPurchaseDetail {
   components: componentList[]
   companyId: string
   // createdBy: string // can auto with token header?
-  ownerId: string // can auto with token header?
+  owners: string[] // can auto with token header?
 }
 
 export default async function updatePurchaseDetail(

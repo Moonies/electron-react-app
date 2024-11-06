@@ -14,6 +14,7 @@ export interface OrderSearchCriteria {
   pageSize?: number
   orderStatus?: `${OrderStatus}` | string
   orderType?: OrderType
+  dateType?: string
 }
 type Company = {
   companyType: string
@@ -63,26 +64,45 @@ export default async function getOrderList(
     keyword,
     startDate,
     endDate,
-    orderStatus,
+    orderStatus = '',
     page = 0,
     pageSize = 10,
+    dateType,
     orderType = OrderType.ALL,
   }: OrderSearchCriteria
 ): Promise<ApiResponse<OrderData[]>> {
-  if (orderType === OrderType.ALL) {
-    // api/orders
-  } else if (orderType === OrderType.SALE) {
+  let response
+  if (orderType === OrderType.SALE) {
     // api/sales status is not completed
   } else if (orderType === OrderType.PURCHASE) {
     // api/purchase status is not completed
+    response = await httpRequest(() =>
+      dateType && dateType !== ''
+        ? axiosInstance.get(
+            `/api/purchase?${category}.contains=${keyword}&status.contains=${orderStatus}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
+          )
+        : axiosInstance.get(
+            `/api/purchase?${category}.contains=${keyword}&status.contains=${orderStatus}&status.notEqual=COMPLETED`
+          )
+    )
+  } else {
+    response = await httpRequest(() =>
+      dateType && dateType !== ''
+        ? axiosInstance.get(
+            `/api/orders?${category}.contains=${keyword}&status.contains=${orderStatus}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
+          )
+        : axiosInstance.get(
+            `/api/orders?${category}.contains=${keyword}&status.contains=${orderStatus}`
+          )
+    )
   }
-  const response = await httpRequest(() =>
-    category !== 'registrationDate' && category !== 'deliveryDate'
-      ? axiosInstance.get(
-          `/api/orders?${category}.contains=${keyword}&registrationDate.from=${startDate}&registrationDate.to=${endDate}&deliveryDate.from=${startDate}&deliveryDate.to=${endDate}`
-        )
-      : axiosInstance.get(`/api/orders?${category}.form=${startDate}&${category}.to=${endDate}`)
-  )
+  // const response = await httpRequest(() =>
+  //   category !== 'registrationDate' && category !== 'deliveryDate'
+  //     ? axiosInstance.get(
+  //         `/api/orders?${category}.contains=${keyword}&registrationDate.from=${startDate}&registrationDate.to=${endDate}&deliveryDate.from=${startDate}&deliveryDate.to=${endDate}`
+  //       )
+  //     : axiosInstance.get(`/api/orders?${category}.form=${startDate}&${category}.to=${endDate}`)
+  // )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
