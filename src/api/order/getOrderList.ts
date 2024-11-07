@@ -12,7 +12,7 @@ export interface OrderSearchCriteria {
   endDate: string
   page?: number
   pageSize?: number
-  orderStatus?: `${OrderStatus}` | string
+  status?: `${OrderStatus}` | string
   orderType?: OrderType
   dateType?: string
 }
@@ -64,7 +64,7 @@ export default async function getOrderList(
     keyword,
     startDate,
     endDate,
-    orderStatus = '',
+    status = '',
     page = 0,
     pageSize = 10,
     dateType,
@@ -79,20 +79,20 @@ export default async function getOrderList(
     response = await httpRequest(() =>
       dateType && dateType !== ''
         ? axiosInstance.get(
-            `/api/purchase?${category}.contains=${keyword}&status.contains=${orderStatus}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
+            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
           )
         : axiosInstance.get(
-            `/api/purchase?${category}.contains=${keyword}&status.contains=${orderStatus}&status.notEqual=COMPLETED`
+            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED`
           )
     )
   } else {
     response = await httpRequest(() =>
       dateType && dateType !== ''
         ? axiosInstance.get(
-            `/api/orders?${category}.contains=${keyword}&status.contains=${orderStatus}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
+            `/api/orders?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&status.notEqual=COMPLETED`
           )
         : axiosInstance.get(
-            `/api/orders?${category}.contains=${keyword}&status.contains=${orderStatus}`
+            `/api/orders?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED`
           )
     )
   }

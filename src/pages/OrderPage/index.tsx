@@ -52,6 +52,7 @@ export default function OrderPage() {
     handlerDeleteOrder,
     dateTypeList,
     orderTypeList,
+    handlerSelectedPurchaseDetail,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -102,32 +103,33 @@ export default function OrderPage() {
           setModalMode('edit')
           setModalOpen(true)
         } else {
-          const result = await getPurchaseDetail(selectedData.id)
-          if (result) {
-            let purchaseDetail: PurchaseModalDataProps = {
-              id: selectedData.id,
-              orderCode: result.orderCode,
-              purchaseId: result.purchaseCode,
-              invoiceNumber: result.invoiceNumber,
-              supplierCompanyId: result.companyId ?? '',
-              supplierCompanyName: result.company?.companyInfo.name ?? '',
-              component: result.components,
-              orderRequestEmployeeId: result.createdBy,
-              orderRequestEmployeeName: '',
-              orderApprovedEmployeeId: '',
-              orderApprovedEmployeeName: '',
-              memo: result.memo,
-              registrationDate: result.registrationDate,
-              totalAmount: result.totalAmount,
-              status: result.status,
-              ownerId: result.ownerId,
-              deliveryDate: result.deliveryDate,
-            }
-            setSelectedPurchase(purchaseDetail)
-            setOrderType('Purchase')
-            setModalMode(selectedData.status === OrderStatus.PENDING ? 'edit' : 'view')
-            setModalOpen(true)
-          }
+          const purchaseDetail = await handlerSelectedPurchaseDetail(selectedData.id)
+          // const result = await getPurchaseDetail(selectedData.id)
+          // if (result) {
+          //   let purchaseDetail: PurchaseModalDataProps = {
+          //     id: selectedData.id,
+          //     orderCode: result.orderCode,
+          //     purchaseId: result.purchaseCode,
+          //     invoiceNumber: result.invoiceNumber,
+          //     supplierCompanyId: result.companyId ?? '',
+          //     supplierCompanyName: result.company?.companyInfo.name ?? '',
+          //     component: result.components,
+          //     orderRequestEmployeeId: result.createdBy,
+          //     orderRequestEmployeeName: '',
+          //     orderApprovedEmployeeId: '',
+          //     orderApprovedEmployeeName: '',
+          //     memo: result.memo,
+          //     registrationDate: result.registrationDate,
+          //     totalAmount: result.totalAmount,
+          //     status: result.status,
+          //     ownerId: result.ownerId,
+          //     deliveryDate: result.deliveryDate,
+          //   }
+          setSelectedPurchase(purchaseDetail)
+          setOrderType('Purchase')
+          setModalMode('edit')
+          setModalOpen(true)
+          // }
         }
       }
     } else {
@@ -167,9 +169,17 @@ export default function OrderPage() {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        setSelectedOrder(selectedData)
-        setModalMode('view')
-        setModalOpen(true)
+        if (selectedData.orderType === 'Sale') {
+          setSelectedOrder(selectedData)
+          setModalMode('view')
+          setModalOpen(true)
+        } else {
+          const purchaseDetail = await handlerSelectedPurchaseDetail(selectedData.id)
+          setSelectedPurchase(purchaseDetail)
+          setOrderType('Purchase')
+          setModalMode('view')
+          setModalOpen(true)
+        }
       }
     } else {
       notificationModal.error('詳細を表示するには、表の行を選択してください。')
@@ -207,9 +217,11 @@ export default function OrderPage() {
           }
           break
         case 'edit': {
+          console.log('edit')
           const response = await editPurchaseOrder(data as PurchaseModalDataProps)
           if (response) {
             setModalOpen(false)
+            setLoading(false)
             notificationSnackbar.success('Purchase Order Update is Success!!')
             if (data.status === OrderStatus.CONFIRM) {
               const confirmed = await openConfirmModal({
@@ -311,10 +323,7 @@ export default function OrderPage() {
   }
 
   const filteredStatuses = statusOrder.filter(
-    status =>
-      searchCriteria.orderType === 'All' ||
-      status.type === searchCriteria.orderType ||
-      status.type === 'All'
+    status => status.type === searchCriteria.orderType || status.type === 'All'
   )
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
@@ -391,28 +400,30 @@ export default function OrderPage() {
                   </MenuItem>
                 ))}
               </TextField>
-              <TextField
-                name='ststus'
-                value={searchCriteria.status ?? ''}
-                select
-                label='状態'
-                id='status-order'
-                onChange={e => handleChange('status', e.target.value as string)}
-                sx={{ width: '30%' }}
-                InputLabelProps={{
-                  id: 'status-order-label',
-                  htmlFor: 'status',
-                  component: 'span',
-                }}
-              >
-                {/* <MenuItem value={''}>None</MenuItem> */}
+              {searchCriteria.orderType !== 'All' && (
+                <TextField
+                  name='ststus'
+                  value={searchCriteria.status ?? ''}
+                  select
+                  label='状態'
+                  id='status-order'
+                  onChange={e => handleChange('status', e.target.value as string)}
+                  sx={{ width: '30%' }}
+                  InputLabelProps={{
+                    id: 'status-order-label',
+                    htmlFor: 'status',
+                    component: 'span',
+                  }}
+                >
+                  {/* <MenuItem value={''}>None</MenuItem> */}
 
-                {filteredStatuses?.map((item, index) => (
-                  <MenuItem key={index} value={`${item.type}.${item.value}`}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+                  {filteredStatuses?.map((item, index) => (
+                    <MenuItem key={index} value={`${item.type}.${item.value}`}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
               <TextField
                 name='dateType'
                 value={searchCriteria.dateType ?? ''}

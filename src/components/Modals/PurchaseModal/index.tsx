@@ -156,7 +156,7 @@ export default function PurchaseModal({
   }, [])
 
   const handleChange = async (field: keyof PurchaseModalDataProps, value: string | number) => {
-    if (field === 'status' && value === 'CONFIRM') {
+    if (field === 'status' && value === 'CONFIRMED') {
       const confirmed = await openConfirmModal({
         title: 'ご注意ください',
         message:
@@ -198,9 +198,9 @@ export default function PurchaseModal({
 
   const statusList = [
     { label: '未発注', value: 'PENDING' },
-    { label: '発注', value: 'CONFIRM' },
-    { label: '配達中', value: 'on_delivery' },
-    { label: '入庫済', value: 'delivered' },
+    { label: '発注', value: 'CONFIRMED' },
+    { label: '配達中', value: 'SHIPPED' },
+    { label: '入庫済', value: 'COMPLETED' },
     { label: '返品中', value: 'rejected' },
     { label: 'キャンセル', value: 'CANCEL' },
   ]
@@ -273,23 +273,20 @@ export default function PurchaseModal({
   ) => {
     switch (currentStatus) {
       case 'PENDING':
-        return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.value))
-      case 'CONFIRM':
-        return statusList.filter(status => status.value !== 'PENDING')
-      case 'SHIP':
-        return statusList.filter(status => ['delivered', 'rejected'].includes(status.value))
+        return statusList.filter(status =>
+          ['PENDING', 'CONFIRMED', 'CANCEL'].includes(status.value)
+        )
+      case 'CONFIRMED':
+        return statusList.filter(status =>
+          ['CONFIRMED', 'SHIPPED', 'CANCEL', 'rejected'].includes(status.value)
+        )
+      case 'SHIPPED':
+        return statusList.filter(status =>
+          ['SHIPPED', 'COMPLETED', 'rejected', 'CANCEL'].includes(status.value)
+        )
 
       default:
         return statusList
-    }
-  }
-
-  const handleSelectStatus = () => {
-    console.log(formData.status)
-    if (formData.status === 'CONFIRM') {
-      notificationModal.warning(
-        'If you change status to confirm, data can be not change. \n if your edited data,than click"OK" they are to be return to after edit \n if you need to update data should be not change status.'
-      )
     }
   }
 
@@ -471,7 +468,9 @@ export default function PurchaseModal({
                   InputLabelProps={{
                     component: 'span',
                   }}
-                  onSelect={handleSelectStatus}
+                  InputProps={{
+                    readOnly: modalMode === 'view',
+                  }}
                 >
                   {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
                     <MenuItem key={item.value} value={item.value}>

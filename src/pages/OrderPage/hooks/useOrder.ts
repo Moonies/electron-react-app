@@ -61,7 +61,9 @@ export default function useOrder() {
       // case OrderStatus.DELAY:
       //   return '納期超過'
       case OrderStatus.CONFIRM:
-        return '発注'
+        return orderType === OrderType.SALE ? '受注' : '発注'
+      case OrderStatus.SHIP:
+        return orderType === OrderType.SALE ? '見積' : '手配'
       // case OrderStatus.RECEIVED:
       //   return '発注'
       // case OrderStatus.PROCESSING:
@@ -141,16 +143,6 @@ export default function useOrder() {
   }, [])
 
   const prepareCategoryStatus = useMemo(() => {
-    // let result: OrderStatus[] = []
-    // Object.values(OrderStatus).forEach(item => {
-    //   if (
-    //     item === OrderStatus.IN_STORE ||
-    //     item === OrderStatus.DELIVERY ||
-    //     item === OrderStatus.ORDERED
-    //   )
-    //     return
-    //   result.push(item)
-    // })
     let status: StatusOption[] = [
       { value: OrderStatus.PENDING, label: '見積', type: OrderType.SALE },
       { value: OrderStatus.CONFIRM, label: '受注', type: OrderType.SALE },
@@ -203,6 +195,32 @@ export default function useOrder() {
     }
   }
 
+  const handlerSelectedPurchaseDetail = async (purchaseId: string) => {
+    const result = await getPurchaseDetail(purchaseId)
+    if (result) {
+      let purchaseDetail: PurchaseModalDataProps = {
+        id: purchaseId,
+        orderCode: result.orderCode,
+        purchaseId: result.purchaseCode,
+        invoiceNumber: result.invoiceNumber,
+        supplierCompanyId: result.companyId ?? '',
+        supplierCompanyName: result.company?.companyInfo.name ?? '',
+        component: result.components,
+        orderRequestEmployeeId: result.createdBy,
+        orderRequestEmployeeName: '',
+        orderApprovedEmployeeId: '',
+        orderApprovedEmployeeName: '',
+        memo: result.memo,
+        registrationDate: result.registrationDate,
+        totalAmount: result.totalAmount,
+        status: result.status,
+        ownerId: result.ownerId,
+        deliveryDate: result.deliveryDate,
+      }
+      return purchaseDetail
+    }
+  }
+
   const addNewOrder = async (formData: OrderData) => {
     // let data: NewOrder = {
     //   orderId: formData.orderId,
@@ -249,6 +267,7 @@ export default function useOrder() {
 
   const editPurchaseOrder = async (formData: PurchaseModalDataProps) => {
     //call update api
+    console.log(formData.status)
     switch (formData.status) {
       case PurchaseStatus.PENDING:
         let data: NewPurchaseDetail = {
@@ -268,6 +287,7 @@ export default function useOrder() {
         if (response.code === 200) return true
         break
       case PurchaseStatus.CONFIRM:
+      case PurchaseStatus.ON_DELIVERY:
       case PurchaseStatus.DELIVERED:
       case PurchaseStatus.CANCEL:
         if (formData.id) {
@@ -338,5 +358,6 @@ export default function useOrder() {
     handlerDeleteOrder,
     dateTypeList,
     orderTypeList,
+    handlerSelectedPurchaseDetail,
   }
 }
