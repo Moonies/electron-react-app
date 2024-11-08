@@ -131,14 +131,30 @@ export default function useOrder() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
-      if (
-        item.field === 'status' ||
-        item.field === 'orderType' ||
-        item.field === 'registrationDate' ||
-        item.field === 'deliveryDate'
-      )
+      // Skip these fields
+      if (['status', 'orderType', 'registrationDate', 'deliveryDate'].includes(item.field)) {
         return
-      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      }
+
+      // Handle special fields
+      if (item.field === 'companyName') {
+        return result.push({
+          value: 'company.companyInfo.name',
+          display: item.headerName || '',
+        })
+      }
+
+      if (item.field === 'owners') {
+        return result.push({
+          value: 'owners.name',
+          display: item.headerName || '',
+        })
+      }
+
+      result.push({
+        value: item.field,
+        display: item.headerName || '',
+      })
     })
     setCategorySearch(result)
   }, [])

@@ -108,8 +108,27 @@ export default function usePurchase() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
-      if (item.field === 'status' || item.field === 'registrationDate') return
-      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      if (['status', 'registrationDate', 'deliveryDate'].includes(item.field)) {
+        return
+      }
+      if (item.field === 'companyName') {
+        return result.push({
+          value: 'company.companyInfo.name',
+          display: item.headerName || '',
+        })
+      }
+
+      if (item.field === 'owners') {
+        return result.push({
+          value: 'owners.name',
+          display: item.headerName || '',
+        })
+      }
+
+      result.push({
+        value: item.field,
+        display: item.headerName || '',
+      })
     })
     setCategorySearch(result)
   }, [])
