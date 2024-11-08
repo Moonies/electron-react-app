@@ -11,7 +11,7 @@ export interface SearchCriteria {
   endDate: string
   page?: number
   pageSize?: number
-  status: `${PurchaseStatus}` | null
+  dateType?: string
 }
 export type ComponentList = {
   id: string
@@ -61,20 +61,20 @@ function chunkArray(mockdata: PurchaseData[], pageSize: number, page: number) {
 
 export default async function getPurchaseList(
   httpRequest: HttpRequest,
-  { category, keyword, startDate, endDate, page = 0, pageSize = 10 }: SearchCriteria
+  { category, keyword, startDate, endDate, page = 0, pageSize = 10, dateType }: SearchCriteria
 ): Promise<ApiResponse<PurchaseData[]>> {
   //for beta:test
   const response = await httpRequest(() =>
-    category !== 'registrationDate' && category !== 'deliveryDate'
+    dateType && dateType !== ''
       ? axiosInstance.get(
-          `/api/purchases?${category}.contains=${keyword}&registrationDate.from=${startDate}&registrationDate.to=${endDate}&deliveryDate.from=${startDate}&deliveryDate.to=${endDate}`
+          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
         )
-      : axiosInstance.get(`/api/purchases?${category}.form=${startDate}&${category}.to=${endDate}`)
+      : axiosInstance.get(`/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}`)
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content }
+  return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
   // when use real API
   // try {
   //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });

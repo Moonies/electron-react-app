@@ -11,12 +11,15 @@ interface CategorySaleSearch {
   value: string
   display: string
 }
+interface CachedData {
+  [key: string]: PurchaseData[]
+}
 
 export default function usePurchase() {
   const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
   const { withLoading, setLoading } = useLoading()
   const [purchaseData, setPurchaseData] = useState<PurchaseData[]>([])
-  // const [cachedData, setCachedData] = useState<CachedData>({})
+  const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
   const statusPurchase = Object.values(PurchaseStatus)
   const { api } = useHttp()
@@ -29,8 +32,12 @@ export default function usePurchase() {
     keyword: '',
     startDate: dateThreeMonthsAgo,
     endDate: new Date(),
-    status: null,
+    dateType: '',
   })
+  const dateTypeList = [
+    { value: 'registrationDate', display: '登録日付' },
+    { value: 'deliveryDate', display: '出荷日付' },
+  ]
 
   const handleChange = (name: string, value: string | Date | null) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
@@ -63,25 +70,37 @@ export default function usePurchase() {
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'invoiceNumber',
-        headerName: '注番',
+        field: 'orderCode',
+        headerName: '受注番号',
         headerAlign: 'center',
-        // minWidth: 100,
-        // flex: 1,
-        // valueFormatter: (params) => dayjs(params.value).format('YYYY-MM-DD'),
       },
       {
-        field: 'status',
-        headerName: '状態',
+        field: 'purchaseCode',
+        headerName: '注番',
         headerAlign: 'center',
-        valueFormatter: value => convertStatus(value),
       },
-      { field: 'supplierCompanyName', headerName: '仕入先', headerAlign: 'center', flex: 1 },
-      { field: 'quotationRequestDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'orderRequestEmployeeName', headerName: '担当者', headerAlign: 'center' },
-      { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
-      { field: 'purchaseApprovedDate', headerName: '見積書依頼', headerAlign: 'center' },
-      { field: 'purchaseReciptDate', headerName: '入庫承認済', headerAlign: 'center' },
+      {
+        field: 'companyName',
+        headerName: '発注先',
+        headerAlign: 'center',
+        flex: 1,
+        valueGetter: (value, row: any) => (row.company ? row.company.companyInfo.name : ''),
+      },
+      // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
+      { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
+      {
+        field: 'owners',
+        headerName: '担当者',
+        headerAlign: 'center',
+        valueGetter: (value: { id: string; name: string }[]) =>
+          value.length > 0 ? value[0].name : '',
+      },
+      // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
+      // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
+      { field: 'deliveryDate', headerName: '入庫日付', headerAlign: 'center' },
+      // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
+      // { field: 'purchaseApprovedDate', headerName: '見積書依頼', headerAlign: 'center' },
+      // { field: 'purchaseReciptDate', headerName: '入庫承認済', headerAlign: 'center' },
     ],
     []
   )
@@ -89,7 +108,7 @@ export default function usePurchase() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
-      if (item.field === 'status') return
+      if (item.field === 'status' || item.field === 'registrationDate') return
       result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
     })
     setCategorySearch(result)
@@ -101,11 +120,18 @@ export default function usePurchase() {
       ...searchCriteria,
       startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
       endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+      page,
+      pageSize,
     }
     //call api
     const result = await api.purchase.getPurchaseList(prepareSearhCriteria)
     if (result.code === 200 && result.data) {
       setPurchaseData(result.data)
+      setTotalRows(result.page?.totalElements ?? 0)
+      setCachedData(prevCache => ({
+        ...prevCache,
+        [`${page}-${pageSize}`]: result.data ? result.data : [],
+      }))
     }
     setLoading(false)
   }
@@ -115,16 +141,16 @@ export default function usePurchase() {
       // If page size has changed, reset to the first page
       setPaginationModel({ page: 0, pageSize: newModel.pageSize })
       // Clear the cache when page size changes
-      // setCachedData({})
+      setCachedData({})
     } else {
       setPaginationModel(newModel)
     }
     const cacheKey = `${newModel.page}-${newModel.pageSize}`
-    // if (cachedData[cacheKey]) {
-    //   setSalesData(cachedData[cacheKey])
-    //   return
-    // }
-    // getSaleList(newModel)
+    if (cachedData[cacheKey]) {
+      setPurchaseData(cachedData[cacheKey])
+      return
+    }
+    getPurchaseListData(newModel)
   }
   return {
     searchCriteria,
@@ -138,5 +164,7 @@ export default function usePurchase() {
     categorySearch,
     statusPurchase,
     convertStatus,
+    dateTypeList,
+    totalRows,
   }
 }

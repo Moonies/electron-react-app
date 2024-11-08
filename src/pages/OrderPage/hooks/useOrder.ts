@@ -82,16 +82,8 @@ export default function useOrder() {
     }
   }
 
-  const convertOrderType = (orderType: string) => {
-    switch (orderType) {
-      case OrderType.PURCHASE:
-        return '仕入'
-      case OrderType.SALE:
-        return '売上'
-      default:
-        break
-    }
-  }
+  const convertOrderType = (orderType: string) =>
+    orderType === OrderType.PURCHASE ? '仕入' : '売上'
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -210,7 +202,7 @@ export default function useOrder() {
       let purchaseDetail: PurchaseModalDataProps = {
         id: purchaseId,
         orderCode: result.orderCode,
-        purchaseId: result.purchaseCode,
+        purchaseCode: result.purchaseCode,
         invoiceNumber: result.invoiceNumber,
         supplierCompanyId: result.companyId ?? '',
         supplierCompanyName: result.company?.companyInfo.name ?? '',
@@ -265,7 +257,7 @@ export default function useOrder() {
       deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
       invoiceNumber: formData.invoiceNumber ?? '',
       memo: formData.memo,
-      purchaseCode: formData.purchaseId ?? '',
+      purchaseCode: formData.purchaseCode ?? '',
       components: formData.component,
       companyId: formData.supplierCompanyId,
       owners: formData.owners,
@@ -276,7 +268,6 @@ export default function useOrder() {
 
   const editPurchaseOrder = async (formData: PurchaseModalDataProps) => {
     //call update api
-    console.log(formData.status)
     switch (formData.status) {
       case PurchaseStatus.PENDING:
         let data: NewPurchaseDetail = {
@@ -287,7 +278,7 @@ export default function useOrder() {
           deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
           invoiceNumber: formData.invoiceNumber ?? '',
           memo: formData.memo,
-          purchaseCode: formData.purchaseId ?? '',
+          purchaseCode: formData.purchaseCode ?? '',
           components: formData.component,
           companyId: formData.supplierCompanyId,
           owners: formData.owners,
@@ -338,7 +329,6 @@ export default function useOrder() {
       pageSize: pageSize,
       // orderType: orderType as OrderType,
     }
-    console.log(prepareSearhCriteria)
     const result = await api.order.getOrderList(prepareSearhCriteria as OrderSearchCriteria)
     if (result.code === 200 && result.data) {
       setOrderData(result.data)

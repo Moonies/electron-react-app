@@ -185,7 +185,7 @@ export default function OrderPage() {
       }
     }
 
-    if ('purchaseId' in data) {
+    if ('purchaseCode' in data) {
       console.log('Confirmed data:', data)
 
       switch (modalMode) {
@@ -199,7 +199,6 @@ export default function OrderPage() {
           }
           break
         case 'edit': {
-          console.log('edit')
           const response = await editPurchaseOrder(data as PurchaseModalDataProps)
           if (response) {
             setModalOpen(false)
@@ -627,6 +626,7 @@ export default function OrderPage() {
           columns={columns}
           totalRows={totalRows}
           paginationModel={paginationModel}
+          paginationMode={'server'}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={orderDataGridRef}
           // getRowId={row => row.orderId}

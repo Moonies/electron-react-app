@@ -9,6 +9,16 @@ type component = {
   price: number
   quantity: number
 }
+type Company = {
+  id: string
+  companyCode: string
+  companyInfo: {
+    name: string
+    email: string
+    phoneNumber: string
+    buildingName: string
+  }
+}
 export type PurchaseOrderHistory = {
   id: string
   orderCode: string
@@ -27,6 +37,7 @@ export type PurchaseOrderHistory = {
   stockApprovalDate: string
   components: component[]
   companyId: string
+  company: Company
 }
 
 export default async function getComponentPurchaseHistory(
@@ -35,7 +46,8 @@ export default async function getComponentPurchaseHistory(
 ): Promise<ApiResponse<PurchaseOrderHistory[]>> {
   const response = await httpRequest(() =>
     axiosInstance.get(
-      '/api/purchases?orderType.equal=Purchase&size=100&components.name.equal=' + componentName
+      '/api/purchases?orderType.equal=Purchase&size=100&status.equal=COMPLETED&components.name.equal=' +
+        componentName
     )
   )
   if (axios.isAxiosError(response)) {

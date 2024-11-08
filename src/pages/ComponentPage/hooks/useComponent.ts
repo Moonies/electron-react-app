@@ -93,13 +93,13 @@ export default function useComponent() {
     let componentDetail
     if (purchaseHistoryResponse) {
       componentDetail = prepareComponents(purchaseHistoryResponse, componentName)
-      componentDetail = await Promise.all(
-        componentDetail.map(async item => {
-          const { data } = await api.supplier.getSupplierDetailWithId(item?.companyId ?? '')
-          console.log(data)
-          return { ...item, companyName: data?.companyInfo.name }
-        })
-      )
+      // componentDetail = await Promise.all(
+      //   componentDetail.map(async item => {
+      //     const { data } = await api.supplier.getSupplierDetailWithId(item?.companyId ?? '')
+      //     console.log(data)
+      //     return { ...item, companyName: data?.companyInfo.name }
+      //   })
+      // )
       return componentDetail as PurchaseOrderHistory[]
     }
   }

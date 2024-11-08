@@ -67,7 +67,7 @@ type OwnerList = {
 export type PurchaseModalDataProps = {
   id?: string
   orderCode: string
-  purchaseId?: string
+  purchaseCode?: string
   invoiceNumber?: string
   supplierCompanyId: string
   supplierCompanyName: string
@@ -95,7 +95,7 @@ interface PurchaseModalProps {
 }
 const defaultFormData: PurchaseModalDataProps = {
   orderCode: '',
-  purchaseId: '',
+  purchaseCode: '',
   invoiceNumber: '',
   supplierCompanyId: '',
   supplierCompanyName: '',
@@ -124,7 +124,7 @@ export default function PurchaseModal({
   const [formData, setFormData] = useState<PurchaseModalDataProps>(initialData ?? defaultFormData)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
-  const currentStatus = mode === 'view' ? 'COMPLETED' : initialData?.status
+  const currentStatus = mode === 'view' ? '' : initialData?.status
   const addNewComponentDataGridRef = useGridApiRef()
   const [openDialogAddComponent, setOpenDialogAddComponent] = useState(false)
   const [openDialogAddMemo, setOpenDialogAddMemo] = useState(false)
@@ -173,8 +173,9 @@ export default function PurchaseModal({
       }
 
       return
+    } else if (field === 'status' && value === 'PENDING') {
+      setModalMode('edit')
     }
-    // setModalMode('edit')
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -296,6 +297,13 @@ export default function PurchaseModal({
     }
   }
 
+  const getTextHeader = () =>
+    modalMode === 'add'
+      ? '追加モーダルウィンドウ'
+      : currentStatus
+        ? '編集モーダルウィンドウ'
+        : '仕入詳細'
+
   return (
     <Dialog
       open={open}
@@ -317,12 +325,12 @@ export default function PurchaseModal({
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6'>
-            {/* {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'} */}
-            {modalMode === 'view'
+            {getTextHeader()}
+            {/* {modalMode === 'view'
               ? '仕入詳細'
               : modalMode === 'edit'
                 ? '編集モーダルウィンドウ'
-                : '追加モーダルウィンドウ'}
+                : '追加モーダルウィンドウ'} */}
           </Typography>
           <Box display={'flex'} gap={4}>
             <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
@@ -366,8 +374,8 @@ export default function PurchaseModal({
               />
               <TextField
                 label='注番'
-                value={formData.purchaseId}
-                onChange={e => handleChange('purchaseId', e.target.value)}
+                value={formData.purchaseCode}
+                onChange={e => handleChange('purchaseCode', e.target.value)}
                 fullWidth
                 margin='normal'
                 required
@@ -468,7 +476,7 @@ export default function PurchaseModal({
                     component: 'span',
                   }}
                   InputProps={{
-                    readOnly: modalMode === 'view' && currentStatus === 'COMPLETED',
+                    readOnly: modalMode === 'view' && currentStatus === '',
                   }}
                 >
                   {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
@@ -598,7 +606,7 @@ export default function PurchaseModal({
             )}
           </Box>
         </DialogContent>
-        {(currentStatus !== 'COMPLETED' || modalMode !== 'view') && (
+        {(currentStatus !== '' || modalMode !== 'view') && (
           <DialogActions>
             <Button
               onClick={onClose}
