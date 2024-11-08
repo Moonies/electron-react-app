@@ -9,6 +9,11 @@ type componentList = {
   price: number
   quantity: number
 }
+
+type OwnerList = {
+  id: string
+  name: string
+}
 export interface AddNewPurchase {
   orderCode: string //may be auto create from database
   totalAmount: number
@@ -22,7 +27,7 @@ export interface AddNewPurchase {
   // stockApprovalDate: string //may be auto update when update event
   components: componentList[]
   companyId: string
-  owners: string[]
+  owners: OwnerList[]
 }
 
 export default async function addNewPurchase(

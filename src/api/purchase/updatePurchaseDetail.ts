@@ -9,6 +9,10 @@ type componentList = {
   price: number
   quantity: number
 }
+type OwnerList = {
+  id: string
+  name: string
+}
 export interface NewPurchaseDetail {
   id: string
   orderCode: string //may be auto create from database
@@ -24,7 +28,7 @@ export interface NewPurchaseDetail {
   components: componentList[]
   companyId: string
   // createdBy: string // can auto with token header?
-  owners: string[] // can auto with token header?
+  owners: OwnerList[]
 }
 
 export default async function updatePurchaseDetail(

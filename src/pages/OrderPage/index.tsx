@@ -53,6 +53,7 @@ export default function OrderPage() {
     dateTypeList,
     orderTypeList,
     handlerSelectedPurchaseDetail,
+    totalRows,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -97,39 +98,20 @@ export default function OrderPage() {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        // console.log(selectedData.orderType)
+        if (selectedData.status === OrderStatus.CANCEL) {
+          notificationModal.warning('Status is Cancel, cannot edit data.')
+          return
+        }
         if (selectedData.orderType === 'Sale') {
           setSelectedOrder(selectedData)
           setModalMode('edit')
           setModalOpen(true)
         } else {
           const purchaseDetail = await handlerSelectedPurchaseDetail(selectedData.id)
-          // const result = await getPurchaseDetail(selectedData.id)
-          // if (result) {
-          //   let purchaseDetail: PurchaseModalDataProps = {
-          //     id: selectedData.id,
-          //     orderCode: result.orderCode,
-          //     purchaseId: result.purchaseCode,
-          //     invoiceNumber: result.invoiceNumber,
-          //     supplierCompanyId: result.companyId ?? '',
-          //     supplierCompanyName: result.company?.companyInfo.name ?? '',
-          //     component: result.components,
-          //     orderRequestEmployeeId: result.createdBy,
-          //     orderRequestEmployeeName: '',
-          //     orderApprovedEmployeeId: '',
-          //     orderApprovedEmployeeName: '',
-          //     memo: result.memo,
-          //     registrationDate: result.registrationDate,
-          //     totalAmount: result.totalAmount,
-          //     status: result.status,
-          //     ownerId: result.ownerId,
-          //     deliveryDate: result.deliveryDate,
-          //   }
           setSelectedPurchase(purchaseDetail)
           setOrderType('Purchase')
           setModalMode('edit')
           setModalOpen(true)
-          // }
         }
       }
     } else {
@@ -223,6 +205,7 @@ export default function OrderPage() {
             setModalOpen(false)
             setLoading(false)
             notificationSnackbar.success('Purchase Order Update is Success!!')
+            handleSearch()
             if (data.status === OrderStatus.CONFIRM) {
               const confirmed = await openConfirmModal({
                 title: '確認してください',
@@ -384,7 +367,7 @@ export default function OrderPage() {
                 name='orderType'
                 value={searchCriteria.orderType}
                 select
-                label='order type'
+                label='受注'
                 id='category-order'
                 onChange={e => handleChange('orderType', e.target.value as string)}
                 sx={{ width: '30%' }}
@@ -428,7 +411,7 @@ export default function OrderPage() {
                 name='dateType'
                 value={searchCriteria.dateType ?? ''}
                 select
-                label='date type'
+                label='日付'
                 id='category-order'
                 onChange={e => handleChange('dateType', e.target.value as string)}
                 sx={{ width: '30%' }}
@@ -438,7 +421,7 @@ export default function OrderPage() {
                   component: 'span',
                 }}
               >
-                <MenuItem value={''}>None</MenuItem>
+                <MenuItem value={''}>ない</MenuItem>
                 {dateTypeList?.map(item => (
                   <MenuItem key={item.value} value={item.value}>
                     {item.display}
@@ -642,7 +625,7 @@ export default function OrderPage() {
         <DataTable
           data={orderData}
           columns={columns}
-          // totalRows={orderData.length}
+          totalRows={totalRows}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={orderDataGridRef}

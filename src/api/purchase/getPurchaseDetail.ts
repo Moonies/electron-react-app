@@ -37,6 +37,10 @@ type CompanyDetail = {
     fax: string
   }
 }
+type OwnerList = {
+  id: string
+  name: string
+}
 export interface PurchaseDetail {
   id: string
   createdBy: string
@@ -60,7 +64,7 @@ export interface PurchaseDetail {
   stockApprovalDate: string
   components: ComponentList[]
   companyId: string
-  ownerId: string
+  owners: OwnerList[]
 }
 
 export default async function getPurchaseDetail(

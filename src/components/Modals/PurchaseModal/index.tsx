@@ -60,6 +60,10 @@ export type PurchaseNewComponentList = {
   price: number
   quantity: number
 }
+type OwnerList = {
+  id: string
+  name: string
+}
 export type PurchaseModalDataProps = {
   id?: string
   orderCode: string
@@ -77,7 +81,7 @@ export type PurchaseModalDataProps = {
   // quotationRequestDate: string | Dayjs
   // purchaseApprovedDate: string | Dayjs
   // stockApprovalDate: string | Dayjs
-  ownerId: string
+  owners: OwnerList[]
   memo: string
   totalAmount: number
   status?: string
@@ -103,7 +107,7 @@ const defaultFormData: PurchaseModalDataProps = {
   // quotationRequestDate: dayjs(),
   // purchaseApprovedDate: dayjs(),
   // stockApprovalDate: dayjs(),
-  ownerId: '',
+  owners: [],
   memo: '',
   registrationDate: dayjs(),
   deliveryDate: dayjs(),
@@ -120,7 +124,7 @@ export default function PurchaseModal({
   const [formData, setFormData] = useState<PurchaseModalDataProps>(initialData ?? defaultFormData)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
-  const currentStatus = initialData?.status
+  const currentStatus = mode === 'view' ? 'COMPLETED' : initialData?.status
   const addNewComponentDataGridRef = useGridApiRef()
   const [openDialogAddComponent, setOpenDialogAddComponent] = useState(false)
   const [openDialogAddMemo, setOpenDialogAddMemo] = useState(false)
@@ -202,12 +206,14 @@ export default function PurchaseModal({
     { label: '配達中', value: 'SHIPPED' },
     { label: '入庫済', value: 'COMPLETED' },
     { label: '返品中', value: 'rejected' },
-    { label: 'キャンセル', value: 'CANCEL' },
+    { label: 'キャンセル', value: 'CANCELLED' },
   ]
 
   const columnVisibilityModel = useMemo(() => {
     return {
-      actions: modalMode !== 'view',
+      actions:
+        (modalMode === 'add' || modalMode === 'edit') &&
+        (currentStatus === undefined || currentStatus === 'PENDING'),
     }
   }, [modalMode])
 
@@ -319,16 +325,6 @@ export default function PurchaseModal({
                 : '追加モーダルウィンドウ'}
           </Typography>
           <Box display={'flex'} gap={4}>
-            {/* {modalMode === 'view' && (
-              <IconButton
-                edge='end'
-                color='inherit'
-                onClick={() => setModalMode('edit')}
-                aria-label='edit'
-              >
-                <EditIcon />
-              </IconButton>
-            )} */}
             <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
               <CloseIcon />
             </IconButton>
@@ -347,7 +343,12 @@ export default function PurchaseModal({
                   handleChange('registrationDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
                 sx={{ marginTop: 2, width: '100%' }}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
               />
               <TextField
                 label='受注番号'
@@ -357,7 +358,10 @@ export default function PurchaseModal({
                 margin='normal'
                 required
                 inputProps={{
-                  readOnly: modalMode === 'view',
+                  readOnly: !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  ),
                 }}
               />
               <TextField
@@ -368,7 +372,10 @@ export default function PurchaseModal({
                 margin='normal'
                 required
                 inputProps={{
-                  readOnly: modalMode === 'view',
+                  readOnly: !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  ),
                 }}
               />
               <TextField
@@ -379,7 +386,10 @@ export default function PurchaseModal({
                 margin='normal'
                 required
                 inputProps={{
-                  readOnly: modalMode === 'view',
+                  readOnly: !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  ),
                 }}
               />
               <Autocomplete
@@ -395,7 +405,12 @@ export default function PurchaseModal({
                 getOptionLabel={option => option.companyInfo.name}
                 sx={{ marginTop: 2 }}
                 renderInput={params => <TextField {...params} label='顧客名' />}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
@@ -410,28 +425,6 @@ export default function PurchaseModal({
                 fullWidth
               />
             </Box>
-            {/* {modalMode !== 'add' && (
-              <Box display={'flex'} flexDirection={'row'}>
-                <TextField
-                  label='状態'
-                  value={formData.status ?? ''}
-                  onChange={e => handleChange('status', e.target.value)}
-                  margin='normal'
-                  select
-                  sx={{ width: '30%' }}
-                  InputLabelProps={{
-                    component: 'span',
-                  }}
-                  onSelect={handleSelectStatus}
-                >
-                  {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Box>
-            )} */}
             {/* waiting for confirm */}
             <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent='space-between'>
               {/* <DatePicker
@@ -445,7 +438,8 @@ export default function PurchaseModal({
                   )
                 }
                 sx={{ marginTop: 2, width: '25%' }}
-                readOnly={modalMode === 'view'}
+                readOnly={(modalMode === 'add' || modalMode === 'edit') &&
+        (currentStatus === undefined || currentStatus === 'PENDING')}
               /> */}
               <DatePicker
                 label='手配納期'
@@ -455,7 +449,12 @@ export default function PurchaseModal({
                   handleChange('deliveryDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
                 sx={{ marginTop: 2, width: '25%' }}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
               />
               {modalMode !== 'add' && (
                 <TextField
@@ -469,7 +468,7 @@ export default function PurchaseModal({
                     component: 'span',
                   }}
                   InputProps={{
-                    readOnly: modalMode === 'view',
+                    readOnly: modalMode === 'view' && currentStatus === 'COMPLETED',
                   }}
                 >
                   {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
@@ -487,7 +486,11 @@ export default function PurchaseModal({
                   variant='outlined'
                   sx={theme => ({
                     color: 'white',
-                    visibility: modalMode === 'view' ? 'hidden' : 'inherit',
+                    visibility:
+                      (modalMode === 'add' || modalMode === 'edit') &&
+                      (currentStatus === undefined || currentStatus === 'PENDING')
+                        ? 'inherit'
+                        : 'hidden',
                     // height: '50%',
                   })}
                 >
@@ -500,7 +503,10 @@ export default function PurchaseModal({
                   variant='outlined'
                   sx={{ color: 'white' }}
                 >
-                  {modalMode === 'add' || modalMode === 'edit' ? 'Add memo' : 'memo'}
+                  {(modalMode === 'add' || modalMode === 'edit') &&
+                  (currentStatus === undefined || currentStatus === 'PENDING')
+                    ? 'Add memo'
+                    : 'memo'}
                 </Button>
               </Box>
               <Autocomplete
@@ -516,17 +522,27 @@ export default function PurchaseModal({
                 getOptionLabel={option => option.name}
                 sx={{ width: '35%' }}
                 renderInput={params => <TextField {...params} label='担当者' />}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
                     setFormData(prev => ({
                       ...prev,
-                      ownerId: newValue.id,
+                      owners: [
+                        {
+                          id: newValue.id,
+                          name: newValue.name,
+                        },
+                      ],
                     }))
                   }
                 }}
-                value={findUserById(formData.ownerId)}
+                value={findUserById(formData.owners[0]?.id ?? null)}
               />
             </Box>
             <DataTable
@@ -542,7 +558,10 @@ export default function PurchaseModal({
               processRowUpdate={processRowUpdate}
               disableColumnSelector
               columnVisibilityModel={columnVisibilityModel}
-              isCellEditable={() => modalMode !== 'view'}
+              isCellEditable={() =>
+                (modalMode === 'add' || modalMode === 'edit') &&
+                (currentStatus === undefined || currentStatus === 'PENDING')
+              }
               slots={{
                 footer: CustomFooter,
               }}
@@ -563,7 +582,10 @@ export default function PurchaseModal({
               <AddNewMemoDialog
                 open={openDialogAddMemo}
                 onClose={() => setOpenDialogAddMemo(false)}
-                editable={modalMode === 'add' || modalMode === 'edit'}
+                editable={
+                  (modalMode === 'add' || modalMode === 'edit') &&
+                  (currentStatus === undefined || currentStatus === 'PENDING')
+                }
                 initailData={formData.memo}
                 onSubmit={memo => {
                   setFormData(prev => ({
@@ -576,7 +598,7 @@ export default function PurchaseModal({
             )}
           </Box>
         </DialogContent>
-        {currentStatus !== 'COMPLETED' && (
+        {(currentStatus !== 'COMPLETED' || modalMode !== 'view') && (
           <DialogActions>
             <Button
               onClick={onClose}

@@ -79,20 +79,20 @@ export default async function getOrderList(
     response = await httpRequest(() =>
       dateType && dateType !== ''
         ? axiosInstance.get(
-            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
+            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
           )
         : axiosInstance.get(
-            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED`
+            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED&page=${page}&size=${pageSize}`
           )
     )
   } else {
     response = await httpRequest(() =>
       dateType && dateType !== ''
         ? axiosInstance.get(
-            `/api/orders?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&status.notEqual=COMPLETED`
+            `/api/orders?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&status.notEqual=COMPLETED&page=${page}&size=${pageSize}`
           )
         : axiosInstance.get(
-            `/api/orders?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED`
+            `/api/orders?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED&page=${page}&size=${pageSize}`
           )
     )
   }
@@ -106,7 +106,7 @@ export default async function getOrderList(
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content }
+  return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
 
   //for beta:test
   // let newMock = chunkArray(mockData, pageSize, page)

@@ -21,12 +21,15 @@ interface StatusOption {
   label: string
   type: OrderType
 }
+interface CachedData {
+  [key: string]: OrderData[]
+}
 
 export default function useOrder() {
   const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
   const { withLoading, setLoading } = useLoading()
   const [orderData, setOrderData] = useState<OrderData[]>([])
-  // const [cachedData, setCachedData] = useState<CachedData>({})
+  const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
   const [statusOrder, setStatusOrder] = useState<StatusOption[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -118,7 +121,13 @@ export default function useOrder() {
       },
       // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
       { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'orderRequestEmployeeName', headerName: '担当者', headerAlign: 'center' },
+      {
+        field: 'owners',
+        headerName: '担当者',
+        headerAlign: 'center',
+        valueGetter: (value: { id: string; name: string }[]) =>
+          value.length > 0 ? value[0].name : '',
+      },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
       { field: 'deliveryDate', headerName: '出荷日付', headerAlign: 'center' },
@@ -175,17 +184,17 @@ export default function useOrder() {
       // If page size has changed, reset to the first page
       setPaginationModel({ page: 0, pageSize: newModel.pageSize })
       // Clear the cache when page size changes
-      // setCachedData({})
+      setCachedData({})
     } else {
       setPaginationModel(newModel)
     }
     const cacheKey = `${newModel.page}-${newModel.pageSize}`
 
-    // if (cachedData[cacheKey]) {
-    //   setSalesData(cachedData[cacheKey])
-    //   return
-    // }
-    // getSaleList(newModel)
+    if (cachedData[cacheKey]) {
+      setOrderData(cachedData[cacheKey])
+      return
+    }
+    getOrderListData(newModel)
   }
 
   const handlerDeleteOrder = async (selectedOrder: OrderData) => {
@@ -214,7 +223,7 @@ export default function useOrder() {
         registrationDate: result.registrationDate,
         totalAmount: result.totalAmount,
         status: result.status,
-        ownerId: result.ownerId,
+        owners: result.owners,
         deliveryDate: result.deliveryDate,
       }
       return purchaseDetail
@@ -253,13 +262,13 @@ export default function useOrder() {
       orderCode: formData.orderCode,
       totalAmount: formData.totalAmount,
       registrationDate: dayjs(formData.registrationDate).format('YYYY-MM-DD'),
-      deliveryDate: '',
+      deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
       invoiceNumber: formData.invoiceNumber ?? '',
       memo: formData.memo,
       purchaseCode: formData.purchaseId ?? '',
       components: formData.component,
       companyId: formData.supplierCompanyId,
-      owners: [formData.ownerId],
+      owners: formData.owners,
     }
     const result = await api.purchase.addNewPurchase(data)
     if (result.code === 200) return true
@@ -281,7 +290,7 @@ export default function useOrder() {
           purchaseCode: formData.purchaseId ?? '',
           components: formData.component,
           companyId: formData.supplierCompanyId,
-          owners: [formData.ownerId],
+          owners: formData.owners,
         }
         const response = await api.purchase.updatePurchaseDetail(data)
         if (response.code === 200) return true
@@ -319,19 +328,25 @@ export default function useOrder() {
     setLoading(true)
     const [orderType, status] = searchCriteria.status.split('.')
 
-    console.log(searchCriteria)
     //call api
     let prepareSearhCriteria = {
       ...searchCriteria,
       startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
       endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
       status: status,
+      page: page,
+      pageSize: pageSize,
       // orderType: orderType as OrderType,
     }
     console.log(prepareSearhCriteria)
     const result = await api.order.getOrderList(prepareSearhCriteria as OrderSearchCriteria)
     if (result.code === 200 && result.data) {
       setOrderData(result.data)
+      setTotalRows(result.page?.totalElements ?? 0)
+      setCachedData(prevCache => ({
+        ...prevCache,
+        [`${page}-${pageSize}`]: result.data ? result.data : [],
+      }))
     }
     setLoading(false)
   }
@@ -359,5 +374,6 @@ export default function useOrder() {
     dateTypeList,
     orderTypeList,
     handlerSelectedPurchaseDetail,
+    totalRows,
   }
 }

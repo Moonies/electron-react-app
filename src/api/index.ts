@@ -19,6 +19,12 @@ export interface ApiResponse<T> {
   code: number | string
   message: string
   data: T | null | undefined
+  page?: {
+    size: number
+    number: number
+    totalElements: number
+    totalPages: number
+  } | null
 }
 
 // Determine the base URL based on the environment
