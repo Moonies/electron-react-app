@@ -20,11 +20,11 @@ function createWindow() {
 
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL('http://localhost:3000')
-    mainWindow.webContents.openDevTools()
-    mainWindow.removeMenu()
+    // mainWindow.webContents.openDevTools()
+    // mainWindow.removeMenu()
   } else {
-    mainWindow.webContents.openDevTools()
-    mainWindow.removeMenu()
+    // mainWindow.webContents.openDevTools()
+    // mainWindow.removeMenu()
     mainWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, '../index.html'),
