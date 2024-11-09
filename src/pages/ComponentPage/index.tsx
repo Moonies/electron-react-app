@@ -57,6 +57,7 @@ export default function ComponentManagementPage() {
     updateComponent,
     deleteComponent,
     handleComponentPurchaseHistoryList,
+    totalRows,
   } = useComponent()
 
   useEffect(() => {
@@ -104,7 +105,7 @@ export default function ComponentManagementPage() {
         if (confirmed) {
           // Delete confirmed
           const response = await deleteComponent(selectedData.id)
-          if (response) getComponentListData()
+          if (response) getComponentListData(paginationModel)
         } else {
           console.log('Delete cancelled')
         }
@@ -131,7 +132,7 @@ export default function ComponentManagementPage() {
       if (modalMode === 'add') {
         const result = await addNewComponent(newDataComponent)
         if (result) {
-          getComponentListData()
+          getComponentListData(paginationModel)
           setModalOpen(false)
         }
       } else {
@@ -139,7 +140,7 @@ export default function ComponentManagementPage() {
         if (data.id) {
           const result = await updateComponent({ id: data.id, ...newDataComponent })
           if (result) {
-            getComponentListData()
+            getComponentListData(paginationModel)
             setModalOpen(false)
           }
         }
@@ -359,9 +360,11 @@ export default function ComponentManagementPage() {
           data={componentListData}
           columns={columns}
           paginationModel={paginationModel}
+          totalRows={totalRows}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={componentDataGridRef}
           getRowId={row => row.id}
+          paginationMode={'server'}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>

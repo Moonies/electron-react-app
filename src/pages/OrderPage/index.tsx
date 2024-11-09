@@ -595,7 +595,8 @@ export default function OrderPage() {
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                onClick={handleExportPdf}
+                sx={{ visibility: 'hidden' }}
+                // onClick={handleExportPdf}
               >
                 データ出力
               </StyledButton>

@@ -142,7 +142,7 @@ export default function usePurchase() {
       page,
       pageSize,
     }
-    //call api
+
     const result = await api.purchase.getPurchaseList(prepareSearhCriteria)
     if (result.code === 200 && result.data) {
       setPurchaseData(result.data)

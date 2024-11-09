@@ -14,6 +14,10 @@ type CategoryProductSearch = {
   display: string
 }
 
+interface CachedData {
+  [key: string]: ComponentData[]
+}
+
 export default function useComponent() {
   const [categorySearch, setCategorySearch] = useState<CategoryProductSearch[]>()
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteriaComponentList>({
@@ -25,6 +29,8 @@ export default function useComponent() {
     page: 0,
     pageSize: 10,
   })
+  const [cachedData, setCachedData] = useState<CachedData>({})
+  const [totalRows, setTotalRows] = useState(0)
   const { api } = useHttp()
   const { withLoading, setLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
@@ -85,7 +91,7 @@ export default function useComponent() {
 
   const handleSearch = useCallback(async () => {
     //if have another event
-    getComponentListData()
+    getComponentListData(paginationModel)
   }, [searchCriteria, withLoading])
 
   const handleComponentPurchaseHistoryList = async (componentName: string) => {
@@ -103,7 +109,7 @@ export default function useComponent() {
       return componentDetail as PurchaseOrderHistory[]
     }
   }
-  const getComponentListData = async () => {
+  const getComponentListData = async ({ page, pageSize }: GridPaginationModel) => {
     const result = await withLoading(api.component.getComponentList(searchCriteria))
     if (result.code === 200 && result.data) {
       setComponentListData(result.data)
@@ -153,7 +159,22 @@ export default function useComponent() {
     }
   }
 
-  const handlePaginationModelChange = () => {}
+  const handlePaginationModelChange = (newModel: GridPaginationModel) => {
+    if (newModel.pageSize !== paginationModel.pageSize) {
+      // If page size has changed, reset to the first page
+      setPaginationModel({ page: 0, pageSize: newModel.pageSize })
+      // Clear the cache when page size changes
+      setCachedData({})
+    } else {
+      setPaginationModel(newModel)
+    }
+    const cacheKey = `${newModel.page}-${newModel.pageSize}`
+    if (cachedData[cacheKey]) {
+      setComponentListData(cachedData[cacheKey])
+      return
+    }
+    getComponentListData(newModel)
+  }
   return {
     paginationModel,
     columns,
@@ -170,5 +191,6 @@ export default function useComponent() {
     updateComponent,
     deleteComponent,
     handleComponentPurchaseHistoryList,
+    totalRows,
   }
 }
