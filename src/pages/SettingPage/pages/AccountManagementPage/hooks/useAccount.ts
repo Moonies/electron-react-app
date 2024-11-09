@@ -39,11 +39,11 @@ export default function useAccount() {
       // },
       { field: 'name', headerName: '名前', headerAlign: 'center' },
       {
-        field: 'roleId',
+        field: 'role',
         headerName: '役柄',
         headerAlign: 'center',
         // minWidth: 200,
-        // valueGetter: (value, row: UserData) => row.role.label, //now backend is progressing
+        valueGetter: (value: { id: string; label: string }) => value.label, //now backend is progressing
       },
     ],
     []

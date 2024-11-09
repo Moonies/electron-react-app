@@ -91,6 +91,8 @@ export default function useHttp() {
     user: userApi(httpRequest),
     component: componentApi(httpRequest),
     kpi: kpiApi(httpRequest),
+    order: orderApi(httpRequest),
+    purchase: purchaseApi(httpRequest),
   }
 
   return { api }

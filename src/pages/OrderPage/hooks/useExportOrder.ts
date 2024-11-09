@@ -92,18 +92,20 @@ export default function useExportOrder() {
   }
 
   const convertTitle = useCallback((typeOrder: string | null): string => {
-    switch (typeOrder) {
-      case OrderStatus.DELIVERY:
-        return PrintTitle.SALE
-      case OrderStatus.RECEIVED:
-        return PrintTitle.PURCHASE
-      case OrderStatus.PENDING:
-        return PrintTitle.PENDING
-      case OrderStatus.ORDERED:
-        return PrintTitle.ORDER
-      default:
-        return ''
-    }
+    //please re-check in export task
+    // switch (typeOrder) {
+    //   case OrderStatus.DELIVERY:
+    //     return PrintTitle.SALE
+    //   case OrderStatus.RECEIVED:
+    //     return PrintTitle.PURCHASE
+    //   case OrderStatus.PENDING:
+    //     return PrintTitle.PENDING
+    //   case OrderStatus.ORDERED:
+    //     return PrintTitle.ORDER
+    //   default:
+    //     return ''
+    // }
+    return ''
   }, [])
 
   const exportSaleSelected = async (orderSelectedData: OrderData) => {
@@ -111,7 +113,7 @@ export default function useExportOrder() {
     let title = convertTitle(orderSelectedData.status)
     try {
       const [customer, myCompany] = await Promise.all([
-        getCustomerDetail(orderSelectedData.customerCompanyId),
+        getCustomerDetail(orderSelectedData.companyId),
         getMyCompanyDetail(),
       ])
 
@@ -122,7 +124,8 @@ export default function useExportOrder() {
         receiver: customer || ({} as ReceiverDetail),
         sender: myCompany || ({} as SenderDetail),
       }
-      exportToPdf(printColumnList, orderSelectedData.product, newExportDetail)
+      //watiting re check export task
+      // exportToPdf(printColumnList, orderSelectedData.product, newExportDetail)
     } catch (error) {
       notificationModal.error(`Error exporting : ${error}`)
     } finally {
@@ -133,29 +136,29 @@ export default function useExportOrder() {
   const prepareSlipData = async (orderSelectedData: OrderData) => {
     try {
       const [customer, myCompany] = await Promise.all([
-        getCustomerDetail(orderSelectedData.customerCompanyId),
+        getCustomerDetail(orderSelectedData.companyId),
         getMyCompanyDetail(),
       ])
+      //waiting re check export task
+      // let newSlipData: DeliverySlipData = {
+      //   customerNumber: customer?.id ?? '',
+      //   customerName: customer?.name ?? '',
+      //   customerFullAddress: customer?.fullAddress ?? '',
+      //   customerTel: customer?.phoneNumber ?? '',
+      //   customerFax: customer?.fax ?? '',
+      //   myCompanyName: myCompany?.name ?? '',
+      //   myCompanyFullAddress: myCompany?.fullAddress ?? '',
+      //   myCompanyTel: myCompany?.phoneNumber ?? '',
+      //   myCompanyFax: myCompany?.fax ?? '',
+      //   id: orderSelectedData.id,
+      //   orderNumber: orderSelectedData.orderId,
+      //   orderShippingDate: orderSelectedData.shippingmentDate,
+      //   orderShippingExpireDate: '',
+      //   totalProduct: orderSelectedData.product.length,
+      //   product: orderSelectedData.product,
+      // }
 
-      let newSlipData: DeliverySlipData = {
-        customerNumber: customer?.id ?? '',
-        customerName: customer?.name ?? '',
-        customerFullAddress: customer?.fullAddress ?? '',
-        customerTel: customer?.phoneNumber ?? '',
-        customerFax: customer?.fax ?? '',
-        myCompanyName: myCompany?.name ?? '',
-        myCompanyFullAddress: myCompany?.fullAddress ?? '',
-        myCompanyTel: myCompany?.phoneNumber ?? '',
-        myCompanyFax: myCompany?.fax ?? '',
-        id: orderSelectedData.id,
-        orderNumber: orderSelectedData.orderId,
-        orderShippingDate: orderSelectedData.shippingmentDate,
-        orderShippingExpireDate: '',
-        totalProduct: orderSelectedData.product.length,
-        product: orderSelectedData.product,
-      }
-
-      return newSlipData
+      // return newSlipData
     } catch (error) {
       notificationModal.error(`Error Prepare SlipData : ${error}`)
     } finally {

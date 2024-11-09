@@ -16,9 +16,9 @@ export enum PrintType {
   PURCHASE = 'purchase_invoice',
 }
 export enum PrintTitle {
-  SALE = '請求書',
-  ORDER = '納品書',
-  PENDING = '見積書',
+  SALE = '請求書', //sale order type
+  ORDER = '納品書', //sale order type
+  PENDING = '見積書', //sale order type
   // SHIPPING = '出荷伝票',
   PURCHASE = '仕入票',
 }

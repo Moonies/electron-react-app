@@ -18,7 +18,7 @@ import { ApiResponse } from 'api'
 export interface ComponentApi {
   addNewComponent: (params: AddNewComponentProps) => Promise<ApiResponse<{}>>
   deleteComponent: (componentId: string) => Promise<ApiResponse<{}>>
-  getComponentData: (componentId: string) => Promise<ApiResponse<componentDetail[]>>
+  getComponentData: (componentNumber: string) => Promise<ApiResponse<componentDetail[]>>
   getComponentPurchaseHistory: (
     componentName: string
   ) => Promise<ApiResponse<PurchaseOrderHistory[]>>
@@ -31,7 +31,7 @@ export default function component(httpRequest: HttpRequest): ComponentApi {
   return {
     addNewComponent: params => addNewComponent(httpRequest, params),
     deleteComponent: componentId => deleteComponent(httpRequest, componentId),
-    getComponentData: componentId => getComponentData(httpRequest, componentId),
+    getComponentData: componentNumber => getComponentData(httpRequest, componentNumber),
     getComponentPurchaseHistory: componentName =>
       getComponentPurchaseHistory(httpRequest, componentName),
     getComponentList: params => getComponentList(httpRequest, params),

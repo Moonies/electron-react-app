@@ -9,12 +9,12 @@ type componentList = {
   price: number
   quantity: number
 }
-
 type OwnerList = {
   id: string
   name: string
 }
-export interface AddNewPurchase {
+export interface NewPurchaseDetail {
+  id: string
   orderCode: string //may be auto create from database
   totalAmount: number
   registrationDate: string
@@ -27,24 +27,19 @@ export interface AddNewPurchase {
   // stockApprovalDate: string //may be auto update when update event
   components: componentList[]
   companyId: string
+  // createdBy: string // can auto with token header?
   owners: OwnerList[]
 }
 
-export default async function addNewPurchase(
+export default async function updatePurchaseDetail(
   httpRequest: HttpRequest,
-  newPurchase: AddNewPurchase
+  newPurchaseDetail: NewPurchaseDetail
 ): Promise<ApiResponse<{}>> {
-  const response = await httpRequest(() => axiosInstance.post('/api/purchases', { ...newPurchase }))
+  const response = await httpRequest(() =>
+    axiosInstance.put('/api/purchases', { ...newPurchaseDetail })
+  )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
   return { code: 200, message: 'success', data: response?.data }
-  //for beta:test
-  // let newMock = chunkArray(mockData, pageSize, page)
-
-  // await new Promise(resolve => setTimeout(resolve, 1000))
-  // return {
-  //   code: 200,
-  //   message: 'Success',
-  //   data: {},
 }

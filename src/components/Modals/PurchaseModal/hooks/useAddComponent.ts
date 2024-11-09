@@ -9,6 +9,7 @@ import {
   GridRowsProp,
   GridEventListener,
   GridRowEditStopReasons,
+  GridPaginationModel,
 } from '@mui/x-data-grid'
 import { ComponentData } from 'api/component/getComponentList'
 import { CustomerData } from 'api/customer/getCustomerList'
@@ -23,8 +24,10 @@ import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 
 import { useCallback, useMemo, useState } from 'react'
+import { formatJPY } from 'utils/formatUtils'
+import { PurchaseModalDataProps } from '..'
 
-export default function useAddComponent(purchaseData: PurchaseData) {
+export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
   const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>(
     purchaseData.component
@@ -32,30 +35,52 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   const [componentData, setComponentData] = useState<ComponentData[]>([])
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [supplierCompanyListData, setSupplierCompanyListData] = useState<SupplierData[]>([])
+
   const { withLoading, setLoading } = useLoading()
   const { api } = useHttp()
 
   const handleAddNewComponent = (newComponent: NewComponentDetail) => {
-    let currentIndex = newComponentListData.length
+    // let currentIndex = newComponentListData.length
     let currentComponentData = newComponentListData
     //should be get componentbyId for check and create new Id
-    if (currentComponentData.length > 0) {
-      const resultIndex = currentComponentData.findIndex(
-        item => item.componentNumber === newComponent.componentNumber
-      )
-      if (resultIndex !== -1) {
-        let newRow = currentComponentData.map((product, index) =>
-          index === resultIndex
-            ? { ...product, quantity: product.quantity + newComponent.quantity }
-            : product
-        )
-        setNewComponentListData(newRow)
-      } else {
-        // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
-      }
-    } else {
-      // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
+
+    if (currentComponentData.length === 0) {
+      return setNewComponentListData(prev => [...prev, { ...newComponent }])
     }
+
+    const existingComponent = currentComponentData.find(
+      item => item.number === newComponent.number && item.id === newComponent.id
+    )
+    if (existingComponent) {
+      let newRow = currentComponentData.map(item =>
+        item.id === newComponent.id
+          ? { ...item, quantity: item.quantity + newComponent.quantity }
+          : item
+      )
+      setNewComponentListData(newRow)
+    } else {
+      setNewComponentListData(prev => [...prev, { ...newComponent }])
+    }
+
+    // if (currentComponentData.length > 0) {
+    //   const resultIndex = currentComponentData.findIndex(
+    //     item => item.componentNumber === newComponent.componentNumber
+    //   )
+    //   const existingComponent = currentComponentData.find(
+    //     item => item.componentNumber === newComponent.componentNumber && item.id === newComponent.id
+    //   )
+    //   if (existingComponent) {
+    //     let newRow = currentComponentData.map((product, index) =>
+    //       index === resultIndex
+    //         ? { ...product, quantity: product.quantity + newComponent.quantity }
+    //         : product
+    //     )
+    //     setNewComponentListData(newRow)
+    //   } else {
+    //     // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
+    //     setNewComponentListData(prev => [...prev, { ...newComponent }])
+    //   }
+    // }
   }
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
@@ -117,21 +142,16 @@ export default function useAddComponent(purchaseData: PurchaseData) {
     []
   )
 
-  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-  })
-
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'componentNumber',
+        field: 'number',
         headerName: '商品番号',
         headerAlign: 'center',
         flex: 1,
       },
       {
-        field: 'componentName',
+        field: 'name',
         headerName: '商品名',
         headerAlign: 'center',
         flex: 1,
@@ -144,12 +164,13 @@ export default function useAddComponent(purchaseData: PurchaseData) {
         editable: true,
       },
       {
-        field: 'unitPrice',
+        field: 'price',
         headerName: '単価',
         type: 'number',
         headerAlign: 'center',
         flex: 1,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        editable: true,
+        valueFormatter: value => formatJPY(Number(value)),
       },
       {
         field: 'totalPrice',
@@ -157,9 +178,9 @@ export default function useAddComponent(purchaseData: PurchaseData) {
         type: 'number',
         headerAlign: 'center',
         flex: 1,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueFormatter: value => formatJPY(Number(value)),
         valueGetter: (value, row) => {
-          return row.quantity * row.unitPrice
+          return row.quantity * row.price
         },
       },
       {
@@ -174,10 +195,10 @@ export default function useAddComponent(purchaseData: PurchaseData) {
   )
 
   const getUserList = async () => {
-    // const result = await api.user.getUserList()
-    // if (result.code === 200 && result.data) {
-    //   setUserListData(result.data)
-    // }
+    const result = await api.user.getUserList(0, 100)
+    if (result.code === 200 && result.data) {
+      setUserListData(result.data)
+    }
   }
   const getCustomerList = async () => {
     const result = await api.supplier.getSupplierList()

@@ -1,28 +1,40 @@
-import { default as getOrderList } from './getOrderList'
+import { default as getOrderList, OrderData, OrderSearchCriteria } from './getOrderList'
 import { default as addNewOrder } from './addNewOrder'
+import { ApiResponse } from 'api'
+import { HttpRequest } from 'hooks/useHttp'
 
 export enum OrderStatus {
-  // ALL = 'all',
-  // NonOrder = 'quatation',
-  // RECEIVED = 'ordered',
-  // OVER_DUE_DATE = 'over_due_date',
-  // ORDER = 'order',
-  // ORDERING = 'ordering', //shipping?
-  // CANCEL = 'cancel',
-
   //basic status
-  PENDING = 'pending',
-  CANCELLED = 'cancelled',
+  // PENDING = 'PENDING',
+  // CANCEL = 'CANCELLED',
   //to sale order
-  ORDERED = 'ordered',
-  PROCESSING = 'processing',
-  DELIVERY = 'delivery',
-  DELAY = 'delay',
-  //to purchase order
-  CONFIRMED = 'confirmed',
-  RECEIVED = 'received',
-  IN_STORE = 'in_store',
+  // ORDERED = 'ordered',
+  // PROCESSING = 'processing',
+  // DELIVERY = 'delivery',
+  // DELAY = 'delay',
+  // //to purchase order
+  // CONFIRM = 'CONFIRMED',
+  // RECEIVED = 'received',
+  // IN_STORE = 'in_store',
+
+  //v2 orderStatus
+  PENDING = 'PENDING',
+  CONFIRM = 'CONFIRMED',
+  SHIP = 'SHIPPED',
+  COMPLETE = 'COMPLETED',
+  REJECT = 'REJECTED',
+  CANCEL = 'CANCELLED',
 }
-export default function order() {
-  return { getOrderList, addNewOrder }
+
+export enum OrderType {
+  SALE = 'Sale',
+  PURCHASE = 'Purchase',
+  ALL = 'All', //for basic OrderStatus
+}
+export interface OrderApi {
+  getOrderList: (params: OrderSearchCriteria) => Promise<ApiResponse<OrderData[]>>
+}
+
+export default function order(httpRequest: HttpRequest): OrderApi {
+  return { getOrderList: params => getOrderList(httpRequest, params) }
 }

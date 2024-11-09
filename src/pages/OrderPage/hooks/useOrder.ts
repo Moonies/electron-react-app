@@ -1,9 +1,14 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-import { api } from 'api/index'
-import { OrderStatus } from 'api/order'
+import { OrderStatus, OrderType } from 'api/order'
 import { NewOrder } from 'api/order/addNewOrder'
-import { OrderData } from 'api/order/getOrderList'
+import { OrderData, OrderSearchCriteria } from 'api/order/getOrderList'
+import { PurchaseStatus } from 'api/purchase'
+import { AddNewPurchase } from 'api/purchase/addNewPurchase'
+import { PurchaseData } from 'api/purchase/getPurchaseList'
+import { NewPurchaseDetail } from 'api/purchase/updatePurchaseDetail'
+import { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
 import dayjs from 'dayjs'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import { useCallback, useMemo, useState } from 'react'
 
@@ -11,14 +16,22 @@ interface CategorySaleSearch {
   value: string
   display: string
 }
+interface StatusOption {
+  value: OrderStatus
+  label: string
+  type: OrderType
+}
+interface CachedData {
+  [key: string]: OrderData[]
+}
 
 export default function useOrder() {
   const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
   const { withLoading, setLoading } = useLoading()
   const [orderData, setOrderData] = useState<OrderData[]>([])
-  // const [cachedData, setCachedData] = useState<CachedData>({})
+  const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
-  const [statusOrder, setStatusOrder] = useState<OrderStatus[]>([])
+  const [statusOrder, setStatusOrder] = useState<StatusOption[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10,
@@ -26,57 +39,91 @@ export default function useOrder() {
   const [searchCriteria, setSearchCriteria] = useState({
     category: '',
     keyword: '',
+    dateType: '',
     startDate: dateThreeMonthsAgo,
     endDate: new Date(),
-    status: null,
+    status: '',
+    orderType: '',
   })
+  const { api } = useHttp()
 
   const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
-
-  const convertStatus = (status: string) => {
+  const dateTypeList = [
+    { value: 'registrationDate', display: '登録日付' },
+    { value: 'deliveryDate', display: '出荷日付' },
+  ]
+  const orderTypeList = [
+    { value: 'All', display: '全て' },
+    { value: 'Sale', display: '売上' },
+    { value: 'Purchase', display: '仕入' },
+  ]
+  const convertStatus = (status: string, orderType: string) => {
     switch (status) {
-      case OrderStatus.RECEIVED:
-        return '発注'
       case OrderStatus.PENDING:
-        return '見積'
-      case OrderStatus.DELAY:
-        return '納期超過'
-      case OrderStatus.CONFIRMED:
-        return '未発注'
-      case OrderStatus.PROCESSING:
-        return 'processing'
-      // case OrderStatus.INSTORE:
+        return orderType === OrderType.SALE ? '見積' : '未発注'
+      // case OrderStatus.DELAY:
+      //   return '納期超過'
+      case OrderStatus.CONFIRM:
+        return orderType === OrderType.SALE ? '受注' : '発注'
+      case OrderStatus.SHIP:
+        return orderType === OrderType.SALE ? '見積' : '手配'
+      // case OrderStatus.RECEIVED:
+      //   return '発注'
+      // case OrderStatus.PROCESSING:
+      //   return 'processing'
+      // case OrderStatus.INSTORE:　//completed in purchase order should be can see purchase page only
       //   return '入庫済'
-      // case OrderStatus.DELIVERED:
+      // case OrderStatus.DELIVERED: //completed in sale order should be can see sale page only
       //   return '出荷済'
-      case OrderStatus.CANCELLED:
+      case OrderStatus.CANCEL:
         return 'キャンセル'
       default:
         return status
     }
   }
 
+  const convertOrderType = (orderType: string) =>
+    orderType === OrderType.PURCHASE ? '仕入' : '売上'
+
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'id',
+        field: 'orderCode',
         headerName: '受注番号',
         headerAlign: 'center',
+      },
+      {
+        field: 'orderType',
+        headerName: '受注タイプ',
+        headerAlign: 'center',
+        valueFormatter: value => convertOrderType(value),
       },
       {
         field: 'status',
         headerName: '状態',
         headerAlign: 'center',
-        valueFormatter: value => convertStatus(value),
+        valueFormatter: (value, row: OrderData) => convertStatus(value, row.orderType),
       },
-      { field: 'customerCompanyName', headerName: '発注先', headerAlign: 'center', flex: 1 },
-      { field: 'orderId', headerName: '注番', headerAlign: 'center' },
-      { field: 'registDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'orderRequestEmployeeName', headerName: '担当者', headerAlign: 'center' },
+      {
+        field: 'companyName',
+        headerName: '発注先',
+        headerAlign: 'center',
+        flex: 1,
+        valueGetter: (value, row: OrderData) => (row.company ? row.company.companyInfo.name : ''),
+      },
+      // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
+      { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
+      {
+        field: 'owners',
+        headerName: '担当者',
+        headerAlign: 'center',
+        valueGetter: (value: { id: string; name: string }[]) =>
+          value.length > 0 ? value[0].name : '',
+      },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
-      { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
-      { field: 'shippingmentDate', headerName: '出荷日付', headerAlign: 'center' },
-      { field: 'paymentDueDate', headerName: '支払期限', headerAlign: 'center' },
+      // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
+      { field: 'deliveryDate', headerName: '出荷日付', headerAlign: 'center' },
+      // { field: 'paymentDueDate', headerName: '支払期限', headerAlign: 'center' },
     ],
     []
   )
@@ -84,33 +131,60 @@ export default function useOrder() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
-      if (item.field === 'status') return
-      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      // Skip these fields
+      if (['status', 'orderType', 'registrationDate', 'deliveryDate'].includes(item.field)) {
+        return
+      }
+
+      // Handle special fields
+      if (item.field === 'companyName') {
+        return result.push({
+          value: 'company.companyInfo.name',
+          display: item.headerName || '',
+        })
+      }
+
+      if (item.field === 'owners') {
+        return result.push({
+          value: 'owners.name',
+          display: item.headerName || '',
+        })
+      }
+
+      result.push({
+        value: item.field,
+        display: item.headerName || '',
+      })
     })
     setCategorySearch(result)
   }, [])
 
   const prepareCategoryStatus = useMemo(() => {
-    let result: OrderStatus[] = []
-    Object.values(OrderStatus).forEach(item => {
-      if (
-        item === OrderStatus.IN_STORE ||
-        item === OrderStatus.DELIVERY ||
-        item === OrderStatus.ORDERED
-      )
-        return
-      result.push(item)
-    })
-    setStatusOrder(result)
+    let status: StatusOption[] = [
+      { value: OrderStatus.PENDING, label: '見積', type: OrderType.SALE },
+      { value: OrderStatus.CONFIRM, label: '受注', type: OrderType.SALE },
+      { value: OrderStatus.SHIP, label: '出荷', type: OrderType.SALE },
+      // { value: OrderStatus.COMPLETE, label: '売上', type: OrderType.SALE },
+      { value: OrderStatus.PENDING, label: '未発注', type: OrderType.PURCHASE },
+      { value: OrderStatus.CONFIRM, label: '発注', type: OrderType.PURCHASE },
+      { value: OrderStatus.SHIP, label: '手配', type: OrderType.PURCHASE },
+      // { value: OrderStatus.COMPLETE, label: '入庫', type: OrderType.PURCHASE },
+      // { value: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.PURCHASE },
+      { value: OrderStatus.REJECT, label: '返品', type: OrderType.ALL },
+      { value: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.ALL },
+    ]
+    setStatusOrder(status)
   }, [])
 
-  const handleChange = (name: string, value: string | Date | null) => {
+  const handleChange = (name: string, value?: string | Date | null) => {
+    if (name === 'orderType') setSearchCriteria(prev => ({ ...prev, status: '' }))
+
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 
   const handleSearch = useCallback(async () => {
     //if condition when search put in here
-    getPurchaseListData(paginationModel)
+    getOrderListData(paginationModel)
   }, [searchCriteria, withLoading])
 
   const handlePaginationModelChange = async (newModel: GridPaginationModel) => {
@@ -118,35 +192,68 @@ export default function useOrder() {
       // If page size has changed, reset to the first page
       setPaginationModel({ page: 0, pageSize: newModel.pageSize })
       // Clear the cache when page size changes
-      // setCachedData({})
+      setCachedData({})
     } else {
       setPaginationModel(newModel)
     }
     const cacheKey = `${newModel.page}-${newModel.pageSize}`
 
-    // if (cachedData[cacheKey]) {
-    //   setSalesData(cachedData[cacheKey])
-    //   return
-    // }
-    // getSaleList(newModel)
+    if (cachedData[cacheKey]) {
+      setOrderData(cachedData[cacheKey])
+      return
+    }
+    getOrderListData(newModel)
+  }
+
+  const handlerDeleteOrder = async (selectedOrder: OrderData) => {
+    if (selectedOrder.orderType === OrderType.SALE) {
+    } else {
+      return await deletePurchaseOrder(selectedOrder.id)
+    }
+  }
+
+  const handlerSelectedPurchaseDetail = async (purchaseId: string) => {
+    const result = await getPurchaseDetail(purchaseId)
+    if (result) {
+      let purchaseDetail: PurchaseModalDataProps = {
+        id: purchaseId,
+        orderCode: result.orderCode,
+        purchaseCode: result.purchaseCode,
+        invoiceNumber: result.invoiceNumber,
+        supplierCompanyId: result.companyId ?? '',
+        supplierCompanyName: result.company?.companyInfo.name ?? '',
+        component: result.components,
+        orderRequestEmployeeId: result.createdBy,
+        orderRequestEmployeeName: '',
+        orderApprovedEmployeeId: '',
+        orderApprovedEmployeeName: '',
+        memo: result.memo,
+        registrationDate: result.registrationDate,
+        totalAmount: result.totalAmount,
+        status: result.status,
+        owners: result.owners,
+        deliveryDate: result.deliveryDate,
+      }
+      return purchaseDetail
+    }
   }
 
   const addNewOrder = async (formData: OrderData) => {
-    let data: NewOrder = {
-      orderId: formData.orderId,
-      customerCompanyId: formData.customerCompanyId,
-      product: formData.product,
-      orderRequestEmployeeId: formData.orderRequestEmployeeId,
-      orderApprovedEmployeeId: formData.orderApprovedEmployeeId,
-      quotationRequestDate: dayjs(formData.quotationRequestDate).format('YYYY/MM/DD'),
-      registDate: dayjs(formData.registDate).format('YYYY/MM/DD'),
-      shippingmentDate: dayjs(formData.shippingmentDate).format('YYYY/MM/DD'),
-      paymentDueDate: dayjs(formData.paymentDueDate).format('YYYY/MM/DD'),
-      status: formData.status,
-    }
+    // let data: NewOrder = {
+    //   orderId: formData.orderId,
+    //   customerCompanyId: formData.customerCompanyId,
+    //   product: formData.product,
+    //   orderRequestEmployeeId: formData.orderRequestEmployeeId,
+    //   orderApprovedEmployeeId: formData.orderApprovedEmployeeId,
+    //   quotationRequestDate: dayjs(formData.quotationRequestDate).format('YYYY/MM/DD'),
+    //   registDate: dayjs(formData.registDate).format('YYYY/MM/DD'),
+    //   shippingmentDate: dayjs(formData.shippingmentDate).format('YYYY/MM/DD'),
+    //   paymentDueDate: dayjs(formData.paymentDueDate).format('YYYY/MM/DD'),
+    //   status: formData.status,
+    // }
     // console.log(data)
     //call api
-    const result = await api.order.addNewOrder(data)
+    // const result = await api.order.addNewOrder(data)
   }
 
   const editOrder = async (FormData: OrderData) => {
@@ -157,12 +264,95 @@ export default function useOrder() {
     //cal delete api
   }
 
-  const getPurchaseListData = async ({ page, pageSize }: GridPaginationModel) => {
-    setLoading(true)
-    //call api
-    const result = await api.order.getOrderList(searchCriteria)
+  const addNewPurchaseOrder = async (formData: PurchaseModalDataProps) => {
+    console.log(formData)
+    let data: AddNewPurchase = {
+      orderCode: formData.orderCode,
+      totalAmount: formData.totalAmount,
+      registrationDate: dayjs(formData.registrationDate).format('YYYY-MM-DD'),
+      deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
+      invoiceNumber: formData.invoiceNumber ?? '',
+      memo: formData.memo,
+      purchaseCode: formData.purchaseCode ?? '',
+      components: formData.component,
+      companyId: formData.supplierCompanyId,
+      owners: formData.owners,
+    }
+    const result = await api.purchase.addNewPurchase(data)
+    if (result.code === 200) return true
+  }
+
+  const editPurchaseOrder = async (formData: PurchaseModalDataProps) => {
+    //call update api
+    switch (formData.status) {
+      case PurchaseStatus.PENDING:
+        let data: NewPurchaseDetail = {
+          id: formData.id ?? '',
+          orderCode: formData.orderCode,
+          totalAmount: formData.totalAmount,
+          registrationDate: dayjs(formData.registrationDate).format('YYYY-MM-DD'),
+          deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
+          invoiceNumber: formData.invoiceNumber ?? '',
+          memo: formData.memo,
+          purchaseCode: formData.purchaseCode ?? '',
+          components: formData.component,
+          companyId: formData.supplierCompanyId,
+          owners: formData.owners,
+        }
+        const response = await api.purchase.updatePurchaseDetail(data)
+        if (response.code === 200) return true
+        break
+      case PurchaseStatus.CONFIRM:
+      case PurchaseStatus.ON_DELIVERY:
+      case PurchaseStatus.DELIVERED:
+      case PurchaseStatus.CANCEL:
+        if (formData.id) {
+          const response = await api.purchase.updatePurchaseStatus(formData.id, formData.status)
+          if (response.code === 200) return true
+        }
+        break
+
+      default:
+        break
+    }
+  }
+
+  const deletePurchaseOrder = async (orderId: string) => {
+    //cal delete api
+    const result = await api.purchase.deletePurchaseOrder(orderId)
     if (result.code === 200 && result.data) {
-      setOrderData(result.data.data)
+      return result.data
+    }
+  }
+
+  const getPurchaseDetail = async (orderId: string) => {
+    const result = await api.purchase.getPurchaseDetail(orderId)
+    if (result.code === 200 && result.data) {
+      return result.data
+    }
+  }
+  const getOrderListData = async ({ page, pageSize }: GridPaginationModel) => {
+    setLoading(true)
+    const [orderType, status] = searchCriteria.status.split('.')
+
+    //call api
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+      status: status,
+      page: page,
+      pageSize: pageSize,
+      // orderType: orderType as OrderType,
+    }
+    const result = await api.order.getOrderList(prepareSearhCriteria as OrderSearchCriteria)
+    if (result.code === 200 && result.data) {
+      setOrderData(result.data)
+      setTotalRows(result.page?.totalElements ?? 0)
+      setCachedData(prevCache => ({
+        ...prevCache,
+        [`${page}-${pageSize}`]: result.data ? result.data : [],
+      }))
     }
     setLoading(false)
   }
@@ -182,5 +372,14 @@ export default function useOrder() {
     addNewOrder,
     editOrder,
     deleteOrder,
+    addNewPurchaseOrder,
+    editPurchaseOrder,
+    deletePurchaseOrder,
+    getPurchaseDetail,
+    handlerDeleteOrder,
+    dateTypeList,
+    orderTypeList,
+    handlerSelectedPurchaseDetail,
+    totalRows,
   }
 }

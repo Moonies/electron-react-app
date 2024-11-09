@@ -46,6 +46,8 @@ export default function PurchasePage() {
     categorySearch,
     statusPurchase,
     convertStatus,
+    dateTypeList,
+    totalRows,
   } = usePurchase()
   const purchaseDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -226,26 +228,6 @@ export default function PurchasePage() {
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
               />
-              {/* <TextField
-                name='ststus'
-                value={searchCriteria.status ?? ''}
-                select
-                label='状態'
-                id='status-order'
-                onChange={e => handleChange('status', e.target.value as string)}
-                sx={{ width: '30%' }}
-                InputLabelProps={{
-                  id: 'status-order-label',
-                  htmlFor: 'status',
-                  component: 'span',
-                }}
-              >
-                {statusPurchase?.map(item => (
-                  <MenuItem key={item} value={item}>
-                    {convertStatus(item)}
-                  </MenuItem>
-                ))}
-              </TextField> */}
             </Box>
             <Box
               display={'flex'}
@@ -254,38 +236,53 @@ export default function PurchasePage() {
               // justifyContent={'space-between'}
               flex={1}
             >
-              <DatePicker
-                label='開始日'
-                value={dayjs(searchCriteria.startDate)}
-                format='YYYY/MM/DD'
-                // onChange={(date: Dayjs | null) =>
-                //   handleChange('startDate', date?.toDate() || new Date())
-                // }
-                onAccept={handleStartDateChange}
-              />
-              <DatePicker
-                label='終了日'
-                format='YYYY/MM/DD'
-                value={dayjs(searchCriteria.endDate)}
-                // onChange={(date: Dayjs | null) =>
-                //   handleChange('endDate', date?.toDate() || new Date())
-                // }
-                onAccept={handleEndDateChange}
-              />
+              <TextField
+                name='dateType'
+                value={searchCriteria.dateType ?? ''}
+                select
+                label='日付'
+                id='category-order'
+                onChange={e => handleChange('dateType', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-order-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                <MenuItem value={''}>ない</MenuItem>
+                {dateTypeList?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {searchCriteria.dateType && (
+                <Box
+                  display={'flex'}
+                  flexDirection={'row'}
+                  gap={2}
+                  // justifyContent={'space-between'}
+                  // flex={1}
+                >
+                  <DatePicker
+                    label='開始日'
+                    value={dayjs(searchCriteria.startDate)}
+                    format='YYYY/MM/DD'
+                    onAccept={handleStartDateChange}
+                    views={['year', 'month', 'day']}
+                  />
+                  <DatePicker
+                    label='終了日'
+                    format='YYYY/MM/DD'
+                    value={dayjs(searchCriteria.endDate)}
+                    onAccept={handleEndDateChange}
+                    views={['year', 'month', 'day']}
+                  />
+                </Box>
+              )}
             </Box>
           </Box>
-          {/* 
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100%',
-            }}
-            gap={3}
-          ></Box> */}
           <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
             sx={{
@@ -360,6 +357,7 @@ export default function PurchasePage() {
                 startIcon={<PrintIcon />}
                 size='large'
                 // onClick={handleExportPdf}
+                sx={{ visibility: 'hidden' }}
               >
                 データ出力
               </StyledButton>
@@ -369,16 +367,17 @@ export default function PurchasePage() {
         <DataTable
           data={purchaseData}
           columns={columns}
-          // totalRows={purchaseData.length}
+          totalRows={totalRows}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={purchaseDataGridRef}
-          getRowId={row => row.purchaseId}
+          paginationMode={'server'}
+          // getRowId={row => row.purchaseId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />
       </Box>
-
-      {modalOpen && (
+      {/* waiting for prepare new data props */}
+      {/* {modalOpen && (
         <PurchaseModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -386,7 +385,7 @@ export default function PurchasePage() {
           initialData={selectedPurchase}
           mode={modalMode}
         />
-      )}
+      )} */}
     </Box>
   )
 }

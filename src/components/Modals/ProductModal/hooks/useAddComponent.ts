@@ -43,10 +43,10 @@ export default function useAddComponent(productData: ProductDetail) {
     let currentIndex = newComponentListData.length
     let currentComponentData = newComponentListData
     let totalAmount = await getTotalRemainComponent(newComponent.id)
-
+    //please check function again in task Sale order
     if (currentComponentData.length > 0) {
       const resultIndex = currentComponentData.findIndex(
-        item => item.componentNumber === newComponent.componentNumber
+        item => item.componentNumber === newComponent.number
       )
       if (resultIndex !== -1) {
         let newRow = currentComponentData.map((component, index) =>

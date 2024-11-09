@@ -23,8 +23,11 @@ import useExportOrder from './hooks/useExportOrder'
 import { pdf, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer'
 import { DeliverySlipData, PDFDocument, PDFGenerator } from './components/SlipDeliveryOrder'
 import useLoading from 'hooks/useLoading'
-import { OrderStatus } from 'api/order'
+import { OrderStatus, OrderType } from 'api/order'
 import SelectTypeOrderDialog from 'components/Dialogs/SelectTypeOrderDialog'
+import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
+import { PurchaseData } from 'api/purchase/getPurchaseList'
+import { SaleData } from 'api/sale/getSaleList'
 
 export default function OrderPage() {
   const {
@@ -43,17 +46,26 @@ export default function OrderPage() {
     addNewOrder,
     editOrder,
     deleteOrder,
+    addNewPurchaseOrder,
+    editPurchaseOrder,
+    getPurchaseDetail,
+    handlerDeleteOrder,
+    dateTypeList,
+    orderTypeList,
+    handlerSelectedPurchaseDetail,
+    totalRows,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedOrder, setSelectedOrder] = useState<OrderData>()
+  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseModalDataProps>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
-  const { notificationModal } = useNotification()
+  const { notificationModal, notificationSnackbar } = useNotification()
   const { exportSaleSelected, prepareSlipData } = useExportOrder()
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [orderType, setOrderType] = useState<string>()
+  const [orderType, setOrderType] = useState<'Sale' | 'Purchase'>()
   const [showPDF, setShowPDF] = useState(false)
   const { setLoading } = useLoading()
 
@@ -81,14 +93,26 @@ export default function OrderPage() {
     setModalOpen(true)
   }
 
-  const handleEditClick = useCallback(() => {
+  const handleEditClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        setSelectedOrder(selectedData)
-        setModalMode('edit')
-        setModalOpen(true)
+        if (selectedData.status === OrderStatus.CANCEL) {
+          notificationModal.warning('Status is Cancel, cannot edit data.')
+          return
+        }
+        if (selectedData.orderType === 'Sale') {
+          setSelectedOrder(selectedData)
+          setModalMode('edit')
+          setModalOpen(true)
+        } else {
+          const purchaseDetail = await handlerSelectedPurchaseDetail(selectedData.id)
+          setSelectedPurchase(purchaseDetail)
+          setOrderType('Purchase')
+          setModalMode('edit')
+          setModalOpen(true)
+        }
       }
     } else {
       notificationModal.error('編集する表の行を選択してください。')
@@ -102,11 +126,16 @@ export default function OrderPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれたの受注番号　 ${selectedData.id}　を削除してもよろしいですか?`,
+          message: `この選ばれたの受注番号　 ${selectedData.orderCode}　を削除してもよろしいですか?`,
           // message: 'Are you sure you want to delete this order Number: ' + selectedData.id,
         })
         if (confirmed) {
           // Perform delete operation
+          const response = await handlerDeleteOrder(selectedData)
+          if (response) {
+            notificationSnackbar.success('削除終了しました。')
+            handleSearch()
+          }
           console.log('Delete confirmed')
         } else {
           console.log('Delete cancelled')
@@ -122,34 +151,85 @@ export default function OrderPage() {
       const selectedId = selectionModel[0]
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
-        setSelectedOrder(selectedData)
-        setModalMode('view')
-        setModalOpen(true)
+        if (selectedData.orderType === 'Sale') {
+          setSelectedOrder(selectedData)
+          setModalMode('view')
+          setModalOpen(true)
+        } else {
+          const purchaseDetail = await handlerSelectedPurchaseDetail(selectedData.id)
+          setSelectedPurchase(purchaseDetail)
+          setOrderType('Purchase')
+          setModalMode('view')
+          setModalOpen(true)
+        }
       }
     } else {
       notificationModal.error('詳細を表示するには、表の行を選択してください。')
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: OrderData) => {
-    // Implement add/edit functionality
-    console.log('Confirmed data:', data)
+  const handleModalConfirm = async (data: OrderData | PurchaseModalDataProps) => {
+    if ('orderId' in data) {
+      switch (modalMode) {
+        case 'add':
+          addNewOrder(data as OrderData)
+          break
+        case 'edit':
+          editOrder(data as OrderData)
+          break
+        case 'view':
+          deleteOrder(data as OrderData)
+          break
+        default:
+          break
+      }
+    }
+
+    if ('purchaseCode' in data) {
+      console.log('Confirmed data:', data)
+
+      switch (modalMode) {
+        case 'add':
+          {
+            const response = await addNewPurchaseOrder(data as PurchaseModalDataProps)
+            if (response) {
+              notificationSnackbar.success('Purchase Order is Success!!')
+              setModalOpen(false)
+            }
+          }
+          break
+        case 'edit': {
+          const response = await editPurchaseOrder(data as PurchaseModalDataProps)
+          if (response) {
+            setModalOpen(false)
+            setLoading(false)
+            notificationSnackbar.success('Purchase Order Update is Success!!')
+            handleSearch()
+            if (data.status === OrderStatus.CONFIRM) {
+              const confirmed = await openConfirmModal({
+                title: '確認してください',
+                message: `Do you want to print 3連納品書?`,
+              })
+              if (confirmed) {
+                // Perform delete operation
+                //print condition
+              }
+            } else {
+              setModalOpen(false)
+            }
+          }
+          break
+        }
+        case 'view':
+          // deleteOrder(data)
+          break
+        default:
+          break
+      }
+    }
     if (modalMode === 'add') {
       // addNewSaleData()
     } else {
-    }
-    switch (modalMode) {
-      case 'add':
-        addNewOrder(data)
-        break
-      case 'edit':
-        editOrder(data)
-        break
-      case 'view':
-        deleteOrder(data)
-        break
-      default:
-        break
     }
     // After successful add/edit, refetch the data
     // await fetchNewOrderData(paginationModel);
@@ -163,7 +243,10 @@ export default function OrderPage() {
       const selectedData = orderData.find(order => order.id === selectedId)
       // if(selectedData?.status === OrderStatus.CANCEL) has condition??
       if (selectedData) {
-        if (selectedData.status === OrderStatus.DELIVERY) {
+        if (
+          selectedData.status === OrderStatus.CONFIRM &&
+          selectedData.orderType === OrderType.PURCHASE
+        ) {
           const newSlipData = await prepareSlipData(selectedData)
           if (newSlipData !== undefined) {
             const blob = await pdf(
@@ -221,6 +304,9 @@ export default function OrderPage() {
     }
   }
 
+  const filteredStatuses = statusOrder.filter(
+    status => status.type === searchCriteria.orderType || status.type === 'All'
+  )
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
@@ -268,12 +354,137 @@ export default function OrderPage() {
                 ))}
               </TextField>
               <TextField
-                // fullWidth
+                fullWidth
                 name='keyword'
                 label='キーワード検索'
                 value={searchCriteria.keyword}
                 onChange={e => handleChange('keyword', e.target.value)}
               />
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
+              <TextField
+                name='orderType'
+                value={searchCriteria.orderType}
+                select
+                label='受注'
+                id='category-order'
+                onChange={e => handleChange('orderType', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-order-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                {orderTypeList?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {searchCriteria.orderType !== 'All' && (
+                <TextField
+                  name='ststus'
+                  value={searchCriteria.status ?? ''}
+                  select
+                  label='状態'
+                  id='status-order'
+                  onChange={e => handleChange('status', e.target.value as string)}
+                  sx={{ width: '30%' }}
+                  InputLabelProps={{
+                    id: 'status-order-label',
+                    htmlFor: 'status',
+                    component: 'span',
+                  }}
+                >
+                  {/* <MenuItem value={''}>None</MenuItem> */}
+
+                  {filteredStatuses?.map((item, index) => (
+                    <MenuItem key={index} value={`${item.type}.${item.value}`}>
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+              <TextField
+                name='dateType'
+                value={searchCriteria.dateType ?? ''}
+                select
+                label='日付'
+                id='category-order'
+                onChange={e => handleChange('dateType', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-order-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                <MenuItem value={''}>ない</MenuItem>
+                {dateTypeList?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+            {searchCriteria.dateType && (
+              <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
+                <Box
+                  display={'flex'}
+                  flexDirection={'row'}
+                  gap={2}
+                  // justifyContent={'space-between'}
+                  // flex={1}
+                >
+                  <DatePicker
+                    label='開始日'
+                    value={dayjs(searchCriteria.startDate)}
+                    format='YYYY/MM/DD'
+                    onAccept={handleStartDateChange}
+                    views={['year', 'month', 'day']}
+                  />
+                  <DatePicker
+                    label='終了日'
+                    format='YYYY/MM/DD'
+                    value={dayjs(searchCriteria.endDate)}
+                    onAccept={handleEndDateChange}
+                    views={['year', 'month', 'day']}
+                  />
+                </Box>
+              </Box>
+            )}
+            {/* <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
+              <TextField
+                name='category'
+                value={searchCriteria.category}
+                select
+                label='範疇項目'
+                id='category-order'
+                onChange={e => handleChange('category', e.target.value as string)}
+                sx={{ width: '30%' }}
+                InputLabelProps={{
+                  id: 'category-order-label',
+                  htmlFor: 'category',
+                  component: 'span',
+                }}
+              >
+                {categorySearch?.map(item => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.display}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {searchCriteria.category !== 'registrationDate' &&
+                searchCriteria.category !== 'deliveryDate' && (
+                  <TextField
+                    // fullWidth
+                    name='keyword'
+                    label='キーワード検索'
+                    value={searchCriteria.keyword}
+                    onChange={e => handleChange('keyword', e.target.value)}
+                  />
+                )}
               <TextField
                 name='ststus'
                 value={searchCriteria.status ?? ''}
@@ -288,49 +499,38 @@ export default function OrderPage() {
                   component: 'span',
                 }}
               >
-                {statusOrder?.map(item => (
-                  <MenuItem key={item} value={item}>
-                    {convertStatus(item)}
+                {statusOrder?.map((item, index) => (
+                  <MenuItem key={index} value={`${item.type}.${item.value}`}>
+                    {item.label}
                   </MenuItem>
                 ))}
               </TextField>
-              <Button
-                variant='contained'
-                endIcon={<SearchIcon />}
-                onClick={handleSearch}
-                size='large'
+            </Box> */}
+            {/* {(searchCriteria.category === 'registrationDate' ||
+              searchCriteria.category === 'deliveryDate') && (
+              <Box
+                display={'flex'}
+                flexDirection={'row'}
+                gap={2}
+                // justifyContent={'space-between'}
+                // flex={1}
               >
-                検索
-              </Button>
-            </Box>
-            <Box
-              display={'flex'}
-              flexDirection={'row'}
-              gap={2}
-              // justifyContent={'space-between'}
-              // flex={1}
-            >
-              <DatePicker
-                label='開始日'
-                value={dayjs(searchCriteria.startDate)}
-                format='YYYY/MM/DD'
-                // onChange={(date: Dayjs | null) =>
-                //   handleChange('startDate', date?.toDate() || new Date())
-                // }
-                onAccept={handleStartDateChange}
-                views={['year', 'month', 'day']}
-              />
-              <DatePicker
-                label='終了日'
-                format='YYYY/MM/DD'
-                value={dayjs(searchCriteria.endDate)}
-                // onChange={(date: Dayjs | null) =>
-                //   handleChange('endDate', date?.toDate() || new Date())
-                // }
-                onAccept={handleEndDateChange}
-                views={['year', 'month', 'day']}
-              />
-            </Box>
+                <DatePicker
+                  label='開始日'
+                  value={dayjs(searchCriteria.startDate)}
+                  format='YYYY/MM/DD'
+                  onAccept={handleStartDateChange}
+                  views={['year', 'month', 'day']}
+                />
+                <DatePicker
+                  label='終了日'
+                  format='YYYY/MM/DD'
+                  value={dayjs(searchCriteria.endDate)}
+                  onAccept={handleEndDateChange}
+                  views={['year', 'month', 'day']}
+                />
+              </Box>
+            )} */}
           </Box>
           <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
@@ -346,10 +546,30 @@ export default function OrderPage() {
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
                 variant='outlined'
+                startIcon={<SearchIcon />}
+                size='large'
+                onClick={handleSearch}
+                // sx={{ visibility: 'hidden' }}
+              >
+                検索
+              </StyledButton>{' '}
+              <StyledButton
+                variant='outlined'
+                startIcon={<DetailIcon />}
+                size='large'
+                onClick={handleViewDetailClick}
+                // sx={{ visibility: 'hidden' }}
+              >
+                詳細
+              </StyledButton>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              <StyledButton
+                variant='outlined'
                 startIcon={<AddIcon />}
                 size='large'
-                onClick={handleAddClick}
-                // onClick={() => setDialogOpen(true)}
+                // onClick={handleAddClick}
+                onClick={() => setDialogOpen(true)}
               >
                 追加
               </StyledButton>
@@ -373,22 +593,22 @@ export default function OrderPage() {
               </StyledButton>
               <StyledButton
                 variant='outlined'
-                startIcon={<DetailIcon />}
+                startIcon={<PrintIcon />}
                 size='large'
-                onClick={handleViewDetailClick}
-                // sx={{ visibility: 'hidden' }}
+                sx={{ visibility: 'hidden' }}
+                // onClick={handleExportPdf}
               >
-                詳細
+                データ出力
               </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              // current version is not support 
               <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
-                {/* current version is not support */}
                 自動アプロード
               </StyledButton>
               <StyledButton
@@ -399,14 +619,15 @@ export default function OrderPage() {
               >
                 データ出力
               </StyledButton>
-            </Box>
+            </Box> */}
           </Box>
         </Box>
         <DataTable
           data={orderData}
           columns={columns}
-          // totalRows={orderData.length}
+          totalRows={totalRows}
           paginationModel={paginationModel}
+          paginationMode={'server'}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={orderDataGridRef}
           // getRowId={row => row.orderId}
@@ -414,7 +635,7 @@ export default function OrderPage() {
         />
       </Box>
 
-      {modalOpen && (
+      {modalOpen && orderType === 'Sale' && (
         <OrderModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -423,6 +644,20 @@ export default function OrderPage() {
           mode={modalMode}
         />
       )}
+
+      {modalOpen && orderType === 'Purchase' && (
+        <PurchaseModal
+          open={modalOpen}
+          onClose={() => {
+            setSelectedPurchase(undefined)
+            setModalOpen(false)
+          }}
+          onConfirm={handleModalConfirm}
+          initialData={selectedPurchase}
+          mode={modalMode}
+        />
+      )}
+
       {dialogOpen && (
         <SelectTypeOrderDialog
           onClose={() => setDialogOpen(false)}
@@ -434,6 +669,7 @@ export default function OrderPage() {
           open={dialogOpen}
         />
       )}
+      {/* to preview and check export pdf */}
       {/* {showPDF && slipsData && (
         <div className='mt-4' style={{ height: '80vh' }}>
           <PDFGenerator data={slipsData} render={() => setLoading(false)} />

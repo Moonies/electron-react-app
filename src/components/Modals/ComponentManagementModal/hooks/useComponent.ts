@@ -22,6 +22,9 @@ export default function useComponent() {
         headerName: '発注先',
         headerAlign: 'center',
         flex: 1,
+        valueGetter: (value, row: PurchaseOrderHistory) => {
+          return row.company.companyInfo.name
+        },
       },
       {
         field: 'quantity',

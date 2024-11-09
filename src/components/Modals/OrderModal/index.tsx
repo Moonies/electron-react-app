@@ -24,7 +24,7 @@ import {
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
-import { OrderData, ProductList } from 'api/order/getOrderList'
+import { OrderData } from 'api/order/getOrderList'
 import DataTable from 'components/DataTable'
 import useAddProductOrder from './hooks/useAddProductOrder'
 import {
@@ -52,9 +52,9 @@ interface PurchaseModalProps {
   initialData?: OrderData
   mode: 'add' | 'edit' | 'view'
 }
-const defaultFormData: OrderData = {
+const defaultFormData = {
   id: '',
-  orderId: '',
+  orderCode: '',
   customerCompanyId: '',
   customerCompanyName: '',
   product: [],
@@ -75,7 +75,8 @@ export default function OrderModal({
   initialData,
   mode,
 }: PurchaseModalProps) {
-  const [formData, setFormData] = useState<OrderData>(initialData ?? defaultFormData)
+  //waiting new order
+  const [formData, setFormData] = useState(defaultFormData)
   const [openDialog, setOpenDialog] = useState(false)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
@@ -165,7 +166,8 @@ export default function OrderModal({
 
     setLoading(true)
     try {
-      await onConfirm({ ...formData, product: newProductListData as ProductList[] })
+      //waiting sale task
+      // await onConfirm({ ...formData, product: newProductListData as ProductList[] })
       onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
@@ -258,8 +260,8 @@ export default function OrderModal({
               />
               <TextField
                 label='注番'
-                value={formData.orderId}
-                onChange={e => handleChange('orderId', e.target.value)}
+                value={formData.orderCode}
+                onChange={e => handleChange('orderCode', e.target.value)}
                 margin='normal'
                 sx={{ flex: 1 }}
                 InputProps={{
@@ -300,7 +302,8 @@ export default function OrderModal({
                     }))
                   }
                 }}
-                value={findCustomerById(formData.customerCompanyId)}
+                // waiting prepare new type in orderModal
+                // value={findCustomerById(formData.customerCompanyId)}
               />
             </Box>
             <Box display={'flex'} flexDirection={'row'} gap={2}>
