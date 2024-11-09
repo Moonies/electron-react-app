@@ -26,13 +26,13 @@ import ProductModal from 'components/Modals/ProductModal'
 import { ProductData } from 'api/product/getProductList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
-import { ProductDetail } from 'components/Modals/ProductModal/hooks/useAddComponent'
+import { ProductDetailModalProps } from 'components/Modals/ProductModal/hooks/useAddComponent'
 import ProductHistoryModal from 'components/Modals/ProductHistoryModal'
 import useLoading from 'hooks/useLoading'
 
 export default function ProductPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedProduct, setSelectedProduct] = useState<ProductData | undefined>(undefined)
+  const [selectedProduct, setSelectedProduct] = useState<ProductData>()
   const [productHistory, setProductHistory] = useState<ProductHistoryData>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalHistory, setModalHistory] = useState(false)
@@ -52,6 +52,8 @@ export default function ProductPage() {
     paginationModel,
     getComponentDetailList,
     getProductOrderHistoryList,
+    handleAddNewProduct,
+    totalRows,
   } = useProduct()
 
   const productDataGridRef = useGridApiRef()
@@ -98,7 +100,7 @@ export default function ProductPage() {
       if (selectedData) {
         const confirmed = await openConfirmModal({
           title: '確認してください',
-          message: `この選ばれたの商品番号　 ${selectedData.productNumber}　を削除してもよろしいですか?`,
+          message: `この選ばれたの商品番号　 ${selectedData.number}　を削除してもよろしいですか?`,
           // message: 'Are you sure you want to delete this Product Number: ' + selectedData.productId,
         })
         if (confirmed) {
@@ -113,7 +115,7 @@ export default function ProductPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: ProductDetail) => {
+  const handleModalConfirm = async (data: ProductDetailModalProps) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -122,9 +124,11 @@ export default function ProductPage() {
         message: 'Are you sure you want to add data.',
       })
       if (confirmed) {
-        setModalOpen(false)
-        // Perform delete operation
-        console.log('Add confirmed')
+        const response = await handleAddNewProduct(data)
+        if (response) {
+          setModalOpen(false)
+          //handlerSearch()
+        }
       } else {
         console.log('Add cancelled')
       }
@@ -140,6 +144,17 @@ export default function ProductPage() {
       const selectedId = selectionModel[0]
       const selectedData = productData.find(product => product.id === selectedId)
       if (selectedData) {
+        let selectedProduct = {
+          id: selectedData.id,
+          productNumber: selectedData.number,
+          productName: selectedData.name,
+          stockQuantity: selectedData.inStock,
+          productCost: selectedData.cost,
+          productPrice: selectedData.price,
+          productUnit: '',
+          productPriceMargin: selectedData.price - selectedData.cost,
+          component: [],
+        }
         // selectedData.component.map(item => {
         // const result = await getComponentDetailList(item.id)
         // })
@@ -160,16 +175,16 @@ export default function ProductPage() {
       console.log(selectedData)
       let productHistoryData: ProductHistoryData
       if (selectedData) {
-        const result = await getProductOrderHistoryList(selectedData.productNumber)
-        if (result) {
-          productHistoryData = {
-            id: selectedData.id,
-            productName: selectedData.productName,
-            productNumber: selectedData.productNumber,
-            orderHistoryList: result,
-          }
-          setProductHistory(productHistoryData)
-        }
+        const result = await getProductOrderHistoryList(selectedData.number)
+        // if (result) {
+        //   productHistoryData = {
+        //     id: selectedData.id,
+        //     productName: selectedData.productName,
+        //     productNumber: selectedData.productNumber,
+        //     orderHistoryList: result,
+        //   }
+        //   setProductHistory(productHistoryData)
+        // }
         setModalHistory(true)
         setLoading(false)
       }
@@ -231,15 +246,6 @@ export default function ProductPage() {
                   label='キーワード検索'
                   value={searchCriteria.keyword}
                   onChange={e => handleChange('keyword', e.target.value)}
-                  // InputProps={{
-                  //   endAdornment: (
-                  //     <InputAdornment position='end'>
-                  //       <IconButton onClick={handleSearch} edge='end'>
-                  //         <SearchIcon />
-                  //       </IconButton>
-                  //     </InputAdornment>
-                  //   ),
-                  // }}
                 />
               </Box>
             </Box>
@@ -327,9 +333,9 @@ export default function ProductPage() {
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={productDataGridRef}
-          // getRowId={row => row.productId}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
-          // sx={{ mt: 4 }}
+          totalRows={totalRows}
+          paginationMode={'server'}
         />
       </Box>
 
@@ -338,7 +344,7 @@ export default function ProductPage() {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedProduct}
+          // initialData={selectedProduct}
           mode={modalMode}
         />
       )}

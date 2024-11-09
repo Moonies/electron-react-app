@@ -17,7 +17,7 @@ const CustomFooter: React.FC = () => {
   const totalPrice = useMemo(() => {
     const rows = apiRef.current.getRowModels()
     return Array.from(rows.values()).reduce((sum, row) => {
-      const rowTotalPrice = row.quantity * row.unitPrice
+      const rowTotalPrice = row.quantity * row.price
       return sum + rowTotalPrice
     }, 0)
   }, [apiRef, rowCount, columnFields])

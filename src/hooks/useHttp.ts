@@ -93,6 +93,7 @@ export default function useHttp() {
     kpi: kpiApi(httpRequest),
     order: orderApi(httpRequest),
     purchase: purchaseApi(httpRequest),
+    product: productApi(httpRequest),
   }
 
   return { api }

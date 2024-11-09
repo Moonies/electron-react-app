@@ -80,7 +80,7 @@ axiosInstance.interceptors.request.use(
 export const api = {
   // user: userApi(),
   // kpi: kpiApi(),
-  product: productApi(),
+  // product: productApi(),
   sale: saleApi(),
   report: reportApi(),
   // myCompany: myCompanyApi(),

@@ -23,7 +23,7 @@ import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import SlideTransition from 'components/Transition/Slide'
 import DataTable from 'components/DataTable'
 import useLoading from 'hooks/useLoading'
-import useAddComponent, { ProductDetail } from './hooks/useAddComponent'
+import useAddComponent, { ProductDetailModalProps } from './hooks/useAddComponent'
 import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import {
   GridActionsCellItem,
@@ -35,16 +35,17 @@ import CustomFooter from './components/CustomFooter'
 import { ComponentData } from 'api/component/getComponentList'
 import NumericFormatCustom from 'components/NumericFormat'
 import { StyledButton } from 'styles/styles'
+import AddComponentPartListDialog from 'components/Dialogs/AddComponentPartListDialog'
 
 interface SalesModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: ProductDetail) => Promise<void>
-  initialData?: ProductDetail
+  onConfirm: (data: ProductDetailModalProps) => Promise<void>
+  initialData?: ProductDetailModalProps
   mode: 'add' | 'edit' | 'view'
 }
 
-const defaultFormData: ProductDetail = {
+const defaultFormData: ProductDetailModalProps = {
   // id:undefined,
   productNumber: '',
   productName: '',
@@ -83,15 +84,18 @@ const ProductModal: React.FC<SalesModalProps> = ({
     handleSaveClick,
     processRowUpdate,
     rowModesModel,
+    productUnitList,
+    getProductUnit,
   } = useAddComponent(formData)
 
   useEffect(() => {
+    getProductUnit()
     if (modalMode === 'add') setFormData(defaultFormData)
-  }, [defaultFormData])
+  }, [])
 
-  const handleChange = (field: keyof ProductDetail, value: string | number) => {
+  const handleChange = (field: keyof ProductDetailModalProps, value: string | number) => {
     // setFormData({ ...formData, [field]: value })
-    debouncedUpdate(field as keyof ProductDetail, value)
+    debouncedUpdate(field as keyof ProductDetailModalProps, value)
   }
 
   const handleSubmit = async () => {
@@ -104,25 +108,6 @@ const ProductModal: React.FC<SalesModalProps> = ({
       setLoading(false)
     }
   }
-
-  const productUnitList = [
-    {
-      value: 'piece',
-      label: '個',
-    },
-    {
-      value: 'unit',
-      label: '台',
-    },
-    {
-      value: 'sheet',
-      label: '枚',
-    },
-    {
-      value: 'set',
-      label: 'セット',
-    },
-  ]
 
   const updatedColumns = columns.map(column => {
     if (column.field === 'actions') {
@@ -182,9 +167,12 @@ const ProductModal: React.FC<SalesModalProps> = ({
   const calculateProfitMargin = (cost: number, price: number) => price - cost
 
   //break for app crash
-  const debouncedUpdate = debounce((field: keyof ProductDetail, value: string | number) => {
-    setFormData({ ...formData, [field]: value })
-  }, 300)
+  const debouncedUpdate = debounce(
+    (field: keyof ProductDetailModalProps, value: string | number) => {
+      setFormData({ ...formData, [field]: value })
+    },
+    100
+  )
 
   return (
     <Dialog
@@ -247,7 +235,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
               }}
             >
               {productUnitList.map(item => (
-                <MenuItem key={item.value} value={item.value}>
+                <MenuItem key={item.name} value={item.id}>
                   {item.label}
                 </MenuItem>
               ))}
@@ -358,7 +346,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
             }}
           />
           {openDialog && (
-            <AddNewComponentListDialog
+            <AddComponentPartListDialog
               open={openDialog}
               onClose={() => setOpenDialog(false)}
               onSubmit={newComponent => {
