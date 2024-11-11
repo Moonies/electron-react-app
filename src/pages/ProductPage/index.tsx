@@ -184,6 +184,7 @@ export default function ProductPage() {
       console.log(selectedData)
       let productHistoryData: ProductHistoryData
       if (selectedData) {
+        notificationModal.warning('now function is not support.')
         const result = await getProductOrderHistoryList(selectedData.number)
         // if (result) {
         //   productHistoryData = {
@@ -194,7 +195,7 @@ export default function ProductPage() {
         //   }
         //   setProductHistory(productHistoryData)
         // }
-        setModalHistory(true)
+        // setModalHistory(true)
         setLoading(false)
       }
     } else {
