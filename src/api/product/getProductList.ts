@@ -6,9 +6,8 @@ export interface SearchCriteriaProductList {
   category: string
   keyword: string
 }
-
-export type ComponentDetail = {
-  id: string
+type ComponentDetail = {
+  // id: string
   number: string
   name: string
   price: number
@@ -23,8 +22,13 @@ export interface ProductData {
   grossMarginRate: number
   inStock: number
   howManyProductsCanBeMade: number
-
-  // component: ComponentDetail[]
+  components: ComponentDetail[]
+  productUnit: {
+    id: string
+    label: string
+    name: string
+  }
+  productUnitId: string
 }
 
 export default async function getProductList(

@@ -22,17 +22,16 @@ import {
 import DataTable from 'components/DataTable'
 import useProduct, { ProductHistoryData } from './hooks/useProduct'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
-import ProductModal from 'components/Modals/ProductModal'
+import ProductModal, { ProductDetailModalProps } from 'components/Modals/ProductModal'
 import { ProductData } from 'api/product/getProductList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
-import { ProductDetailModalProps } from 'components/Modals/ProductModal/hooks/useAddComponent'
 import ProductHistoryModal from 'components/Modals/ProductHistoryModal'
 import useLoading from 'hooks/useLoading'
 
 export default function ProductPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedProduct, setSelectedProduct] = useState<ProductData>()
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetailModalProps>()
   const [productHistory, setProductHistory] = useState<ProductHistoryData>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalHistory, setModalHistory] = useState(false)
@@ -50,10 +49,12 @@ export default function ProductPage() {
     handleChange,
     handlePaginationModelChange,
     paginationModel,
-    getComponentDetailList,
     getProductOrderHistoryList,
     handleAddNewProduct,
     totalRows,
+    handleUpdateProductDetail,
+    deleteProduct,
+    prepareProductDetail,
   } = useProduct()
 
   const productDataGridRef = useGridApiRef()
@@ -84,8 +85,26 @@ export default function ProductPage() {
       const selectedId = selectionModel[0]
       const selectedData = productData.find(product => product.id === selectedId)
       if (selectedData) {
+        // let prepareProductData: ProductDetailModalProps = {
+        //   id: selectedData.id,
+        //   productNumber: selectedData.number,
+        //   productName: selectedData.name,
+        //   stockQuantity: selectedData.inStock,
+        //   productCost: selectedData.cost,
+        //   productPrice: selectedData.price,
+        //   productUnit: selectedData.productUnitId,
+        //   productPriceMargin: selectedData.price - selectedData.cost,
+        //   components: selectedData.components.map(item => ({
+        //     id: item.number + item.name,
+        //     name: item.name,
+        //     number: item.number,
+        //     quantity: item.quantity,
+        //     price: item.price,
+        //   })),
+        // }
+        const result = prepareProductDetail(selectedData)
         setModalMode('edit')
-        setSelectedProduct(selectedData)
+        setSelectedProduct(result)
         setModalOpen(true)
       }
     } else {
@@ -104,8 +123,10 @@ export default function ProductPage() {
           // message: 'Are you sure you want to delete this Product Number: ' + selectedData.productId,
         })
         if (confirmed) {
-          // Perform delete operation
-          console.log('Delete confirmed')
+          const response = await deleteProduct(selectedData.id)
+          if (response) {
+            handleSearch()
+          }
         } else {
           console.log('Delete cancelled')
         }
@@ -118,25 +139,26 @@ export default function ProductPage() {
   const handleModalConfirm = async (data: ProductDetailModalProps) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
-    if (modalMode === 'add') {
-      const confirmed = await openConfirmModal({
-        title: '確認してください',
-        message: 'Are you sure you want to add data.',
-      })
-      if (confirmed) {
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: 'Are you sure you want to add data.',
+    })
+    if (confirmed) {
+      if (modalMode === 'add') {
         const response = await handleAddNewProduct(data)
         if (response) {
           setModalOpen(false)
-          //handlerSearch()
+          handleSearch()
         }
       } else {
-        console.log('Add cancelled')
+        const response = await handleUpdateProductDetail(data)
+        if (response) {
+          setModalOpen(false)
+          handleSearch()
+        }
       }
       // addNewSaleData()
-    } else {
     }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
   }
 
   const handleViewDetailClick = useCallback(async () => {
@@ -144,21 +166,8 @@ export default function ProductPage() {
       const selectedId = selectionModel[0]
       const selectedData = productData.find(product => product.id === selectedId)
       if (selectedData) {
-        let selectedProduct = {
-          id: selectedData.id,
-          productNumber: selectedData.number,
-          productName: selectedData.name,
-          stockQuantity: selectedData.inStock,
-          productCost: selectedData.cost,
-          productPrice: selectedData.price,
-          productUnit: '',
-          productPriceMargin: selectedData.price - selectedData.cost,
-          component: [],
-        }
-        // selectedData.component.map(item => {
-        // const result = await getComponentDetailList(item.id)
-        // })
-        setSelectedProduct(selectedData)
+        const result = prepareProductDetail(selectedData)
+        setSelectedProduct(result)
         setModalOpen(true)
         setModalMode('view')
       }
@@ -344,7 +353,7 @@ export default function ProductPage() {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          // initialData={selectedProduct}
+          initialData={selectedProduct}
           mode={modalMode}
         />
       )}

@@ -10,29 +10,19 @@ import {
   GridRowsProp,
 } from '@mui/x-data-grid'
 import { ComponentData } from 'api/component/getComponentData'
-import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import { ProductUnitDetail } from 'api/product/getProductUnitList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
-
-export type ProductDetailModalProps = {
-  id?: string
-  productNumber: string
-  productName: string
-  stockQuantity: number
-  productCost: number
-  productPrice: number
-  productUnit: string
-  productPriceMargin?: number
-  component: NewComponentDetail[]
-}
+import { ProductDetailModalProps } from '..'
 
 export default function useAddComponent(productData: ProductDetailModalProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
-  const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>([])
+  const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>(
+    productData.components
+  )
   const [productUnitList, setProductUnitList] = useState<ProductUnitDetail[]>([])
   const { setLoading } = useLoading()
   const { api } = useHttp()

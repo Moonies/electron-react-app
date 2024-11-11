@@ -6,9 +6,10 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { orderHistory } from 'api/product/getProductOrderHistory'
 import useHttp from 'hooks/useHttp'
 import { AddNewProductProps } from 'api/product/addNewProduct'
-import { ProductDetailModalProps } from 'components/Modals/ProductModal/hooks/useAddComponent'
 import useNotification from 'hooks/useNotification'
 import { formatJPY } from 'utils/formatUtils'
+import { ProductDetailModalProps } from 'components/Modals/ProductModal'
+import { NewProductDetailProps } from 'api/product/updateProductDetail'
 
 interface PaginationModel {
   page: number
@@ -46,22 +47,6 @@ export default function useProduct() {
   const { withLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
   const { api } = useHttp()
-
-  const productUnitConverter = (rawProductUnit: string): string => {
-    switch (rawProductUnit) {
-      case 'piece':
-        return '個'
-      case 'unit':
-        return '台'
-      case 'sheet':
-        return '枚'
-      case 'set':
-        return 'セット'
-
-      default:
-        return ''
-    }
-  }
 
   const handleChange = (name: string, value: string) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
@@ -102,7 +87,13 @@ export default function useProduct() {
         headerAlign: 'center',
         valueGetter: (value: { id: string; label: string; name: string }) => value.label,
       },
-      { field: 'inStock', headerName: '在庫数', type: 'number', headerAlign: 'center' },
+      {
+        field: 'inStock',
+        headerName: '在庫数',
+        type: 'number',
+        headerAlign: 'center',
+        valueFormatter: value => (value === null ? 0 : value),
+      },
       {
         field: 'howManyProductsCanBeMade',
         headerName: '製作できる製品',
@@ -121,6 +112,27 @@ export default function useProduct() {
     setCategorySearch(result)
   }, [])
 
+  const prepareProductDetail = (selectedData: ProductData) => {
+    let productDetailModalData: ProductDetailModalProps = {
+      id: selectedData.id,
+      productNumber: selectedData.number,
+      productName: selectedData.name,
+      stockQuantity: selectedData.inStock,
+      productCost: selectedData.cost,
+      productPrice: selectedData.price,
+      productUnit: selectedData.productUnitId,
+      productPriceMargin: selectedData.price - selectedData.cost,
+      components: selectedData.components.map(item => ({
+        id: item.number + item.name,
+        name: item.name,
+        number: item.number,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    }
+    return productDetailModalData
+  }
+
   const handleSearch = useCallback(async () => {
     //condition and prepare data put here
     getProductList(paginationModel)
@@ -135,7 +147,7 @@ export default function useProduct() {
       grossMarginRate: formData.productPriceMargin ?? 0,
       productUnitId: formData.productUnit,
       // taxCategory: formData.productName,
-      components: formData.component.map(item => ({
+      components: formData.components.map(item => ({
         name: item.name,
         number: item.number,
         quantity: item.quantity,
@@ -144,6 +156,25 @@ export default function useProduct() {
     const response = await addNewProduct(newProduct)
     if (response) return response
   }
+
+  const handleUpdateProductDetail = async (formData: ProductDetailModalProps) => {
+    let newProductDetail: NewProductDetailProps = {
+      id: formData.id ?? '',
+      name: formData.productName,
+      number: formData.productNumber,
+      price: formData.productPrice,
+      lastestPriceDecisionDate: '',
+      cost: formData.productCost,
+      grossMarginRate:
+        ((formData.productPrice - formData.productCost) / formData.productCost) * 100,
+      productUnitId: formData.productUnit,
+      components: formData.components,
+      inStock: formData.stockQuantity,
+    }
+    const response = await updateProductDetail(newProductDetail)
+    if (response) return response
+  }
+
   const handlePaginationModelChange = (newModel: PaginationModel) => {
     if (newModel.pageSize !== paginationModel.pageSize) {
       // If page size has changed, reset to the first page
@@ -160,11 +191,6 @@ export default function useProduct() {
       return
     }
     getProductList(newModel)
-  }
-
-  const getComponentDetailList = async (componentId: string) => {
-    //get component detail
-    //get total remain
   }
 
   const getProductOrderHistoryList = async (productId: string) => {
@@ -195,6 +221,27 @@ export default function useProduct() {
   const addNewProduct = async (data: AddNewProductProps) => {
     const result = await api.product.addNewProduct(data)
     if (result.code === 200 && result.data) {
+      notificationSnackbar.success('追加完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
+  const updateProductDetail = async (data: NewProductDetailProps) => {
+    const result = await api.product.updateProductDetail(data)
+    if (result.code === 200 && result.data) {
+      notificationSnackbar.success('編集完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
+  const deleteProduct = async (productId: string) => {
+    const result = await api.product.deleteProduct(productId)
+    if (result.code === 200) {
+      notificationSnackbar.success('削除完了しました。')
       return true
     } else {
       notificationSnackbar.error(result.message)
@@ -211,9 +258,11 @@ export default function useProduct() {
     handleChange,
     handlePaginationModelChange,
     paginationModel,
-    getComponentDetailList,
     getProductOrderHistoryList,
     handleAddNewProduct,
     totalRows,
+    handleUpdateProductDetail,
+    deleteProduct,
+    prepareProductDetail,
   }
 }

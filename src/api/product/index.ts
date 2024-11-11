@@ -5,11 +5,15 @@ import { default as getProductUnitList, ProductUnitDetail } from './getProductUn
 import { ApiResponse } from 'api'
 import { HttpRequest } from 'hooks/useHttp'
 import { default as addnewProduct, AddNewProductProps } from './addNewProduct'
+import { default as updateProductDetail, NewProductDetailProps } from './updateProductDetail'
+import { default as deleteProduct } from './deleteProduct'
 
 export interface ProductApi {
   getProductUnitList: () => Promise<ApiResponse<ProductUnitDetail[]>>
   addNewProduct: (params: AddNewProductProps) => Promise<ApiResponse<{}>>
   getProductList: (params: SearchCriteriaProductList) => Promise<ApiResponse<ProductData[]>>
+  updateProductDetail: (params: NewProductDetailProps) => Promise<ApiResponse<{}>>
+  deleteProduct: (productId: string) => Promise<ApiResponse<{}>>
 }
 
 export default function product(httpRequest: HttpRequest): ProductApi {
@@ -17,5 +21,7 @@ export default function product(httpRequest: HttpRequest): ProductApi {
     getProductUnitList: () => getProductUnitList(httpRequest),
     addNewProduct: params => addnewProduct(httpRequest, params),
     getProductList: params => getProductList(httpRequest, params),
+    updateProductDetail: params => updateProductDetail(httpRequest, params),
+    deleteProduct: productId => deleteProduct(httpRequest, productId),
   }
 }
