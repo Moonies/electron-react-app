@@ -1,6 +1,5 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { OrderStatus, OrderType } from 'api/order'
-import { NewOrder } from 'api/order/addNewOrder'
 import { OrderData, OrderSearchCriteria } from 'api/order/getOrderList'
 import { PurchaseStatus } from 'api/purchase'
 import { AddNewPurchase } from 'api/purchase/addNewPurchase'

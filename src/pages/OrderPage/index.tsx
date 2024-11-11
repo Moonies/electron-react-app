@@ -17,7 +17,7 @@ import DataTable from 'components/DataTable'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
 import useOrder from './hooks/useOrder'
-import OrderModal from 'components/Modals/OrderModal'
+import SaleModal, { SaleModalDataProps } from 'components/Modals/SaleModal'
 import { OrderData } from 'api/order/getOrderList'
 import useExportOrder from './hooks/useExportOrder'
 import { pdf, PDFDownloadLink, BlobProvider } from '@react-pdf/renderer'
@@ -168,21 +168,22 @@ export default function OrderPage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: OrderData | PurchaseModalDataProps) => {
-    if ('orderId' in data) {
-      switch (modalMode) {
-        case 'add':
-          addNewOrder(data as OrderData)
-          break
-        case 'edit':
-          editOrder(data as OrderData)
-          break
-        case 'view':
-          deleteOrder(data as OrderData)
-          break
-        default:
-          break
-      }
+  const handleModalConfirm = async (data: SaleModalDataProps | PurchaseModalDataProps) => {
+    if ('saleCode' in data) {
+      console.log('confirmed sale data:', data)
+      // switch (modalMode) {
+      //   case 'add':
+      //     addNewOrder(data as OrderData)
+      //     break
+      //   case 'edit':
+      //     editOrder(data as OrderData)
+      //     break
+      //   case 'view':
+      //     deleteOrder(data as OrderData)
+      //     break
+      //   default:
+      //     break
+      // }
     }
 
     if ('purchaseCode' in data) {
@@ -231,8 +232,6 @@ export default function OrderPage() {
       // addNewSaleData()
     } else {
     }
-    // After successful add/edit, refetch the data
-    // await fetchNewOrderData(paginationModel);
   }
 
   const handleExportPdf = async () => {
@@ -454,83 +453,6 @@ export default function OrderPage() {
                 </Box>
               </Box>
             )}
-            {/* <Box display={'flex'} flexDirection={'row'} gap={2} alignItems={'center'}>
-              <TextField
-                name='category'
-                value={searchCriteria.category}
-                select
-                label='範疇項目'
-                id='category-order'
-                onChange={e => handleChange('category', e.target.value as string)}
-                sx={{ width: '30%' }}
-                InputLabelProps={{
-                  id: 'category-order-label',
-                  htmlFor: 'category',
-                  component: 'span',
-                }}
-              >
-                {categorySearch?.map(item => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.display}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {searchCriteria.category !== 'registrationDate' &&
-                searchCriteria.category !== 'deliveryDate' && (
-                  <TextField
-                    // fullWidth
-                    name='keyword'
-                    label='キーワード検索'
-                    value={searchCriteria.keyword}
-                    onChange={e => handleChange('keyword', e.target.value)}
-                  />
-                )}
-              <TextField
-                name='ststus'
-                value={searchCriteria.status ?? ''}
-                select
-                label='状態'
-                id='status-order'
-                onChange={e => handleChange('status', e.target.value as string)}
-                sx={{ width: '30%' }}
-                InputLabelProps={{
-                  id: 'status-order-label',
-                  htmlFor: 'status',
-                  component: 'span',
-                }}
-              >
-                {statusOrder?.map((item, index) => (
-                  <MenuItem key={index} value={`${item.type}.${item.value}`}>
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box> */}
-            {/* {(searchCriteria.category === 'registrationDate' ||
-              searchCriteria.category === 'deliveryDate') && (
-              <Box
-                display={'flex'}
-                flexDirection={'row'}
-                gap={2}
-                // justifyContent={'space-between'}
-                // flex={1}
-              >
-                <DatePicker
-                  label='開始日'
-                  value={dayjs(searchCriteria.startDate)}
-                  format='YYYY/MM/DD'
-                  onAccept={handleStartDateChange}
-                  views={['year', 'month', 'day']}
-                />
-                <DatePicker
-                  label='終了日'
-                  format='YYYY/MM/DD'
-                  value={dayjs(searchCriteria.endDate)}
-                  onAccept={handleEndDateChange}
-                  views={['year', 'month', 'day']}
-                />
-              </Box>
-            )} */}
           </Box>
           <Divider orientation='vertical' flexItem sx={{ ml: 'auto' }}></Divider>
           <Box
@@ -636,11 +558,11 @@ export default function OrderPage() {
       </Box>
 
       {modalOpen && orderType === 'Sale' && (
-        <OrderModal
+        <SaleModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          initialData={selectedOrder}
+          // initialData={selectedOrder}
           mode={modalMode}
         />
       )}

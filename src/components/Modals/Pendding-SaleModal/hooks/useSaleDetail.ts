@@ -1,14 +1,6 @@
 import { GridColDef } from '@mui/x-data-grid'
-import { CustomerData } from 'api/customer/getCustomerList'
-import { api } from 'api/index'
-import { OrderStatus } from 'api/order'
-import { OrderData } from 'api/order/getOrderList'
-import { ProductDataDetail } from 'api/product/getProductData'
-import { UserData } from 'api/user/getUserList'
-import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
-import useLoading from 'hooks/useLoading'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 export default function useSaleDetail() {
   const currencyFormatter = new Intl.NumberFormat('ja-JP', {
