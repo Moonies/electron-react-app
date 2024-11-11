@@ -1,9 +1,15 @@
-import { GridColDef } from '@mui/x-data-grid'
+import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { ProductData, SearchCriteriaProductList } from 'api/product/getProductList'
 import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
 import { orderHistory } from 'api/product/getProductOrderHistory'
+import useHttp from 'hooks/useHttp'
+import { AddNewProductProps } from 'api/product/addNewProduct'
+import useNotification from 'hooks/useNotification'
+import { formatJPY } from 'utils/formatUtils'
+import { ProductDetailModalProps } from 'components/Modals/ProductModal'
+import { NewProductDetailProps } from 'api/product/updateProductDetail'
 
 interface PaginationModel {
   page: number
@@ -13,6 +19,9 @@ interface PaginationModel {
 interface CategoryProductSearch {
   value: string
   display: string
+}
+interface CachedData {
+  [key: string]: ProductData[]
 }
 
 export type ProductHistoryData = {
@@ -29,32 +38,15 @@ export default function useProduct() {
     keyword: '',
   })
   const [productData, setProductData] = useState<ProductData[]>([])
-  const [paginationModel, setPaginationModel] = useState<PaginationModel>({
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10,
   })
+  const [cachedData, setCachedData] = useState<CachedData>({})
+  const [totalRows, setTotalRows] = useState(0)
   const { withLoading } = useLoading()
-
-  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-  })
-
-  const productUnitConverter = (rawProductUnit: string): string => {
-    switch (rawProductUnit) {
-      case 'piece':
-        return '個'
-      case 'unit':
-        return '台'
-      case 'sheet':
-        return '枚'
-      case 'set':
-        return 'セット'
-
-      default:
-        return ''
-    }
-  }
+  const { notificationSnackbar } = useNotification()
+  const { api } = useHttp()
 
   const handleChange = (name: string, value: string) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
@@ -62,30 +54,30 @@ export default function useProduct() {
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'productNumber', headerName: '図番', flex: 1, headerAlign: 'center' },
-      { field: 'productName', headerName: '品名', flex: 1, headerAlign: 'center' },
+      { field: 'number', headerName: '図番', flex: 1, headerAlign: 'center' },
+      { field: 'name', headerName: '品名', flex: 1, headerAlign: 'center' },
       {
-        field: 'productPrice',
+        field: 'price',
         headerName: '単価',
         type: 'number',
         headerAlign: 'center',
         // minWidth: 200,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueFormatter: value => formatJPY(Number(value)),
       },
       {
-        field: 'productCost',
+        field: 'cost',
         headerName: '原価',
         type: 'number',
         headerAlign: 'center',
         // minWidth: 200,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueFormatter: value => formatJPY(Number(value)),
       },
       {
-        field: 'grossProfitMargin',
+        field: 'grossProfitMarginRate',
         headerName: '粗利益率',
         headerAlign: 'center',
         valueGetter: (value, row) => {
-          return (((row.productPrice - row.productCost) / row.productCost) * 100).toFixed(3) + '%'
+          return (((row.price - row.cost) / row.cost) * 100).toFixed(3) + '%'
         },
       },
       {
@@ -93,9 +85,21 @@ export default function useProduct() {
         headerName: '単位',
         type: 'number',
         headerAlign: 'center',
-        valueGetter: value => productUnitConverter(value),
+        valueGetter: (value: { id: string; label: string; name: string }) => value.label,
       },
-      { field: 'stockQuantity', headerName: '在庫数', type: 'number', headerAlign: 'center' },
+      {
+        field: 'inStock',
+        headerName: '在庫数',
+        type: 'number',
+        headerAlign: 'center',
+        valueFormatter: value => (value === null ? 0 : value),
+      },
+      {
+        field: 'howManyProductsCanBeMade',
+        headerName: '製作できる製品',
+        type: 'number',
+        headerAlign: 'center',
+      },
     ],
     []
   )
@@ -108,29 +112,140 @@ export default function useProduct() {
     setCategorySearch(result)
   }, [])
 
-  const handleSearch = useCallback(async () => {
-    const result = await withLoading(api.product.getProductList(searchCriteria))
-    if (result.code === 200 && result.data) {
-      setProductData(result.data.data)
+  const prepareProductDetail = (selectedData: ProductData) => {
+    let productDetailModalData: ProductDetailModalProps = {
+      id: selectedData.id,
+      productNumber: selectedData.number,
+      productName: selectedData.name,
+      stockQuantity: selectedData.inStock,
+      productCost: selectedData.cost,
+      productPrice: selectedData.price,
+      productUnit: selectedData.productUnitId,
+      productPriceMargin: selectedData.price - selectedData.cost,
+      components: selectedData.components.map(item => ({
+        id: item.number + item.name,
+        name: item.name,
+        number: item.number,
+        quantity: item.quantity,
+        price: item.price,
+      })),
     }
-  }, [searchCriteria, withLoading])
-
-  const handlePaginationModelChange = (newModel: PaginationModel) => {
-    setPaginationModel(newModel)
-    //call APi
+    return productDetailModalData
   }
 
-  const getComponentDetailList = async (componentId: string) => {
-    //get component detail
-    //get total remain
+  const handleSearch = useCallback(async () => {
+    //condition and prepare data put here
+    getProductList(paginationModel)
+  }, [searchCriteria, withLoading])
+
+  const handleAddNewProduct = async (formData: ProductDetailModalProps) => {
+    let newProduct: AddNewProductProps = {
+      name: formData.productName,
+      number: formData.productNumber,
+      price: formData.productPrice,
+      cost: formData.productCost,
+      grossMarginRate: formData.productPriceMargin ?? 0,
+      productUnitId: formData.productUnit,
+      // taxCategory: formData.productName,
+      components: formData.components.map(item => ({
+        name: item.name,
+        number: item.number,
+        quantity: item.quantity,
+      })),
+    }
+    const response = await addNewProduct(newProduct)
+    if (response) return response
+  }
+
+  const handleUpdateProductDetail = async (formData: ProductDetailModalProps) => {
+    let newProductDetail: NewProductDetailProps = {
+      id: formData.id ?? '',
+      name: formData.productName,
+      number: formData.productNumber,
+      price: formData.productPrice,
+      lastestPriceDecisionDate: '',
+      cost: formData.productCost,
+      grossMarginRate:
+        ((formData.productPrice - formData.productCost) / formData.productCost) * 100,
+      productUnitId: formData.productUnit,
+      components: formData.components,
+      inStock: formData.stockQuantity,
+    }
+    const response = await updateProductDetail(newProductDetail)
+    if (response) return response
+  }
+
+  const handlePaginationModelChange = (newModel: PaginationModel) => {
+    if (newModel.pageSize !== paginationModel.pageSize) {
+      // If page size has changed, reset to the first page
+      setPaginationModel({ page: 0, pageSize: newModel.pageSize })
+      // Clear the cache when page size changes
+      setCachedData({})
+    } else {
+      setPaginationModel(newModel)
+    }
+    const cacheKey = `${newModel.page}-${newModel.pageSize}`
+
+    if (cachedData[cacheKey]) {
+      setProductData(cachedData[cacheKey])
+      return
+    }
+    getProductList(newModel)
   }
 
   const getProductOrderHistoryList = async (productId: string) => {
-    const result = await api.product.getProductOrderHistory(productId)
-    if (result.code === 200 && result.data) {
-      return result.data
+    // const result = await api.product.getProductOrderHistory(productId)
+    // if (result.code === 200 && result.data) {
+    //   return result.data
+    // }
+    // return undefined
+  }
+
+  const getProductList = async ({ page, pageSize }: GridPaginationModel) => {
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      page: page,
+      pageSize: pageSize,
     }
-    return undefined
+    const result = await api.product.getProductList(prepareSearhCriteria)
+    if (result.code === 200 && result.data) {
+      setProductData(result.data)
+      setTotalRows(result.page?.totalElements ?? 0)
+      setCachedData(prevCache => ({
+        ...prevCache,
+        [`${page}-${pageSize}`]: result.data ? result.data : [],
+      }))
+    }
+  }
+
+  const addNewProduct = async (data: AddNewProductProps) => {
+    const result = await api.product.addNewProduct(data)
+    if (result.code === 200 && result.data) {
+      notificationSnackbar.success('追加完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
+  const updateProductDetail = async (data: NewProductDetailProps) => {
+    const result = await api.product.updateProductDetail(data)
+    if (result.code === 200 && result.data) {
+      notificationSnackbar.success('編集完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
+  }
+
+  const deleteProduct = async (productId: string) => {
+    const result = await api.product.deleteProduct(productId)
+    if (result.code === 200) {
+      notificationSnackbar.success('削除完了しました。')
+      return true
+    } else {
+      notificationSnackbar.error(result.message)
+    }
   }
 
   return {
@@ -143,7 +258,11 @@ export default function useProduct() {
     handleChange,
     handlePaginationModelChange,
     paginationModel,
-    getComponentDetailList,
     getProductOrderHistoryList,
+    handleAddNewProduct,
+    totalRows,
+    handleUpdateProductDetail,
+    deleteProduct,
+    prepareProductDetail,
   }
 }

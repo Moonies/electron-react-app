@@ -17,7 +17,9 @@ import dayjs from 'dayjs'
 import useHttp from 'hooks/useHttp'
 import React, { useCallback, useEffect, useState } from 'react'
 import NumericFormatCustom from 'components/NumericFormat'
-export type NewComponentDetail = {
+import useNotification from 'hooks/useNotification'
+
+export type ComponentDetail = {
   id: string
   number: string
   name: string
@@ -30,18 +32,18 @@ interface ComponentDataExtended extends ComponentData {
   inputValue?: string
 }
 
-interface DialogAddNewComponentDialogProps {
+interface DialogAddComponentPartProps {
   open: boolean
   onClose: () => void
-  onSubmit: (inputProduct: NewComponentDetail) => void
+  onSubmit: (inputProduct: ComponentDetail) => void
 }
 
-export default function AddNewComponentListDialog({
+export default function AddComponentPartListDialog({
   open,
   onClose,
   onSubmit,
-}: DialogAddNewComponentDialogProps) {
-  const [formData, setFormData] = useState<NewComponentDetail>({
+}: DialogAddComponentPartProps) {
+  const [formData, setFormData] = useState<ComponentDetail>({
     id: '',
     number: '',
     name: '',
@@ -51,9 +53,14 @@ export default function AddNewComponentListDialog({
   const [loading, setLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [componentList, setComponentList] = useState<ComponentData[]>([])
-  const [isNewValue, setIsNewValue] = useState(false)
+  const { notificationModal } = useNotification()
   const { api } = useHttp()
   const submitProduct = async (e: React.FormEvent) => {
+    const selectedComponent = componentList.find(item => item.id === formData.id)
+    if (selectedComponent && selectedComponent?.inStock < formData.quantity) {
+      notificationModal.warning('component instock is not enough, please check your stock')
+      return
+    }
     e.preventDefault()
     e.stopPropagation()
     onSubmit(formData)
@@ -72,7 +79,7 @@ export default function AddNewComponentListDialog({
           setLoading(false)
         }
       }
-    }, 300),
+    }, 500),
     []
   )
 
@@ -92,7 +99,7 @@ export default function AddNewComponentListDialog({
         }
       }}
     >
-      <DialogTitle>Please Select Component</DialogTitle>
+      <DialogTitle>Please Select Component Part</DialogTitle>
       <form onSubmit={submitProduct}>
         <DialogContent>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
@@ -102,19 +109,14 @@ export default function AddNewComponentListDialog({
                 const { key, ...optionProps } = props
                 return (
                   <Box component='li' {...optionProps} key={option.id || option.number}>
-                    {/* {option.componentNumber}: {option.name} (¥{option.price}) */}
-                    {/* cannot use before confirmed */}
-                    {option.name.startsWith('Add "')
-                      ? option.name
-                      : `${option.number}: ${option.name} (¥${option.price})`}
+                    {option.number}: {option.name} (¥{option.price})
                   </Box>
                 )
               }}
               getOptionLabel={option => {
                 return typeof option === 'string' ? option : option.number
               }}
-              freeSolo
-              sx={{ flex: 1 }}
+              sx={{ flex: 1, width: '40%' }}
               renderInput={params => (
                 <TextField
                   {...params}
@@ -137,39 +139,19 @@ export default function AddNewComponentListDialog({
               }}
               onChange={(event, newValue) => {
                 if (newValue && typeof newValue !== 'string') {
-                  // cannot use before confirmed
-                  newValue.name.startsWith('Add "') ? setIsNewValue(true) : setIsNewValue(false)
                   setFormData({
                     id: newValue.id,
                     number: newValue.number,
-                    // componentName: newValue.componentName,
-                    // cannot use before confirmed
-                    name: newValue.name.startsWith('Add "')
-                      ? '' // Clear componentName if it's a new value
-                      : newValue.name,
+                    name: newValue.name,
                     quantity: 1,
                     price: newValue.price,
                   })
+                } else {
+                  setFormData({ id: '', number: '', name: '', quantity: 1, price: 0 })
                 }
               }}
-              // cannot use before confirmed
-              filterOptions={(options, params) => {
-                const filtered: any = options.filter(option =>
-                  option.number.toLowerCase().includes(params.inputValue.toLowerCase())
-                )
-                if (params.inputValue !== '' && !filtered.length) {
-                  filtered.push({
-                    id: `new-${params.inputValue}`,
-                    number: params.inputValue,
-                    name: `Add "${params.inputValue}"`,
-                    price: 0,
-                  } as ComponentData)
-                }
-                return filtered
-              }}
-              value={formData.number || null}
+              isOptionEqualToValue={option => option.number === formData.number}
             />
-            {/* cannot use before confirmed */}
             {formData.id !== '' && (
               <>
                 <TextField
@@ -177,7 +159,8 @@ export default function AddNewComponentListDialog({
                   value={formData.name}
                   onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   required
-                  InputProps={{ readOnly: !isNewValue }}
+                  InputProps={{ readOnly: true }}
+                  sx={{ width: '40%' }}
                 />
                 <TextField
                   label='価格'
@@ -188,20 +171,20 @@ export default function AddNewComponentListDialog({
                   }
                   InputProps={{
                     inputComponent: NumericFormatCustom as any,
-                    readOnly: !isNewValue,
+                    readOnly: true,
                   }}
                   required
+                  sx={{ width: '15%' }}
                 />
               </>
             )}
             <TextField
               label='数量'
-              // type='number'
               value={formData?.quantity ?? ''}
               onChange={e =>
                 setFormData(prev => ({ ...prev, quantity: parseFloat(e.target.value) }))
               }
-              sx={{ width: '30%' }}
+              sx={{ width: '15%' }}
               InputProps={{
                 inputComponent: NumericFormatCustom as any,
               }}

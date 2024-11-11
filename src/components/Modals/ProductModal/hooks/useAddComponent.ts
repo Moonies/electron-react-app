@@ -10,37 +10,29 @@ import {
   GridRowsProp,
 } from '@mui/x-data-grid'
 import { ComponentData } from 'api/component/getComponentData'
-import { ComponentDetail, ProductData } from 'api/product/getProductList'
+import { ProductUnitDetail } from 'api/product/getProductUnitList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
+import { ProductDetailModalProps } from '..'
 
-export type ProductDetail = {
-  id?: number
-  productNumber: string
-  productName: string
-  stockQuantity: number
-  productCost: number
-  productPrice: number
-  productUnit: string
-  productPriceMargin?: number
-  component: ComponentDetail[]
-}
-
-export default function useAddComponent(productData: ProductDetail) {
+export default function useAddComponent(productData: ProductDetailModalProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
-  const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>([])
+  const [newComponentListData, setNewComponentListData] = useState<GridRowsProp>(
+    productData.components
+  )
+  const [productUnitList, setProductUnitList] = useState<ProductUnitDetail[]>([])
   const { setLoading } = useLoading()
   const { api } = useHttp()
-  useEffect(() => {
-    prepareComponent()
-  }, [productData])
+
+  // useEffect(() => {
+  //   prepareComponent()
+  // }, [productData])
 
   const handleAddNewComponent = async (newComponent: NewComponentDetail) => {
     setLoading(true)
-    let currentIndex = newComponentListData.length
     let currentComponentData = newComponentListData
     let totalAmount = await getTotalRemainComponent(newComponent.id)
     //please check function again in task Sale order
@@ -54,19 +46,19 @@ export default function useAddComponent(productData: ProductDetail) {
             ? {
                 ...component,
                 quantity: component.quantity + newComponent.quantity,
-                totalQuantity: totalAmount,
+                // totalQuantity: totalAmount,
               }
-            : { ...component, totalQuantity: totalAmount }
+            : // : { ...component, totalQuantity: totalAmount }
+              { ...component }
         )
         setNewComponentListData(newRow)
       } else {
-        // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
-        setNewComponentListData(prev => [...prev, { ...newComponent, totalQuantity: totalAmount }])
+        // setNewComponentListData(prev => [...prev, { ...newComponent, totalQuantity: totalAmount }])
+        setNewComponentListData(prev => [...prev, { ...newComponent }])
       }
     } else {
-      setNewComponentListData(prev => [...prev, { ...newComponent, totalQuantity: totalAmount }])
-
-      // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
+      // setNewComponentListData(prev => [...prev, { ...newComponent, totalQuantity: totalAmount }])
+      setNewComponentListData(prev => [...prev, { ...newComponent }])
     }
     setLoading(false)
   }
@@ -136,17 +128,23 @@ export default function useAddComponent(productData: ProductDetail) {
     // setNewComponentListData({ ...updatedProducts })
   }, [])
 
+  const getProductUnit = async () => {
+    const response = await api.product.getProductUnitList()
+    if (response.code === 200 && response.data) {
+      setProductUnitList(response.data)
+    }
+  }
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'componentNumber',
-        headerName: '商品番号',
+        field: 'number',
+        headerName: '部品番号',
         headerAlign: 'center',
         flex: 1,
       },
       {
-        field: 'componentName',
-        headerName: '商品名',
+        field: 'name',
+        headerName: '部品名',
         headerAlign: 'center',
         flex: 1,
       },
@@ -158,14 +156,14 @@ export default function useAddComponent(productData: ProductDetail) {
         flex: 1,
         editable: true,
       },
+      // {
+      //   field: 'totalQuantity',
+      //   headerName: '合計残り',
+      //   headerAlign: 'center',
+      //   flex: 1,
+      // },
       {
-        field: 'totalQuantity',
-        headerName: '合計残り',
-        headerAlign: 'center',
-        flex: 1,
-      },
-      {
-        field: 'unitPrice',
+        field: 'price',
         headerName: '単価',
         type: 'number',
         headerAlign: 'center',
@@ -180,7 +178,7 @@ export default function useAddComponent(productData: ProductDetail) {
         flex: 1,
         valueFormatter: value => formatJPY(Number(value)),
         valueGetter: (value, row) => {
-          return row.quantity * row.unitPrice
+          return row.quantity * row.price
         },
       },
       {
@@ -205,5 +203,7 @@ export default function useAddComponent(productData: ProductDetail) {
     newComponentListData,
     rowModesModel,
     columns,
+    productUnitList,
+    getProductUnit,
   }
 }

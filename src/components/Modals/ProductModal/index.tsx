@@ -19,11 +19,10 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
 } from '@mui/icons-material'
-import { ComponentDetail, ProductData } from 'api/product/getProductList'
 import SlideTransition from 'components/Transition/Slide'
 import DataTable from 'components/DataTable'
 import useLoading from 'hooks/useLoading'
-import useAddComponent, { ProductDetail } from './hooks/useAddComponent'
+import useAddComponent from './hooks/useAddComponent'
 import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import {
   GridActionsCellItem,
@@ -35,16 +34,30 @@ import CustomFooter from './components/CustomFooter'
 import { ComponentData } from 'api/component/getComponentList'
 import NumericFormatCustom from 'components/NumericFormat'
 import { StyledButton } from 'styles/styles'
+import AddComponentPartListDialog from 'components/Dialogs/AddComponentPartListDialog'
+import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
+
+export type ProductDetailModalProps = {
+  id?: string
+  productNumber: string
+  productName: string
+  stockQuantity: number
+  productCost: number
+  productPrice: number
+  productUnit: string
+  productPriceMargin?: number
+  components: NewComponentDetail[]
+}
 
 interface SalesModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: ProductDetail) => Promise<void>
-  initialData?: ProductDetail
+  onConfirm: (data: ProductDetailModalProps) => Promise<void>
+  initialData?: ProductDetailModalProps
   mode: 'add' | 'edit' | 'view'
 }
 
-const defaultFormData: ProductDetail = {
+const defaultFormData: ProductDetailModalProps = {
   // id:undefined,
   productNumber: '',
   productName: '',
@@ -53,7 +66,7 @@ const defaultFormData: ProductDetail = {
   productPrice: 0,
   productPriceMargin: 0,
   productUnit: '',
-  component: [],
+  components: [],
 }
 
 const ProductModal: React.FC<SalesModalProps> = ({
@@ -83,20 +96,22 @@ const ProductModal: React.FC<SalesModalProps> = ({
     handleSaveClick,
     processRowUpdate,
     rowModesModel,
+    productUnitList,
+    getProductUnit,
   } = useAddComponent(formData)
 
   useEffect(() => {
-    if (modalMode === 'add') setFormData(defaultFormData)
-  }, [defaultFormData])
+    getProductUnit()
+  }, [])
 
-  const handleChange = (field: keyof ProductDetail, value: string | number) => {
-    // setFormData({ ...formData, [field]: value })
-    debouncedUpdate(field as keyof ProductDetail, value)
+  const handleChange = (field: keyof ProductDetailModalProps, value: string | number) => {
+    setFormData({ ...formData, [field]: value })
+    // debouncedUpdate(field as keyof ProductDetailModalProps, value)
   }
 
   const handleSubmit = async () => {
     try {
-      await onConfirm({ ...formData, component: newComponentListData as ComponentDetail[] })
+      await onConfirm({ ...formData, components: newComponentListData as NewComponentDetail[] })
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
@@ -104,25 +119,6 @@ const ProductModal: React.FC<SalesModalProps> = ({
       setLoading(false)
     }
   }
-
-  const productUnitList = [
-    {
-      value: 'piece',
-      label: '個',
-    },
-    {
-      value: 'unit',
-      label: '台',
-    },
-    {
-      value: 'sheet',
-      label: '枚',
-    },
-    {
-      value: 'set',
-      label: 'セット',
-    },
-  ]
 
   const updatedColumns = columns.map(column => {
     if (column.field === 'actions') {
@@ -182,9 +178,12 @@ const ProductModal: React.FC<SalesModalProps> = ({
   const calculateProfitMargin = (cost: number, price: number) => price - cost
 
   //break for app crash
-  const debouncedUpdate = debounce((field: keyof ProductDetail, value: string | number) => {
-    setFormData({ ...formData, [field]: value })
-  }, 300)
+  const debouncedUpdate = debounce(
+    (field: keyof ProductDetailModalProps, value: string | number) => {
+      setFormData({ ...formData, [field]: value })
+    },
+    100
+  )
 
   return (
     <Dialog
@@ -221,6 +220,9 @@ const ProductModal: React.FC<SalesModalProps> = ({
               onChange={e => handleChange('productNumber', e.target.value)}
               fullWidth
               margin='normal'
+              InputProps={{
+                readOnly: modalMode === 'view',
+              }}
               // sx={{ flex: 1 }}
             />
             <TextField
@@ -230,24 +232,30 @@ const ProductModal: React.FC<SalesModalProps> = ({
               onChange={e => handleChange('productName', e.target.value)}
               fullWidth
               margin='normal'
+              InputProps={{
+                readOnly: modalMode === 'view',
+              }}
               // sx={{ width: '20%' }}
             />
             <TextField
               label='単位'
               type='text'
-              value={formData.productUnit}
+              value={productUnitList.length > 0 ? formData.productUnit : ''} //for waiting productUnitList Loaded
               defaultValue={undefined}
               onChange={e => handleChange('productUnit', e.target.value)}
               // fullWidth
               margin='normal'
               select
               sx={{ width: '40%' }}
+              InputProps={{
+                readOnly: modalMode === 'view',
+              }}
               InputLabelProps={{
                 component: 'span',
               }}
             >
               {productUnitList.map(item => (
-                <MenuItem key={item.value} value={item.value}>
+                <MenuItem key={item.id} value={item.id}>
                   {item.label}
                 </MenuItem>
               ))}
@@ -263,6 +271,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
               // fullWidth
               margin='normal'
               InputProps={{
+                readOnly: modalMode === 'view',
                 inputComponent: NumericFormatCustom as any,
                 inputProps: {
                   maxLength: 13,
@@ -282,6 +291,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
               margin='normal'
               onTouchStart={e => e.preventDefault()}
               InputProps={{
+                readOnly: modalMode === 'view',
                 inputComponent: NumericFormatCustom as any,
                 inputProps: {
                   maxLength: 13,
@@ -305,11 +315,15 @@ const ProductModal: React.FC<SalesModalProps> = ({
             {modalMode !== 'add' && (
               <TextField
                 label='在庫数'
-                type='number'
+                // type='number'
                 value={formData.stockQuantity}
                 onChange={e => handleChange('stockQuantity', parseFloat(e.target.value))}
                 // fullWidth
                 margin='normal'
+                InputProps={{
+                  readOnly: modalMode === 'view',
+                  inputComponent: NumericFormatCustom as any,
+                }}
                 // sx={{ width: '20%' }}
               />
             )}
@@ -358,7 +372,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
             }}
           />
           {openDialog && (
-            <AddNewComponentListDialog
+            <AddComponentPartListDialog
               open={openDialog}
               onClose={() => setOpenDialog(false)}
               onSubmit={newComponent => {
@@ -370,20 +384,22 @@ const ProductModal: React.FC<SalesModalProps> = ({
           )}
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} variant='contained'>
-          キャンセル
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant='outlined'
-          sx={{
-            color: 'white',
-          }}
-        >
-          保存
-        </Button>
-      </DialogActions>
+      {modalMode !== 'view' && (
+        <DialogActions>
+          <Button onClick={onClose} variant='contained'>
+            キャンセル
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant='outlined'
+            sx={{
+              color: 'white',
+            }}
+          >
+            保存
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   )
 }

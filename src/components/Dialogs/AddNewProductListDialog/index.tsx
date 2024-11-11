@@ -55,8 +55,8 @@ export default function AddnewProductDialog({
       if (query.length >= 2) {
         setLoading(true)
         try {
-          const fetchedOptions = await api.product.getProductData(query)
-          setProductList(fetchedOptions.data?.data ?? [])
+          // const fetchedOptions = await api.product.getProductData(query)
+          // setProductList(fetchedOptions.data?.data ?? [])
         } catch (error) {
           console.error('Error fetching options:', error)
         } finally {
