@@ -82,7 +82,7 @@ export type PurchaseModalDataProps = {
   // purchaseApprovedDate: string | Dayjs
   // stockApprovalDate: string | Dayjs
   owners: OwnerList[]
-  memo: string
+  memo?: string
   totalAmount: number
   status?: string
 }
@@ -450,7 +450,7 @@ export default function PurchaseModal({
         (currentStatus === undefined || currentStatus === 'PENDING')}
               /> */}
               <DatePicker
-                label='手配納期'
+                label='配達納期'
                 value={dayjs(formData.deliveryDate) ?? ''}
                 format='YYYY-MM-DD'
                 onChange={newValue =>
@@ -573,7 +573,7 @@ export default function PurchaseModal({
               slots={{
                 footer: CustomFooter,
               }}
-              getRowId={row => (modalMode !== 'add' ? row.name + row.number : row.id)}
+              // getRowId={row => (modalMode !== 'add' ? row.name + row.number : row.id)}
             />
             {openDialogAddComponent && (
               <AddNewComponentListDialog

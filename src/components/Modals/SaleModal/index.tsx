@@ -33,6 +33,8 @@ import {
   GridRowSelectionModel,
   GridSlots,
   useGridApiRef,
+  GridRowParams,
+  gridDataRowIdsSelector,
 } from '@mui/x-data-grid'
 import AddnewProductDialog from 'components/Dialogs/AddNewProductListDialog'
 import { TransitionProps } from '@mui/material/transitions'
@@ -42,11 +44,15 @@ import customer from 'api/customer'
 import SlideTransition from 'components/Transition/Slide'
 import CustomFooter from './components/CustomerFooter'
 import { OrderStatus } from 'api/order'
+import { SaleStatus } from 'api/sale'
+import AddNewMemoDialog from 'components/Dialogs/AddNewMemoDialog'
+import { useConfirmModal } from 'hooks/useConfirmModal'
 interface Option {
   label: string
   id: number
 }
 export type SaleNewProductList = {
+  id?: string
   name: string
   number: string
   price: number
@@ -60,15 +66,13 @@ export type SaleModalDataProps = {
   customerCompanyId: string
   customerCompanyName: string
   product: SaleNewProductList[]
-  // orderRequestEmployeeId: string
-  // orderRequestEmployeeName: string
-  // orderApprovedEmployeeId: string
-  // orderApprovedEmployeeName: string
-  quotationRequestDate: Dayjs | string
-  paymentDueDate: Dayjs | string
-  registDate: Dayjs | string
+  memo?: string
+  // quotationRequestDate: Dayjs | string
+  // paymentDueDate: Dayjs | string
+  registrationDate: Dayjs | string
   shippingmentDate: Dayjs | string
   status: string
+  totalAmount: number
   owners: {
     id: string
     name: string
@@ -83,20 +87,14 @@ interface PurchaseModalProps {
   mode: 'add' | 'edit' | 'view'
 }
 const defaultFormData = {
-  // id: '',
   orderCode: '',
   saleCode: '',
   invoiceNumber: '',
   customerCompanyId: '',
   customerCompanyName: '',
   product: [],
-  // orderRequestEmployeeId: '',
-  // orderRequestEmployeeName: '',
-  // orderApprovedEmployeeId: '',
-  // orderApprovedEmployeeName: '',
-  quotationRequestDate: dayjs(),
-  paymentDueDate: dayjs(),
-  registDate: dayjs(),
+  totalAmount: 0,
+  registrationDate: dayjs(),
   shippingmentDate: dayjs(),
   status: OrderStatus.PENDING,
   owners: [],
@@ -108,14 +106,16 @@ export default function SaleModal({
   initialData,
   mode,
 }: PurchaseModalProps) {
-  //waiting new order
-  const [formData, setFormData] = useState(initialData ?? defaultFormData)
+  const [formData, setFormData] = useState<SaleModalDataProps>(initialData ?? defaultFormData)
   const [openDialog, setOpenDialog] = useState(false)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
+  const currentStatus = mode === 'view' ? '' : initialData?.status
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
   const addNewProductDataGridRef = useGridApiRef()
+  const [openDialogAddMemo, setOpenDialogAddMemo] = useState(false)
   const { setLoading } = useLoading()
   const { Slide } = SlideTransition({ direction: 'up' })
+  const { openConfirmModal } = useConfirmModal()
 
   const {
     columns,
@@ -146,9 +146,8 @@ export default function SaleModal({
     if (column.field === 'actions') {
       return {
         ...column,
-        getActions: ({ id }: any) => {
+        getActions: ({ id }: GridRowParams) => {
           const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
-
           if (isInEditMode) {
             return [
               <GridActionsCellItem
@@ -190,7 +189,23 @@ export default function SaleModal({
     return column
   })
 
-  const handleChange = (field: keyof SaleModalDataProps, value: string | number) => {
+  const handleChange = async (field: keyof SaleModalDataProps, value: string | number) => {
+    if (field === 'status' && value === 'CONFIRMED') {
+      const confirmed = await openConfirmModal({
+        title: 'ご注意ください',
+        message:
+          'If you change status to confirm, data can be not change. \n if your click "OK", edited data they are to be return to after edit \n if you need to update data should be not change status.',
+      })
+      if (confirmed) {
+        setFormData(initialData ?? defaultFormData)
+        setFormData(prev => ({ ...prev, [field]: value }))
+        setModalMode('view')
+      }
+
+      return
+    } else if (field === 'status' && value === 'PENDING') {
+      setModalMode('edit')
+    }
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -199,11 +214,9 @@ export default function SaleModal({
 
     setLoading(true)
     try {
-      //waiting sale task
       await onConfirm({ ...formData, product: newProductListData as SaleNewProductList[] })
     } catch (error) {
       console.error('Error submitting data:', error)
-      // Handle error (e.g., show error message)
     } finally {
       setLoading(false)
     }
@@ -214,20 +227,46 @@ export default function SaleModal({
   }
 
   const findCustomerById = (customerId: string | null) => {
-    return customerListData?.find(customer => customer.companyCode === customerId) || null
+    return customerListData?.find(customer => customer.id === customerId) || null
   }
 
   const statusList = [
-    { label: '見積書依頼', value: 'invoice_pending' },
-    { label: '配達中', value: 'on_delivery' },
-    { label: '入庫済', value: 'delivered' },
-    { label: '返品中', value: 'rejected' },
-    { label: 'キャンセル', value: 'cancelled' },
+    { label: '見積', value: 'PENDING' },
+    { label: '受注', value: 'CONFIRMED' },
+    { label: '出荷', value: 'SHIPPED' },
+    { label: '出荷済', value: 'COMPLETED' }, //売上
+    { label: '返品', value: 'rejected' },
+    { label: 'キャンセル', value: 'CANCELLED' },
   ]
+
+  const getAvailableStatuses = (
+    currentStatus: SaleStatus | string,
+    statusList: { label: string; value: string }[]
+  ) => {
+    switch (currentStatus) {
+      case 'PENDING':
+        return statusList.filter(status =>
+          ['PENDING', 'CONFIRMED', 'CANCEL'].includes(status.value)
+        )
+      case 'CONFIRMED':
+        return statusList.filter(status =>
+          ['CONFIRMED', 'SHIPPED', 'CANCEL', 'rejected'].includes(status.value)
+        )
+      case 'SHIPPED':
+        return statusList.filter(status =>
+          ['SHIPPED', 'COMPLETED', 'rejected', 'CANCEL'].includes(status.value)
+        )
+
+      default:
+        return statusList
+    }
+  }
 
   const columnVisibilityModel = useMemo(() => {
     return {
-      actions: modalMode !== 'view',
+      actions:
+        (modalMode === 'add' || modalMode === 'edit') &&
+        (currentStatus === undefined || currentStatus === 'PENDING'),
     }
   }, [modalMode])
 
@@ -257,7 +296,7 @@ export default function SaleModal({
                 : '追加モーダルウィンドウ'}
           </Typography>
           <Box display={'flex'} gap={4}>
-            {modalMode === 'view' && (
+            {/* {modalMode === 'view' && (
               <IconButton
                 edge='end'
                 color='inherit'
@@ -266,7 +305,7 @@ export default function SaleModal({
               >
                 <EditIcon />
               </IconButton>
-            )}
+            )} */}
             <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
               <CloseIcon />
             </IconButton>
@@ -279,13 +318,10 @@ export default function SaleModal({
             <Box display={'flex'} flexDirection={'row'} gap={2}>
               <DatePicker
                 label='登録日付'
-                value={dayjs(formData.quotationRequestDate)}
+                value={dayjs(formData.registrationDate)}
                 format='YYYY/MM/DD'
                 onChange={newValue =>
-                  handleChange(
-                    'quotationRequestDate',
-                    newValue ? newValue.format('YYYY-MM-DD') : ''
-                  )
+                  handleChange('registrationDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
                 sx={{ marginTop: 2, width: '100%' }}
                 readOnly={modalMode === 'view'}
@@ -298,7 +334,10 @@ export default function SaleModal({
                 fullWidth
                 // sx={{ flex: 1 }}
                 InputProps={{
-                  readOnly: modalMode === 'view',
+                  readOnly: !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  ),
                 }}
                 required
               />
@@ -310,7 +349,10 @@ export default function SaleModal({
                 fullWidth
                 // sx={{ flex: 1 }}
                 InputProps={{
-                  readOnly: modalMode === 'view',
+                  readOnly: !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  ),
                 }}
                 required
               />
@@ -321,14 +363,12 @@ export default function SaleModal({
                 fullWidth
                 margin='normal'
                 required
-                inputProps={
-                  {
-                    // readOnly: !(
-                    //   (modalMode === 'add' || modalMode === 'edit') &&
-                    //   (currentStatus === undefined || currentStatus === 'PENDING')
-                    // ),
-                  }
-                }
+                inputProps={{
+                  readOnly: !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  ),
+                }}
               />
               <Autocomplete
                 options={customerListData}
@@ -348,7 +388,7 @@ export default function SaleModal({
                   if (typeof newValue === 'object' && newValue !== null) {
                     setFormData(prev => ({
                       ...prev,
-                      customerCompanyId: newValue.companyCode,
+                      customerCompanyId: newValue.id,
                     }))
                   }
                 }}
@@ -358,7 +398,7 @@ export default function SaleModal({
                 fullWidth
               />
             </Box>
-            <Box display={'flex'} flexDirection={'row'} gap={2}>
+            <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent='space-between'>
               {/* <DatePicker
                 label='見積書日付'
                 value={dayjs(formData.quotationRequestDate)}
@@ -380,7 +420,12 @@ export default function SaleModal({
                   handleChange('shippingmentDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
                 sx={{ marginTop: 2, width: '25%' }}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
               />
               {/* <DatePicker
                 label='支払期限'
@@ -399,15 +444,15 @@ export default function SaleModal({
                   onChange={e => handleChange('status', e.target.value)}
                   margin='normal'
                   select
-                  sx={{ flex: 1 }}
+                  sx={{ width: '30%' }}
                   InputLabelProps={{
                     component: 'span',
                   }}
                   InputProps={{
-                    readOnly: modalMode === 'view',
+                    readOnly: modalMode === 'view' && currentStatus === '',
                   }}
                 >
-                  {statusList.map(item => (
+                  {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
                     <MenuItem key={item.value} value={item.value}>
                       {item.label}
                     </MenuItem>
@@ -422,17 +467,32 @@ export default function SaleModal({
               justifyContent={'space-between'}
               sx={{ marginTop: 2 }}
             >
-              <Box display={'flex'} alignItems={'end'}>
+              <Box display={'flex'} alignItems={'end'} flex={1}>
                 <Button
                   onClick={() => setOpenDialog(true)}
                   variant='outlined'
                   sx={theme => ({
                     color: 'white',
-                    visibility: modalMode === 'view' ? 'hidden' : 'inherit',
-                    // height: '50%',
+                    visibility:
+                      (modalMode === 'add' || modalMode === 'edit') &&
+                      (currentStatus === undefined || currentStatus === 'PENDING')
+                        ? 'inherit'
+                        : 'hidden',
                   })}
                 >
                   Add Product
+                </Button>
+              </Box>
+              <Box display={'flex'} alignItems={'end'}>
+                <Button
+                  onClick={() => setOpenDialogAddMemo(true)}
+                  variant='outlined'
+                  sx={{ color: 'white' }}
+                >
+                  {(modalMode === 'add' || modalMode === 'edit') &&
+                  (currentStatus === undefined || currentStatus === 'PENDING')
+                    ? 'Add memo'
+                    : 'memo'}
                 </Button>
               </Box>
               <Autocomplete
@@ -470,7 +530,7 @@ export default function SaleModal({
               data={newProductListData}
               columns={updatedColumns}
               apiref={addNewProductDataGridRef}
-              // getRowId={row => row.productNumber}
+              // getRowId={row => (modalMode === 'add' ? row.id : `${row.name}${row.number}`)}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
               sx={{ height: 475, mt: 2 }}
               editMode='row'
@@ -480,7 +540,10 @@ export default function SaleModal({
               processRowUpdate={processRowUpdate}
               disableColumnSelector
               columnVisibilityModel={columnVisibilityModel}
-              isCellEditable={() => modalMode !== 'view'}
+              isCellEditable={() =>
+                (modalMode === 'add' || modalMode === 'edit') &&
+                (currentStatus === undefined || currentStatus === 'PENDING')
+              }
               slots={{
                 footer: CustomFooter,
               }}
@@ -494,19 +557,30 @@ export default function SaleModal({
                 setOpenDialog(false)
                 handleAddNewProduct(newProduct)
               }}
-              // initialData={selectedOrder}
+            />
+          )}
+          {openDialogAddMemo && (
+            <AddNewMemoDialog
+              open={openDialogAddMemo}
+              onClose={() => setOpenDialogAddMemo(false)}
+              editable={
+                (modalMode === 'add' || modalMode === 'edit') &&
+                (currentStatus === undefined || currentStatus === 'PENDING')
+              }
+              initailData={formData.memo}
+              onSubmit={memo => {
+                setFormData(prev => ({
+                  ...prev,
+                  memo: memo,
+                }))
+                setOpenDialogAddMemo(false)
+              }}
             />
           )}
         </DialogContent>
-        {modalMode !== 'view' && (
+        {(currentStatus !== '' || modalMode !== 'view') && (
           <DialogActions>
-            <Button
-              onClick={onClose}
-              variant='contained'
-              // sx={theme => ({
-              //   color: 'white',
-              // })}
-            >
+            <Button onClick={onClose} variant='contained'>
               キャンセル
             </Button>
             <Button

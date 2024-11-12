@@ -31,7 +31,7 @@ import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
 import usePurchase from './hooks/usePurchase'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
-import PurchaseModal from 'components/Modals/PurchaseModal'
+import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
 
 export default function PurchasePage() {
   const {
@@ -51,7 +51,7 @@ export default function PurchasePage() {
   } = usePurchase()
   const purchaseDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseData | undefined>(undefined)
+  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseModalDataProps>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
@@ -79,50 +79,74 @@ export default function PurchasePage() {
   }
 
   const handleEditClick = useCallback(() => {
-    if (selectionModel.length === 1) {
-      const selectedId = selectionModel[0]
-      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
-      if (selectedData) {
-        setModalMode('edit')
-        setSelectedPurchase(selectedData)
-        setModalOpen(true)
-      }
-    } else {
-      notificationModal.error('編集する表の行を選択してください。')
-    }
+    // if (selectionModel.length === 1) {
+    //   const selectedId = selectionModel[0]
+    //   const selectedData = purchaseData.find(item => item.id === selectedId)
+    //   if (selectedData) {
+    //     setModalMode('edit')
+    //     setSelectedPurchase(selectedData)
+    //     setModalOpen(true)
+    //   }
+    // } else {
+    //   notificationModal.error('編集する表の行を選択してください。')
+    // }
   }, [selectionModel])
 
   const handleDeleteClick = useCallback(async () => {
-    if (selectionModel.length === 1) {
-      const selectedId = selectionModel[0]
-      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
-      if (selectedData) {
-        const confirmed = await openConfirmModal({
-          title: '確認してください',
-          message: `この選ばれたの注番　 ${selectedData.invoiceNumber}　を削除してもよろしいですか?`,
-
-          // message:
-          //   'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
-        })
-        if (confirmed) {
-          // Perform delete operation
-          console.log('Delete confirmed')
-        } else {
-          console.log('Delete cancelled')
-        }
-      }
-    } else {
-      notificationModal.error('削除する行をテーブルから選択してください')
-    }
+    // if (selectionModel.length === 1) {
+    //   const selectedId = selectionModel[0]
+    //   const selectedData = purchaseData.find(item => item.id === selectedId)
+    //   if (selectedData) {
+    //     const confirmed = await openConfirmModal({
+    //       title: '確認してください',
+    //       message: `この選ばれたの注番　 ${selectedData.invoiceNumber}　を削除してもよろしいですか?`,
+    //       // message:
+    //       //   'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
+    //     })
+    //     if (confirmed) {
+    //       // Perform delete operation
+    //       console.log('Delete confirmed')
+    //     } else {
+    //       console.log('Delete cancelled')
+    //     }
+    //   }
+    // } else {
+    //   notificationModal.error('削除する行をテーブルから選択してください')
+    // }
   }, [selectionModel])
 
   const handleViewDetailClick = useCallback(async () => {
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
-      const selectedData = purchaseData.find(item => item.purchaseId === selectedId)
+      const selectedData = purchaseData.find(item => item.id === selectedId)
       if (selectedData) {
+        let purchaseDetail: PurchaseModalDataProps = {
+          id: selectedData.id,
+          orderCode: selectedData.orderCode,
+          purchaseCode: selectedData.purchaseCode,
+          invoiceNumber: selectedData.invoiceNumber,
+          supplierCompanyId: selectedData.companyId ?? '',
+          supplierCompanyName: selectedData.company?.companyInfo.name ?? '',
+          component: selectedData.components.map(item => ({
+            id: item.number + item.name,
+            name: item.name,
+            number: item.number,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          orderRequestEmployeeId: selectedData.createdBy,
+          orderRequestEmployeeName: '',
+          orderApprovedEmployeeId: '',
+          orderApprovedEmployeeName: '',
+          memo: selectedData.memo,
+          registrationDate: selectedData.registrationDate,
+          totalAmount: selectedData.totalAmount,
+          status: selectedData.status,
+          owners: selectedData.owners,
+          deliveryDate: selectedData.deliveryDate,
+        }
+        setSelectedPurchase(purchaseDetail)
         setModalMode('view')
-        setSelectedPurchase(selectedData)
         setModalOpen(true)
         console.log(selectedData)
       }
@@ -131,7 +155,7 @@ export default function PurchasePage() {
     }
   }, [selectionModel])
 
-  const handleModalConfirm = async (data: PurchaseData) => {
+  const handleModalConfirm = async (data: PurchaseModalDataProps) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
     if (modalMode === 'add') {
@@ -377,7 +401,7 @@ export default function PurchasePage() {
         />
       </Box>
       {/* waiting for prepare new data props */}
-      {/* {modalOpen && (
+      {modalOpen && (
         <PurchaseModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -385,7 +409,7 @@ export default function PurchasePage() {
           initialData={selectedPurchase}
           mode={modalMode}
         />
-      )} */}
+      )}
     </Box>
   )
 }

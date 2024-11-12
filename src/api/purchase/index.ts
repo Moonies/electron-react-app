@@ -28,6 +28,7 @@ export interface PurchaseApi {
   updatePurchaseDetail: (params: NewPurchaseDetail) => Promise<ApiResponse<{}>>
   updatePurchaseStatus: (purchaseId: string, status: PurchaseStatus) => Promise<ApiResponse<{}>>
 }
+
 export default function purchase(httpRequest: HttpRequest): PurchaseApi {
   return {
     getPurchaseList: params => getPurchaseList(httpRequest, params),

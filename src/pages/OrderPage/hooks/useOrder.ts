@@ -1,15 +1,20 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { OrderStatus, OrderType } from 'api/order'
+import { AddNewSaleOrderProps } from 'api/sale/addNewSale'
 import { OrderData, OrderSearchCriteria } from 'api/order/getOrderList'
 import { PurchaseStatus } from 'api/purchase'
 import { AddNewPurchase } from 'api/purchase/addNewPurchase'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import { NewPurchaseDetail } from 'api/purchase/updatePurchaseDetail'
 import { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
+import { SaleModalDataProps } from 'components/Modals/SaleModal'
 import dayjs from 'dayjs'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
+import useNotification from 'hooks/useNotification'
 import { useCallback, useMemo, useState } from 'react'
+import { SaleStatus } from 'api/sale'
+import { NewSaleDetailProps } from 'api/sale/updateSaleDetail'
 
 interface CategorySaleSearch {
   value: string
@@ -44,12 +49,14 @@ export default function useOrder() {
     status: '',
     orderType: '',
   })
+  const { notificationSnackbar } = useNotification()
   const { api } = useHttp()
 
   const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
   const dateTypeList = [
     { value: 'registrationDate', display: '登録日付' },
-    { value: 'deliveryDate', display: '出荷日付' },
+    { value: 'deliveryDate', display: '配達日付' },
+    { value: 'shipmentDate', display: '出荷日付' },
   ]
   const orderTypeList = [
     { value: 'All', display: '全て' },
@@ -65,7 +72,7 @@ export default function useOrder() {
       case OrderStatus.CONFIRM:
         return orderType === OrderType.SALE ? '受注' : '発注'
       case OrderStatus.SHIP:
-        return orderType === OrderType.SALE ? '見積' : '手配'
+        return orderType === OrderType.SALE ? '出荷' : '配達'
       // case OrderStatus.RECEIVED:
       //   return '発注'
       // case OrderStatus.PROCESSING:
@@ -121,7 +128,7 @@ export default function useOrder() {
       },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
-      { field: 'deliveryDate', headerName: '出荷日付', headerAlign: 'center' },
+      { field: 'deliveryDate', headerName: '出荷 / 配達日付', headerAlign: 'center' },
       // { field: 'paymentDueDate', headerName: '支払期限', headerAlign: 'center' },
     ],
     []
@@ -166,7 +173,7 @@ export default function useOrder() {
       // { value: OrderStatus.COMPLETE, label: '売上', type: OrderType.SALE },
       { value: OrderStatus.PENDING, label: '未発注', type: OrderType.PURCHASE },
       { value: OrderStatus.CONFIRM, label: '発注', type: OrderType.PURCHASE },
-      { value: OrderStatus.SHIP, label: '手配', type: OrderType.PURCHASE },
+      { value: OrderStatus.SHIP, label: '配達', type: OrderType.PURCHASE },
       // { value: OrderStatus.COMPLETE, label: '入庫', type: OrderType.PURCHASE },
       // { value: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.PURCHASE },
       { value: OrderStatus.REJECT, label: '返品', type: OrderType.ALL },
@@ -204,14 +211,45 @@ export default function useOrder() {
     getOrderListData(newModel)
   }
 
-  const handlerDeleteOrder = async (selectedOrder: OrderData) => {
+  const handleDeleteOrder = async (selectedOrder: OrderData) => {
     if (selectedOrder.orderType === OrderType.SALE) {
+      const response = await deleteSaleOrder(selectedOrder.id)
+      return response
     } else {
-      return await deletePurchaseOrder(selectedOrder.id)
+      const response = await deletePurchaseOrder(selectedOrder.id)
+      return response
     }
   }
 
-  const handlerSelectedPurchaseDetail = async (purchaseId: string) => {
+  const handleSelectedSaleDetail = async (saleId: string) => {
+    const result = await getSaleDetail(saleId)
+    if (result) {
+      let saleDetail: SaleModalDataProps = {
+        id: result.id,
+        orderCode: result.orderCode,
+        saleCode: result.saleCode,
+        invoiceNumber: result.invoiceNumber,
+        customerCompanyId: result.companyId,
+        customerCompanyName: result.company.companyInfo.name,
+        product: result.products.map(item => ({
+          id: item.number + item.name,
+          name: item.name,
+          number: item.number,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        registrationDate: result.registrationDate,
+        shippingmentDate: result.shipmentDate,
+        status: result.status,
+        totalAmount: result.totalAmount,
+        owners: result.owners,
+        memo: result.memo,
+      }
+      return saleDetail
+    }
+  }
+
+  const handleSelectedPurchaseDetail = async (purchaseId: string) => {
     const result = await getPurchaseDetail(purchaseId)
     if (result) {
       let purchaseDetail: PurchaseModalDataProps = {
@@ -221,7 +259,13 @@ export default function useOrder() {
         invoiceNumber: result.invoiceNumber,
         supplierCompanyId: result.companyId ?? '',
         supplierCompanyName: result.company?.companyInfo.name ?? '',
-        component: result.components,
+        component: result.components.map(item => ({
+          id: item.number + item.name,
+          name: item.name,
+          number: item.number,
+          quantity: item.quantity,
+          price: item.price,
+        })),
         orderRequestEmployeeId: result.createdBy,
         orderRequestEmployeeName: '',
         orderApprovedEmployeeId: '',
@@ -237,30 +281,61 @@ export default function useOrder() {
     }
   }
 
-  const addNewOrder = async (formData: OrderData) => {
-    // let data: NewOrder = {
-    //   orderId: formData.orderId,
-    //   customerCompanyId: formData.customerCompanyId,
-    //   product: formData.product,
-    //   orderRequestEmployeeId: formData.orderRequestEmployeeId,
-    //   orderApprovedEmployeeId: formData.orderApprovedEmployeeId,
-    //   quotationRequestDate: dayjs(formData.quotationRequestDate).format('YYYY/MM/DD'),
-    //   registDate: dayjs(formData.registDate).format('YYYY/MM/DD'),
-    //   shippingmentDate: dayjs(formData.shippingmentDate).format('YYYY/MM/DD'),
-    //   paymentDueDate: dayjs(formData.paymentDueDate).format('YYYY/MM/DD'),
-    //   status: formData.status,
-    // }
-    // console.log(data)
-    //call api
-    // const result = await api.order.addNewOrder(data)
+  const addNewSaleOrder = async (formData: SaleModalDataProps) => {
+    let data: AddNewSaleOrderProps = {
+      orderCode: formData.orderCode,
+      companyId: formData.customerCompanyId,
+      products: formData.product,
+      registrationDate: dayjs().format('YYYY-MM-DD'),
+      shipmentDate: dayjs(formData.shippingmentDate).format('YYYY-MM-DD'),
+      invoiceNumber: formData.invoiceNumber,
+      owners: formData.owners,
+      saleCode: formData.saleCode,
+      totalAmount: formData.totalAmount,
+      memo: formData.memo,
+    }
+    const result = await api.sale.addNewSale(data)
+    if (result.code === 200) {
+      notificationSnackbar.success('追加完了しました。')
+      return true
+    }
   }
 
-  const editOrder = async (FormData: OrderData) => {
-    //call update api
-  }
+  const editSaleOrder = async (formData: SaleModalDataProps) => {
+    switch (formData.status) {
+      case SaleStatus.PENDING:
+        let data: NewSaleDetailProps = {
+          id: formData.id ?? '',
+          orderCode: formData.orderCode,
+          totalAmount: formData.totalAmount,
+          registrationDate: dayjs(formData.registrationDate).format('YYYY-MM-DD'),
+          shipmentDate: dayjs(formData.shippingmentDate).format('YYYY-MM-DD'),
+          invoiceNumber: formData.invoiceNumber ?? '',
+          memo: formData.memo,
+          saleCode: formData.saleCode ?? '',
+          products: formData.product,
+          companyId: formData.customerCompanyId,
+          owners: formData.owners,
+        }
+        const response = await api.sale.updateSaleDetail(data)
+        if (response.code === 200) {
+          notificationSnackbar.success('編集完了しました。')
+          return true
+        }
+        break
+      case SaleStatus.CONFIRM:
+      case SaleStatus.ON_DELIVERY:
+      case SaleStatus.DELIVERED:
+      case SaleStatus.CANCEL:
+        if (formData.id) {
+          const response = await api.sale.updateSaleStatus(formData.id, formData.status)
+          if (response.code === 200) return true
+        }
+        break
 
-  const deleteOrder = async (FormData: OrderData) => {
-    //cal delete api
+      default:
+        break
+    }
   }
 
   const addNewPurchaseOrder = async (formData: PurchaseModalDataProps) => {
@@ -316,20 +391,32 @@ export default function useOrder() {
     }
   }
 
-  const deletePurchaseOrder = async (orderId: string) => {
-    //cal delete api
-    const result = await api.purchase.deletePurchaseOrder(orderId)
+  const deletePurchaseOrder = async (purchaseId: string) => {
+    const result = await api.purchase.deletePurchaseOrder(purchaseId)
+    if (result.code === 200 && result.data) {
+      return true
+    }
+  }
+
+  const getPurchaseDetail = async (purchaseId: string) => {
+    const result = await api.purchase.getPurchaseDetail(purchaseId)
     if (result.code === 200 && result.data) {
       return result.data
     }
   }
 
-  const getPurchaseDetail = async (orderId: string) => {
-    const result = await api.purchase.getPurchaseDetail(orderId)
+  const getSaleDetail = async (saleId: string) => {
+    const result = await api.sale.getSaleDetail(saleId)
+    if (result.code === 200 && result.data) return result.data
+  }
+
+  const deleteSaleOrder = async (saleId: string) => {
+    const result = await api.sale.deleteSale(saleId)
     if (result.code === 200 && result.data) {
-      return result.data
+      return true
     }
   }
+
   const getOrderListData = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
     const [orderType, status] = searchCriteria.status.split('.')
@@ -368,17 +455,18 @@ export default function useOrder() {
     handlePaginationModelChange,
     statusOrder,
     convertStatus,
-    addNewOrder,
-    editOrder,
-    deleteOrder,
+    addNewSaleOrder,
+    editSaleOrder,
+    deleteSaleOrder,
     addNewPurchaseOrder,
     editPurchaseOrder,
     deletePurchaseOrder,
     getPurchaseDetail,
-    handlerDeleteOrder,
+    handleDeleteOrder,
     dateTypeList,
     orderTypeList,
-    handlerSelectedPurchaseDetail,
+    handleSelectedPurchaseDetail,
     totalRows,
+    handleSelectedSaleDetail,
   }
 }

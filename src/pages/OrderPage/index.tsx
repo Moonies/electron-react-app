@@ -43,21 +43,21 @@ export default function OrderPage() {
     categorySearch,
     statusOrder,
     convertStatus,
-    addNewOrder,
-    editOrder,
-    deleteOrder,
+    addNewSaleOrder,
+    editSaleOrder,
     addNewPurchaseOrder,
     editPurchaseOrder,
     getPurchaseDetail,
-    handlerDeleteOrder,
+    handleDeleteOrder,
     dateTypeList,
     orderTypeList,
-    handlerSelectedPurchaseDetail,
+    handleSelectedPurchaseDetail,
     totalRows,
+    handleSelectedSaleDetail,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
-  const [selectedOrder, setSelectedOrder] = useState<OrderData>()
+  const [selectedSale, setSelectedSale] = useState<SaleModalDataProps>()
   const [selectedPurchase, setSelectedPurchase] = useState<PurchaseModalDataProps>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
@@ -88,7 +88,7 @@ export default function OrderPage() {
   }, [])
 
   const handleAddClick = () => {
-    setSelectedOrder(undefined)
+    orderType === 'Sale' ? setSelectedSale(undefined) : setSelectedPurchase(undefined)
     setModalMode('add')
     setModalOpen(true)
   }
@@ -103,11 +103,13 @@ export default function OrderPage() {
           return
         }
         if (selectedData.orderType === 'Sale') {
-          setSelectedOrder(selectedData)
+          const saleDetail = await handleSelectedSaleDetail(selectedData.id)
+          setSelectedSale(saleDetail)
+          setOrderType('Sale')
           setModalMode('edit')
           setModalOpen(true)
         } else {
-          const purchaseDetail = await handlerSelectedPurchaseDetail(selectedData.id)
+          const purchaseDetail = await handleSelectedPurchaseDetail(selectedData.id)
           setSelectedPurchase(purchaseDetail)
           setOrderType('Purchase')
           setModalMode('edit')
@@ -127,18 +129,15 @@ export default function OrderPage() {
         const confirmed = await openConfirmModal({
           title: '確認してください',
           message: `この選ばれたの受注番号　 ${selectedData.orderCode}　を削除してもよろしいですか?`,
-          // message: 'Are you sure you want to delete this order Number: ' + selectedData.id,
         })
         if (confirmed) {
-          // Perform delete operation
-          const response = await handlerDeleteOrder(selectedData)
+          const response = await handleDeleteOrder(selectedData)
           if (response) {
             notificationSnackbar.success('削除終了しました。')
             handleSearch()
           }
-          console.log('Delete confirmed')
         } else {
-          console.log('Delete cancelled')
+          //delete cancle event
         }
       }
     } else {
@@ -152,11 +151,13 @@ export default function OrderPage() {
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
         if (selectedData.orderType === 'Sale') {
-          setSelectedOrder(selectedData)
+          const saleDetail = await handleSelectedSaleDetail(selectedData.id)
+          setSelectedSale(saleDetail)
+          setOrderType('Sale')
           setModalMode('view')
           setModalOpen(true)
         } else {
-          const purchaseDetail = await handlerSelectedPurchaseDetail(selectedData.id)
+          const purchaseDetail = await handleSelectedPurchaseDetail(selectedData.id)
           setSelectedPurchase(purchaseDetail)
           setOrderType('Purchase')
           setModalMode('view')
@@ -171,19 +172,29 @@ export default function OrderPage() {
   const handleModalConfirm = async (data: SaleModalDataProps | PurchaseModalDataProps) => {
     if ('saleCode' in data) {
       console.log('confirmed sale data:', data)
-      // switch (modalMode) {
-      //   case 'add':
-      //     addNewOrder(data as OrderData)
-      //     break
-      //   case 'edit':
-      //     editOrder(data as OrderData)
-      //     break
-      //   case 'view':
-      //     deleteOrder(data as OrderData)
-      //     break
-      //   default:
-      //     break
-      // }
+      switch (modalMode) {
+        case 'add':
+          {
+            const response = await addNewSaleOrder(data)
+            if (response) {
+              setModalOpen(false)
+            }
+          }
+          break
+        case 'edit':
+          {
+            const response = await editSaleOrder(data)
+            if (response) {
+              setModalOpen(false)
+            }
+          }
+          break
+        case 'view':
+          // deleteOrder(data as OrderData)
+          break
+        default:
+          break
+      }
     }
 
     if ('purchaseCode' in data) {
@@ -562,7 +573,7 @@ export default function OrderPage() {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onConfirm={handleModalConfirm}
-          // initialData={selectedOrder}
+          initialData={selectedSale}
           mode={modalMode}
         />
       )}

@@ -81,7 +81,7 @@ export const api = {
   // user: userApi(),
   // kpi: kpiApi(),
   // product: productApi(),
-  sale: saleApi(),
+  // sale: saleApi(),
   report: reportApi(),
   // myCompany: myCompanyApi(),
   // postCode: postCodeApi(),

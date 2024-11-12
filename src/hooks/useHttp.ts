@@ -94,6 +94,7 @@ export default function useHttp() {
     order: orderApi(httpRequest),
     purchase: purchaseApi(httpRequest),
     product: productApi(httpRequest),
+    sale: saleApi(httpRequest),
   }
 
   return { api }

@@ -2,19 +2,10 @@ import axios from 'axios'
 import { ApiResponse, axiosInstance } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
 import { mockData } from './_mockdata'
-import { PurchaseStatus } from '.'
 import { HttpRequest } from 'hooks/useHttp'
-export interface SearchCriteria {
-  category: string
-  keyword: string
-  startDate: string
-  endDate: string
-  page?: number
-  pageSize?: number
-  dateType?: string
-}
+import { SaleStatus } from '.'
 
-type ComponentList = {
+type ProductDetail = {
   name: string
   number: string
   price: number
@@ -42,7 +33,7 @@ type OwnerList = {
   id: string
   name: string
 }
-export interface PurchaseData {
+export interface SaleDetail {
   id: string
   createdBy: string
   createdAt: string
@@ -53,44 +44,30 @@ export interface PurchaseData {
   totalAmount: number
   registrationDate: string
   deliveryDate: string | Dayjs
+  shipmentDate: string | Dayjs
   invoiceNumber: string
   memo: string
   status: string
   orderType: string
-  purchaseCode: string
+  saleCode: string
   quotationRequestDate: string
   orderApprovalPendingDate: null
   orderApprovalDate: string
   stockApprovalPendingDate: null
   stockApprovalDate: string
-  components: ComponentList[]
+  products: ProductDetail[]
   companyId: string
   owners: OwnerList[]
 }
 
-//for implement case only when apprved should be remove it
-function chunkArray(mockdata: PurchaseData[], pageSize: number, page: number) {
-  const result = []
-  for (let i = 0; i < mockdata.length; i += pageSize) {
-    result.push(mockdata.slice(i, i + pageSize))
-  }
-  return result[page]
-}
-
-export default async function getPurchaseList(
+export default async function getSaleDetail(
   httpRequest: HttpRequest,
-  { category, keyword, startDate, endDate, page = 0, pageSize = 10, dateType }: SearchCriteria
-): Promise<ApiResponse<PurchaseData[]>> {
+  orderId: string
+): Promise<ApiResponse<SaleDetail>> {
   //for beta:test
-  const response = await httpRequest(() =>
-    dateType && dateType !== ''
-      ? axiosInstance.get(
-          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
-        )
-      : axiosInstance.get(`/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}`)
-  )
+  const response = await httpRequest(() => axiosInstance.get('/api/sales/' + orderId))
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
+  return { code: 200, message: 'success', data: response?.data }
 }

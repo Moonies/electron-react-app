@@ -9,6 +9,7 @@ import {
   GridRowsProp,
   GridEventListener,
   GridRowEditStopReasons,
+  GridValidRowModel,
 } from '@mui/x-data-grid'
 import { CustomerData } from 'api/customer/getCustomerList'
 import { OrderData } from 'api/order/getOrderList'
@@ -20,10 +21,11 @@ import useLoading from 'hooks/useLoading'
 
 import { useCallback, useMemo, useState } from 'react'
 import { formatJPY } from 'utils/formatUtils'
+import { SaleModalDataProps } from '..'
 
-export default function useAddOrder(orderDeta: any) {
+export default function useAddOrder(saleData: SaleModalDataProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
-  const [newProductListData, setNewProductListData] = useState<GridRowsProp>([]) //waiting task order
+  const [newProductListData, setNewProductListData] = useState<GridRowsProp>(saleData.product)
   const [productData, setProductData] = useState<ProductDetailList[]>([])
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
@@ -37,7 +39,7 @@ export default function useAddOrder(orderDeta: any) {
     }
 
     const existingComponent = currentProductData.find(
-      item => item.number === newProduct.productNumber && item.id === newProduct.id
+      item => item.number === newProduct.number && item.id === newProduct.id
     )
     if (existingComponent) {
       let newRow = currentProductData.map(item =>
@@ -49,26 +51,6 @@ export default function useAddOrder(orderDeta: any) {
     } else {
       setNewProductListData(prev => [...prev, { ...newProduct }])
     }
-
-    // let currentIndex = newProductListData.length
-    // let currentProductData = newProductListData
-    // if (currentProductData.length > 0) {
-    //   const resultIndex = currentProductData.findIndex(
-    //     item => item.productNumber === newProduct.productNumber
-    //   )
-    //   if (resultIndex !== -1) {
-    //     let newRow = currentProductData.map((product, index) =>
-    //       index === resultIndex
-    //         ? { ...product, quantity: product.quantity + newProduct.quantity }
-    //         : product
-    //     )
-    //     setNewProductListData(newRow)
-    //   } else {
-    //     setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
-    //   }
-    // } else {
-    //   setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
-    // }
   }
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
@@ -131,13 +113,13 @@ export default function useAddOrder(orderDeta: any) {
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'productNumber',
+        field: 'number',
         headerName: '商品番号',
         headerAlign: 'center',
         flex: 1,
       },
       {
-        field: 'productName',
+        field: 'name',
         headerName: '商品名',
         headerAlign: 'center',
         flex: 1,
@@ -150,7 +132,7 @@ export default function useAddOrder(orderDeta: any) {
         editable: true,
       },
       {
-        field: 'productPrice',
+        field: 'price',
         headerName: '単価',
         type: 'number',
         headerAlign: 'center',
@@ -165,7 +147,7 @@ export default function useAddOrder(orderDeta: any) {
         flex: 1,
         valueFormatter: value => formatJPY(Number(value)),
         valueGetter: (value, row) => {
-          return row.quantity * row.productPrice
+          return row.quantity * row.price
         },
       },
       {

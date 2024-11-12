@@ -19,15 +19,15 @@ export type AddNewSaleOrderProps = {
   orderCode: string
   totalAmount: number
   registrationDate: string
-  deliveryDate: string
   invoiceNumber: string
-  memo: string
+  memo?: string
   saleCode: string
+  // deliveryDate: string
   // remainingOrder: number
   // allocation: string
-  quotationDate: string
+  // quotationDate: string
+  // billingDate: string
   shipmentDate: string
-  billingDate: string
   products: ProductDetail[]
   owners: OwnerDetail[]
   companyId: string

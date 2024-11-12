@@ -151,6 +151,7 @@ export default function useProduct() {
         name: item.name,
         number: item.number,
         quantity: item.quantity,
+        price: item.price,
       })),
     }
     const response = await addNewProduct(newProduct)

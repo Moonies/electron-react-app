@@ -18,10 +18,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 export type ProductDetail = {
   id?: string
-  productNumber: string | null
-  productName: string | null
+  number: string | null
+  name: string | null
   quantity: number
-  productPrice: number
+  price: number
 }
 interface DialogProductProps {
   open: boolean
@@ -37,10 +37,10 @@ export default function AddnewProductDialog({
   // productData,
 }: DialogProductProps) {
   const [formData, setFormData] = useState<ProductDetail>({
-    productNumber: null,
-    productName: null,
+    number: null,
+    name: null,
     quantity: 1,
-    productPrice: 0,
+    price: 0,
   })
   const [loading, setLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
@@ -136,28 +136,28 @@ export default function AddnewProductDialog({
                   setFormData(prev => ({
                     ...prev,
                     id: newValue.id,
-                    productNumber: newValue.number || null,
-                    productName: newValue.name || null,
-                    productPrice: newValue.price || 0,
+                    number: newValue.number || null,
+                    name: newValue.name || null,
+                    price: newValue.price || 0,
                   }))
                 } else {
                   setFormData({
                     id: undefined,
-                    productNumber: null,
-                    productName: null,
-                    productPrice: 0,
+                    number: null,
+                    name: null,
+                    price: 0,
                     quantity: 1,
                   })
                 }
               }}
-              isOptionEqualToValue={option => option.number === formData?.productNumber}
+              isOptionEqualToValue={option => option.number === formData?.number}
               // value={formData?.productNumber}
             />
             {formData.id && (
               <>
                 <TextField
                   label='商品名'
-                  value={formData.productName}
+                  value={formData.name}
                   onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   required
                   InputProps={{ readOnly: true }}
@@ -166,7 +166,7 @@ export default function AddnewProductDialog({
                 <TextField
                   label='価格'
                   // type='number'
-                  value={formData.productPrice}
+                  value={formData.price}
                   onChange={e =>
                     setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))
                   }

@@ -104,17 +104,17 @@ export default function useSales() {
 
   const getSaleList = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
-    const result = await api.sale.getSaleList(searchCriteria)
-    if (result.code === 200 && result.data) {
-      setSalesSummary(result.data.summary)
-      setSaleData(result.data.data)
-      setTotalRows(result.data.totalRow)
-      // Cache the fetched data
-      setCachedData(prevCache => ({
-        ...prevCache,
-        [`${page}-${pageSize}`]: result.data ? result.data.data : [],
-      }))
-    }
+    // const result = await api.sale.getSaleList(searchCriteria)
+    // if (result.code === 200 && result.data) {
+    //   setSalesSummary(result.data.summary)
+    //   setSaleData(result.data.data)
+    //   setTotalRows(result.data.totalRow)
+    //   // Cache the fetched data
+    //   setCachedData(prevCache => ({
+    //     ...prevCache,
+    //     [`${page}-${pageSize}`]: result.data ? result.data.data : [],
+    //   }))
+    // }
     setLoading(false)
   }
 
