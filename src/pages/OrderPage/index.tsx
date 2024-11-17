@@ -206,6 +206,7 @@ export default function OrderPage() {
             const response = await addNewPurchaseOrder(data as PurchaseModalDataProps)
             if (response) {
               notificationSnackbar.success('Purchase Order is Success!!')
+              setLoading(false)
               setModalOpen(false)
             }
           }
@@ -410,7 +411,7 @@ export default function OrderPage() {
                   {/* <MenuItem value={''}>None</MenuItem> */}
 
                   {filteredStatuses?.map((item, index) => (
-                    <MenuItem key={index} value={`${item.type}.${item.value}`}>
+                    <MenuItem key={index} value={`${item.type}.${item.name}`}>
                       {item.label}
                     </MenuItem>
                   ))}

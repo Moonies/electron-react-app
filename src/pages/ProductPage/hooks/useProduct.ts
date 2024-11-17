@@ -3,7 +3,7 @@ import { ProductData, SearchCriteriaProductList } from 'api/product/getProductLi
 import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
-import { orderHistory } from 'api/product/getProductOrderHistory'
+// import { orderHistory } from 'api/product/getProductOrderHistory'
 import useHttp from 'hooks/useHttp'
 import { AddNewProductProps } from 'api/product/addNewProduct'
 import useNotification from 'hooks/useNotification'
@@ -28,7 +28,7 @@ export type ProductHistoryData = {
   id: number
   productNumber: string
   productName: string
-  orderHistoryList: orderHistory[]
+  // orderHistoryList: orderHistory[]
 }
 
 export default function useProduct() {
@@ -158,7 +158,10 @@ export default function useProduct() {
     if (response) return response
   }
 
-  const handleUpdateProductDetail = async (formData: ProductDetailModalProps) => {
+  const handleUpdateProductDetail = async (
+    formData: ProductDetailModalProps,
+    needUpdateInStock: boolean
+  ) => {
     let newProductDetail: NewProductDetailProps = {
       id: formData.id ?? '',
       name: formData.productName,
@@ -170,10 +173,16 @@ export default function useProduct() {
         ((formData.productPrice - formData.productCost) / formData.productCost) * 100,
       productUnitId: formData.productUnit,
       components: formData.components,
-      inStock: formData.stockQuantity,
+      // inStock: formData.stockQuantity,
     }
+
     const response = await updateProductDetail(newProductDetail)
-    if (response) return response
+    if (response && needUpdateInStock) {
+      const response = await updateProductInStock(newProductDetail.id, formData.stockQuantity)
+      return response
+    } else {
+      return response
+    }
   }
 
   const handlePaginationModelChange = (newModel: PaginationModel) => {
@@ -210,7 +219,7 @@ export default function useProduct() {
     }
     const result = await api.product.getProductList(prepareSearhCriteria)
     if (result.code === 200 && result.data) {
-      setProductData(result.data)
+      setProductData(() => result.data || [])
       setTotalRows(result.page?.totalElements ?? 0)
       setCachedData(prevCache => ({
         ...prevCache,
@@ -236,6 +245,13 @@ export default function useProduct() {
       return true
     } else {
       notificationSnackbar.error(result.message)
+    }
+  }
+
+  const updateProductInStock = async (prodictId: string, newQuantity: number) => {
+    const result = await api.product.updateProductInStock(prodictId, newQuantity)
+    if (result.code === 200) {
+      return true
     }
   }
 

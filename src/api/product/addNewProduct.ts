@@ -18,6 +18,18 @@ export type AddNewProductProps = {
   components: ComponentDetail[]
 }
 
+type NewProductDetail = {
+  id: string
+  name: string
+  number: string
+  price: number
+  cost: number
+  grossMarginRate: number
+  productUnitId: string
+  // taxCategory: string
+  components: ComponentDetail[]
+}
+
 export default async function addNewProduct(
   httpRequest: HttpRequest,
   data: AddNewProductProps

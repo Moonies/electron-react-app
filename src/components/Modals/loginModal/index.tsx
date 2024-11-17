@@ -21,15 +21,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
   const { notificationSnackbar, notificationModal } = useNotification()
   const { setUserLogin, removeUserLogin, setToken } = useAuth()
   const { resetConfig } = useApiConfig()
-  const { withLoading } = useLoading()
+  const { withLoading, setLoading } = useLoading()
   const { api } = useApi()
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     // navigate('/')
     // onSuccess()
-
-    const result = await withLoading(api.user.checkAuth(username, password))
+    setLoading(true)
+    const result = await api.user.checkAuth(username, password)
 
     if (result.code === 200 && result.data) {
       // dispatch(login(result.data))
@@ -44,6 +44,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
         notificationModal.error(resultUser.message)
       }
     } else {
+      setLoading(false)
       switch (result.code) {
         case 403:
           resetConfig()

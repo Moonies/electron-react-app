@@ -32,6 +32,7 @@ import IpConfigManegementPage from 'pages/SettingPage/pages/IpConfigManagementPa
 import PurchasePage from 'pages/PurchasePage'
 import OrderPage from 'pages/OrderPage'
 import electronBridge from './electronBridge'
+import useLoading from './hooks/useLoading'
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
 console.error = (...args: any) => {
@@ -52,6 +53,7 @@ export default function App() {
   const [apiConfigModal, setApiConfigmodal] = useState<boolean>(false)
   const { loadConfig, isConfigSet } = useApiConfig()
   const [loginSuccess, setLoginSuccess] = useState(false)
+  const { setLoading } = useLoading()
   useEffect(() => {
     const configLoaded = loadConfig()
     if (!configLoaded) {
@@ -77,6 +79,7 @@ export default function App() {
 
   const handleCloseApiConfig = () => {
     setApiConfigmodal(false)
+    loadConfig()
     // check connection or something
     if (!isAuthenticated) {
       setLoginOpen(true)
@@ -141,6 +144,7 @@ export default function App() {
                 onError={handleError}
                 //when success is keep user to local storage
                 onSuccess={() => {
+                  setLoading(false)
                   setLoginOpen(false)
                   setLoginSuccess(true)
                 }}

@@ -110,7 +110,7 @@ export default function ProductPage() {
     } else {
       notificationModal.error('編集する表の行を選択してください。')
     }
-  }, [selectionModel])
+  }, [selectionModel, productData])
 
   const handleDeleteClick = useCallback(async () => {
     if (selectionModel.length === 1) {
@@ -134,11 +134,12 @@ export default function ProductPage() {
     } else {
       notificationModal.error('削除する行をテーブルから選択してください')
     }
-  }, [selectionModel])
+  }, [selectionModel, productData])
 
   const handleModalConfirm = async (data: ProductDetailModalProps) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
+    // console.log('selected data', selectedProduct)
     const confirmed = await openConfirmModal({
       title: '確認してください',
       message: 'Are you sure you want to add data.',
@@ -151,7 +152,8 @@ export default function ProductPage() {
           handleSearch()
         }
       } else {
-        const response = await handleUpdateProductDetail(data)
+        let needUpdateQuantity = data.stockQuantity !== selectedProduct?.stockQuantity
+        const response = await handleUpdateProductDetail(data, needUpdateQuantity)
         if (response) {
           setModalOpen(false)
           handleSearch()
@@ -174,7 +176,7 @@ export default function ProductPage() {
     } else {
       notificationModal.error('詳細を表示するには、表の行を選択してください。')
     }
-  }, [selectionModel])
+  }, [selectionModel, productData])
 
   const handleHistoryClick = useCallback(async () => {
     if (selectionModel.length === 1) {

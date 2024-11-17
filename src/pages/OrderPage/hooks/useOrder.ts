@@ -21,7 +21,7 @@ interface CategorySaleSearch {
   display: string
 }
 interface StatusOption {
-  value: OrderStatus
+  name: OrderStatus
   label: string
   type: OrderType
 }
@@ -128,7 +128,13 @@ export default function useOrder() {
       },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
-      { field: 'deliveryDate', headerName: '出荷 / 配達日付', headerAlign: 'center' },
+      {
+        field: 'deliveryDate',
+        headerName: '出荷 / 配達日付',
+        headerAlign: 'center',
+        valueGetter: (value, row: OrderData) =>
+          row.orderType === OrderType.SALE ? row.shipmentDate : row.deliveryDate,
+      },
       // { field: 'paymentDueDate', headerName: '支払期限', headerAlign: 'center' },
     ],
     []
@@ -167,17 +173,18 @@ export default function useOrder() {
 
   const prepareCategoryStatus = useMemo(() => {
     let status: StatusOption[] = [
-      { value: OrderStatus.PENDING, label: '見積', type: OrderType.SALE },
-      { value: OrderStatus.CONFIRM, label: '受注', type: OrderType.SALE },
-      { value: OrderStatus.SHIP, label: '出荷', type: OrderType.SALE },
-      // { value: OrderStatus.COMPLETE, label: '売上', type: OrderType.SALE },
-      { value: OrderStatus.PENDING, label: '未発注', type: OrderType.PURCHASE },
-      { value: OrderStatus.CONFIRM, label: '発注', type: OrderType.PURCHASE },
-      { value: OrderStatus.SHIP, label: '配達', type: OrderType.PURCHASE },
-      // { value: OrderStatus.COMPLETE, label: '入庫', type: OrderType.PURCHASE },
-      // { value: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.PURCHASE },
-      { value: OrderStatus.REJECT, label: '返品', type: OrderType.ALL },
-      { value: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.ALL },
+      { name: OrderStatus.ALL, label: '全て', type: OrderType.ALL },
+      { name: OrderStatus.PENDING, label: '見積', type: OrderType.SALE },
+      { name: OrderStatus.CONFIRM, label: '受注', type: OrderType.SALE },
+      { name: OrderStatus.SHIP, label: '出荷', type: OrderType.SALE },
+      // { name: OrderStatus.COMPLETE, label: '売上', type: OrderType.SALE },
+      { name: OrderStatus.PENDING, label: '未発注', type: OrderType.PURCHASE },
+      { name: OrderStatus.CONFIRM, label: '発注', type: OrderType.PURCHASE },
+      { name: OrderStatus.SHIP, label: '配達', type: OrderType.PURCHASE },
+      // { name: OrderStatus.COMPLETE, label: '入庫', type: OrderType.PURCHASE },
+      // { name: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.PURCHASE },
+      { name: OrderStatus.REJECT, label: '返品', type: OrderType.ALL },
+      { name: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.ALL },
     ]
     setStatusOrder(status)
   }, [])
@@ -231,13 +238,7 @@ export default function useOrder() {
         invoiceNumber: result.invoiceNumber,
         customerCompanyId: result.companyId,
         customerCompanyName: result.company.companyInfo.name,
-        product: result.products.map(item => ({
-          id: item.number + item.name,
-          name: item.name,
-          number: item.number,
-          quantity: item.quantity,
-          price: item.price,
-        })),
+        product: result.products,
         registrationDate: result.registrationDate,
         shippingmentDate: result.shipmentDate,
         status: result.status,
@@ -260,11 +261,8 @@ export default function useOrder() {
         supplierCompanyId: result.companyId ?? '',
         supplierCompanyName: result.company?.companyInfo.name ?? '',
         component: result.components.map(item => ({
+          ...item,
           id: item.number + item.name,
-          name: item.name,
-          number: item.number,
-          quantity: item.quantity,
-          price: item.price,
         })),
         orderRequestEmployeeId: result.createdBy,
         orderRequestEmployeeName: '',
@@ -285,7 +283,10 @@ export default function useOrder() {
     let data: AddNewSaleOrderProps = {
       orderCode: formData.orderCode,
       companyId: formData.customerCompanyId,
-      products: formData.product,
+      products: formData.product.map(item => ({
+        ...item,
+        useCanBeMadeInQuantity: true,
+      })),
       registrationDate: dayjs().format('YYYY-MM-DD'),
       shipmentDate: dayjs(formData.shippingmentDate).format('YYYY-MM-DD'),
       invoiceNumber: formData.invoiceNumber,
@@ -313,7 +314,10 @@ export default function useOrder() {
           invoiceNumber: formData.invoiceNumber ?? '',
           memo: formData.memo,
           saleCode: formData.saleCode ?? '',
-          products: formData.product,
+          products: formData.product.map(item => ({
+            ...item,
+            useCanBeMadeInQuantity: true,
+          })),
           companyId: formData.customerCompanyId,
           owners: formData.owners,
         }
@@ -323,13 +327,18 @@ export default function useOrder() {
           return true
         }
         break
-      case SaleStatus.CONFIRM:
       case SaleStatus.ON_DELIVERY:
+      case SaleStatus.CONFIRM:
       case SaleStatus.DELIVERED:
       case SaleStatus.CANCEL:
-        if (formData.id) {
-          const response = await api.sale.updateSaleStatus(formData.id, formData.status)
-          if (response.code === 200) return true
+        {
+          if (formData.id) {
+            const response = await api.sale.updateSaleStatus(formData.id, formData.status)
+            if (response.code === 200) {
+              notificationSnackbar.success('編集完了しました。')
+              return true
+            }
+          }
         }
         break
 

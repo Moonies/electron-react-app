@@ -23,6 +23,7 @@ export enum OrderStatus {
   COMPLETE = 'COMPLETED',
   REJECT = 'REJECTED',
   CANCEL = 'CANCELLED',
+  ALL = '',
 }
 
 export enum OrderType {

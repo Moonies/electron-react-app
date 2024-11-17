@@ -179,7 +179,8 @@ export default function PurchaseModal({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
     try {
       const rows = addNewComponentDataGridRef.current.getRowModels()
@@ -196,8 +197,6 @@ export default function PurchaseModal({
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -317,10 +316,10 @@ export default function PurchaseModal({
       // maxWidth='md'
       fullScreen
       TransitionComponent={Slide}
-      keepMounted
+      // keepMounted
       scroll={'paper'}
-      aria-labelledby='purchase-modal-title'
-      aria-describedby='purchase-modal-description'
+      // aria-labelledby='purchase-modal-title'
+      // aria-describedby='purchase-modal-description'
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>

@@ -186,19 +186,19 @@ export default function ComponentManagementModal({
 
                 // sx={{ flex: 1 }}
               />
-              <TextField
-                label='在庫数'
-                value={formData?.inStock}
-                fullWidth
-                margin='normal'
-                InputProps={{
-                  inputComponent: NumericFormatCustom as any,
-                  readOnly: modalMode === 'view',
-                }}
-                onChange={e => handleChange('inStock', e.target.value)}
-
-                // sx={{ flex: 1 }}
-              />
+              {modalMode === 'view' && (
+                <TextField
+                  label='在庫数'
+                  value={formData?.inStock}
+                  fullWidth
+                  margin='normal'
+                  InputProps={{
+                    inputComponent: NumericFormatCustom as any,
+                    readOnly: modalMode === 'view',
+                  }}
+                  onChange={e => handleChange('inStock', e.target.value)}
+                />
+              )}
             </Box>
             {modalMode === 'view' && (
               <>

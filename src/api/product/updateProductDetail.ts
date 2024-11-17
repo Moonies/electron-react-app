@@ -19,7 +19,7 @@ export type NewProductDetailProps = {
   productUnitId: string
   // taxCategory: string
   components: ComponentDetail[]
-  inStock: number
+  // inStock: number
 }
 
 export default async function updateProductDetail(
