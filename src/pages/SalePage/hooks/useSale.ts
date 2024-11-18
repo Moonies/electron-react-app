@@ -1,9 +1,10 @@
 import { useState, useCallback, useMemo } from 'react'
 import dayjs from 'dayjs'
-import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { SaleData, SalesSummary, SearchCriteria } from 'api/sale/getSaleList'
+import useHttp from 'hooks/useHttp'
+import { SaleModalDataProps } from 'components/Modals/SaleModal'
 
 interface CategorySaleSearch {
   value: string
@@ -16,12 +17,12 @@ interface CachedData {
 
 export default function useSales() {
   const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
-
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     category: '',
     keyword: '',
     startDate: dateThreeMonthsAgo,
     endDate: new Date(),
+    dateType: '',
   })
   const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
   const [cachedData, setCachedData] = useState<CachedData>({})
@@ -34,6 +35,11 @@ export default function useSales() {
   })
   const [totalRows, setTotalRows] = useState(0)
   const { withLoading, setLoading } = useLoading()
+  const { api } = useHttp()
+  const dateTypeList = [
+    { value: 'registrationDate', display: '登録日付' },
+    { value: 'deliveryDate', display: '出荷日付' },
+  ]
 
   const handleChange = (name: string, value: string | Date | null) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
@@ -47,18 +53,34 @@ export default function useSales() {
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'id',
+        field: 'orderCode',
         headerName: '受注番号',
         headerAlign: 'center',
       },
-      { field: 'customerCompanyName', headerName: '発注先', headerAlign: 'center', flex: 1 },
-      { field: 'orderId', headerName: '注番', headerAlign: 'center' },
-      // { field: 'registDate', headerName: '登録日付', headerAlign: 'center' },
-      { field: 'orderRequestEmployeeName', headerName: '担当者', headerAlign: 'center' },
+      {
+        field: 'saleCode',
+        headerName: '注番',
+        headerAlign: 'center',
+      },
+      {
+        field: 'companyName',
+        headerName: '発注先名',
+        headerAlign: 'center',
+        flex: 1,
+        valueGetter: (value, row: any) => (row.company ? row.company.companyInfo.name : ''),
+      },
+      // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
+      { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
+      {
+        field: 'owners',
+        headerName: '担当者',
+        headerAlign: 'center',
+        valueGetter: (value: { id: string; name: string }[]) =>
+          value.length > 0 ? value[0].name : '',
+      },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
-      { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
-      { field: 'shippingmentDate', headerName: '出荷日付', headerAlign: 'center' },
-      { field: 'paymentDueDate', headerName: '支払期限', headerAlign: 'center' },
+      // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
+      { field: 'shipmentDate', headerName: '出荷日付', headerAlign: 'center' },
     ],
     []
   )
@@ -66,10 +88,49 @@ export default function useSales() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
-      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      if (['status', 'registrationDate', 'deliveryDate'].includes(item.field)) {
+        return
+      }
+      if (item.field === 'companyName') {
+        return result.push({
+          value: 'company.companyInfo.name',
+          display: item.headerName || '',
+        })
+      }
+
+      if (item.field === 'owners') {
+        return result.push({
+          value: 'owners.name',
+          display: item.headerName || '',
+        })
+      }
+
+      result.push({
+        value: item.field,
+        display: item.headerName || '',
+      })
     })
     setCategorySearch(result)
   }, [])
+
+  const handleSelectedSaleDetail = (selectedSaleOrder: SaleData) => {
+    let saleDetail: SaleModalDataProps = {
+      id: selectedSaleOrder.id,
+      orderCode: selectedSaleOrder.orderCode,
+      saleCode: selectedSaleOrder.saleCode,
+      invoiceNumber: selectedSaleOrder.invoiceNumber,
+      customerCompanyId: selectedSaleOrder.companyId,
+      customerCompanyName: selectedSaleOrder.company.companyInfo.name,
+      product: selectedSaleOrder.products,
+      registrationDate: selectedSaleOrder.registrationDate,
+      shippingmentDate: selectedSaleOrder.shipmentDate,
+      status: selectedSaleOrder.status,
+      totalAmount: selectedSaleOrder.totalAmount,
+      owners: selectedSaleOrder.owners,
+      memo: selectedSaleOrder.memo,
+    }
+    return saleDetail
+  }
 
   const handleSearch = useCallback(async () => {
     //if condition when search put in here
@@ -93,28 +154,19 @@ export default function useSales() {
     getSaleList(newModel)
   }
 
-  const addNewSaleData = useCallback(() => {
-    //call api to insert
-  }, [])
-
-  const updateSaleData = useCallback(() => {
-    //call api to update
-    //and refersh dataTable
-  }, [])
-
   const getSaleList = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
-    // const result = await api.sale.getSaleList(searchCriteria)
-    // if (result.code === 200 && result.data) {
-    //   setSalesSummary(result.data.summary)
-    //   setSaleData(result.data.data)
-    //   setTotalRows(result.data.totalRow)
-    //   // Cache the fetched data
-    //   setCachedData(prevCache => ({
-    //     ...prevCache,
-    //     [`${page}-${pageSize}`]: result.data ? result.data.data : [],
-    //   }))
-    // }
+    const result = await api.sale.getSaleList(searchCriteria)
+    if (result.code === 200 && result.data) {
+      // setSalesSummary(result.data.summary)
+      setSaleData(result.data)
+      setTotalRows(result.page?.totalElements ?? 0)
+      // Cache the fetched data
+      setCachedData(prevCache => ({
+        ...prevCache,
+        [`${page}-${pageSize}`]: result.data ? result.data : [],
+      }))
+    }
     setLoading(false)
   }
 
@@ -128,10 +180,10 @@ export default function useSales() {
     handlePaginationModelChange,
     paginationModel,
     currencyFormatter,
-    addNewSaleData,
-    updateSaleData,
     prepareCategorySearch,
     categorySearch,
     totalRows,
+    dateTypeList,
+    handleSelectedSaleDetail,
   }
 }

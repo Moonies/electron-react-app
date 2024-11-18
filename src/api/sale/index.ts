@@ -1,4 +1,4 @@
-import { default as getSaleList } from './getSaleList'
+import { default as getSaleList, SearchCriteria, SaleData } from './getSaleList'
 import { default as getSaleDetail, SaleDetail } from './getSaleDetail'
 import { ApiResponse } from 'api'
 import { HttpRequest } from 'hooks/useHttp'
@@ -17,6 +17,7 @@ export enum SaleStatus {
 }
 
 export interface SaleApi {
+  getSaleList: (params: SearchCriteria) => Promise<ApiResponse<SaleData[]>>
   getSaleDetail: (saleId: string) => Promise<ApiResponse<SaleDetail>>
   addNewSale: (params: AddNewSaleOrderProps) => Promise<ApiResponse<{}>>
   updateSaleDetail: (params: NewSaleDetailProps) => Promise<ApiResponse<{}>>
@@ -26,6 +27,7 @@ export interface SaleApi {
 
 export default function sale(httpRequest: HttpRequest): SaleApi {
   return {
+    getSaleList: params => getSaleList(httpRequest, params),
     getSaleDetail: saleId => getSaleDetail(httpRequest, saleId),
     addNewSale: params => addNewSale(httpRequest, params),
     updateSaleDetail: params => updateSaleDetail(httpRequest, params),

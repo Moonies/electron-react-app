@@ -1,12 +1,11 @@
 import { Text, View, Image } from '@react-pdf/renderer'
 import { SlipDetail } from '../..'
-import { ProductList } from 'api/sale/getSaleList'
 import { styles } from './styles'
 import dayjs from 'dayjs'
 export interface DeliverySlipData {
   barCodeGenerate: (orderId: string) => string
   slipData: SlipDetail
-  product: ProductList
+  product: any // waiting task recheck export
   type: 'invoice' | 'delivery'
 }
 export default function SubPrintDeliveryDetail({

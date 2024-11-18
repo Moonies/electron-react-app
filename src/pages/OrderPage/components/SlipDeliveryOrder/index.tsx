@@ -3,7 +3,6 @@ import { Document, Page, View, PDFViewer, Image } from '@react-pdf/renderer'
 import JsBarcode from 'jsbarcode'
 import SubPrintOrderDetail from './components/SubPrintOrderDetail'
 import SubPrintDeliveryDetail from './components/SubPrintDeliveryDetail'
-import { ProductList } from 'api/sale/getSaleList'
 import { styles } from './styles'
 import { Dayjs } from 'dayjs'
 
@@ -22,7 +21,7 @@ export type DeliverySlipData = {
   orderShippingDate: Dayjs | string
   orderShippingExpireDate: Dayjs | string
   totalProduct: number
-  product: ProductList[]
+  product: any[] //waiting task recheck export
 }
 export interface DeliverySlipProps {
   data: DeliverySlipData

@@ -85,9 +85,11 @@ export default async function getPurchaseList(
   const response = await httpRequest(() =>
     dateType && dateType !== ''
       ? axiosInstance.get(
-          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
+          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
         )
-      : axiosInstance.get(`/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}`)
+      : axiosInstance.get(
+          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&page=${page}&size=${pageSize}`
+        )
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }

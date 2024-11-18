@@ -79,10 +79,10 @@ export type SaleModalDataProps = {
   }[]
 }
 
-interface PurchaseModalProps {
+interface SaleModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (data: SaleModalDataProps) => Promise<void>
+  onConfirm?: (data: SaleModalDataProps) => Promise<void>
   initialData?: SaleModalDataProps
   mode: 'add' | 'edit' | 'view'
 }
@@ -99,13 +99,7 @@ const defaultFormData = {
   status: OrderStatus.PENDING,
   owners: [],
 }
-export default function SaleModal({
-  open,
-  onClose,
-  onConfirm,
-  initialData,
-  mode,
-}: PurchaseModalProps) {
+export default function SaleModal({ open, onClose, onConfirm, initialData, mode }: SaleModalProps) {
   const [formData, setFormData] = useState<SaleModalDataProps>(initialData ?? defaultFormData)
   const [openDialog, setOpenDialog] = useState(false)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -214,7 +208,8 @@ export default function SaleModal({
 
     setLoading(true)
     try {
-      await onConfirm({ ...formData, product: newProductListData as SaleNewProductList[] })
+      onConfirm &&
+        (await onConfirm({ ...formData, product: newProductListData as SaleNewProductList[] }))
     } catch (error) {
       console.error('Error submitting data:', error)
     } finally {
@@ -583,16 +578,19 @@ export default function SaleModal({
             <Button onClick={onClose} variant='contained'>
               キャンセル
             </Button>
-            <Button
-              type='submit'
-              // onClick={handleSubmit}
-              variant='outlined'
-              sx={theme => ({
-                color: 'white',
-              })}
-            >
-              保存
-            </Button>
+            {((currentStatus === OrderStatus.PENDING && formData.status === OrderStatus.PENDING) ||
+              (formData.status !== currentStatus && formData.status !== OrderStatus.PENDING)) && (
+              <Button
+                type='submit'
+                // onClick={handleSubmit}
+                variant='outlined'
+                sx={theme => ({
+                  color: 'white',
+                })}
+              >
+                保存
+              </Button>
+            )}
           </DialogActions>
         )}
       </form>
