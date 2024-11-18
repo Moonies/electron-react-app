@@ -15,16 +15,17 @@ import useNotification from 'hooks/useNotification'
 import { useCallback, useMemo, useState } from 'react'
 import { SaleStatus } from 'api/sale'
 import { NewSaleDetailProps } from 'api/sale/updateSaleDetail'
+import { StatusDetail } from 'api/status/getStatusList'
 
 interface CategorySaleSearch {
   value: string
   display: string
 }
-interface StatusOption {
-  name: OrderStatus
-  label: string
-  type: OrderType
-}
+// interface StatusOption {
+//   name: OrderStatus
+//   label: string
+//   orderType: OrderType
+// }
 interface CachedData {
   [key: string]: OrderData[]
 }
@@ -35,7 +36,7 @@ export default function useOrder() {
   const [orderData, setOrderData] = useState<OrderData[]>([])
   const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
-  const [statusOrder, setStatusOrder] = useState<StatusOption[]>([])
+  const [statusOrder, setStatusOrder] = useState<StatusDetail[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
     pageSize: 10,
@@ -112,7 +113,7 @@ export default function useOrder() {
       },
       {
         field: 'companyName',
-        headerName: '発注先',
+        headerName: '発注先 / 仕入先',
         headerAlign: 'center',
         flex: 1,
         valueGetter: (value, row: OrderData) => (row.company ? row.company.companyInfo.name : ''),
@@ -171,22 +172,24 @@ export default function useOrder() {
     setCategorySearch(result)
   }, [])
 
-  const prepareCategoryStatus = useMemo(() => {
-    let status: StatusOption[] = [
-      { name: OrderStatus.ALL, label: '全て', type: OrderType.ALL },
-      { name: OrderStatus.PENDING, label: '見積', type: OrderType.SALE },
-      { name: OrderStatus.CONFIRM, label: '受注', type: OrderType.SALE },
-      { name: OrderStatus.SHIP, label: '出荷', type: OrderType.SALE },
-      // { name: OrderStatus.COMPLETE, label: '売上', type: OrderType.SALE },
-      { name: OrderStatus.PENDING, label: '未発注', type: OrderType.PURCHASE },
-      { name: OrderStatus.CONFIRM, label: '発注', type: OrderType.PURCHASE },
-      { name: OrderStatus.SHIP, label: '配達', type: OrderType.PURCHASE },
-      // { name: OrderStatus.COMPLETE, label: '入庫', type: OrderType.PURCHASE },
-      // { name: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.PURCHASE },
-      { name: OrderStatus.REJECT, label: '返品', type: OrderType.ALL },
-      { name: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.ALL },
-    ]
-    setStatusOrder(status)
+  const prepareCategoryStatus = useMemo(async () => {
+    const result = await api.status.getStatusList()
+    if (result.code === 200 && result.data) {
+      setStatusOrder(result.data)
+    }
+    // let status: StatusOption[] = [
+    //   { name: OrderStatus.ALL, label: '全て', type: OrderType.ALL },
+    //   { name: OrderStatus.PENDING, label: '見積', type: OrderType.SALE },
+    //   { name: OrderStatus.CONFIRM, label: '受注', type: OrderType.SALE },
+    //   { name: OrderStatus.SHIP, label: '出荷', type: OrderType.SALE },
+    //   // { name: OrderStatus.COMPLETE, label: '売上', type: OrderType.SALE },
+    //   { name: OrderStatus.PENDING, label: '未発注', type: OrderType.PURCHASE },
+    //   { name: OrderStatus.CONFIRM, label: '発注', type: OrderType.PURCHASE },
+    //   { name: OrderStatus.SHIP, label: '配達', type: OrderType.PURCHASE },
+    //   // { name: OrderStatus.COMPLETE, label: '入庫', type: OrderType.PURCHASE },
+    //   { name: OrderStatus.REJECT, label: '返品', type: OrderType.ALL },
+    //   { name: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.ALL },
+    // ]
   }, [])
 
   const handleChange = (name: string, value?: string | Date | null) => {

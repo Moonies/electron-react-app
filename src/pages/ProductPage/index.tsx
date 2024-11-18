@@ -20,13 +20,13 @@ import {
   ManageSearch as ManageSearchIcon,
 } from '@mui/icons-material'
 import DataTable from 'components/DataTable'
-import useProduct, { ProductHistoryData } from './hooks/useProduct'
+import useProduct from './hooks/useProduct'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import ProductModal, { ProductDetailModalProps } from 'components/Modals/ProductModal'
 import { ProductData } from 'api/product/getProductList'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
-import ProductHistoryModal from 'components/Modals/ProductHistoryModal'
+import ProductHistoryModal, { ProductHistoryData } from 'components/Modals/ProductHistoryModal'
 import useLoading from 'hooks/useLoading'
 
 export default function ProductPage() {
@@ -55,6 +55,7 @@ export default function ProductPage() {
     handleUpdateProductDetail,
     deleteProduct,
     prepareProductDetail,
+    handleOrderProductHistory,
   } = useProduct()
 
   const productDataGridRef = useGridApiRef()
@@ -85,23 +86,6 @@ export default function ProductPage() {
       const selectedId = selectionModel[0]
       const selectedData = productData.find(product => product.id === selectedId)
       if (selectedData) {
-        // let prepareProductData: ProductDetailModalProps = {
-        //   id: selectedData.id,
-        //   productNumber: selectedData.number,
-        //   productName: selectedData.name,
-        //   stockQuantity: selectedData.inStock,
-        //   productCost: selectedData.cost,
-        //   productPrice: selectedData.price,
-        //   productUnit: selectedData.productUnitId,
-        //   productPriceMargin: selectedData.price - selectedData.cost,
-        //   components: selectedData.components.map(item => ({
-        //     id: item.number + item.name,
-        //     name: item.name,
-        //     number: item.number,
-        //     quantity: item.quantity,
-        //     price: item.price,
-        //   })),
-        // }
         const result = prepareProductDetail(selectedData)
         setModalMode('edit')
         setSelectedProduct(result)
@@ -183,21 +167,19 @@ export default function ProductPage() {
       setLoading(true)
       const selectedId = selectionModel[0]
       const selectedData = productData.find(product => product.id === selectedId)
-      console.log(selectedData)
       let productHistoryData: ProductHistoryData
       if (selectedData) {
-        notificationModal.warning('now function is not support.')
-        const result = await getProductOrderHistoryList(selectedData.number)
-        // if (result) {
-        //   productHistoryData = {
-        //     id: selectedData.id,
-        //     productName: selectedData.productName,
-        //     productNumber: selectedData.productNumber,
-        //     orderHistoryList: result,
-        //   }
-        //   setProductHistory(productHistoryData)
-        // }
-        // setModalHistory(true)
+        const result = await handleOrderProductHistory(selectedData.id)
+        if (result) {
+          productHistoryData = {
+            id: selectedData.id,
+            productName: selectedData.name,
+            productNumber: selectedData.number,
+            orderHistoryList: result,
+          }
+          setProductHistory(productHistoryData)
+        }
+        setModalHistory(true)
         setLoading(false)
       }
     } else {

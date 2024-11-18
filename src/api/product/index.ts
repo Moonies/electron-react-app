@@ -1,6 +1,6 @@
 import { default as getProductList, ProductData, SearchCriteriaProductList } from './getProductList'
 import { default as getProductData, ProductDetail } from './getProductData'
-import { default as getProductOrderHistory } from './getProductOrderHistory'
+import { default as getProductOrderHistory, OrderHistory } from './getProductOrderHistory'
 import { default as getProductUnitList, ProductUnitDetail } from './getProductUnitList'
 import { ApiResponse } from 'api'
 import { HttpRequest } from 'hooks/useHttp'
@@ -17,6 +17,7 @@ export interface ProductApi {
   deleteProduct: (productId: string) => Promise<ApiResponse<{}>>
   getProductData: (category: string, keyword: string) => Promise<ApiResponse<ProductDetail[]>>
   updateProductInStock: (productId: string, newQuantity: number) => Promise<ApiResponse<{}>>
+  getProductOrderHistory: (productId: string) => Promise<ApiResponse<OrderHistory[]>>
 }
 
 export default function product(httpRequest: HttpRequest): ProductApi {
@@ -29,5 +30,6 @@ export default function product(httpRequest: HttpRequest): ProductApi {
     getProductData: (category, keyword) => getProductData(httpRequest, { category, keyword }),
     updateProductInStock: (productId, newQuantity) =>
       updateProductInStock(httpRequest, productId, newQuantity),
+    getProductOrderHistory: params => getProductOrderHistory(httpRequest, params),
   }
 }

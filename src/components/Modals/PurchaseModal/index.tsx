@@ -411,7 +411,7 @@ export default function PurchaseModal({
                 }}
                 getOptionLabel={option => option.companyInfo.name}
                 sx={{ marginTop: 2 }}
-                renderInput={params => <TextField {...params} label='顧客名' />}
+                renderInput={params => <TextField {...params} label='仕入先名' />}
                 readOnly={
                   !(
                     (modalMode === 'add' || modalMode === 'edit') &&

@@ -316,7 +316,7 @@ export default function OrderPage() {
   }
 
   const filteredStatuses = statusOrder.filter(
-    status => status.type === searchCriteria.orderType || status.type === 'All'
+    status => status.orderType === searchCriteria.orderType || status.orderType === 'All'
   )
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
@@ -411,7 +411,7 @@ export default function OrderPage() {
                   {/* <MenuItem value={''}>None</MenuItem> */}
 
                   {filteredStatuses?.map((item, index) => (
-                    <MenuItem key={index} value={`${item.type}.${item.name}`}>
+                    <MenuItem key={index} value={`${item.orderType}.${item.name}`}>
                       {item.label}
                     </MenuItem>
                   ))}

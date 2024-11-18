@@ -10,6 +10,7 @@ import useNotification from 'hooks/useNotification'
 import { formatJPY } from 'utils/formatUtils'
 import { ProductDetailModalProps } from 'components/Modals/ProductModal'
 import { NewProductDetailProps } from 'api/product/updateProductDetail'
+import { OrderHistory } from 'api/product/getProductOrderHistory'
 
 interface PaginationModel {
   page: number
@@ -24,18 +25,13 @@ interface CachedData {
   [key: string]: ProductData[]
 }
 
-export type ProductHistoryData = {
-  id: number
-  productNumber: string
-  productName: string
-  // orderHistoryList: orderHistory[]
-}
-
 export default function useProduct() {
   const [categorySearch, setCategorySearch] = useState<CategoryProductSearch[]>()
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteriaProductList>({
     category: '',
     keyword: '',
+    page: 0,
+    pageSize: 10,
   })
   const [productData, setProductData] = useState<ProductData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -107,7 +103,9 @@ export default function useProduct() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategoryProductSearch[] = []
     columns.forEach(item => {
-      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      if (item.field === 'number' || item.field === 'name') {
+        result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      }
     })
     setCategorySearch(result)
   }, [])
@@ -185,6 +183,18 @@ export default function useProduct() {
     }
   }
 
+  const handleOrderProductHistory = async (
+    productId: string
+  ): Promise<OrderHistory[] | undefined> => {
+    const response = await getProductOrderHistoryList(productId)
+    if (response) {
+      return response.map(item => ({
+        ...item,
+        products: item.products.filter(subItem => Object.values(subItem).includes(productId)),
+      }))
+    }
+  }
+
   const handlePaginationModelChange = (newModel: PaginationModel) => {
     if (newModel.pageSize !== paginationModel.pageSize) {
       // If page size has changed, reset to the first page
@@ -204,11 +214,10 @@ export default function useProduct() {
   }
 
   const getProductOrderHistoryList = async (productId: string) => {
-    // const result = await api.product.getProductOrderHistory(productId)
-    // if (result.code === 200 && result.data) {
-    //   return result.data
-    // }
-    // return undefined
+    const result = await api.product.getProductOrderHistory(productId)
+    if (result.code === 200 && result.data) {
+      return result.data
+    }
   }
 
   const getProductList = async ({ page, pageSize }: GridPaginationModel) => {
@@ -281,5 +290,6 @@ export default function useProduct() {
     handleUpdateProductDetail,
     deleteProduct,
     prepareProductDetail,
+    handleOrderProductHistory,
   }
 }
