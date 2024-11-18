@@ -17,7 +17,7 @@ interface CachedData {
 
 export default function useSales() {
   const dateThreeMonthsAgo = dayjs().subtract(3, 'month').toDate()
-  const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
+  const [searchCriteria, setSearchCriteria] = useState({
     category: '',
     keyword: '',
     startDate: dateThreeMonthsAgo,
@@ -26,8 +26,9 @@ export default function useSales() {
   })
   const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
   const [cachedData, setCachedData] = useState<CachedData>({})
+  const [totalSaleAmount, setTotalSaleAmount] = useState<number>()
 
-  const [salesSummary, setSalesSummary] = useState<SalesSummary | null>(null)
+  // const [salesSummary, setSalesSummary] = useState<SalesSummary | null>(null)
   const [saleData, setSaleData] = useState<SaleData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
@@ -38,17 +39,12 @@ export default function useSales() {
   const { api } = useHttp()
   const dateTypeList = [
     { value: 'registrationDate', display: '登録日付' },
-    { value: 'deliveryDate', display: '出荷日付' },
+    { value: 'shipmentDate', display: '出荷日付' },
   ]
 
   const handleChange = (name: string, value: string | Date | null) => {
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
-
-  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-  })
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -69,7 +65,7 @@ export default function useSales() {
         flex: 1,
         valueGetter: (value, row: any) => (row.company ? row.company.companyInfo.name : ''),
       },
-      // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
+      { field: 'totalAmount', headerName: '合計', type: 'number', headerAlign: 'center' },
       { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
       {
         field: 'owners',
@@ -88,7 +84,7 @@ export default function useSales() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategorySaleSearch[] = []
     columns.forEach(item => {
-      if (['status', 'registrationDate', 'deliveryDate'].includes(item.field)) {
+      if (['registrationDate', 'shipmentDate'].includes(item.field)) {
         return
       }
       if (item.field === 'companyName') {
@@ -135,6 +131,7 @@ export default function useSales() {
   const handleSearch = useCallback(async () => {
     //if condition when search put in here
     getSaleList(paginationModel)
+    getSaleTotalAmount()
   }, [searchCriteria, withLoading])
 
   const handlePaginationModelChange = async (newModel: GridPaginationModel) => {
@@ -156,9 +153,15 @@ export default function useSales() {
 
   const getSaleList = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
-    const result = await api.sale.getSaleList(searchCriteria)
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+      page,
+      pageSize,
+    }
+    const result = await api.sale.getSaleList(prepareSearhCriteria)
     if (result.code === 200 && result.data) {
-      // setSalesSummary(result.data.summary)
       setSaleData(result.data)
       setTotalRows(result.page?.totalElements ?? 0)
       // Cache the fetched data
@@ -170,20 +173,31 @@ export default function useSales() {
     setLoading(false)
   }
 
+  const getSaleTotalAmount = async () => {
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+    }
+    const result = await api.sale.getSaleTotalAmount(prepareSearhCriteria)
+    if (result.code === 200 && result.data !== null) {
+      setTotalSaleAmount(result.data)
+    }
+  }
+
   return {
     searchCriteria,
     handleChange,
     handleSearch,
-    salesSummary,
     saleData,
     columns,
     handlePaginationModelChange,
     paginationModel,
-    currencyFormatter,
     prepareCategorySearch,
     categorySearch,
     totalRows,
     dateTypeList,
     handleSelectedSaleDetail,
+    totalSaleAmount,
   }
 }

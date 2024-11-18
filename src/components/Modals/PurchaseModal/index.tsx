@@ -501,7 +501,7 @@ export default function PurchaseModal({
                     // height: '50%',
                   })}
                 >
-                  Add Component
+                  部品追加
                 </Button>
               </Box>
               <Box display={'flex'} alignItems={'end'}>
@@ -512,8 +512,8 @@ export default function PurchaseModal({
                 >
                   {(modalMode === 'add' || modalMode === 'edit') &&
                   (currentStatus === undefined || currentStatus === 'PENDING')
-                    ? 'Add memo'
-                    : 'memo'}
+                    ? 'メモ追加'
+                    : 'メモ'}
                 </Button>
               </Box>
               <Autocomplete
@@ -616,16 +616,22 @@ export default function PurchaseModal({
             >
               キャンセル
             </Button>
-            <Button
-              // onClick={handleSubmit}
-              variant='outlined'
-              type='submit'
-              sx={theme => ({
-                color: 'white',
-              })}
-            >
-              保存
-            </Button>
+            {(!currentStatus ||
+              (currentStatus === PurchaseStatus.PENDING &&
+                formData.status === PurchaseStatus.PENDING) ||
+              (formData.status !== currentStatus &&
+                formData.status !== PurchaseStatus.PENDING)) && (
+              <Button
+                // onClick={handleSubmit}
+                variant='outlined'
+                type='submit'
+                sx={theme => ({
+                  color: 'white',
+                })}
+              >
+                保存
+              </Button>
+            )}
           </DialogActions>
         )}
       </form>

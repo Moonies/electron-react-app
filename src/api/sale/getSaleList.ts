@@ -6,8 +6,8 @@ import { HttpRequest } from 'hooks/useHttp'
 export interface SearchCriteria {
   category: string
   keyword: string
-  startDate: Date
-  endDate: Date
+  startDate: string | Dayjs
+  endDate: string | Dayjs
   page?: number
   pageSize?: number
   dateType: string

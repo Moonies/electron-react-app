@@ -33,23 +33,23 @@ import useExportSale from './hooks/useExportSale'
 import useNotification from 'hooks/useNotification'
 import useLoading from 'hooks/useLoading'
 import SaleModal, { SaleModalDataProps } from 'components/Modals/SaleModal'
+import { formatJPY } from 'utils/formatUtils'
 
 export default function SalePage() {
   const {
     searchCriteria,
     handleChange,
     handleSearch,
-    salesSummary,
     saleData,
     columns,
     handlePaginationModelChange,
     paginationModel,
-    currencyFormatter,
     prepareCategorySearch,
     categorySearch,
     totalRows,
     dateTypeList,
     handleSelectedSaleDetail,
+    totalSaleAmount,
   } = useSales()
   const saleDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -335,17 +335,13 @@ export default function SalePage() {
             }}
             gap={3}
           >
-            {salesSummary && (
-              <>
-                <Typography variant='h6'>
-                  総売上高: {currencyFormatter.format(Number(salesSummary.totalSales))}
-                </Typography>
-                {/* summary of(product price-(cost*quantity)) */}
-                {/* <Typography variant='h6'>
+            <Typography variant='h6'>
+              総売上高: {formatJPY(Number(totalSaleAmount ?? 0))}
+            </Typography>
+            {/* summary of(product price-(cost*quantity)) */}
+            {/* <Typography variant='h6'>
                   粗利: {currencyFormatter.format(Number(salesSummary.averageOrderValue))}
                 </Typography> */}
-              </>
-            )}
           </Box>
           <Divider orientation='vertical' flexItem></Divider>
           <Box

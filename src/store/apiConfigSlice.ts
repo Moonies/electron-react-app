@@ -29,7 +29,6 @@ const apiConfigSlice = createSlice({
 })
 
 export const getBaseUrl = (): string => {
-  console.log('call get BaseUrl')
   const storedBaseUrl = localStorage.getItem('apiConfig')
   let parsedConfig
   //end point can be change depens on user

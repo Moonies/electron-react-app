@@ -170,79 +170,77 @@ export default function OrderPage() {
   }, [selectionModel])
 
   const handleModalConfirm = async (data: SaleModalDataProps | PurchaseModalDataProps) => {
-    if ('saleCode' in data) {
-      console.log('confirmed sale data:', data)
-      switch (modalMode) {
-        case 'add':
-          {
-            const response = await addNewSaleOrder(data)
-            if (response) {
-              setModalOpen(false)
-            }
-          }
-          break
-        case 'edit':
-          {
-            const response = await editSaleOrder(data)
-            if (response) {
-              setModalOpen(false)
-            }
-          }
-          break
-        case 'view':
-          // deleteOrder(data as OrderData)
-          break
-        default:
-          break
-      }
-    }
-
-    if ('purchaseCode' in data) {
-      console.log('Confirmed data:', data)
-
-      switch (modalMode) {
-        case 'add':
-          {
-            const response = await addNewPurchaseOrder(data as PurchaseModalDataProps)
-            if (response) {
-              notificationSnackbar.success('Purchase Order is Success!!')
-              setLoading(false)
-              setModalOpen(false)
-            }
-          }
-          break
-        case 'edit': {
-          const response = await editPurchaseOrder(data as PurchaseModalDataProps)
-          if (response) {
-            setModalOpen(false)
-            setLoading(false)
-            notificationSnackbar.success('Purchase Order Update is Success!!')
-            handleSearch()
-            if (data.status === OrderStatus.CONFIRM) {
-              const confirmed = await openConfirmModal({
-                title: '確認してください',
-                message: `Do you want to print 3連納品書?`,
-              })
-              if (confirmed) {
-                // Perform delete operation
-                //print condition
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: `このデータを保存しますか。`,
+    })
+    if (confirmed) {
+      if ('saleCode' in data) {
+        switch (modalMode) {
+          case 'add':
+            {
+              const response = await addNewSaleOrder(data)
+              if (response) {
+                setModalOpen(false)
               }
-            } else {
-              setModalOpen(false)
             }
-          }
-          break
+            break
+          case 'edit':
+            {
+              const response = await editSaleOrder(data)
+              if (response) {
+                setModalOpen(false)
+              }
+            }
+            break
+          case 'view':
+            // deleteOrder(data as OrderData)
+            break
+          default:
+            break
         }
-        case 'view':
-          // deleteOrder(data)
-          break
-        default:
-          break
       }
-    }
-    if (modalMode === 'add') {
-      // addNewSaleData()
-    } else {
+
+      if ('purchaseCode' in data) {
+        switch (modalMode) {
+          case 'add':
+            {
+              const response = await addNewPurchaseOrder(data as PurchaseModalDataProps)
+              if (response) {
+                notificationSnackbar.success('Purchase Order is Success!!')
+                setLoading(false)
+                setModalOpen(false)
+              }
+            }
+            break
+          case 'edit': {
+            const response = await editPurchaseOrder(data as PurchaseModalDataProps)
+            if (response) {
+              setModalOpen(false)
+              setLoading(false)
+              notificationSnackbar.success('Purchase Order Update is Success!!')
+              handleSearch()
+              if (data.status === OrderStatus.CONFIRM) {
+                const confirmed = await openConfirmModal({
+                  title: '確認してください',
+                  message: `Do you want to print 3連納品書?`,
+                })
+                if (confirmed) {
+                  // Perform delete operation
+                  //print condition
+                }
+              } else {
+              }
+            }
+            break
+          }
+          case 'view':
+            // deleteOrder(data)
+            break
+          default:
+            break
+        }
+      }
     }
   }
 

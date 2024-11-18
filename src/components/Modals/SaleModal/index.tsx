@@ -208,8 +208,17 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
 
     setLoading(true)
     try {
+      const rows = addNewProductDataGridRef.current.getRowModels()
+      const totalAmount = Array.from(rows.values()).reduce((sum, row) => {
+        const rowTotalPrice = row.quantity * row.price
+        return sum + rowTotalPrice
+      }, 0)
       onConfirm &&
-        (await onConfirm({ ...formData, product: newProductListData as SaleNewProductList[] }))
+        (await onConfirm({
+          ...formData,
+          totalAmount: totalAmount,
+          product: newProductListData as SaleNewProductList[],
+        }))
     } catch (error) {
       console.error('Error submitting data:', error)
     } finally {
@@ -475,7 +484,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                         : 'hidden',
                   })}
                 >
-                  Add Product
+                  商品追加
                 </Button>
               </Box>
               <Box display={'flex'} alignItems={'end'}>
@@ -486,8 +495,8 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                 >
                   {(modalMode === 'add' || modalMode === 'edit') &&
                   (currentStatus === undefined || currentStatus === 'PENDING')
-                    ? 'Add memo'
-                    : 'memo'}
+                    ? 'メモ追加'
+                    : 'メモ'}
                 </Button>
               </Box>
               <Autocomplete
@@ -578,7 +587,8 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
             <Button onClick={onClose} variant='contained'>
               キャンセル
             </Button>
-            {((currentStatus === OrderStatus.PENDING && formData.status === OrderStatus.PENDING) ||
+            {(!currentStatus ||
+              (currentStatus === OrderStatus.PENDING && formData.status === OrderStatus.PENDING) ||
               (formData.status !== currentStatus && formData.status !== OrderStatus.PENDING)) && (
               <Button
                 type='submit'
