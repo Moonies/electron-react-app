@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material'
-import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import { useNavigate } from 'react-router-dom'
 import useNotification from 'hooks/useNotification'

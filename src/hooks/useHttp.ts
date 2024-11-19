@@ -84,19 +84,20 @@ export default function useHttp() {
 
   // Pass `httpRequest` to the `user` API group
   const api = {
-    customer: customerApi(httpRequest),
-    myCompany: myCompanyApi(httpRequest),
-    postCode: postCodeApi(httpRequest),
-    role: roleApi(httpRequest),
-    supplier: supplierApi(httpRequest),
-    user: userApi(httpRequest),
     component: componentApi(httpRequest),
+    customer: customerApi(httpRequest),
     kpi: kpiApi(httpRequest),
+    myCompany: myCompanyApi(httpRequest),
     order: orderApi(httpRequest),
-    purchase: purchaseApi(httpRequest),
+    postCode: postCodeApi(httpRequest),
     product: productApi(httpRequest),
+    purchase: purchaseApi(httpRequest),
+    report: reportApi(httpRequest),
+    role: roleApi(httpRequest),
     sale: saleApi(httpRequest),
     status: statusApi(httpRequest),
+    supplier: supplierApi(httpRequest),
+    user: userApi(httpRequest),
   }
 
   return { api }

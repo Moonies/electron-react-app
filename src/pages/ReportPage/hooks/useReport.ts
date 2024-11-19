@@ -1,9 +1,9 @@
-import { api } from 'api/index'
 import { ReportSearchCriteria } from 'api/report'
 import { BestSaleProductReportData } from 'api/report/getBestSaleProductReportData'
 import { ProfitReportData } from 'api/report/getProfitReportData'
 import { SaleReportData } from 'api/report/getSaleReportData'
 import { WorstProductReportData } from 'api/report/getWorstSaleProductReportData'
+import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import { useState } from 'react'
 
@@ -45,7 +45,7 @@ export default function useReport() {
   const [inProgessValue, setInProgressValue] = useState<number>()
   const [summaryData, setSummaryData] = useState<SummaryData>()
   const [summaryCompareData, setSummaryCompareData] = useState<SummaryCompareData>()
-
+  const { api } = useHttp()
   let summaryPreviousData: SummaryPreviousData = {
     previousSale: 0,
     previousAmountSale: 0,

@@ -1,16 +1,6 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Paper,
-  SvgIcon,
-  Typography,
-} from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers'
-import dayjs, { Dayjs } from 'dayjs'
-import React, { useEffect, useRef, useState } from 'react'
+import { Box, CardContent, CardHeader, Divider, Paper, Typography } from '@mui/material'
+import dayjs from 'dayjs'
+import { useEffect, useRef, useState } from 'react'
 import BestSaleProductChart from './components/BestSaleProductChart'
 import ProgressChart from './components/ProgressChart'
 import SubHeader from './components/SubHeader'
@@ -44,8 +34,8 @@ export default function ReportPage() {
     checkTextColor,
   } = useReport()
   const [searchCriteria, setSearchCriteria] = useState({
-    category: 0,
-    startDate: new Date(),
+    category: 'YEAR',
+    startDate: dayjs().subtract(3, 'month').toDate(),
     endDate: new Date(),
   })
   const [labelCompare, setLabelCompare] = useState('')
@@ -54,20 +44,26 @@ export default function ReportPage() {
   )
 
   const handleChange = (name: string, value: string | Date | null) => {
+    console.log(name, value)
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 
   const handleSearch = () => {
-    getSaleReport(searchCriteria)
-    getBestSaleProductReport(searchCriteria)
-    getWorstSaleProductReport(searchCriteria)
-    getProfitReport(searchCriteria)
-    getSummary(searchCriteria)
+    let newSearchCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+    }
+    getSaleReport(newSearchCriteria)
+    getBestSaleProductReport(newSearchCriteria)
+    getWorstSaleProductReport(newSearchCriteria)
+    getProfitReport(newSearchCriteria)
+    getSummary(newSearchCriteria)
     setLabelCompare(
-      `${dayjs(searchCriteria.startDate).format('YYYY-MM-DD')} ~ ${dayjs(searchCriteria.endDate).format('YYYY-MM-DD')}との比較`
+      `${dayjs(searchCriteria.startDate).subtract(1, 'year').format('YYYY-MM-DD')} ~ ${dayjs(searchCriteria.endDate).subtract(1, 'year').format('YYYY-MM-DD')}との比較`
     )
     setLabelSelectedYear(
-      `${dayjs(searchCriteria.startDate).format('YYYY')} ~ ${dayjs(searchCriteria.endDate).format('YYYY')}`
+      `${dayjs(searchCriteria.startDate).subtract(1, 'year').format('YYYY')} ~ ${dayjs(searchCriteria.startDate).format('YYYY')}`
     )
   }
 

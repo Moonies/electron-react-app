@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { api } from 'api/index'
 import { CustomerDetailData } from 'api/customer/getCustomerDetailById'
 import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import {

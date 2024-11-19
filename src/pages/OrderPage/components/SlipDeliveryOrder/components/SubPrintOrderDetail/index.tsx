@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Text, View, Image as PDFImage } from '@react-pdf/renderer'
-import { api } from 'api/index'
 import { styles } from './styles'
 import { SlipDetail } from '../..'
 import dayjs from 'dayjs'

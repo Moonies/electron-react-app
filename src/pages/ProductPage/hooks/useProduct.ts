@@ -1,6 +1,5 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { ProductData, SearchCriteriaProductList } from 'api/product/getProductList'
-import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
 // import { orderHistory } from 'api/product/getProductOrderHistory'
