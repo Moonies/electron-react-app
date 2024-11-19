@@ -169,7 +169,6 @@ export default function AddNewComponentListDialog({
               }}
               value={formData.number || null}
             />
-            {/* cannot use before confirmed */}
             {formData.id !== '' && (
               <>
                 <TextField

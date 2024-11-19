@@ -1,16 +1,15 @@
 import axios from 'axios'
 import { ApiResponse, axiosInstance } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
+import { mockData } from './_mockdata'
 import { HttpRequest } from 'hooks/useHttp'
+import { SaleStatus } from '.'
 
-export interface SearchCriteria {
-  category: string
-  keyword: string
-  startDate: string | Dayjs
-  endDate: string | Dayjs
-  page?: number
-  pageSize?: number
-  dateType: string
+type ProductDetail = {
+  name: string
+  number: string
+  price: number
+  quantity: number
 }
 type CompanyDetail = {
   id: string
@@ -30,22 +29,11 @@ type CompanyDetail = {
     fax: string
   }
 }
-export interface SalesSummary {
-  totalSales: number
-  averageOrderValue: number
-  topSellingProduct: string
-}
-type ProductDetail = {
-  name: string
-  number: string
-  price: number
-  quantity: number
-}
-type OwnerDetail = {
+type OwnerList = {
   id: string
   name: string
 }
-export interface SaleData {
+export interface SaleDetail {
   id: string
   createdBy: string
   createdAt: string
@@ -69,27 +57,17 @@ export interface SaleData {
   stockApprovalDate: string
   products: ProductDetail[]
   companyId: string
-  owners: OwnerDetail[]
+  owners: OwnerList[]
 }
 
-export default async function getSaleList(
+export default async function getSaleDetail(
   httpRequest: HttpRequest,
-  { category, keyword, startDate, endDate, page = 0, pageSize = 10, dateType }: SearchCriteria
-): Promise<ApiResponse<SaleData[]>> {
+  orderId: string
+): Promise<ApiResponse<SaleDetail>> {
   //for beta:test
-  // let newMock = chunkArray(mockData, pageSize, page)
-
-  const response = await httpRequest(() =>
-    dateType && dateType !== ''
-      ? axiosInstance.get(
-          `/api/sales?status.equal=COMPLETED&${category}.contains=${keyword}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
-        )
-      : axiosInstance.get(
-          `/api/sales?status.equal=COMPLETED&${category}.contains=${keyword}&page=${page}&size=${pageSize}`
-        )
-  )
+  const response = await httpRequest(() => axiosInstance.get('/api/sales/' + orderId))
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
+  return { code: 200, message: 'success', data: response?.data }
 }

@@ -27,10 +27,11 @@ export interface CustomerData {
 }
 
 export default async function getCustomerList(
-  httpRequest: HttpRequest
+  httpRequest: HttpRequest,
+  { page = 0, pageSize = 10 }
 ): Promise<ApiResponse<CustomerData[]>> {
   const response = await httpRequest(() =>
-    axiosInstance.get('/api/companies?companyType.equal=customer')
+    axiosInstance.get(`/api/companies?companyType.equal=customer&page=${page}&size=${pageSize}`)
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }

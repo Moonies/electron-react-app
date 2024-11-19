@@ -10,16 +10,18 @@ import {
   TextField,
 } from '@mui/material'
 import { Box } from '@mui/system'
-import { api } from 'api/index'
-import { ProductDataDetail } from 'api/product/getProductData'
+import { ProductDetail as ProductDetailList } from 'api/product/getProductData'
+import NumericFormatCustom from 'components/NumericFormat'
 import dayjs from 'dayjs'
+import useHttp from 'hooks/useHttp'
 import React, { useCallback, useEffect, useState } from 'react'
 
 export type ProductDetail = {
-  productNumber: string | null
-  productName: string | null
+  id?: string
+  number: string | null
+  name: string | null
   quantity: number
-  productPrice: number
+  price: number
 }
 interface DialogProductProps {
   open: boolean
@@ -35,14 +37,15 @@ export default function AddnewProductDialog({
   // productData,
 }: DialogProductProps) {
   const [formData, setFormData] = useState<ProductDetail>({
-    productNumber: null,
-    productName: null,
+    number: null,
+    name: null,
     quantity: 1,
-    productPrice: 0,
+    price: 0,
   })
   const [loading, setLoading] = useState(false)
   const [inputValue, setInputValue] = useState('')
-  const [productList, setProductList] = useState<ProductDataDetail[]>([])
+  const [productList, setProductList] = useState<ProductDetailList[]>([])
+  const { api } = useHttp()
 
   const submitProduct = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,8 +58,8 @@ export default function AddnewProductDialog({
       if (query.length >= 2) {
         setLoading(true)
         try {
-          // const fetchedOptions = await api.product.getProductData(query)
-          // setProductList(fetchedOptions.data?.data ?? [])
+          const fetchedOptions = await api.product.getProductData('number', query)
+          setProductList(fetchedOptions.data ?? [])
         } catch (error) {
           console.error('Error fetching options:', error)
         } finally {
@@ -75,7 +78,7 @@ export default function AddnewProductDialog({
     <Dialog
       open={open}
       disableEscapeKeyDown={true}
-      maxWidth='sm'
+      maxWidth={formData.id ? 'lg' : 'sm'}
       fullWidth
       onClose={(event, reason) => {
         if (reason !== 'backdropClick') {
@@ -93,10 +96,7 @@ export default function AddnewProductDialog({
                 const { key, ...optionProps } = props
                 return (
                   <Box key={key} component='li' {...optionProps}>
-                    {option.productNumber +
-                      '  :  ' +
-                      option.productName +
-                      `(${option.productPrice})`}
+                    {option.number + '  :  ' + option.name + `(${option.price})`}
                   </Box>
                 )
               }}
@@ -104,13 +104,13 @@ export default function AddnewProductDialog({
                 if (typeof option === 'string') {
                   return option
                 }
-                if (option && option.productNumber) {
-                  return option.productNumber
+                if (option && option.number) {
+                  return option.number
                 }
                 return ''
               }}
-              freeSolo
-              sx={{ marginTop: 2, flex: 1 }}
+              // freeSolo
+              sx={{ flex: 1 }}
               renderInput={params => (
                 <TextField
                   {...params}
@@ -135,26 +135,60 @@ export default function AddnewProductDialog({
                 if (typeof newValue === 'object' && newValue !== null) {
                   setFormData(prev => ({
                     ...prev,
-                    productNumber: newValue.productNumber || null,
-                    productName: newValue.productName || null,
-                    productPrice: newValue.productPrice || 0,
+                    id: newValue.id,
+                    number: newValue.number || null,
+                    name: newValue.name || null,
+                    price: newValue.price || 0,
                   }))
+                } else {
+                  setFormData({
+                    id: undefined,
+                    number: null,
+                    name: null,
+                    price: 0,
+                    quantity: 1,
+                  })
                 }
               }}
-              isOptionEqualToValue={(option, value) => option.productNumber === value.productNumber}
-              value={formData?.productNumber}
+              isOptionEqualToValue={option => option.number === formData?.number}
+              // value={formData?.productNumber}
             />
-            <TextField
-              label='数量'
-              type='number'
-              value={formData?.quantity ?? ''}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, quantity: parseFloat(e.target.value) }))
-              }
-              // fullWidth
-              margin='normal'
-              // sx={{ width: '20%' }}
-            />
+            {formData.id && (
+              <>
+                <TextField
+                  label='商品名'
+                  value={formData.name}
+                  onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  required
+                  InputProps={{ readOnly: true }}
+                  sx={{ width: '40%' }}
+                />
+                <TextField
+                  label='価格'
+                  // type='number'
+                  value={formData.price}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))
+                  }
+                  InputProps={{
+                    inputComponent: NumericFormatCustom as any,
+                    readOnly: true,
+                  }}
+                  sx={{ width: '15%' }}
+                />
+                <TextField
+                  label='数量'
+                  value={formData?.quantity ?? ''}
+                  InputProps={{
+                    inputComponent: NumericFormatCustom as any,
+                  }}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, quantity: parseFloat(e.target.value) }))
+                  }
+                  sx={{ width: '15%' }}
+                />
+              </>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>

@@ -95,7 +95,7 @@ export default function useExportSale() {
     setLoading(true)
     try {
       const [receiver, sender] = await Promise.all([
-        getCustomerDetail(saleSelectedData.customerCompanyId),
+        getCustomerDetail(saleSelectedData.company.id),
         getMyCompanyDetail(),
       ])
 
@@ -110,7 +110,7 @@ export default function useExportSale() {
       setExportDetail(newExportDetail)
 
       // console.log(newExportDetail)
-      exportToPdf(printColumnList, saleSelectedData.product, newExportDetail)
+      exportToPdf(printColumnList, saleSelectedData.products, newExportDetail) // waiting task recheck export
     } catch (error) {
       console.error('Error exporting sale:', error)
     } finally {

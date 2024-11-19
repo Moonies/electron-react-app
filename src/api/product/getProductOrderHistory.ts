@@ -1,80 +1,54 @@
 import axios from 'axios'
-import { ApiResponse } from 'api'
+import { ApiResponse, axiosInstance } from 'api'
 import { mockdata } from './_mockdata'
 import { ComponentData } from 'api/component/getComponentList'
+import { HttpRequest } from 'hooks/useHttp'
 
-export type orderHistory = {
+type OwnerDetail = {
   id: string
-  orderNumber: string
-  customerName: string
+  name: string
+}
+type CompanyDetail = {
+  id: string
+  companyCode: string
+  companyInfo: {
+    name: string
+    productNumber: string
+    email: string
+    fax?: string
+  }
+}
+type ProductDetail = {
+  id: string
+  name: string
+  number: string
   price: number
   quantity: number
-  orderDate: string
+}
+export type OrderHistory = {
+  id: string
+  orderCode: string
+  saleCode: string
+  company: CompanyDetail
+  quantity: number
+  shipmentDate: string
+  owners: OwnerDetail[]
+  products: ProductDetail[]
   memo?: string
 }
 
 export default async function getProductOrderHistory(
+  httpRequest: HttpRequest,
   productId: string
-): Promise<ApiResponse<orderHistory[]>> {
-  //for beta:test
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  return {
-    code: 200,
-    message: 'Success',
-    data: [
-      {
-        id: '1',
-        orderNumber: '2305542',
-        // customerId: '9998',
-        // customerNumber: '9998',
-        customerName: '諸口',
-        price: 6000,
-        quantity: 5,
-        orderDate: '2024/05/05',
-        // receivedDate: '2024/05/07',
-        memo: 'quantity > 3, prices down 10%',
-      },
-      {
-        id: '5',
-        orderNumber: '2305559',
-        // customerId: '9998',
-        // customerNumber: '9998',
-        customerName: '諸口',
-        price: 6818,
-        quantity: 1,
-        orderDate: '2024/06/05',
-        // receivedDate: '2024/06/07',
-        memo: 'different memo test',
-      },
-      {
-        id: '42',
-        orderNumber: '2306064',
-        // customerId: '9998',
-        // customerNumber: '9998',
-        customerName: '諸口',
-        price: 6818,
-        quantity: 1,
-        orderDate: '2024/06/05',
-        // receivedDate: '2024/06/07',
-      },
-    ],
+): Promise<ApiResponse<OrderHistory[]>> {
+  //current version is support 100 lasted
+  const response = await httpRequest(() =>
+    axiosInstance.get(
+      `/api/sales?status.equal=COMPLETED&size=100&products.id.equal=${productId}?sort=shipmentDate,asc`
+    )
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  // when use real API
-  // try {
-  //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });
-  //     return response.data;
-  // } catch (error) {
-  //     if (axios.isAxiosError(error) && error.response) {
-  //         return {
-  //             code: error.response.status,
-  //             message: error.response.data.message || 'An error occurred during authentication',
-  //             data: null
-  //         };
-  //     }
-  //     return {
-  //         code: 500,
-  //         message: 'An unexpected error occurred',
-  //         data: null
-  //     };
-  // }
+  return { code: 200, message: 'success', data: response?.data.content }
 }

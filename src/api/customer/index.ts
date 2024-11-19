@@ -10,7 +10,7 @@ export interface CustomerApi {
   addNewCustomer: (params: AddNewCustomerProps) => Promise<ApiResponse<{}>>
   deleteCustomer: (customerId: string) => Promise<ApiResponse<{}>>
   getCustomerDetailById: (customerCode: string) => Promise<ApiResponse<CustomerDetailData>>
-  getCustomerList: () => Promise<ApiResponse<CustomerData[]>>
+  getCustomerList: (page?: number, pageSize?: number) => Promise<ApiResponse<CustomerData[]>>
   updateCustomerDetail: (params: UpdateCustomerDetailProps) => Promise<ApiResponse<{}>>
 }
 
@@ -19,7 +19,7 @@ export default function customer(httpRequest: HttpRequest): CustomerApi {
     addNewCustomer: params => addNewCustomer(httpRequest, params),
     deleteCustomer: customerId => deleteCustomer(httpRequest, customerId),
     getCustomerDetailById: customerCode => getCustomerDetailById(httpRequest, customerCode),
-    getCustomerList: () => getCustomerList(httpRequest),
+    getCustomerList: (page, pageSize) => getCustomerList(httpRequest, { page, pageSize }),
     updateCustomerDetail: params => updateCustomerDetail(httpRequest, params),
   }
 }

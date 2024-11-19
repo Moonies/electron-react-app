@@ -1,5 +1,4 @@
 import { default as getOrderList, OrderData, OrderSearchCriteria } from './getOrderList'
-import { default as addNewOrder } from './addNewOrder'
 import { ApiResponse } from 'api'
 import { HttpRequest } from 'hooks/useHttp'
 
@@ -24,6 +23,7 @@ export enum OrderStatus {
   COMPLETE = 'COMPLETED',
   REJECT = 'REJECTED',
   CANCEL = 'CANCELLED',
+  ALL = '',
 }
 
 export enum OrderType {
@@ -36,5 +36,7 @@ export interface OrderApi {
 }
 
 export default function order(httpRequest: HttpRequest): OrderApi {
-  return { getOrderList: params => getOrderList(httpRequest, params) }
+  return {
+    getOrderList: params => getOrderList(httpRequest, params),
+  }
 }

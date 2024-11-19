@@ -20,7 +20,7 @@ export interface AddNewPurchase {
   registrationDate: string
   deliveryDate: string
   invoiceNumber: string
-  memo: string
+  memo?: string
   purchaseCode: string
   // quotationRequestDate: string //may be auto update when update event
   // orderApprovalDate: string //may be auto update when update event

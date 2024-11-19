@@ -126,7 +126,7 @@ export default function ComponentManagementPage() {
         name: data.name,
         number: data.number,
         price: data.price,
-        inStock: data.inStock,
+        // inStock: data.inStock,
         latestPriceDecisionDate: dayjs().format('YYYY-MM-DD'), //today
       }
       if (modalMode === 'add') {

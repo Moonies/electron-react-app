@@ -81,7 +81,7 @@ export default function usePurchase() {
       },
       {
         field: 'companyName',
-        headerName: '発注先',
+        headerName: '仕入先名',
         headerAlign: 'center',
         flex: 1,
         valueGetter: (value, row: any) => (row.company ? row.company.companyInfo.name : ''),

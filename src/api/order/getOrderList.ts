@@ -43,7 +43,8 @@ export interface OrderData {
   orderApprovedEmployeeName: string
   quotationRequestDate: string | Dayjs
   registDate: string | Dayjs
-  shippingmentDate: string | Dayjs
+  shipmentDate: string | Dayjs
+  deliveryDate: string | Dayjs
   paymentDueDate: string | Dayjs
   status: string | null
   orderType: string
@@ -74,6 +75,15 @@ export default async function getOrderList(
   let response
   if (orderType === OrderType.SALE) {
     // api/sales status is not completed
+    response = await httpRequest(() =>
+      dateType && dateType !== ''
+        ? axiosInstance.get(
+            `/api/sales?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
+          )
+        : axiosInstance.get(
+            `/api/sales?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED&page=${page}&size=${pageSize}`
+          )
+    )
   } else if (orderType === OrderType.PURCHASE) {
     // api/purchase status is not completed
     response = await httpRequest(() =>
@@ -107,14 +117,4 @@ export default async function getOrderList(
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
   return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
-
-  //for beta:test
-  // let newMock = chunkArray(mockData, pageSize, page)
-
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  return {
-    code: 200,
-    message: 'Success',
-    data: [],
-  }
 }

@@ -13,43 +13,61 @@ export interface SearchCriteria {
   pageSize?: number
   dateType?: string
 }
-export type ComponentList = {
-  id: string
-  componentNumber: string
-  componentName: string
+
+type ComponentList = {
+  name: string
+  number: string
+  price: number
   quantity: number
-  unitPrice: number
-  totalPrice: number
+}
+type CompanyDetail = {
+  id: string
+  companyCode: string
+  companyType: string
+  companyInfo: {
+    name: string
+    buildingName: string
+    address: {
+      streetAddress: string
+      city: string
+      prefecture: string
+      postalCode: string
+    }
+    phoneNumber: string
+    email: string
+    fax: string
+  }
+}
+type OwnerList = {
+  id: string
+  name: string
 }
 export interface PurchaseData {
-  purchaseId: string
+  id: string
+  createdBy: string
+  createdAt: string
+  modifiedBy: string
+  modifiedAt: string
+  company: CompanyDetail
+  orderCode: string
+  totalAmount: number
+  registrationDate: string
+  deliveryDate: string | Dayjs
   invoiceNumber: string
-  supplierCompanyId: string
-  supplierCompanyName: string
-  component: ComponentList[]
-  orderRequestEmployeeId: string
-  orderRequestEmployeeName: string
-  orderApprovedEmployeeId: string
-  orderApprovedEmployeeName: string
-  quotationRequestDate: string | dayjs.Dayjs
-  purchaseApprovedDate: string | dayjs.Dayjs
-  purchaseReciptDate: string | dayjs.Dayjs
-  status: string | null
-
-  //newData
-  // deliveryDate :Dayjs | string
-  // orderApprovalDate :Dayjs | string
-  // orderApprovalPendingDate :Dayjs | string
-  // orderCode : string
-  // purchaseCode: string
-  // registrationDate :Dayjs | string
-  // stockApprovalDate: Dayjs | string
-  // stockApprovalPendingDate: Dayjs | string
-  // totalAmount : number
-  // companyId: number
-  // id :number
-  // memo : string
+  memo: string
+  status: string
+  orderType: string
+  purchaseCode: string
+  quotationRequestDate: string
+  orderApprovalPendingDate: null
+  orderApprovalDate: string
+  stockApprovalPendingDate: null
+  stockApprovalDate: string
+  components: ComponentList[]
+  companyId: string
+  owners: OwnerList[]
 }
+
 //for implement case only when apprved should be remove it
 function chunkArray(mockdata: PurchaseData[], pageSize: number, page: number) {
   const result = []
@@ -67,30 +85,14 @@ export default async function getPurchaseList(
   const response = await httpRequest(() =>
     dateType && dateType !== ''
       ? axiosInstance.get(
-          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&${dateType}.from=${startDate}&${dateType}.to=${endDate}`
+          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
         )
-      : axiosInstance.get(`/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}`)
+      : axiosInstance.get(
+          `/api/purchases?status.equal=COMPLETED&${category}.contains=${keyword}&page=${page}&size=${pageSize}`
+        )
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
   return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
-  // when use real API
-  // try {
-  //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });
-  //     return response.data;
-  // } catch (error) {
-  //     if (axios.isAxiosError(error) && error.response) {
-  //         return {
-  //             code: error.response.status,
-  //             message: error.response.data.message || 'An error occurred during authentication',
-  //             data: null
-  //         };
-  //     }
-  //     return {
-  //         code: 500,
-  //         message: 'An unexpected error occurred',
-  //         data: null
-  //     };
-  // }
 }

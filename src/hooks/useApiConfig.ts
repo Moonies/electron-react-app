@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from 'store/index'
 import { setConfig, clearConfig } from 'store/apiConfigSlice'
+import { updateAxiosBaseUrl } from 'api/index'
 
 export interface ApiConfig {
   baseUrl: string
@@ -13,6 +14,7 @@ export default function useApiConfig() {
 
   const updateConfig = (newConfig: ApiConfig) => {
     dispatch(setConfig(newConfig))
+    updateAxiosBaseUrl()
     // localStorage.setItem('apiConfig', JSON.stringify(newConfig))
   }
 

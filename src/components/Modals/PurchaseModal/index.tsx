@@ -82,7 +82,7 @@ export type PurchaseModalDataProps = {
   // purchaseApprovedDate: string | Dayjs
   // stockApprovalDate: string | Dayjs
   owners: OwnerList[]
-  memo: string
+  memo?: string
   totalAmount: number
   status?: string
 }
@@ -179,7 +179,8 @@ export default function PurchaseModal({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setLoading(true)
     try {
       const rows = addNewComponentDataGridRef.current.getRowModels()
@@ -196,8 +197,6 @@ export default function PurchaseModal({
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -317,10 +316,10 @@ export default function PurchaseModal({
       // maxWidth='md'
       fullScreen
       TransitionComponent={Slide}
-      keepMounted
+      // keepMounted
       scroll={'paper'}
-      aria-labelledby='purchase-modal-title'
-      aria-describedby='purchase-modal-description'
+      // aria-labelledby='purchase-modal-title'
+      // aria-describedby='purchase-modal-description'
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -412,7 +411,7 @@ export default function PurchaseModal({
                 }}
                 getOptionLabel={option => option.companyInfo.name}
                 sx={{ marginTop: 2 }}
-                renderInput={params => <TextField {...params} label='顧客名' />}
+                renderInput={params => <TextField {...params} label='仕入先名' />}
                 readOnly={
                   !(
                     (modalMode === 'add' || modalMode === 'edit') &&
@@ -450,7 +449,7 @@ export default function PurchaseModal({
         (currentStatus === undefined || currentStatus === 'PENDING')}
               /> */}
               <DatePicker
-                label='手配納期'
+                label='配達納期'
                 value={dayjs(formData.deliveryDate) ?? ''}
                 format='YYYY-MM-DD'
                 onChange={newValue =>
@@ -502,7 +501,7 @@ export default function PurchaseModal({
                     // height: '50%',
                   })}
                 >
-                  Add Component
+                  部品追加
                 </Button>
               </Box>
               <Box display={'flex'} alignItems={'end'}>
@@ -513,8 +512,8 @@ export default function PurchaseModal({
                 >
                   {(modalMode === 'add' || modalMode === 'edit') &&
                   (currentStatus === undefined || currentStatus === 'PENDING')
-                    ? 'Add memo'
-                    : 'memo'}
+                    ? 'メモ追加'
+                    : 'メモ'}
                 </Button>
               </Box>
               <Autocomplete
@@ -573,7 +572,7 @@ export default function PurchaseModal({
               slots={{
                 footer: CustomFooter,
               }}
-              getRowId={row => (modalMode !== 'add' ? row.name + row.number : row.id)}
+              // getRowId={row => (modalMode !== 'add' ? row.name + row.number : row.id)}
             />
             {openDialogAddComponent && (
               <AddNewComponentListDialog
@@ -617,16 +616,22 @@ export default function PurchaseModal({
             >
               キャンセル
             </Button>
-            <Button
-              // onClick={handleSubmit}
-              variant='outlined'
-              type='submit'
-              sx={theme => ({
-                color: 'white',
-              })}
-            >
-              保存
-            </Button>
+            {(!currentStatus ||
+              (currentStatus === PurchaseStatus.PENDING &&
+                formData.status === PurchaseStatus.PENDING) ||
+              (formData.status !== currentStatus &&
+                formData.status !== PurchaseStatus.PENDING)) && (
+              <Button
+                // onClick={handleSubmit}
+                variant='outlined'
+                type='submit'
+                sx={theme => ({
+                  color: 'white',
+                })}
+              >
+                保存
+              </Button>
+            )}
           </DialogActions>
         )}
       </form>

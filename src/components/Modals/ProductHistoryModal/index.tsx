@@ -17,7 +17,14 @@ import DataTable from 'components/DataTable'
 import { GridActionsCellItem, GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import ViewMemoDialog from 'components/Dialogs/ViewMemoDialog'
 import useProductHistory from './hooks/useProductHistory'
-import { ProductHistoryData } from 'pages/ProductPage/hooks/useProduct'
+import { OrderHistory } from 'api/product/getProductOrderHistory'
+
+export type ProductHistoryData = {
+  id: string
+  productNumber: string
+  productName: string
+  orderHistoryList: OrderHistory[]
+}
 
 interface ComponentManagementModalProps {
   open: boolean

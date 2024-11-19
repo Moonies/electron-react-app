@@ -9,45 +9,47 @@ import {
   GridRowsProp,
   GridEventListener,
   GridRowEditStopReasons,
+  GridValidRowModel,
 } from '@mui/x-data-grid'
 import { CustomerData } from 'api/customer/getCustomerList'
-// import { api } from 'api/index'
 import { OrderData } from 'api/order/getOrderList'
-import { ProductDataDetail } from 'api/product/getProductData'
+import { ProductDetail as ProductDetailList } from 'api/product/getProductData'
 import { UserData } from 'api/user/getUserList'
 import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { formatJPY } from 'utils/formatUtils'
+import { SaleModalDataProps } from '..'
 
-export default function useAddOrder(orderDeta: any) {
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({})
-  const [newProductListData, setNewProductListData] = useState<GridRowsProp>([]) //waiting task order
-  const [productData, setProductData] = useState<ProductDataDetail[]>([])
+export default function useAddOrder(saleData: SaleModalDataProps) {
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
+  const [newProductListData, setNewProductListData] = useState<GridRowsProp>(saleData.product)
+  const [productData, setProductData] = useState<ProductDetailList[]>([])
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
   const { withLoading, setLoading } = useLoading()
   const { api } = useHttp()
+
   const handleAddNewProduct = (newProduct: ProductDetail) => {
-    let currentIndex = newProductListData.length
     let currentProductData = newProductListData
-    if (currentProductData.length > 0) {
-      const resultIndex = currentProductData.findIndex(
-        item => item.productNumber === newProduct.productNumber
+    if (currentProductData.length === 0) {
+      return setNewProductListData(prev => [...prev, { ...newProduct }])
+    }
+
+    const existingComponent = currentProductData.find(
+      item => item.number === newProduct.number && item.id === newProduct.id
+    )
+    if (existingComponent) {
+      let newRow = currentProductData.map(item =>
+        item.id === newProduct.id
+          ? { ...item, quantity: item.quantity + newProduct.quantity }
+          : item
       )
-      if (resultIndex !== -1) {
-        let newRow = currentProductData.map((product, index) =>
-          index === resultIndex
-            ? { ...product, quantity: product.quantity + newProduct.quantity }
-            : product
-        )
-        setNewProductListData(newRow)
-      } else {
-        setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
-      }
+      setNewProductListData(newRow)
     } else {
-      setNewProductListData(prev => [...prev, { id: currentIndex + 1, ...newProduct }])
+      setNewProductListData(prev => [...prev, { ...newProduct }])
     }
   }
 
@@ -108,21 +110,16 @@ export default function useAddOrder(orderDeta: any) {
   //   []
   // )
 
-  const currencyFormatter = new Intl.NumberFormat('ja-JP', {
-    style: 'currency',
-    currency: 'JPY',
-  })
-
   const columns: GridColDef[] = useMemo(
     () => [
       {
-        field: 'productNumber',
+        field: 'number',
         headerName: '商品番号',
         headerAlign: 'center',
         flex: 1,
       },
       {
-        field: 'productName',
+        field: 'name',
         headerName: '商品名',
         headerAlign: 'center',
         flex: 1,
@@ -135,12 +132,12 @@ export default function useAddOrder(orderDeta: any) {
         editable: true,
       },
       {
-        field: 'productPrice',
+        field: 'price',
         headerName: '単価',
         type: 'number',
         headerAlign: 'center',
         flex: 1,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueFormatter: value => formatJPY(Number(value)),
       },
       {
         field: 'totalPrice',
@@ -148,9 +145,9 @@ export default function useAddOrder(orderDeta: any) {
         type: 'number',
         headerAlign: 'center',
         flex: 1,
-        valueFormatter: value => currencyFormatter.format(Number(value)),
+        valueFormatter: value => formatJPY(Number(value)),
         valueGetter: (value, row) => {
-          return row.quantity * row.productPrice
+          return row.quantity * row.price
         },
       },
       {
@@ -165,16 +162,16 @@ export default function useAddOrder(orderDeta: any) {
   )
 
   const getUserList = async () => {
-    const result = await api.user.getUserList()
+    const result = await api.user.getUserList(0, 100)
     if (result.code === 200 && result.data) {
       setUserListData(result.data)
     }
   }
   const getCustomerList = async () => {
-    // const result = await api.customer.getCustomerList()
-    // if (result.data && result.code === 200) {
-    //   setCustomerListData(result.data)
-    // }
+    const result = await api.customer.getCustomerList(0, 100)
+    if (result.data && result.code === 200) {
+      setCustomerListData(result.data)
+    }
   }
   return {
     columns,

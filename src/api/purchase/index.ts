@@ -7,7 +7,7 @@ import { default as addNewPurchase, AddNewPurchase } from './addNewPurchase'
 import { HttpRequest } from 'hooks/useHttp'
 import { ApiResponse } from 'api'
 import { default as getPurchaseDetail, PurchaseDetail } from './getPurchaseDetail'
-import updatePurchaseDetail, { NewPurchaseDetail } from './updatePurchaseDetail'
+import { default as updatePurchaseDetail, NewPurchaseDetail } from './updatePurchaseDetail'
 import updatePurchaseStatus from './updatePurchaseStatus'
 import { default as deletePurchaseOrder } from './deletePurchase'
 
@@ -28,6 +28,7 @@ export interface PurchaseApi {
   updatePurchaseDetail: (params: NewPurchaseDetail) => Promise<ApiResponse<{}>>
   updatePurchaseStatus: (purchaseId: string, status: PurchaseStatus) => Promise<ApiResponse<{}>>
 }
+
 export default function purchase(httpRequest: HttpRequest): PurchaseApi {
   return {
     getPurchaseList: params => getPurchaseList(httpRequest, params),

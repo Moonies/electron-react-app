@@ -1,7 +1,6 @@
 import { debounce } from '@mui/material'
 import {
   GridColDef,
-  GridActionsCellItem,
   GridRowModes,
   GridRowModesModel,
   GridRowId,
@@ -9,17 +8,11 @@ import {
   GridRowsProp,
   GridEventListener,
   GridRowEditStopReasons,
-  GridPaginationModel,
 } from '@mui/x-data-grid'
 import { ComponentData } from 'api/component/getComponentList'
-import { CustomerData } from 'api/customer/getCustomerList'
-import { OrderData } from 'api/order/getOrderList'
-import { ProductDataDetail } from 'api/product/getProductData'
-import { PurchaseData } from 'api/purchase/getPurchaseList'
 import { SupplierData } from 'api/supplier/getSupplierList'
 import { UserData } from 'api/user/getUserList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
-import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 

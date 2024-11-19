@@ -3,13 +3,14 @@ import { ProductData, SearchCriteriaProductList } from 'api/product/getProductLi
 import { api } from 'api'
 import useLoading from 'hooks/useLoading'
 import React, { useCallback, useMemo, useState } from 'react'
-import { orderHistory } from 'api/product/getProductOrderHistory'
+// import { orderHistory } from 'api/product/getProductOrderHistory'
 import useHttp from 'hooks/useHttp'
 import { AddNewProductProps } from 'api/product/addNewProduct'
 import useNotification from 'hooks/useNotification'
 import { formatJPY } from 'utils/formatUtils'
 import { ProductDetailModalProps } from 'components/Modals/ProductModal'
 import { NewProductDetailProps } from 'api/product/updateProductDetail'
+import { OrderHistory } from 'api/product/getProductOrderHistory'
 
 interface PaginationModel {
   page: number
@@ -24,18 +25,13 @@ interface CachedData {
   [key: string]: ProductData[]
 }
 
-export type ProductHistoryData = {
-  id: number
-  productNumber: string
-  productName: string
-  orderHistoryList: orderHistory[]
-}
-
 export default function useProduct() {
   const [categorySearch, setCategorySearch] = useState<CategoryProductSearch[]>()
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteriaProductList>({
     category: '',
     keyword: '',
+    page: 0,
+    pageSize: 10,
   })
   const [productData, setProductData] = useState<ProductData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -107,7 +103,9 @@ export default function useProduct() {
   const prepareCategorySearch = useMemo(() => {
     let result: CategoryProductSearch[] = []
     columns.forEach(item => {
-      result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      if (item.field === 'number' || item.field === 'name') {
+        result.push({ value: item.field, display: item.headerName ? item.headerName : '' })
+      }
     })
     setCategorySearch(result)
   }, [])
@@ -151,13 +149,17 @@ export default function useProduct() {
         name: item.name,
         number: item.number,
         quantity: item.quantity,
+        price: item.price,
       })),
     }
     const response = await addNewProduct(newProduct)
     if (response) return response
   }
 
-  const handleUpdateProductDetail = async (formData: ProductDetailModalProps) => {
+  const handleUpdateProductDetail = async (
+    formData: ProductDetailModalProps,
+    needUpdateInStock: boolean
+  ) => {
     let newProductDetail: NewProductDetailProps = {
       id: formData.id ?? '',
       name: formData.productName,
@@ -169,10 +171,28 @@ export default function useProduct() {
         ((formData.productPrice - formData.productCost) / formData.productCost) * 100,
       productUnitId: formData.productUnit,
       components: formData.components,
-      inStock: formData.stockQuantity,
+      // inStock: formData.stockQuantity,
     }
+
     const response = await updateProductDetail(newProductDetail)
-    if (response) return response
+    if (response && needUpdateInStock) {
+      const response = await updateProductInStock(newProductDetail.id, formData.stockQuantity)
+      return response
+    } else {
+      return response
+    }
+  }
+
+  const handleOrderProductHistory = async (
+    productId: string
+  ): Promise<OrderHistory[] | undefined> => {
+    const response = await getProductOrderHistoryList(productId)
+    if (response) {
+      return response.map(item => ({
+        ...item,
+        products: item.products.filter(subItem => Object.values(subItem).includes(productId)),
+      }))
+    }
   }
 
   const handlePaginationModelChange = (newModel: PaginationModel) => {
@@ -194,11 +214,10 @@ export default function useProduct() {
   }
 
   const getProductOrderHistoryList = async (productId: string) => {
-    // const result = await api.product.getProductOrderHistory(productId)
-    // if (result.code === 200 && result.data) {
-    //   return result.data
-    // }
-    // return undefined
+    const result = await api.product.getProductOrderHistory(productId)
+    if (result.code === 200 && result.data) {
+      return result.data
+    }
   }
 
   const getProductList = async ({ page, pageSize }: GridPaginationModel) => {
@@ -209,7 +228,7 @@ export default function useProduct() {
     }
     const result = await api.product.getProductList(prepareSearhCriteria)
     if (result.code === 200 && result.data) {
-      setProductData(result.data)
+      setProductData(() => result.data || [])
       setTotalRows(result.page?.totalElements ?? 0)
       setCachedData(prevCache => ({
         ...prevCache,
@@ -235,6 +254,13 @@ export default function useProduct() {
       return true
     } else {
       notificationSnackbar.error(result.message)
+    }
+  }
+
+  const updateProductInStock = async (prodictId: string, newQuantity: number) => {
+    const result = await api.product.updateProductInStock(prodictId, newQuantity)
+    if (result.code === 200) {
+      return true
     }
   }
 
@@ -264,5 +290,6 @@ export default function useProduct() {
     handleUpdateProductDetail,
     deleteProduct,
     prepareProductDetail,
+    handleOrderProductHistory,
   }
 }

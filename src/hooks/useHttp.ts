@@ -12,6 +12,7 @@ import { default as roleApi } from 'api/role'
 import { default as saleApi } from 'api/sale'
 import { default as supplierApi } from 'api/supplier'
 import { default as userApi } from 'api/user'
+import { default as statusApi } from 'api/status'
 
 import axios, { AxiosResponse, AxiosError } from 'axios'
 import useNotification from './useNotification'
@@ -94,6 +95,8 @@ export default function useHttp() {
     order: orderApi(httpRequest),
     purchase: purchaseApi(httpRequest),
     product: productApi(httpRequest),
+    sale: saleApi(httpRequest),
+    status: statusApi(httpRequest),
   }
 
   return { api }
