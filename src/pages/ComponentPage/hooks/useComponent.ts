@@ -47,7 +47,14 @@ export default function useComponent() {
         valueFormatter: value => formatJPY(Number(value)),
         // minWidth: 200,
       },
-      { field: 'inStock', headerName: '数量', headerAlign: 'center', flex: 1, type: 'number' },
+      {
+        field: 'inStock',
+        headerName: '数量',
+        headerAlign: 'center',
+        flex: 1,
+        type: 'number',
+        valueFormatter: value => (value === null ? 0 : value),
+      },
       { field: 'latestPriceDecisionDate', headerName: '単価時点', headerAlign: 'center', flex: 1 },
     ],
     []
