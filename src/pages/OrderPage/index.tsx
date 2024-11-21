@@ -182,6 +182,7 @@ export default function OrderPage() {
               const response = await addNewSaleOrder(data)
               if (response) {
                 setModalOpen(false)
+                setLoading(false)
               }
             }
             break
@@ -190,6 +191,9 @@ export default function OrderPage() {
               const response = await editSaleOrder(data)
               if (response) {
                 setModalOpen(false)
+                setLoading(false)
+                notificationSnackbar.success('Sale Order Update is Success!!')
+                handleSearch()
               }
             }
             break

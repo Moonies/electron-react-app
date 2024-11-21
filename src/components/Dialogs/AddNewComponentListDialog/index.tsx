@@ -187,7 +187,7 @@ export default function AddNewComponentListDialog({
                   }
                   InputProps={{
                     inputComponent: NumericFormatCustom as any,
-                    readOnly: !isNewValue,
+                    // readOnly: !isNewValue,
                   }}
                   required
                 />

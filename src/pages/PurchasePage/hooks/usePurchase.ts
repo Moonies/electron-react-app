@@ -155,6 +155,19 @@ export default function usePurchase() {
     setLoading(false)
   }
 
+  const getAllPurchaseData = async () => {
+    let allSearchCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+      pageSize: totalRows,
+    }
+    const result = await api.purchase.getPurchaseList(allSearchCriteria)
+    if (result.code === 200 && result.data) {
+      return result.data
+    }
+    return []
+  }
   const handlePaginationModelChange = async (newModel: GridPaginationModel) => {
     if (newModel.pageSize !== paginationModel.pageSize) {
       // If page size has changed, reset to the first page
@@ -185,5 +198,6 @@ export default function usePurchase() {
     convertStatus,
     dateTypeList,
     totalRows,
+    getAllPurchaseData,
   }
 }

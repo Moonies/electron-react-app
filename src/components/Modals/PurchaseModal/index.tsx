@@ -612,6 +612,7 @@ export default function PurchaseModal({
               // sx={theme => ({
               //   color: 'white',
               // })}
+              aria-hidden='true'
             >
               キャンセル
             </Button>
@@ -627,6 +628,7 @@ export default function PurchaseModal({
                 sx={theme => ({
                   color: 'white',
                 })}
+                aria-hidden='true'
               >
                 保存
               </Button>

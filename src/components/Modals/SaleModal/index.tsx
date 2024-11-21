@@ -206,7 +206,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    setLoading(true)
+    // setLoading(true)
     try {
       const rows = addNewProductDataGridRef.current.getRowModels()
       const totalAmount = Array.from(rows.values()).reduce((sum, row) => {

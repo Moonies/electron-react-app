@@ -44,11 +44,11 @@ export default function useExportOrder() {
   const { api } = useHttp()
   const printColumnList: GridColDef[] = useMemo(
     () => [
-      { field: 'productNumber', headerName: '図面番号' },
-      { field: 'productName', headerName: '品名' },
+      { field: 'number', headerName: '図面番号' },
+      { field: 'name', headerName: '品名' },
       { field: 'quantity', headerName: '数量' },
       {
-        field: 'productPrice',
+        field: 'price',
         headerName: '単価',
       },
       {
@@ -59,17 +59,34 @@ export default function useExportOrder() {
     []
   )
 
+  const columns = [
+    { key: 'invoiceNumber', header: '伝票番号' },
+    { key: 'orderCode', header: '受注番号' },
+    { key: 'customerName', header: '名称' },
+    { key: 'productNumber', header: '図番' },
+    { key: 'productName', header: '品名' },
+    { key: 'quantity', header: '数量' },
+    { key: 'price', header: '単価' },
+    { key: 'totalPrice', header: '金額' },
+    { key: 'purchaseCode', header: '注番' },
+    { key: 'owner', header: '担当者名' },
+    { key: 'registrationDate', header: '納入日' },
+    { key: 'deliveryDate', header: '手配納期' },
+  ]
+
   const getCustomerDetail = async (customerId: string) => {
     const { data } = await api.customer.getCustomerDetailById(customerId)
     if (data) {
       return {
-        id: data.id,
-        name: data.customerName,
-        email: data.email,
-        fullAddress: data.prefecture + data.city + data.street + data.addressCode,
-        phoneNumber: formatPhoneNumber(data.phoneNumber),
-        postCode: formatPostcode(data.postalCode),
-        fax: formatPhoneNumber(data.faxNumber) ?? '',
+        name: data.companyInfo.name,
+        email: data.companyInfo.email,
+        fullAddress:
+          data.companyInfo.address.prefecture +
+          data.companyInfo.address.city +
+          data.companyInfo.address.streetAddress,
+        phoneNumber: formatPhoneNumber(data.companyInfo.phoneNumber),
+        postCode: formatPostcode(data.companyInfo.address.postalCode),
+        fax: formatPhoneNumber(data.companyInfo.fax) ?? '',
       }
     }
   }
@@ -91,21 +108,28 @@ export default function useExportOrder() {
     }
   }
 
+  const getSaleDetail = async (saleId: string) => {
+    const response = await api.sale.getSaleDetail(saleId)
+    if (response.code === 200 && response.data) return response
+  }
+
+  const getPurchaseDetail = async (purchaseId: string) => {
+    const response = await api.purchase.getPurchaseDetail(purchaseId)
+    if (response.code === 200 && response.data) return response
+  }
   const convertTitle = useCallback((typeOrder: string | null): string => {
-    //please re-check in export task
-    // switch (typeOrder) {
-    //   case OrderStatus.DELIVERY:
-    //     return PrintTitle.SALE
-    //   case OrderStatus.RECEIVED:
-    //     return PrintTitle.PURCHASE
-    //   case OrderStatus.PENDING:
-    //     return PrintTitle.PENDING
-    //   case OrderStatus.ORDERED:
-    //     return PrintTitle.ORDER
-    //   default:
-    //     return ''
-    // }
-    return ''
+    switch (typeOrder) {
+      // case OrderStatus.DELIVERY:
+      //   return PrintTitle.SALE
+      // case OrderStatus.RECEIVED:
+      //   return PrintTitle.PURCHASE
+      case OrderStatus.PENDING:
+        return PrintTitle.PENDING
+      case OrderStatus.CONFIRM:
+        return PrintTitle.ORDER
+      default:
+        return ''
+    }
   }, [])
 
   const exportSaleSelected = async (orderSelectedData: OrderData) => {

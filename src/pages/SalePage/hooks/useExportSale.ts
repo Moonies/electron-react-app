@@ -43,11 +43,11 @@ export default function useExportSale() {
   const { api } = useHttp()
   const printColumnList: GridColDef[] = useMemo(
     () => [
-      { field: 'productNumber', headerName: '図面番号' },
-      { field: 'productName', headerName: '品名' },
+      { field: 'number', headerName: '図面番号' },
+      { field: 'name', headerName: '品名' },
       { field: 'quantity', headerName: '数量' },
       {
-        field: 'productPrice',
+        field: 'price',
         headerName: '単価',
       },
       {
@@ -60,16 +60,19 @@ export default function useExportSale() {
 
   const getCustomerDetail = async (customerId: string) => {
     const { data } = await api.customer.getCustomerDetailById(customerId)
+    console.log(data)
     if (data) {
       return {
-        name: data.customerName,
-        email: data.email,
-        fullAddress: data.prefecture + data.city + data.street + data.addressCode,
-        phoneNumber: formatPhoneNumber(data.phoneNumber),
-        postCode: formatPostcode(data.postalCode),
-        fax: formatPhoneNumber(data.faxNumber) ?? '',
+        name: data.companyInfo.name,
+        email: data.companyInfo.email,
+        fullAddress:
+          data.companyInfo.address.prefecture +
+          data.companyInfo.address.city +
+          data.companyInfo.address.streetAddress,
+        phoneNumber: formatPhoneNumber(data.companyInfo.phoneNumber),
+        postCode: formatPostcode(data.companyInfo.address.postalCode),
+        fax: formatPhoneNumber(data.companyInfo.fax) ?? '',
       }
-      // setExportDetail(prev => ({ ...prev, receiver: newReceiver }))
     }
   }
 
@@ -87,7 +90,6 @@ export default function useExportSale() {
         postCode: formatPostcode(data.companyInfo.address.postalCode),
         fax: formatPhoneNumber(data.companyInfo.fax),
       }
-      // setExportDetail(prev => ({ ...prev, sender: newSender }))
     }
   }
 
@@ -100,17 +102,23 @@ export default function useExportSale() {
       ])
 
       const newExportDetail: ExportDetail = {
-        id: saleSelectedData.id,
+        id: saleSelectedData.orderCode, //orderCode or saleCode ??
         title: PrintTitle.SALE, // Assuming PrintTitle.SALE is 'SALE'
         fileName: PrintTitle.SALE + '(Test)', // Assuming PrintTitle.SALE is 'SALE'
         receiver: receiver || ({} as ReceiverDetail),
         sender: sender || ({} as ReceiverDetail),
       }
 
+      const newProductList = saleSelectedData.products.map(
+        ({ useCanBeMadeInQuantity, ...item }) => ({
+          ...item,
+          totalPrice: item.price * item.quantity,
+        })
+      )
+
       setExportDetail(newExportDetail)
 
-      // console.log(newExportDetail)
-      exportToPdf(printColumnList, saleSelectedData.products, newExportDetail) // waiting task recheck export
+      exportToPdf(printColumnList, newProductList, newExportDetail)
     } catch (error) {
       console.error('Error exporting sale:', error)
     } finally {

@@ -16,11 +16,11 @@ export enum PrintType {
   PURCHASE = 'purchase_invoice',
 }
 export enum PrintTitle {
-  SALE = '請求書', //sale order type
-  ORDER = '納品書', //sale order type
-  PENDING = '見積書', //sale order type
+  SALE = '請求書', //sale order is completed
+  ORDER = '納品書', //sale order is confirm
+  PENDING = '見積書', //sale order is pending
   // SHIPPING = '出荷伝票',
-  PURCHASE = '仕入票',
+  PURCHASE = '仕入票', //purchase order is completed
 }
 export type SenderDetail = {
   postCode: string
