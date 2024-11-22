@@ -15,6 +15,7 @@ export default function useExportPurchase() {
 
       // Transform each component into a row
       const rows = order.components.map(component => ({
+        invoiceNumber: order.invoiceNumber,
         orderCode: order.orderCode,
         customerName: customerName,
         componentNumber: component.number,
@@ -22,7 +23,6 @@ export default function useExportPurchase() {
         quantity: component.quantity,
         price: component.price,
         totalPrice: component.quantity * component.price,
-        invoiceNumber: order.invoiceNumber,
         purchaseCode: order.purchaseCode,
         owner: ownerName,
         registrationDate: order.registrationDate,

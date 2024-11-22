@@ -39,12 +39,13 @@ export type OrderHistory = {
 
 export default async function getProductOrderHistory(
   httpRequest: HttpRequest,
-  productId: string
+  productId: string,
+  pageSize: number = 100
 ): Promise<ApiResponse<OrderHistory[]>> {
   //current version is support 100 lasted
   const response = await httpRequest(() =>
     axiosInstance.get(
-      `/api/sales?status.equal=COMPLETED&size=100&products.id.equal=${productId}&sort=shipmentDate,asc`
+      `/api/sales?status.equal=COMPLETED&size=${pageSize}&products.id.equal=${productId}&sort=shipmentDate,asc`
     )
   )
   if (axios.isAxiosError(response)) {

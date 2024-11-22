@@ -28,6 +28,7 @@ import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
 import ProductHistoryModal, { ProductHistoryData } from 'components/Modals/ProductHistoryModal'
 import useLoading from 'hooks/useLoading'
+import useExportProduct, { ExportAllProductData } from './hooks/useExportProduct'
 
 export default function ProductPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -56,7 +57,10 @@ export default function ProductPage() {
     deleteProduct,
     prepareProductDetail,
     handleOrderProductHistory,
+    getAllProductData,
   } = useProduct()
+
+  const { exportProduct } = useExportProduct()
 
   const productDataGridRef = useGridApiRef()
 
@@ -170,6 +174,7 @@ export default function ProductPage() {
       let productHistoryData: ProductHistoryData
       if (selectedData) {
         const result = await handleOrderProductHistory(selectedData.id)
+        console.log(result)
         if (result) {
           productHistoryData = {
             id: selectedData.id,
@@ -186,6 +191,57 @@ export default function ProductPage() {
       notificationModal.error('商品履歴を表示するには、表の行を選択してください。')
     }
   }, [selectionModel])
+
+  const handleExportClick = async () => {
+    // notificationModal.warning('long time to generate, please do not close app when loadding.')
+    const response = await getAllProductData()
+    let allProductOrderHistory = []
+    if (response) {
+      for (const product of response) {
+        const historyResponse = await handleOrderProductHistory(product.id)
+        const totalQuantity = historyResponse?.map(saleHistory => {
+          const sumQuantity =
+            saleHistory.products?.reduce((sum, product) => {
+              return sum + (product.quantity || 0)
+            }, 0) || 0
+
+          // Return new object with all existing properties plus totalQuantity
+          return sumQuantity
+        })
+        const summaryTotalQuantity = (totalQuantity ?? []).reduce((sum, num) => sum + num, 0)
+        allProductOrderHistory.push({ ...product, totalQuantity: summaryTotalQuantity })
+      }
+      const resultAllProductOrderHistory: ExportAllProductData[] = allProductOrderHistory.map(
+        ({
+          id,
+          // components,
+          cost,
+          grossMarginRate,
+          inStock,
+          name,
+          number,
+          totalQuantity,
+          price,
+          productUnit,
+          createdAt,
+        }) => ({
+          id,
+          // components,
+          cost,
+          grossMarginRate,
+          inStock,
+          name,
+          number,
+          totalQuantity,
+          price,
+          productUnit,
+          createdAt,
+        })
+      )
+      // console.log(resultAllProductOrderHistory)
+      exportProduct(resultAllProductOrderHistory)
+    }
+  }
 
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
@@ -299,16 +355,7 @@ export default function ProductPage() {
               >
                 編集
               </StyledButton>
-              {/* waiting for comfirm */}
-              {/* <StyledButton
-                variant='outlined'
-                startIcon={<PrintIcon />}
-                size='large'
-                // onClick={handleExportPdf}
-              >
-                データ出力
-              </StyledButton> */}
-              {/* 製品注文履歴 */}
+
               <StyledButton
                 variant='outlined'
                 startIcon={<DetailIcon />}
@@ -318,6 +365,23 @@ export default function ProductPage() {
               >
                 詳細
               </StyledButton>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              {/* waiting for comfirm */}
+              <StyledButton
+                variant='outlined'
+                startIcon={<PrintIcon />}
+                size='large'
+                onClick={handleExportClick}
+              >
+                データ出力
+              </StyledButton>
+              <StyledButton
+                variant='outlined'
+                startIcon={<PrintIcon />}
+                size='large'
+                sx={{ visibility: 'hidden' }}
+              />
             </Box>
           </Box>
         </Box>

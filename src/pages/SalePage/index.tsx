@@ -407,7 +407,7 @@ export default function SalePage() {
                 startIcon={<PrintIcon />}
                 size='large'
                 onClick={handleExportPdf}
-                sx={{ visibility: 'hidden' }}
+                // sx={{ visibility: 'hidden' }}
               >
                 データ出力
               </StyledButton>

@@ -180,13 +180,92 @@ export const exportToCsv = (columns: GridColDef[], rows: any[]) => {
 }
 
 // Export to XLSX
-export const exportToXlsx = (columns: GridColDef[], rows: any[]) => {
-  const headers = columns.map(col => col.headerName || col.field)
-  const data = rows.map(row => columns.map(col => getCellValue(row, col)))
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...data])
+export const exportToXlsx = (
+  columns: { key: string; header: string }[],
+  data: any[],
+  fileName: string
+) => {
+  //old version
+  // const headers = columns.map(col => col.headerName || col.field)
+  // const data = rows.map(row => columns.map(col => getCellValue(row, col)))
+  // const ws = XLSX.utils.aoa_to_sheet([headers, ...data])
+  // const wb = XLSX.utils.book_new()
+  // XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+  // XLSX.writeFile(wb, 'export.xlsx')
+
+  //1.0.9 version
+  // Create worksheet
+  const ws = XLSX.utils.json_to_sheet(data)
+
+  // Add headers
+  columns.forEach((col, idx) => {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: idx })
+    if (!ws[cellRef]) ws[cellRef] = { v: '' }
+    ws[cellRef].v = col.header
+  })
+
+  // Format numbers in the worksheet
+  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+  for (let R = 1; R <= range.e.r; R++) {
+    // Format inStock column
+    const inStock = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'inStock'),
+    })
+    if (ws[inStock]) {
+      ws[inStock].z = '#,##0' // Format for whole numbers
+    }
+
+    // Format quantity column
+    const quantityCell = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'quantity'),
+    })
+    if (ws[quantityCell]) {
+      ws[quantityCell].z = '#,##0' // Format for whole numbers
+    }
+
+    // Format price column
+    const priceCell = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'price'),
+    })
+    if (ws[priceCell]) {
+      ws[priceCell].z = '#,##0.00' // Format for currency
+    }
+
+    // Format total price column
+    const totalPriceCell = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'totalPrice'),
+    })
+    if (ws[totalPriceCell]) {
+      ws[totalPriceCell].z = '#,##0.00' // Format for currency
+    }
+  }
+
+  // Add styling to headers
+  const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+  for (let i = 0; i <= headerRange.e.c; i++) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: i })
+    if (!ws[cellRef].s) ws[cellRef].s = {}
+    ws[cellRef].s.font = { bold: true }
+  }
+
+  // Set column widths
+  ws['!cols'] = columns.map(col => {
+    // Set wider columns for formatted numbers
+    if (['price', 'totalPrice'].includes(col.key)) {
+      return { wch: 20 }
+    }
+    return { wch: 15 }
+  })
+
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
-  XLSX.writeFile(wb, 'export.xlsx')
+  // auto gen to sheet1
+  XLSX.utils.book_append_sheet(wb, ws)
+
+  XLSX.writeFile(wb, `${fileName}.xlsx`)
 }
 
 // Updated exportToPdf function
