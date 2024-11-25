@@ -54,6 +54,8 @@ export default function OrderPage() {
     handleSelectedPurchaseDetail,
     totalRows,
     handleSelectedSaleDetail,
+    getSaleOrderList,
+    getPurchaseOrderList,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -63,7 +65,7 @@ export default function OrderPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal, notificationSnackbar } = useNotification()
-  const { exportSaleSelected, prepareSlipData } = useExportOrder()
+  const { exportSaleSelected, prepareSlipData, exportOrder } = useExportOrder()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [orderType, setOrderType] = useState<'Sale' | 'Purchase'>()
   const [showPDF, setShowPDF] = useState(false)
@@ -280,6 +282,22 @@ export default function OrderPage() {
       }
     } else {
       notificationModal.error('出力する行をテーブルから選択してください')
+    }
+  }
+
+  const handleExport = async () => {
+    if (searchCriteria.orderType === OrderType.SALE) {
+      const saleOrder = await getSaleOrderList()
+      exportOrder(saleOrder)
+    } else if (searchCriteria.orderType === OrderType.PURCHASE) {
+      const purchaseOrder = await getPurchaseOrderList()
+      exportOrder(undefined, purchaseOrder)
+    } else {
+      const [saleOrder, purchaseOrder] = await Promise.all([
+        getSaleOrderList(),
+        getPurchaseOrderList(),
+      ])
+      exportOrder(saleOrder, purchaseOrder)
     }
   }
 
@@ -531,8 +549,8 @@ export default function OrderPage() {
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                sx={{ visibility: 'hidden' }}
-                // onClick={handleExportPdf}
+                // sx={{ visibility: 'hidden' }}
+                onClick={handleExport}
               >
                 データ出力
               </StyledButton>

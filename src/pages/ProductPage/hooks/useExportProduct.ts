@@ -34,14 +34,14 @@ export default function useExportProduct() {
   }
 
   const columns = [
-    { key: 'productNumber', header: '図番' },
-    { key: 'productName', header: '品名' },
+    { key: 'productNumber', header: '商品番号' },
+    { key: 'productName', header: '商品名' },
     { key: 'inStock', header: '在庫数' },
     { key: 'quantity', header: '数量' },
     { key: 'cost', header: '評価' },
     { key: 'price', header: '単価' },
     { key: 'totalPrice', header: '小計' },
-    { key: 'registrationDate', header: '納入日' },
+    { key: 'registrationDate', header: '登録日付' },
   ]
 
   const exportProduct = async (dataToExport: ExportAllProductData[]) => {

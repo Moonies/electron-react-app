@@ -1,11 +1,11 @@
 import { useState, useCallback, useMemo } from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { api } from 'api/index'
 import { CustomerDetailData } from 'api/customer/getCustomerDetailById'
 import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import {
   ExportDetail,
   exportToPdf,
+  exportToXlsx,
   PrintTitle,
   ReceiverDetail,
   SenderDetail,
@@ -58,6 +58,48 @@ export default function useExportSale() {
     []
   )
 
+  const transformData = (orders: SaleData[]) => {
+    return orders.reduce((acc: any, order) => {
+      // Get the owner name (assuming we take the first owner if multiple exist)
+      const ownerName = order.owners?.[0]?.name || ''
+
+      // Get the customer name from company info
+      const customerName = order.company?.companyInfo?.name || ''
+
+      // Transform each product into a row
+      const rows = order.products.map(product => ({
+        invoiceNumber: order.invoiceNumber,
+        orderCode: order.orderCode,
+        customerName: customerName,
+        productNumber: product.number,
+        productName: product.name,
+        quantity: product.quantity,
+        price: product.price,
+        totalPrice: product.quantity * product.price,
+        saleCode: order.saleCode,
+        owner: ownerName,
+        registrationDate: order.registrationDate,
+        shipmentDate: order.shipmentDate,
+      }))
+
+      return acc.concat(rows)
+    }, [])
+  }
+  const columns = [
+    { key: 'invoiceNumber', header: '伝票番号' },
+    { key: 'orderCode', header: '受注番号' },
+    { key: 'customerName', header: '取引先' },
+    { key: 'productNumber', header: '図番' },
+    { key: 'productName', header: '品名' },
+    { key: 'quantity', header: '数量' },
+    { key: 'price', header: '単価' },
+    { key: 'totalPrice', header: '金額' },
+    { key: 'saleCode', header: '注番' },
+    { key: 'owner', header: '担当者名' },
+    { key: 'registrationDate', header: '納入日' },
+    { key: 'shipmentDate', header: '出荷日' },
+  ]
+
   const getCustomerDetail = async (customerId: string) => {
     const { data } = await api.customer.getCustomerDetailById(customerId)
     console.log(data)
@@ -93,7 +135,7 @@ export default function useExportSale() {
     }
   }
 
-  const exportSaleSelected = async (saleSelectedData: SaleData) => {
+  const printSaleInvoice = async (saleSelectedData: SaleData) => {
     setLoading(true)
     try {
       const [receiver, sender] = await Promise.all([
@@ -106,7 +148,7 @@ export default function useExportSale() {
         title: PrintTitle.SALE, // Assuming PrintTitle.SALE is 'SALE'
         fileName: PrintTitle.SALE + '(Test)', // Assuming PrintTitle.SALE is 'SALE'
         receiver: receiver || ({} as ReceiverDetail),
-        sender: sender || ({} as ReceiverDetail),
+        sender: sender || ({} as SenderDetail),
       }
 
       const newProductList = saleSelectedData.products.map(
@@ -126,11 +168,22 @@ export default function useExportSale() {
     }
   }
 
+  const exportSale = async (dataToExport: SaleData[]) => {
+    try {
+      const transformedData = transformData(dataToExport)
+      exportToXlsx(columns, transformedData, 'sale-report')
+    } catch (error) {
+      console.error('Error exporting to XLSX:', error)
+      alert('Failed to export XLSX. Please ensure the xlsx library is properly imported.')
+    }
+  }
+
   return {
     printColumnList,
     getCustomerDetail,
     getMyCompanyDetail,
     exportDetail,
-    exportSaleSelected,
+    printSaleInvoice,
+    exportSale,
   }
 }

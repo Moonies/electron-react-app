@@ -1,7 +1,10 @@
 import { GridColDef } from '@mui/x-data-grid'
 // import { api } from 'api/index'
-import { OrderStatus } from 'api/order'
+import { OrderStatus, OrderType } from 'api/order'
 import { OrderData } from 'api/order/getOrderList'
+import { PurchaseOrderData } from 'api/order/getPurchaseOrderList'
+import { SaleOrderData } from 'api/order/getSaleOrderList'
+import dayjs from 'dayjs'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
@@ -9,12 +12,14 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   ExportDetail,
   exportToPdf,
+  exportToXlsx,
   PrintTitle,
   ReceiverDetail,
   SenderDetail,
 } from 'utils/exportUtils'
 import { formatPhoneNumber, formatPostcode } from 'utils/formatUtils'
 import { DeliverySlipData, SlipDetail } from '../components/SlipDeliveryOrder'
+import useOrder from './useOrder'
 
 const initialExportDetail: ExportDetail = {
   id: '',
@@ -42,6 +47,7 @@ export default function useExportOrder() {
   const { setLoading } = useLoading()
   const { notificationModal } = useNotification()
   const { api } = useHttp()
+  const { convertStatus, convertOrderType } = useOrder()
   const printColumnList: GridColDef[] = useMemo(
     () => [
       { field: 'number', headerName: '図面番号' },
@@ -59,19 +65,86 @@ export default function useExportOrder() {
     []
   )
 
+  const transformSaleData = (orders: SaleOrderData[]) => {
+    return orders.reduce((acc: any, order) => {
+      // Get the owner name (assuming we take the first owner if multiple exist)
+      const ownerName = order.owners?.[0]?.name || ''
+
+      // Get the customer name from company info
+      const customerName = order.company?.companyInfo?.name || ''
+
+      // Transform each product into a row
+      const rows = order.products.map(product => ({
+        invoiceNumber: order.invoiceNumber,
+        orderCode: order.orderCode,
+        orderType: convertOrderType(order.orderType),
+        status: convertStatus(order.status, order.orderType),
+        customerName: customerName,
+        productNumber: product.number,
+        productName: product.name,
+        quantity: product.quantity,
+        price: product.price,
+        totalPrice: product.quantity * product.price,
+        orderNumber: order.saleCode,
+        owner: ownerName,
+        registrationDate: order.registrationDate,
+        deliveryDate: '', //in sale delivery is all null, null is not support in xlsx and csv
+        shipmentDate: order.shipmentDate,
+        memo: order.memo,
+      }))
+
+      return acc.concat(rows)
+    }, [])
+  }
+
+  const transformPurchaseData = (orders: PurchaseOrderData[]) => {
+    return orders.reduce((acc: any, order) => {
+      // Get the owner name (assuming we take the first owner if multiple exist)
+      const ownerName = order.owners?.[0]?.name || ''
+
+      // Get the customer name from company info
+      const customerName = order.company?.companyInfo?.name || ''
+
+      // Transform each product into a row
+      const rows = order.components.map(component => ({
+        invoiceNumber: order.invoiceNumber,
+        orderCode: order.orderCode,
+        orderType: convertOrderType(order.orderType),
+        status: convertStatus(order.status, order.orderType),
+        customerName: customerName,
+        productNumber: component.number,
+        productName: component.name,
+        quantity: component.quantity,
+        price: component.price,
+        totalPrice: component.quantity * component.price,
+        orderNumber: order.purchaseCode,
+        owner: ownerName,
+        registrationDate: order.registrationDate,
+        deliveryDate: order.deliveryDate,
+        shipmentDate: '', //in purchase shipment is all null,null is not support in xlsx and csv
+        memo: order.memo,
+      }))
+
+      return acc.concat(rows)
+    }, [])
+  }
+
   const columns = [
     { key: 'invoiceNumber', header: '伝票番号' },
     { key: 'orderCode', header: '受注番号' },
+    { key: 'orderType', header: '受注タイプ' },
+    { key: 'status', header: '状態' },
     { key: 'customerName', header: '名称' },
     { key: 'productNumber', header: '図番' },
     { key: 'productName', header: '品名' },
     { key: 'quantity', header: '数量' },
     { key: 'price', header: '単価' },
     { key: 'totalPrice', header: '金額' },
-    { key: 'purchaseCode', header: '注番' },
+    { key: 'orderNumber', header: '注番' },
     { key: 'owner', header: '担当者名' },
-    { key: 'registrationDate', header: '納入日' },
-    { key: 'deliveryDate', header: '手配納期' },
+    { key: 'registrationDate', header: '登録日付' },
+    { key: 'deliveryDate', header: '配達日付' },
+    { key: 'shipmentDate', header: '出荷日付' },
   ]
 
   const getCustomerDetail = async (customerId: string) => {
@@ -157,6 +230,26 @@ export default function useExportOrder() {
     }
   }
 
+  const exportOrder = async (saleOrder?: SaleOrderData[], purchaseOrder?: PurchaseOrderData[]) => {
+    if (saleOrder && purchaseOrder) {
+      const [saleReport, purchaseReport] = await Promise.all([
+        transformSaleData(saleOrder),
+        transformPurchaseData(purchaseOrder),
+      ])
+      let exportOrderSelected = [...saleReport, ...purchaseReport]
+      exportOrderSelected.sort(
+        (a, b) => dayjs(a.registrationDate).valueOf() - dayjs(b.registrationDate).valueOf()
+      )
+      exportToXlsx(columns, exportOrderSelected, 'order-report')
+    } else if (saleOrder) {
+      const report = await transformSaleData(saleOrder)
+      exportToXlsx(columns, report, 'order-report')
+    } else if (purchaseOrder) {
+      const report = await transformPurchaseData(purchaseOrder)
+      exportToXlsx(columns, report, 'order-report')
+    }
+  }
+
   const prepareSlipData = async (orderSelectedData: OrderData) => {
     try {
       const [customer, myCompany] = await Promise.all([
@@ -192,5 +285,6 @@ export default function useExportOrder() {
   return {
     exportSaleSelected,
     prepareSlipData,
+    exportOrder,
   }
 }

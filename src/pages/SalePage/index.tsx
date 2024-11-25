@@ -50,6 +50,7 @@ export default function SalePage() {
     dateTypeList,
     handleSelectedSaleDetail,
     totalSaleAmount,
+    getAllSaleData,
   } = useSales()
   const saleDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -57,13 +58,7 @@ export default function SalePage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
-  const {
-    printColumnList,
-    exportDetail,
-    getCustomerDetail,
-    getMyCompanyDetail,
-    exportSaleSelected,
-  } = useExportSale()
+  const { printSaleInvoice, exportSale } = useExportSale()
   const { notificationModal } = useNotification()
   const { setLoading } = useLoading()
 
@@ -150,11 +145,19 @@ export default function SalePage() {
       const selectedId = selectionModel[0]
       const selectedData = saleData.find(item => item.id === selectedId)
       if (selectedData) {
-        exportSaleSelected(selectedData)
+        printSaleInvoice(selectedData)
       }
     } else {
       setLoading(false)
       notificationModal.error('出力する行をテーブルから選択してください')
+    }
+  }
+  const handleExport = async () => {
+    if (totalRows > saleData.length) {
+      const saleReport = await getAllSaleData()
+      saleReport && exportSale(saleReport)
+    } else {
+      exportSale(saleData)
     }
   }
   const handleStartDateChange = (date: Dayjs | null) => {
@@ -406,7 +409,7 @@ export default function SalePage() {
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                onClick={handleExportPdf}
+                onClick={handleExport}
                 // sx={{ visibility: 'hidden' }}
               >
                 データ出力

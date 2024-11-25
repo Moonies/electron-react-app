@@ -244,14 +244,6 @@ export const exportToXlsx = (
     }
   }
 
-  // Add styling to headers
-  const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1')
-  for (let i = 0; i <= headerRange.e.c; i++) {
-    const cellRef = XLSX.utils.encode_cell({ r: 0, c: i })
-    if (!ws[cellRef].s) ws[cellRef].s = {}
-    ws[cellRef].s.font = { bold: true }
-  }
-
   // Set column widths
   ws['!cols'] = columns.map(col => {
     // Set wider columns for formatted numbers
