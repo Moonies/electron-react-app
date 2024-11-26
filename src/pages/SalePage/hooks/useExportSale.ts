@@ -160,7 +160,7 @@ export default function useExportSale() {
 
       setExportDetail(newExportDetail)
 
-      exportToPdf(printColumnList, newProductList, newExportDetail)
+      exportToPdf(printColumnList, newProductList, newExportDetail, '下記の通り、納品致しました。')
     } catch (error) {
       console.error('Error exporting sale:', error)
     } finally {

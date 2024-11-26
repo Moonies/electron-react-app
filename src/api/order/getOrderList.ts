@@ -36,6 +36,7 @@ export interface OrderData {
   id: string
   orderCode: string
   companyId: string
+  invoiceNumber: string
   company: Company
   orderRequestEmployeeId: string
   orderRequestEmployeeName: string

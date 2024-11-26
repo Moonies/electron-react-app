@@ -21,37 +21,16 @@ import { formatPhoneNumber, formatPostcode } from 'utils/formatUtils'
 import { DeliverySlipData, SlipDetail } from '../components/SlipDeliveryOrder'
 import useOrder from './useOrder'
 
-const initialExportDetail: ExportDetail = {
-  id: '',
-  title: '',
-  fileName: '',
-  // type: '',
-  // taxType: '',
-  sender: {
-    postCode: '',
-    fullAddress: '',
-    phoneNumber: '',
-    email: '',
-    name: '',
-  },
-  receiver: {
-    postCode: '',
-    fullAddress: '',
-    phoneNumber: '',
-    email: '',
-    name: '',
-  },
-}
-
 export default function useExportOrder() {
   const { setLoading } = useLoading()
   const { notificationModal } = useNotification()
   const { api } = useHttp()
   const { convertStatus, convertOrderType } = useOrder()
+
   const printColumnList: GridColDef[] = useMemo(
     () => [
-      { field: 'number', headerName: '図面番号' },
-      { field: 'name', headerName: '品名' },
+      { field: 'number', headerName: '商品番号' },
+      { field: 'name', headerName: '商品名' },
       { field: 'quantity', headerName: '数量' },
       {
         field: 'price',
@@ -183,13 +162,9 @@ export default function useExportOrder() {
 
   const getSaleDetail = async (saleId: string) => {
     const response = await api.sale.getSaleDetail(saleId)
-    if (response.code === 200 && response.data) return response
+    if (response.code === 200 && response.data) return response.data
   }
 
-  const getPurchaseDetail = async (purchaseId: string) => {
-    const response = await api.purchase.getPurchaseDetail(purchaseId)
-    if (response.code === 200 && response.data) return response
-  }
   const convertTitle = useCallback((typeOrder: string | null): string => {
     switch (typeOrder) {
       // case OrderStatus.DELIVERY:
@@ -205,24 +180,45 @@ export default function useExportOrder() {
     }
   }, [])
 
+  const convertPrintType = useCallback((orderType: string, orderStatus: string | null) => {
+    switch (orderStatus) {
+      case OrderStatus.PENDING:
+      case null:
+        return orderType === OrderType.SALE ? '下記のとおりお見積申し上げます。' : ''
+      case OrderStatus.CONFIRM:
+      case OrderStatus.COMPLETE:
+        return orderType === OrderType.SALE ? '下記の通り、納品致しました。' : ''
+      default:
+        return ''
+    }
+  }, [])
+
   const exportSaleSelected = async (orderSelectedData: OrderData) => {
     setLoading(true)
-    let title = convertTitle(orderSelectedData.status)
     try {
+      let title = convertTitle(orderSelectedData.status)
+      let printType = convertPrintType(orderSelectedData.orderType, orderSelectedData.status)
       const [customer, myCompany] = await Promise.all([
         getCustomerDetail(orderSelectedData.companyId),
         getMyCompanyDetail(),
       ])
-
+      let item
+      if (orderSelectedData.orderType === OrderType.SALE) {
+        const response = await getSaleDetail(orderSelectedData.id)
+        item = response?.products.map(({ useCanBeMadeInQuantity, ...item }) => ({
+          ...item,
+          totalPrice: item.price * item.quantity,
+        }))
+      }
       const newExportDetail: ExportDetail = {
-        id: orderSelectedData.id,
+        id: orderSelectedData.invoiceNumber,
         title: title,
         fileName: title + '(Test)',
         receiver: customer || ({} as ReceiverDetail),
         sender: myCompany || ({} as SenderDetail),
       }
       //watiting re check export task
-      // exportToPdf(printColumnList, orderSelectedData.product, newExportDetail)
+      exportToPdf(printColumnList, item ?? [], newExportDetail, printType)
     } catch (error) {
       notificationModal.error(`Error exporting : ${error}`)
     } finally {

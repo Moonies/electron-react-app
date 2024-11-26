@@ -250,7 +250,7 @@ export default function OrderPage() {
     }
   }
 
-  const handleExportPdf = async () => {
+  const handlePrintDocument = async () => {
     // setShowPDF(true) //for test to preview PDF
     setLoading(true)
     if (selectionModel.length === 1) {
@@ -258,6 +258,7 @@ export default function OrderPage() {
       const selectedData = orderData.find(order => order.id === selectedId)
       // if(selectedData?.status === OrderStatus.CANCEL) has condition??
       if (selectedData) {
+        //purchase caes and need to print?
         if (
           selectedData.status === OrderStatus.CONFIRM &&
           selectedData.orderType === OrderType.PURCHASE
@@ -277,7 +278,12 @@ export default function OrderPage() {
           }
           //and call update status to ORDERED
         } else {
-          exportSaleSelected(selectedData)
+          if (selectedData.orderType === 'Sale') {
+            exportSaleSelected(selectedData)
+          } else {
+            // need to discuss for purchase order
+            // const purchaseDetail = await handleSelectedPurchaseDetail(selectedData.id)
+          }
         }
       }
     } else {
@@ -550,7 +556,7 @@ export default function OrderPage() {
                 startIcon={<PrintIcon />}
                 size='large'
                 // sx={{ visibility: 'hidden' }}
-                onClick={handleExport}
+                onClick={handlePrintDocument}
               >
                 データ出力
               </StyledButton>

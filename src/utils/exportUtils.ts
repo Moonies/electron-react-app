@@ -261,7 +261,12 @@ export const exportToXlsx = (
 }
 
 // Updated exportToPdf function
-export const exportToPdf = (columns: GridColDef[], rows: object[], exportDetail: ExportDetail) => {
+export const exportToPdf = (
+  columns: GridColDef[],
+  rows: object[],
+  exportDetail: ExportDetail,
+  exportText: string
+) => {
   const doc = new jsPDF({
     orientation: 'p',
     unit: 'mm',
@@ -315,7 +320,8 @@ export const exportToPdf = (columns: GridColDef[], rows: object[], exportDetail:
       doc.text('E-Mail:', margin, 81)
       doc.text(exportDetail.receiver.email, margin + labelEmailWidth + 5, 81)
 
-      doc.text('下記の通り、納品致しました。', margin, 95),
+      doc.text(exportText, margin, 95),
+        //right side detail
         drawLabelValuePair(doc, '発行日 ', today, pageWidth - 80, 40, 70)
       // Draw '番号' and its value
       drawLabelValuePair(doc, '番号  ', exportDetail.id, pageWidth - 80, 47, 70)
