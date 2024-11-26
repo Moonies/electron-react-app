@@ -9,6 +9,7 @@ import {
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
   ContentPasteSearch as DetailIcon,
+  FileDownload as FileDownloadIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { StyledButton } from 'styles/styles'
@@ -259,32 +260,33 @@ export default function OrderPage() {
       // if(selectedData?.status === OrderStatus.CANCEL) has condition??
       if (selectedData) {
         //purchase caes and need to print?
-        if (
-          selectedData.status === OrderStatus.CONFIRM &&
-          selectedData.orderType === OrderType.PURCHASE
-        ) {
-          const newSlipData = await prepareSlipData(selectedData)
-          if (newSlipData !== undefined) {
-            const blob = await pdf(
-              <PDFDocument data={newSlipData} render={() => setLoading(false)} />
-            ).toBlob()
-            const url = URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', '3連納品書.pdf') //name sapce is waiting to confirm
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-          }
-          //and call update status to ORDERED
+        // if (
+        //   selectedData.status === OrderStatus.CONFIRM &&
+        //   selectedData.orderType === OrderType.PURCHASE
+        // ) {
+        //   const newSlipData = await prepareSlipData(selectedData)
+        //   if (newSlipData !== undefined) {
+        //     const blob = await pdf(
+        //       <PDFDocument data={newSlipData} render={() => setLoading(false)} />
+        //     ).toBlob()
+        //     const url = URL.createObjectURL(blob)
+        //     const link = document.createElement('a')
+        //     link.href = url
+        //     link.setAttribute('download', '3連納品書.pdf') //name sapce is waiting to confirm
+        //     document.body.appendChild(link)
+        //     link.click()
+        //     document.body.removeChild(link)
+        //   }
+        // } else {
+        if (selectedData.orderType === 'Sale') {
+          exportSaleSelected(selectedData)
         } else {
-          if (selectedData.orderType === 'Sale') {
-            exportSaleSelected(selectedData)
-          } else {
-            // need to discuss for purchase order
-            // const purchaseDetail = await handleSelectedPurchaseDetail(selectedData.id)
-          }
+          notificationModal.info('now purchase order is not support.')
+          setLoading(false)
+          // need to discuss for purchase order
+          // const purchaseDetail = await handleSelectedPurchaseDetail(selectedData.id)
         }
+        // }
       }
     } else {
       notificationModal.error('出力する行をテーブルから選択してください')
@@ -551,18 +553,7 @@ export default function OrderPage() {
               >
                 編集
               </StyledButton>
-              <StyledButton
-                variant='outlined'
-                startIcon={<PrintIcon />}
-                size='large'
-                // sx={{ visibility: 'hidden' }}
-                onClick={handlePrintDocument}
-              >
-                データ出力
-              </StyledButton>
-            </Box>
-            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
-              // current version is not support 
+              {/* // current version is not support  */}
               <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
@@ -571,15 +562,26 @@ export default function OrderPage() {
               >
                 自動アプロード
               </StyledButton>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
+              <StyledButton
+                variant='outlined'
+                startIcon={<FileDownloadIcon />}
+                size='large'
+                // sx={{ visibility: 'hidden' }}
+                onClick={handleExport}
+              >
+                データ出力
+              </StyledButton>
               <StyledButton
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                onClick={handleExportPdf}
+                onClick={handlePrintDocument}
               >
-                データ出力
+                データ印刷
               </StyledButton>
-            </Box> */}
+            </Box>
           </Box>
         </Box>
         <DataTable
