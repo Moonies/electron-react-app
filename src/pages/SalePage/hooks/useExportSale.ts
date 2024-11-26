@@ -1,11 +1,11 @@
 import { useState, useCallback, useMemo } from 'react'
 import { GridColDef } from '@mui/x-data-grid'
-import { api } from 'api/index'
 import { CustomerDetailData } from 'api/customer/getCustomerDetailById'
 import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import {
   ExportDetail,
   exportToPdf,
+  exportToXlsx,
   PrintTitle,
   ReceiverDetail,
   SenderDetail,
@@ -43,11 +43,11 @@ export default function useExportSale() {
   const { api } = useHttp()
   const printColumnList: GridColDef[] = useMemo(
     () => [
-      { field: 'productNumber', headerName: '図面番号' },
-      { field: 'productName', headerName: '品名' },
+      { field: 'number', headerName: '図面番号' },
+      { field: 'name', headerName: '品名' },
       { field: 'quantity', headerName: '数量' },
       {
-        field: 'productPrice',
+        field: 'price',
         headerName: '単価',
       },
       {
@@ -58,18 +58,63 @@ export default function useExportSale() {
     []
   )
 
+  const transformData = (orders: SaleData[]) => {
+    return orders.reduce((acc: any, order) => {
+      // Get the owner name (assuming we take the first owner if multiple exist)
+      const ownerName = order.owners?.[0]?.name || ''
+
+      // Get the customer name from company info
+      const customerName = order.company?.companyInfo?.name || ''
+
+      // Transform each product into a row
+      const rows = order.products.map(product => ({
+        invoiceNumber: order.invoiceNumber,
+        orderCode: order.orderCode,
+        customerName: customerName,
+        productNumber: product.number,
+        productName: product.name,
+        quantity: product.quantity,
+        price: product.price,
+        totalPrice: product.quantity * product.price,
+        saleCode: order.saleCode,
+        owner: ownerName,
+        registrationDate: order.registrationDate,
+        shipmentDate: order.shipmentDate,
+      }))
+
+      return acc.concat(rows)
+    }, [])
+  }
+  const columns = [
+    { key: 'invoiceNumber', header: '伝票番号' },
+    { key: 'orderCode', header: '受注番号' },
+    { key: 'customerName', header: '取引先' },
+    { key: 'productNumber', header: '図番' },
+    { key: 'productName', header: '品名' },
+    { key: 'quantity', header: '数量' },
+    { key: 'price', header: '単価' },
+    { key: 'totalPrice', header: '金額' },
+    { key: 'saleCode', header: '注番' },
+    { key: 'owner', header: '担当者名' },
+    { key: 'registrationDate', header: '納入日' },
+    { key: 'shipmentDate', header: '出荷日' },
+  ]
+
   const getCustomerDetail = async (customerId: string) => {
     const { data } = await api.customer.getCustomerDetailById(customerId)
+    console.log(data)
     if (data) {
       return {
-        name: data.customerName,
-        email: data.email,
-        fullAddress: data.prefecture + data.city + data.street + data.addressCode,
-        phoneNumber: formatPhoneNumber(data.phoneNumber),
-        postCode: formatPostcode(data.postalCode),
-        fax: formatPhoneNumber(data.faxNumber) ?? '',
+        name: data.companyInfo.name,
+        email: data.companyInfo.email,
+        fullAddress:
+          data.companyInfo.address.prefecture +
+          data.companyInfo.address.city +
+          data.companyInfo.address.streetAddress,
+        phoneNumber: formatPhoneNumber(data.companyInfo.phoneNumber),
+        postCode: formatPostcode(data.companyInfo.address.postalCode),
+        fax: formatPhoneNumber(data.companyInfo.fax) ?? '',
       }
-      // setExportDetail(prev => ({ ...prev, receiver: newReceiver }))
     }
   }
 
@@ -87,11 +132,10 @@ export default function useExportSale() {
         postCode: formatPostcode(data.companyInfo.address.postalCode),
         fax: formatPhoneNumber(data.companyInfo.fax),
       }
-      // setExportDetail(prev => ({ ...prev, sender: newSender }))
     }
   }
 
-  const exportSaleSelected = async (saleSelectedData: SaleData) => {
+  const printSaleInvoice = async (saleSelectedData: SaleData) => {
     setLoading(true)
     try {
       const [receiver, sender] = await Promise.all([
@@ -100,21 +144,37 @@ export default function useExportSale() {
       ])
 
       const newExportDetail: ExportDetail = {
-        id: saleSelectedData.id,
+        id: saleSelectedData.orderCode, //orderCode or saleCode ??
         title: PrintTitle.SALE, // Assuming PrintTitle.SALE is 'SALE'
         fileName: PrintTitle.SALE + '(Test)', // Assuming PrintTitle.SALE is 'SALE'
         receiver: receiver || ({} as ReceiverDetail),
-        sender: sender || ({} as ReceiverDetail),
+        sender: sender || ({} as SenderDetail),
       }
+
+      const newProductList = saleSelectedData.products.map(
+        ({ useCanBeMadeInQuantity, ...item }) => ({
+          ...item,
+          totalPrice: item.price * item.quantity,
+        })
+      )
 
       setExportDetail(newExportDetail)
 
-      // console.log(newExportDetail)
-      exportToPdf(printColumnList, saleSelectedData.products, newExportDetail) // waiting task recheck export
+      exportToPdf(printColumnList, newProductList, newExportDetail, '下記の通り、納品致しました。')
     } catch (error) {
       console.error('Error exporting sale:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const exportSale = async (dataToExport: SaleData[]) => {
+    try {
+      const transformedData = transformData(dataToExport)
+      exportToXlsx(columns, transformedData, 'sale-report')
+    } catch (error) {
+      console.error('Error exporting to XLSX:', error)
+      alert('Failed to export XLSX. Please ensure the xlsx library is properly imported.')
     }
   }
 
@@ -123,6 +183,7 @@ export default function useExportSale() {
     getCustomerDetail,
     getMyCompanyDetail,
     exportDetail,
-    exportSaleSelected,
+    printSaleInvoice,
+    exportSale,
   }
 }

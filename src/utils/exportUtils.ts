@@ -16,11 +16,11 @@ export enum PrintType {
   PURCHASE = 'purchase_invoice',
 }
 export enum PrintTitle {
-  SALE = '請求書', //sale order type
-  ORDER = '納品書', //sale order type
-  PENDING = '見積書', //sale order type
+  SALE = '請求書', //sale order is completed
+  ORDER = '納品書', //sale order is confirm
+  PENDING = '見積書', //sale order is pending
   // SHIPPING = '出荷伝票',
-  PURCHASE = '仕入票',
+  PURCHASE = '仕入票', //purchase order is completed
 }
 export type SenderDetail = {
   postCode: string
@@ -180,17 +180,93 @@ export const exportToCsv = (columns: GridColDef[], rows: any[]) => {
 }
 
 // Export to XLSX
-export const exportToXlsx = (columns: GridColDef[], rows: any[]) => {
-  const headers = columns.map(col => col.headerName || col.field)
-  const data = rows.map(row => columns.map(col => getCellValue(row, col)))
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...data])
+export const exportToXlsx = (
+  columns: { key: string; header: string }[],
+  data: any[],
+  fileName: string
+) => {
+  //old version
+  // const headers = columns.map(col => col.headerName || col.field)
+  // const data = rows.map(row => columns.map(col => getCellValue(row, col)))
+  // const ws = XLSX.utils.aoa_to_sheet([headers, ...data])
+  // const wb = XLSX.utils.book_new()
+  // XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+  // XLSX.writeFile(wb, 'export.xlsx')
+
+  //1.0.9 version
+  // Create worksheet
+  const ws = XLSX.utils.json_to_sheet(data)
+
+  // Add headers
+  columns.forEach((col, idx) => {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c: idx })
+    if (!ws[cellRef]) ws[cellRef] = { v: '' }
+    ws[cellRef].v = col.header
+  })
+
+  // Format numbers in the worksheet
+  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1')
+  for (let R = 1; R <= range.e.r; R++) {
+    // Format inStock column
+    const inStock = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'inStock'),
+    })
+    if (ws[inStock]) {
+      ws[inStock].z = '#,##0' // Format for whole numbers
+    }
+
+    // Format quantity column
+    const quantityCell = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'quantity'),
+    })
+    if (ws[quantityCell]) {
+      ws[quantityCell].z = '#,##0' // Format for whole numbers
+    }
+
+    // Format price column
+    const priceCell = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'price'),
+    })
+    if (ws[priceCell]) {
+      ws[priceCell].z = '#,##0.00' // Format for currency
+    }
+
+    // Format total price column
+    const totalPriceCell = XLSX.utils.encode_cell({
+      r: R,
+      c: columns.findIndex(col => col.key === 'totalPrice'),
+    })
+    if (ws[totalPriceCell]) {
+      ws[totalPriceCell].z = '#,##0.00' // Format for currency
+    }
+  }
+
+  // Set column widths
+  ws['!cols'] = columns.map(col => {
+    // Set wider columns for formatted numbers
+    if (['price', 'totalPrice'].includes(col.key)) {
+      return { wch: 20 }
+    }
+    return { wch: 15 }
+  })
+
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
-  XLSX.writeFile(wb, 'export.xlsx')
+  // auto gen to sheet1
+  XLSX.utils.book_append_sheet(wb, ws)
+
+  XLSX.writeFile(wb, `${fileName}.xlsx`)
 }
 
 // Updated exportToPdf function
-export const exportToPdf = (columns: GridColDef[], rows: object[], exportDetail: ExportDetail) => {
+export const exportToPdf = (
+  columns: GridColDef[],
+  rows: object[],
+  exportDetail: ExportDetail,
+  exportText: string
+) => {
   const doc = new jsPDF({
     orientation: 'p',
     unit: 'mm',
@@ -244,7 +320,8 @@ export const exportToPdf = (columns: GridColDef[], rows: object[], exportDetail:
       doc.text('E-Mail:', margin, 81)
       doc.text(exportDetail.receiver.email, margin + labelEmailWidth + 5, 81)
 
-      doc.text('下記の通り、納品致しました。', margin, 95),
+      doc.text(exportText, margin, 95),
+        //right side detail
         drawLabelValuePair(doc, '発行日 ', today, pageWidth - 80, 40, 70)
       // Draw '番号' and its value
       drawLabelValuePair(doc, '番号  ', exportDetail.id, pageWidth - 80, 47, 70)

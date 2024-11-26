@@ -20,6 +20,7 @@ import {
   Print as PrintIcon,
   UploadFile as UploadFileIcon,
   ContentPasteSearch as DetailIcon,
+  FileDownload as FileDownloadIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import useSales from './hooks/useSale'
@@ -50,6 +51,7 @@ export default function SalePage() {
     dateTypeList,
     handleSelectedSaleDetail,
     totalSaleAmount,
+    getAllSaleData,
   } = useSales()
   const saleDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -57,13 +59,7 @@ export default function SalePage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
-  const {
-    printColumnList,
-    exportDetail,
-    getCustomerDetail,
-    getMyCompanyDetail,
-    exportSaleSelected,
-  } = useExportSale()
+  const { printSaleInvoice, exportSale } = useExportSale()
   const { notificationModal } = useNotification()
   const { setLoading } = useLoading()
 
@@ -145,16 +141,25 @@ export default function SalePage() {
   }
 
   const handleExportPdf = async () => {
-    // setLoading(true)
+    setLoading(true)
     if (selectionModel.length === 1) {
       const selectedId = selectionModel[0]
       const selectedData = saleData.find(item => item.id === selectedId)
       if (selectedData) {
-        exportSaleSelected(selectedData)
+        await printSaleInvoice(selectedData)
+        setLoading(false)
       }
     } else {
       setLoading(false)
-      notificationModal.error('出力する行をテーブルから選択してください')
+      notificationModal.error('印刷する行をテーブルから選択してください')
+    }
+  }
+  const handleExport = async () => {
+    if (totalRows > saleData.length) {
+      const saleReport = await getAllSaleData()
+      saleReport && exportSale(saleReport)
+    } else {
+      exportSale(saleData)
     }
   }
   const handleStartDateChange = (date: Dayjs | null) => {
@@ -346,23 +351,14 @@ export default function SalePage() {
           <Divider orientation='vertical' flexItem></Divider>
           <Box
             sx={{
-              // width: '30%',
+              width: '30%',
               display: 'flex',
               flexDirection: 'column',
-              marginRight: 4,
+              // marginRight: 4,
             }}
             gap={1}
           >
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
-              {/* <StyledButton
-                variant='outlined'
-                startIcon={<AddIcon />}
-                size='large'
-                onClick={handleAddClick}
-                sx={{ visibility: 'hidden' }}
-              >
-                追加
-              </StyledButton> */}
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
                 variant='outlined'
                 startIcon={<SearchIcon />}
@@ -371,9 +367,26 @@ export default function SalePage() {
               >
                 検索
               </StyledButton>
+              <StyledButton
+                variant='outlined'
+                startIcon={<DetailIcon />}
+                size='large'
+                onClick={handleViewDetailClick}
+              >
+                詳細
+              </StyledButton>
             </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
-              {/* <StyledButton
+            {/* <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}> */}
+            {/* <StyledButton
+                variant='outlined'
+                startIcon={<AddIcon />}
+                size='large'
+                onClick={handleAddClick}
+                sx={{ visibility: 'hidden' }}
+              >
+                追加
+              </StyledButton> */}
+            {/* <StyledButton
                 variant='outlined'
                 startIcon={<EditIcon />}
                 size='large'
@@ -382,17 +395,8 @@ export default function SalePage() {
               >
                 編集
               </StyledButton> */}
-              <StyledButton
-                variant='outlined'
-                startIcon={<DetailIcon />}
-                size='large'
-                onClick={handleViewDetailClick}
-                // sx={{ visibility: 'hidden' }}
-              >
-                詳細
-              </StyledButton>
-            </Box>
-            <Box display={'flex'} flexDirection={'row'} justifyContent={'end'}>
+            {/* </Box> */}
+            <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               {/* <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
@@ -404,12 +408,21 @@ export default function SalePage() {
               </StyledButton> */}
               <StyledButton
                 variant='outlined'
+                startIcon={<FileDownloadIcon />}
+                size='large'
+                // sx={{ visibility: 'hidden' }}
+                onClick={handleExport}
+              >
+                データ出力
+              </StyledButton>
+              <StyledButton
+                variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
                 onClick={handleExportPdf}
-                sx={{ visibility: 'hidden' }}
+                // sx={{ visibility: 'hidden' }}
               >
-                データ出力
+                データ印刷
               </StyledButton>
             </Box>
           </Box>

@@ -83,6 +83,7 @@ export default function ComponentManagementPage() {
           id: selectedData.id,
           inStock: selectedData.inStock,
           price: selectedData.price,
+          lastestPriceDate: selectedData.latestPriceDecisionDate,
         }
         setModalMode('edit')
         setSelectedComponent(newInitComponent)

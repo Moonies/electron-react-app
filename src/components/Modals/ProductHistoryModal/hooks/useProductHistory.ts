@@ -30,7 +30,7 @@ export default function useProductHistory() {
         headerName: '数量',
         headerAlign: 'center',
         flex: 1,
-        valueFormatter: (value, row: OrderHistory) => row.products[0].quantity,
+        valueFormatter: (value, row: OrderHistory) => row.products && row.products[0].quantity,
       },
 
       {

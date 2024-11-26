@@ -173,6 +173,17 @@ export default function useSales() {
     setLoading(false)
   }
 
+  const getAllSaleData = async () => {
+    let newSearchCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+      pageSize: totalRows,
+    }
+    const result = await api.sale.getSaleList(newSearchCriteria)
+    if (result.code === 200 && result.data) return result.data
+  }
+
   const getSaleTotalAmount = async () => {
     let prepareSearhCriteria = {
       ...searchCriteria,
@@ -199,5 +210,6 @@ export default function useSales() {
     dateTypeList,
     handleSelectedSaleDetail,
     totalSaleAmount,
+    getAllSaleData,
   }
 }

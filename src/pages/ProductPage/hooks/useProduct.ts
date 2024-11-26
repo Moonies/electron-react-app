@@ -237,6 +237,17 @@ export default function useProduct() {
     }
   }
 
+  const getAllProductData = async () => {
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      pageSize: totalRows,
+    }
+    const result = await api.product.getProductList(prepareSearhCriteria)
+    if (result.code === 200 && result.data) {
+      return result.data
+    }
+  }
+
   const addNewProduct = async (data: AddNewProductProps) => {
     const result = await api.product.addNewProduct(data)
     if (result.code === 200 && result.data) {
@@ -291,5 +302,6 @@ export default function useProduct() {
     deleteProduct,
     prepareProductDetail,
     handleOrderProductHistory,
+    getAllProductData,
   }
 }

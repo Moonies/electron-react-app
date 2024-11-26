@@ -32,6 +32,7 @@ import useNotification from 'hooks/useNotification'
 import usePurchase from './hooks/usePurchase'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
+import useExportPurchase from './hooks/useExportPurchase'
 
 export default function PurchasePage() {
   const {
@@ -48,7 +49,9 @@ export default function PurchasePage() {
     convertStatus,
     dateTypeList,
     totalRows,
+    getAllPurchaseData,
   } = usePurchase()
+  const { exportPurchaseSelected } = useExportPurchase()
   const purchaseDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedPurchase, setSelectedPurchase] = useState<PurchaseModalDataProps>()
@@ -155,6 +158,16 @@ export default function PurchasePage() {
     }
   }, [selectionModel])
 
+  const handleExportPurchase = async () => {
+    //now version is xlsx only
+    if (totalRows < purchaseData.length) {
+      const response = await getAllPurchaseData()
+      exportPurchaseSelected(response)
+    } else {
+      exportPurchaseSelected(purchaseData)
+    }
+  }
+
   const handleModalConfirm = async (data: PurchaseModalDataProps) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
@@ -162,8 +175,6 @@ export default function PurchasePage() {
       // addNewSaleData()
     } else {
     }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
   }
 
   const handleStartDateChange = (date: Dayjs | null) => {
@@ -380,8 +391,8 @@ export default function PurchasePage() {
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                // onClick={handleExportPdf}
-                sx={{ visibility: 'hidden' }}
+                onClick={handleExportPurchase}
+                // sx={{ visibility: 'hidden' }}
               >
                 データ出力
               </StyledButton>

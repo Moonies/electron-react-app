@@ -181,7 +181,7 @@ export default function ComponentManagementModal({
                   handleChange('price', e.target.value ? parseFloat(e.target.value) : 0)
                 }
                 helperText={
-                  modalMode === 'view' ? `latestPrice edit ${formData.lastestPriceDate}` : ''
+                  modalMode !== 'add' ? `latestPrice edit ${formData.lastestPriceDate}` : ''
                 }
 
                 // sx={{ flex: 1 }}

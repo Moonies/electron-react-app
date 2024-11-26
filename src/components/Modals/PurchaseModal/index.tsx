@@ -181,7 +181,6 @@ export default function PurchaseModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     try {
       const rows = addNewComponentDataGridRef.current.getRowModels()
       const totalAmount = Array.from(rows.values()).reduce((sum, row) => {
@@ -613,6 +612,7 @@ export default function PurchaseModal({
               // sx={theme => ({
               //   color: 'white',
               // })}
+              aria-hidden='true'
             >
               キャンセル
             </Button>
@@ -628,6 +628,7 @@ export default function PurchaseModal({
                 sx={theme => ({
                   color: 'white',
                 })}
+                aria-hidden='true'
               >
                 保存
               </Button>
