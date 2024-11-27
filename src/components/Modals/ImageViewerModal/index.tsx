@@ -49,7 +49,7 @@ export default function ImageViewerModal({
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6'>
-            {productDetail.number}-{productDetail.number} of Image
+            {productDetail.number}-{productDetail.number}　の画像
           </Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
