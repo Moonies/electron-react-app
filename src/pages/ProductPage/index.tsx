@@ -58,6 +58,7 @@ export default function ProductPage() {
     prepareProductDetail,
     handleOrderProductHistory,
     getAllProductData,
+    handleProductImage,
   } = useProduct()
 
   const { exportProduct } = useExportProduct()
@@ -141,13 +142,18 @@ export default function ProductPage() {
         }
       } else {
         let needUpdateQuantity = data.stockQuantity !== selectedProduct?.stockQuantity
-        const response = await handleUpdateProductDetail(data, needUpdateQuantity)
-        if (response) {
+        let newImage = data.image?.file
+
+        const [updateProductResponse, updateImageResponse] = await Promise.all([
+          handleUpdateProductDetail(data, needUpdateQuantity),
+          data.id && handleProductImage(data.id, newImage),
+        ])
+
+        if (updateProductResponse) {
           setModalOpen(false)
           handleSearch()
         }
       }
-      // addNewSaleData()
     }
   }
 

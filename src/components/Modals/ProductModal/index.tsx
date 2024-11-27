@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, ChangeEvent } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -11,6 +11,7 @@ import {
   Typography,
   IconButton,
   debounce,
+  Divider,
 } from '@mui/material'
 import {
   Close as CloseIcon,
@@ -18,6 +19,8 @@ import {
   Save as SaveIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
+  FileUpload as FileUploadIcon,
+  ImageSearch as ImageSearchIcon,
 } from '@mui/icons-material'
 import SlideTransition from 'components/Transition/Slide'
 import DataTable from 'components/DataTable'
@@ -33,9 +36,12 @@ import {
 import CustomFooter from './components/CustomFooter'
 import { ComponentData } from 'api/component/getComponentList'
 import NumericFormatCustom from 'components/NumericFormat'
-import { StyledButton } from 'styles/styles'
+import { StyledButton, VisuallyHiddenInput } from 'styles/styles'
 import AddComponentPartListDialog from 'components/Dialogs/AddComponentPartListDialog'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
+import useNotification from 'hooks/useNotification'
+import ImageViewerModal from '../ImageViewerModal'
+import useProductImage, { UploadedImage } from './hooks/useProductImage'
 
 export type ProductDetailModalProps = {
   id?: string
@@ -47,9 +53,10 @@ export type ProductDetailModalProps = {
   productUnit: string
   productPriceMargin?: number
   components: NewComponentDetail[]
+  image?: UploadedImage
 }
 
-interface SalesModalProps {
+interface ProductModalProps {
   open: boolean
   onClose: () => void
   onConfirm: (data: ProductDetailModalProps) => Promise<void>
@@ -69,21 +76,27 @@ const defaultFormData: ProductDetailModalProps = {
   components: [],
 }
 
-const ProductModal: React.FC<SalesModalProps> = ({
+export default function ProductModal({
   open,
   onClose,
   onConfirm,
   initialData,
   mode,
-}) => {
+}: ProductModalProps) {
   const [formData, setFormData] = useState(initialData ?? defaultFormData)
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>(mode)
   const [openDialog, setOpenDialog] = useState(false)
+  const [openImagePreview, setOpenImagePreview] = useState(false)
+
   const { setLoading } = useLoading()
   const { Slide } = SlideTransition({ direction: 'up' })
   const addNewComponentDataGridRef = useGridApiRef()
+  const { notificationSnackbar } = useNotification()
 
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+  const { getProductImage, setUploadedImage, uploadedImage } = useProductImage()
   const {
     newComponentListData,
     columns,
@@ -102,6 +115,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
 
   useEffect(() => {
     getProductUnit()
+    modalMode !== 'add' && formData.id && getProductImage(formData.id)
   }, [])
 
   const handleChange = (field: keyof ProductDetailModalProps, value: string | number) => {
@@ -111,7 +125,11 @@ const ProductModal: React.FC<SalesModalProps> = ({
 
   const handleSubmit = async () => {
     try {
-      await onConfirm({ ...formData, components: newComponentListData as NewComponentDetail[] })
+      await onConfirm({
+        ...formData,
+        components: newComponentListData as NewComponentDetail[],
+        image: uploadedImage,
+      })
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
@@ -174,6 +192,43 @@ const ProductModal: React.FC<SalesModalProps> = ({
     }
   }, [modalMode])
 
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        console.log(file.type)
+        notificationSnackbar.error('file type is not impage file.')
+        // setError(`File ${file.name} is not an allowed image type. Please select a JPEG, PNG, GIF, or WebP image.`);
+        event.target.value = ''
+        return
+      }
+      try {
+        //if company id should auto update but at confirm is shuold be update
+        // console.log('Upload successful', file)
+        const newImage: UploadedImage = {
+          file,
+          previewUrl: URL.createObjectURL(file),
+        }
+        console.log(newImage.previewUrl)
+        setUploadedImage(newImage)
+      } catch (error) {
+        // setPreviewUrl(null)
+        if (error instanceof Error) {
+          console.log(error.message)
+        } else {
+          console.log('An unknown error occurred')
+        }
+      }
+    }
+    // Reset the file input
+    event.target.value = ''
+  }
+
+  const handlePreviewImage = () => {
+    //open picture image preview
+    setOpenImagePreview(true)
+  }
+
   // setFormData(prev => ({ ...prev, ['productPriceMargin']: price - cost }))
   const calculateProfitMargin = (cost: number, price: number) => price - cost
 
@@ -184,6 +239,13 @@ const ProductModal: React.FC<SalesModalProps> = ({
     },
     100
   )
+
+  const clearFileUpload = () => {
+    if (uploadedImage && uploadedImage.previewUrl) {
+      URL.revokeObjectURL(uploadedImage.previewUrl)
+    }
+    setUploadedImage(undefined)
+  }
 
   return (
     <Dialog
@@ -351,6 +413,51 @@ const ProductModal: React.FC<SalesModalProps> = ({
                 部品追加
               </Button> */}
             </Box>
+            <Box gap={2} display={'flex'} flexDirection={'row'}>
+              <Box display={'flex'} alignItems={'center'} mt={4}>
+                <Button
+                  variant='contained'
+                  startIcon={<FileUploadIcon />}
+                  size='large'
+                  sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+                  tabIndex={-1}
+                  role={undefined}
+                  component='label'
+                >
+                  商品画像追加
+                  <VisuallyHiddenInput
+                    type='file'
+                    onChange={handleFileChange}
+                    accept={ALLOWED_TYPES.join(',')}
+                  />
+                </Button>
+              </Box>
+              {uploadedImage?.previewUrl && (
+                <Box gap={2} display={'flex'} flexDirection={'column'}>
+                  <Divider>商品画像</Divider>
+                  <StyledButton
+                    variant='outlined'
+                    startIcon={<ImageSearchIcon />}
+                    size='large'
+                    onClick={handlePreviewImage}
+                    // sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+                  >
+                    表示
+                  </StyledButton>
+                  {modalMode !== 'view' && (
+                    <StyledButton
+                      variant='outlined'
+                      startIcon={<DeleteIcon />}
+                      size='large'
+                      onClick={clearFileUpload}
+                      // sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+                    >
+                      削除
+                    </StyledButton>
+                  )}
+                </Box>
+              )}
+            </Box>
           </Box>
           <DataTable
             data={newComponentListData}
@@ -382,11 +489,19 @@ const ProductModal: React.FC<SalesModalProps> = ({
               // initialData={selectedOrder}
             />
           )}
+          {openImagePreview && (
+            <ImageViewerModal
+              imagePreview={uploadedImage?.previewUrl ?? ''}
+              onClose={() => setOpenImagePreview(false)}
+              open={openImagePreview}
+              productDetail={{ name: formData.productName, number: formData.productNumber }}
+            />
+          )}
         </Box>
       </DialogContent>
       {modalMode !== 'view' && (
         <DialogActions>
-          <Button onClick={onClose} variant='contained'>
+          <Button onClick={onClose} variant='contained' aria-label='close'>
             キャンセル
           </Button>
           <Button
@@ -395,6 +510,7 @@ const ProductModal: React.FC<SalesModalProps> = ({
             sx={{
               color: 'white',
             }}
+            aria-label='close'
           >
             保存
           </Button>
@@ -403,5 +519,3 @@ const ProductModal: React.FC<SalesModalProps> = ({
     </Dialog>
   )
 }
-
-export default ProductModal
