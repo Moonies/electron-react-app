@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { StyledButton } from 'styles/styles'
+import { StyledButton, VisuallyHiddenInput } from 'styles/styles'
 import {
   SaveAs as SaveIcon,
   Search as SearchIcon,
@@ -19,12 +19,10 @@ import {
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useNotification from 'hooks/useNotification'
 import useMyCompany, { MyCompanyDetail } from './hooks/useMyCompany'
-// import { MyCompanyDetail } from 'api/myCompany/getMyCompanyDetail'
 import { isShrink } from 'utils/inputUtils'
 import MarkInputPhoneNumber from 'components/MarkInput/MarkInputPhoneNumber'
 import MarkInputPostalCode from 'components/MarkInput/MarkInputPostalCode'
 import MarkInputCorporateNumber from 'components/MarkInput/MarkInputCorporateNumber'
-import { VisuallyHiddenInput } from './styles'
 import { deConvertPostalCode } from 'utils/formatUtils'
 
 interface UploadedImage {
@@ -46,8 +44,6 @@ export default function MyCompanyManagementPage() {
     uploadedImage,
     setUploadedImage,
   } = useMyCompany()
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  // const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
 
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
