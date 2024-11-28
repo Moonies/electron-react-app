@@ -131,7 +131,7 @@ export default function ProductPage() {
     // console.log('selected data', selectedProduct)
     const confirmed = await openConfirmModal({
       title: '確認してください',
-      message: 'Are you sure you want to add data.',
+      message: 'Are you sure you want to save data.',
     })
     if (confirmed) {
       if (modalMode === 'add') {

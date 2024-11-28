@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ loginStatus }) => {
           <Typography alignContent={'center'}>
             user: {userDetail?.number}- {userDetail?.name}
           </Typography>
-          <Button onClick={handleLogout}>Logout</Button>
+          <Button onClick={handleLogout}>ロックアウト</Button>
         </Box>
       </Toolbar>
     </AppBar>

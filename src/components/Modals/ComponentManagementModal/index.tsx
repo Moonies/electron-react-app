@@ -157,6 +157,7 @@ export default function ComponentManagementModal({
                 inputProps={{ readOnly: modalMode === 'view' }}
                 // sx={{ flex: 1 }}
                 onChange={e => handleChange('componentNumber', e.target.value)}
+                required
               />
               <TextField
                 label='部品名'
@@ -165,7 +166,7 @@ export default function ComponentManagementModal({
                 margin='normal'
                 inputProps={{ readOnly: modalMode === 'view' }}
                 onChange={e => handleChange('componentName', e.target.value)}
-
+                required
                 // sx={{ flex: 1 }}
               />
               <TextField

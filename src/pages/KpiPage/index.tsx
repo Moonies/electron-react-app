@@ -113,7 +113,7 @@ export default function KpiPage() {
   const handleReset = async () => {
     const confirmed = await openConfirmModal({
       title: '確認してください',
-      message: 'Are you sure you want to reset data? \n data is all to be reset',
+      message: 'データをリセットしてもよろしいですか? \n データはすべてリセットされます。',
     })
 
     if (confirmed) {

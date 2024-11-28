@@ -266,142 +266,145 @@ export default function ProductModal({
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6'>
-            {modalMode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
+            {modalMode === 'add' ? '商品追加モーダルウィンドウ' : '商品編集モーダルウィンドウ'}
           </Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>
         </Box>
       </DialogTitle>
-      <DialogContent>
-        <Box display={'flex'} flexDirection={'column'}>
-          <Box display={'flex'} flexDirection={'row'} gap={2}>
-            <TextField
-              label='商品番号'
-              value={formData.productNumber}
-              onChange={e => handleChange('productNumber', e.target.value)}
-              fullWidth
-              margin='normal'
-              InputProps={{
-                readOnly: modalMode === 'view',
-              }}
-              // sx={{ flex: 1 }}
-            />
-            <TextField
-              label='商品品名'
-              type='text'
-              value={formData.productName}
-              onChange={e => handleChange('productName', e.target.value)}
-              fullWidth
-              margin='normal'
-              InputProps={{
-                readOnly: modalMode === 'view',
-              }}
-              // sx={{ width: '20%' }}
-            />
-            <TextField
-              label='単位'
-              type='text'
-              value={productUnitList.length > 0 ? formData.productUnit : ''} //for waiting productUnitList Loaded
-              defaultValue={undefined}
-              onChange={e => handleChange('productUnit', e.target.value)}
-              // fullWidth
-              margin='normal'
-              select
-              sx={{ width: '40%' }}
-              InputProps={{
-                readOnly: modalMode === 'view',
-              }}
-              InputLabelProps={{
-                component: 'span',
-              }}
-            >
-              {productUnitList.map(item => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <Box display={'flex'} flexDirection={'row'} gap={2}>
-            <TextField
-              label='原価'
-              value={formData.productCost}
-              onChange={e =>
-                handleChange('productCost', e.target.value ? parseFloat(e.target.value) : 0)
-              }
-              // fullWidth
-              margin='normal'
-              InputProps={{
-                readOnly: modalMode === 'view',
-                inputComponent: NumericFormatCustom as any,
-                inputProps: {
-                  maxLength: 13,
-                },
-              }}
-              onContextMenu={e => e.preventDefault()} // Optionally prevent context menu
-              variant='outlined'
-              // sx={{ width: '20%' }}
-            />
-            <TextField
-              label='単価'
-              value={formData.productPrice}
-              onChange={e =>
-                handleChange('productPrice', e.target.value ? parseFloat(e.target.value) : 0)
-              }
-              // fullWidth
-              margin='normal'
-              onTouchStart={e => e.preventDefault()}
-              InputProps={{
-                readOnly: modalMode === 'view',
-                inputComponent: NumericFormatCustom as any,
-                inputProps: {
-                  maxLength: 13,
-                },
-              }}
-
-              // sx={{ width: '20%' }}
-            />
-            <TextField
-              label='粗利益'
-              value={calculateProfitMargin(formData.productCost, formData.productPrice)}
-              // onChange={e => handleChange('productPriceMargin', parseFloat(e.target.value))}
-              // fullWidth
-              InputProps={{
-                readOnly: true,
-                inputComponent: NumericFormatCustom as any,
-              }}
-              margin='normal'
-              // sx={{ width: '20%' }}
-            />
-            {modalMode !== 'add' && (
+      <form onSubmit={handleSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <DialogContent>
+          <Box display={'flex'} flexDirection={'column'}>
+            <Box display={'flex'} flexDirection={'row'} gap={2}>
               <TextField
-                label='在庫数'
-                // type='number'
-                value={formData.stockQuantity}
-                onChange={e => handleChange('stockQuantity', parseFloat(e.target.value))}
+                label='商品番号'
+                value={formData.productNumber}
+                onChange={e => handleChange('productNumber', e.target.value)}
+                fullWidth
+                margin='normal'
+                InputProps={{
+                  readOnly: modalMode === 'view',
+                }}
+                required
+                // sx={{ flex: 1 }}
+              />
+              <TextField
+                label='商品品名'
+                type='text'
+                value={formData.productName}
+                onChange={e => handleChange('productName', e.target.value)}
+                fullWidth
+                margin='normal'
+                InputProps={{
+                  readOnly: modalMode === 'view',
+                }}
+                required
+                // sx={{ width: '20%' }}
+              />
+              <TextField
+                label='単位'
+                type='text'
+                value={productUnitList.length > 0 ? formData.productUnit : ''} //for waiting productUnitList Loaded
+                defaultValue={undefined}
+                onChange={e => handleChange('productUnit', e.target.value)}
+                // fullWidth
+                margin='normal'
+                select
+                sx={{ width: '40%' }}
+                InputProps={{
+                  readOnly: modalMode === 'view',
+                }}
+                InputLabelProps={{
+                  component: 'span',
+                }}
+              >
+                {productUnitList.map(item => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} gap={2}>
+              <TextField
+                label='原価'
+                value={formData.productCost}
+                onChange={e =>
+                  handleChange('productCost', e.target.value ? parseFloat(e.target.value) : 0)
+                }
                 // fullWidth
                 margin='normal'
                 InputProps={{
                   readOnly: modalMode === 'view',
                   inputComponent: NumericFormatCustom as any,
+                  inputProps: {
+                    maxLength: 13,
+                  },
                 }}
+                onContextMenu={e => e.preventDefault()} // Optionally prevent context menu
+                variant='outlined'
                 // sx={{ width: '20%' }}
               />
-            )}
-          </Box>
-          <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
-            <Box display={'flex'} alignItems={'end'}>
-              <StyledButton
-                variant='outlined'
-                startIcon={<AddIcon />}
-                size='large'
-                onClick={() => setOpenDialog(true)}
-                sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
-              >
-                部品追加
-              </StyledButton>
-              {/* <Button
+              <TextField
+                label='単価'
+                value={formData.productPrice}
+                onChange={e =>
+                  handleChange('productPrice', e.target.value ? parseFloat(e.target.value) : 0)
+                }
+                // fullWidth
+                margin='normal'
+                onTouchStart={e => e.preventDefault()}
+                InputProps={{
+                  readOnly: modalMode === 'view',
+                  inputComponent: NumericFormatCustom as any,
+                  inputProps: {
+                    maxLength: 13,
+                  },
+                }}
+
+                // sx={{ width: '20%' }}
+              />
+              <TextField
+                label='粗利益'
+                value={calculateProfitMargin(formData.productCost, formData.productPrice)}
+                // onChange={e => handleChange('productPriceMargin', parseFloat(e.target.value))}
+                // fullWidth
+                InputProps={{
+                  readOnly: true,
+                  inputComponent: NumericFormatCustom as any,
+                }}
+                margin='normal'
+                // sx={{ width: '20%' }}
+              />
+              {modalMode !== 'add' && (
+                <TextField
+                  label='在庫数'
+                  // type='number'
+                  value={formData.stockQuantity}
+                  onChange={e => handleChange('stockQuantity', parseFloat(e.target.value))}
+                  // fullWidth
+                  margin='normal'
+                  InputProps={{
+                    readOnly: modalMode === 'view',
+                    inputComponent: NumericFormatCustom as any,
+                  }}
+                  // sx={{ width: '20%' }}
+                />
+              )}
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
+              <Box display={'flex'} alignItems={'end'}>
+                <StyledButton
+                  variant='outlined'
+                  startIcon={<AddIcon />}
+                  size='large'
+                  onClick={() => setOpenDialog(true)}
+                  sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+                >
+                  部品追加
+                </StyledButton>
+                {/* <Button
                 onClick={() => setOpenDialog(true)}
                 variant='outlined'
                 sx={theme => ({
@@ -412,110 +415,111 @@ export default function ProductModal({
               >
                 部品追加
               </Button> */}
-            </Box>
-            <Box gap={2} display={'flex'} flexDirection={'row'}>
-              <Box display={'flex'} alignItems={'center'} mt={4}>
-                <Button
-                  variant='contained'
-                  startIcon={<FileUploadIcon />}
-                  size='large'
-                  sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
-                  tabIndex={-1}
-                  role={undefined}
-                  component='label'
-                >
-                  商品画像追加
-                  <VisuallyHiddenInput
-                    type='file'
-                    onChange={handleFileChange}
-                    accept={ALLOWED_TYPES.join(',')}
-                  />
-                </Button>
               </Box>
-              {uploadedImage?.previewUrl && (
-                <Box gap={2} display={'flex'} flexDirection={'column'}>
-                  <Divider>商品画像</Divider>
-                  <StyledButton
-                    variant='outlined'
-                    startIcon={<ImageSearchIcon />}
+              <Box gap={2} display={'flex'} flexDirection={'row'}>
+                <Box display={'flex'} alignItems={'center'} mt={4}>
+                  <Button
+                    variant='contained'
+                    startIcon={<FileUploadIcon />}
                     size='large'
-                    onClick={handlePreviewImage}
-                    // sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+                    sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+                    tabIndex={-1}
+                    role={undefined}
+                    component='label'
                   >
-                    表示
-                  </StyledButton>
-                  {modalMode !== 'view' && (
+                    商品画像追加
+                    <VisuallyHiddenInput
+                      type='file'
+                      onChange={handleFileChange}
+                      accept={ALLOWED_TYPES.join(',')}
+                    />
+                  </Button>
+                </Box>
+                {uploadedImage?.previewUrl && (
+                  <Box gap={2} display={'flex'} flexDirection={'column'}>
+                    <Divider>商品画像</Divider>
                     <StyledButton
                       variant='outlined'
-                      startIcon={<DeleteIcon />}
+                      startIcon={<ImageSearchIcon />}
                       size='large'
-                      onClick={clearFileUpload}
+                      onClick={handlePreviewImage}
                       // sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
                     >
-                      削除
+                      表示
                     </StyledButton>
-                  )}
-                </Box>
-              )}
+                    {modalMode !== 'view' && (
+                      <StyledButton
+                        variant='outlined'
+                        startIcon={<DeleteIcon />}
+                        size='large'
+                        onClick={clearFileUpload}
+                        // sx={{ visibility: modalMode === 'view' ? 'hidden' : 'inherit' }}
+                      >
+                        削除
+                      </StyledButton>
+                    )}
+                  </Box>
+                )}
+              </Box>
             </Box>
-          </Box>
-          <DataTable
-            data={newComponentListData}
-            columns={updatedColumns}
-            apiref={addNewComponentDataGridRef}
-            // getRowId={row => row.productNumber}
-            onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
-            sx={{ height: 475, mt: 2 }}
-            editMode='row'
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
-            processRowUpdate={processRowUpdate}
-            disableColumnSelector
-            columnVisibilityModel={columnVisibilityModel}
-            isCellEditable={() => modalMode !== 'view'}
-            slots={{
-              footer: CustomFooter,
-            }}
-          />
-          {openDialog && (
-            <AddComponentPartListDialog
-              open={openDialog}
-              onClose={() => setOpenDialog(false)}
-              onSubmit={newComponent => {
-                setOpenDialog(false)
-                handleAddNewComponent(newComponent)
+            <DataTable
+              data={newComponentListData}
+              columns={updatedColumns}
+              apiref={addNewComponentDataGridRef}
+              // getRowId={row => row.productNumber}
+              onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
+              sx={{ height: 475, mt: 2 }}
+              editMode='row'
+              rowModesModel={rowModesModel}
+              onRowModesModelChange={handleRowModesModelChange}
+              onRowEditStop={handleRowEditStop}
+              processRowUpdate={processRowUpdate}
+              disableColumnSelector
+              columnVisibilityModel={columnVisibilityModel}
+              isCellEditable={() => modalMode !== 'view'}
+              slots={{
+                footer: CustomFooter,
               }}
-              // initialData={selectedOrder}
             />
-          )}
-          {openImagePreview && (
-            <ImageViewerModal
-              imagePreview={uploadedImage?.previewUrl ?? ''}
-              onClose={() => setOpenImagePreview(false)}
-              open={openImagePreview}
-              productDetail={{ name: formData.productName, number: formData.productNumber }}
-            />
-          )}
-        </Box>
-      </DialogContent>
-      {modalMode !== 'view' && (
-        <DialogActions>
-          <Button onClick={onClose} variant='contained' aria-label='close'>
-            キャンセル
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            variant='outlined'
-            sx={{
-              color: 'white',
-            }}
-            aria-label='close'
-          >
-            保存
-          </Button>
-        </DialogActions>
-      )}
+            {openDialog && (
+              <AddComponentPartListDialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                onSubmit={newComponent => {
+                  setOpenDialog(false)
+                  handleAddNewComponent(newComponent)
+                }}
+                // initialData={selectedOrder}
+              />
+            )}
+            {openImagePreview && (
+              <ImageViewerModal
+                imagePreview={uploadedImage?.previewUrl ?? ''}
+                onClose={() => setOpenImagePreview(false)}
+                open={openImagePreview}
+                productDetail={{ name: formData.productName, number: formData.productNumber }}
+              />
+            )}
+          </Box>
+        </DialogContent>
+        {modalMode !== 'view' && (
+          <DialogActions>
+            <Button onClick={onClose} variant='contained' aria-label='close'>
+              キャンセル
+            </Button>
+            <Button
+              type='submit'
+              variant='outlined'
+              sx={{
+                color: 'white',
+              }}
+              aria-label='close'
+            >
+              保存
+            </Button>
+          </DialogActions>
+        )}
+      </form>
     </Dialog>
   )
 }

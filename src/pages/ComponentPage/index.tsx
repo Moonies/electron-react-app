@@ -119,7 +119,7 @@ export default function ComponentManagementPage() {
   const handleModalConfirm = async (data: NewComponent) => {
     const confirmed = await openConfirmModal({
       title: '確認してください',
-      message: 'Are you sure you want to add data.',
+      message: 'Are you sure you want to save data.',
     })
     if (confirmed) {
       setLoading(true)

@@ -28,7 +28,7 @@ export default function ViewMemoDialog({ open, onClose, message }: DialogSelectT
         }
       }}
     >
-      <DialogTitle>Memo Detail</DialogTitle>
+      <DialogTitle>メモの内容</DialogTitle>
       <DialogContent>
         <Typography variant='body1' gutterBottom></Typography>
         {message}

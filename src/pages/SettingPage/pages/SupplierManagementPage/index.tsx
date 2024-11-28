@@ -122,7 +122,7 @@ export default function SupplierManagementPage() {
   const handleModalConfirm = async (data: ModalSupplierProps) => {
     const confirmed = await openConfirmModal({
       title: '確認してください',
-      message: 'Are you sure you want to add data.',
+      message: 'Are you sure you want to save data.',
     })
     if (confirmed) {
       let newSupplierData = {
@@ -182,7 +182,7 @@ export default function SupplierManagementPage() {
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>仕入単価管理</Divider>
+          <Divider textAlign='left'>仕入先管理</Divider>
         </Typography>
       </Box>
       <Box
