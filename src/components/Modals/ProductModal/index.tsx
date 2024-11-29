@@ -42,6 +42,7 @@ import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog
 import useNotification from 'hooks/useNotification'
 import ImageViewerModal from '../ImageViewerModal'
 import useProductImage, { UploadedImage } from './hooks/useProductImage'
+import CustomerColumn from './components/CustomColumn'
 
 export type ProductDetailModalProps = {
   id?: string
@@ -99,7 +100,6 @@ export default function ProductModal({
   const { getProductImage, setUploadedImage, uploadedImage } = useProductImage()
   const {
     newComponentListData,
-    columns,
     handleAddNewComponent,
     handleCancelClick,
     handleDeleteClick,
@@ -112,6 +112,14 @@ export default function ProductModal({
     productUnitList,
     getProductUnit,
   } = useAddComponent(formData)
+
+  const columns = CustomerColumn({
+    cancle: handleCancelClick,
+    edit: handleEditClick,
+    save: handleSaveClick,
+    remove: handleDeleteClick,
+    rowModesModel,
+  })
 
   useEffect(() => {
     getProductUnit()
@@ -137,54 +145,6 @@ export default function ProductModal({
       setLoading(false)
     }
   }
-
-  const updatedColumns = columns.map(column => {
-    if (column.field === 'actions') {
-      return {
-        ...column,
-        getActions: ({ id }: any) => {
-          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
-
-          if (isInEditMode) {
-            return [
-              <GridActionsCellItem
-                icon={<SaveIcon />}
-                label='Save'
-                sx={{
-                  color: 'primary.main',
-                }}
-                onClick={handleSaveClick(id)}
-              />,
-              <GridActionsCellItem
-                icon={<CloseIcon />}
-                label='Cancel'
-                className='textPrimary'
-                onClick={handleCancelClick(id)}
-                color='inherit'
-              />,
-            ]
-          }
-
-          return [
-            <GridActionsCellItem
-              icon={<EditIcon />}
-              label='Edit'
-              className='textPrimary'
-              onClick={handleEditClick(id)}
-              color='inherit'
-            />,
-            <GridActionsCellItem
-              icon={<DeleteIcon />}
-              label='Delete'
-              onClick={handleDeleteClick(id)}
-              color='inherit'
-            />,
-          ]
-        },
-      }
-    }
-    return column
-  })
 
   const columnVisibilityModel = useMemo(() => {
     return {
@@ -225,11 +185,9 @@ export default function ProductModal({
   }
 
   const handlePreviewImage = () => {
-    //open picture image preview
     setOpenImagePreview(true)
   }
 
-  // setFormData(prev => ({ ...prev, ['productPriceMargin']: price - cost }))
   const calculateProfitMargin = (cost: number, price: number) => price - cost
 
   //break for app crash
@@ -464,7 +422,7 @@ export default function ProductModal({
             </Box>
             <DataTable
               data={newComponentListData}
-              columns={updatedColumns}
+              columns={columns}
               apiref={addNewComponentDataGridRef}
               // getRowId={row => row.productNumber}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
