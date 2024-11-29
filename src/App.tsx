@@ -40,11 +40,6 @@ console.error = (...args: any) => {
   error(...args)
 }
 
-interface ApiConfig {
-  baseUrl: string
-  // apiKey?: string
-}
-
 export default function App() {
   const [loginOpen, setLoginOpen] = useState(false)
   //default is false when have a token or time limit should be change in store.
@@ -131,8 +126,6 @@ export default function App() {
                   <Route path='/settings/customer' element={<CustomerManagementPage />} />
                   <Route path='/settings/supplier' element={<SupplierManagementPage />} />
                   <Route path='/settings/server' element={<IpConfigManegementPage />} />
-
-                  {/* <Route path="/settings" element={<SettingPage />} /> */}
                 </Routes>
               </Box>
               <LoginModal
