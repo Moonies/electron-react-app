@@ -297,9 +297,9 @@ export default function PurchaseModal({
 
   const getTextHeader = () =>
     modalMode === 'add'
-      ? '追加モーダルウィンドウ'
+      ? '仕入追加モーダルウィンドウ'
       : currentStatus
-        ? '編集モーダルウィンドウ'
+        ? '仕入編集モーダルウィンドウ'
         : '仕入詳細'
 
   return (
@@ -311,8 +311,6 @@ export default function PurchaseModal({
         }
       }}
       disableEscapeKeyDown
-      // fullWidth
-      // maxWidth='md'
       fullScreen
       TransitionComponent={Slide}
       // keepMounted
@@ -322,14 +320,7 @@ export default function PurchaseModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>
-            {getTextHeader()}
-            {/* {modalMode === 'view'
-              ? '仕入詳細'
-              : modalMode === 'edit'
-                ? '編集モーダルウィンドウ'
-                : '追加モーダルウィンドウ'} */}
-          </Typography>
+          <Typography variant='h6'>{getTextHeader()}</Typography>
           <Box display={'flex'} gap={4}>
             <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
               <CloseIcon />

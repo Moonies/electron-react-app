@@ -86,7 +86,7 @@ export default function AddnewProductDialog({
         }
       }}
     >
-      <DialogTitle>Please Select Product</DialogTitle>
+      <DialogTitle>商品を選んでください</DialogTitle>
       <form onSubmit={submitProduct}>
         <DialogContent>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>

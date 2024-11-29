@@ -319,9 +319,7 @@ export default function OrderPage() {
       newStartDate &&
       dayjs(newStartDate).isAfter(dayjs(searchCriteria.endDate), 'day')
     ) {
-      notificationModal.warning(
-        'Start date cannot be after the end date. End date has been cleared.'
-      )
+      notificationModal.warning('開始日は終了日より後にはできません。終了日はクリアされています。')
       handleChange('endDate', null)
     }
   }
@@ -337,7 +335,7 @@ export default function OrderPage() {
       dayjs(newEndDate).isBefore(dayjs(searchCriteria.startDate), 'day')
     ) {
       notificationModal.warning(
-        'End date cannot be before the start date. Start date has been cleared.'
+        '終了日は開始日より前に設定できません。開始日はクリアされています。'
       )
       handleChange('startDate', null)
     }

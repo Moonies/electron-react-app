@@ -296,8 +296,8 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
             {modalMode === 'view'
               ? '受注詳細'
               : modalMode === 'edit'
-                ? '編集モーダルウィンドウ'
-                : '追加モーダルウィンドウ'}
+                ? '受注編集モーダルウィンドウ'
+                : '受注追加モーダルウィンドウ'}
           </Typography>
           <Box display={'flex'} gap={4}>
             {/* {modalMode === 'view' && (

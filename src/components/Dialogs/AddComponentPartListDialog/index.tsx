@@ -58,7 +58,7 @@ export default function AddComponentPartListDialog({
   const submitProduct = async (e: React.FormEvent) => {
     const selectedComponent = componentList.find(item => item.id === formData.id)
     if (selectedComponent && selectedComponent?.inStock < formData.quantity) {
-      notificationModal.warning('component instock is not enough, please check your stock')
+      notificationModal.warning('部品の在庫が足りません。在庫を確認してください。')
       return
     }
     e.preventDefault()
@@ -99,7 +99,7 @@ export default function AddComponentPartListDialog({
         }
       }}
     >
-      <DialogTitle>Please Select Component Part</DialogTitle>
+      <DialogTitle>商品の部品を選んでください。</DialogTitle>
       <form onSubmit={submitProduct}>
         <DialogContent>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
