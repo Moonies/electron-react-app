@@ -17,8 +17,7 @@ import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 
 import { useCallback, useMemo, useState } from 'react'
-import { formatJPY } from 'utils/formatUtils'
-import { PurchaseModalDataProps } from '..'
+import { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
 
 export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
@@ -54,26 +53,6 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
     } else {
       setNewComponentListData(prev => [...prev, { ...newComponent }])
     }
-
-    // if (currentComponentData.length > 0) {
-    //   const resultIndex = currentComponentData.findIndex(
-    //     item => item.componentNumber === newComponent.componentNumber
-    //   )
-    //   const existingComponent = currentComponentData.find(
-    //     item => item.componentNumber === newComponent.componentNumber && item.id === newComponent.id
-    //   )
-    //   if (existingComponent) {
-    //     let newRow = currentComponentData.map((product, index) =>
-    //       index === resultIndex
-    //         ? { ...product, quantity: product.quantity + newComponent.quantity }
-    //         : product
-    //     )
-    //     setNewComponentListData(newRow)
-    //   } else {
-    //     // setNewComponentListData(prev => [...prev, { id: currentIndex + 1, ...newComponent }])
-    //     setNewComponentListData(prev => [...prev, { ...newComponent }])
-    //   }
-    // }
   }
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
@@ -135,58 +114,6 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
     []
   )
 
-  const columns: GridColDef[] = useMemo(
-    () => [
-      {
-        field: 'number',
-        headerName: '商品番号',
-        headerAlign: 'center',
-        flex: 1,
-      },
-      {
-        field: 'name',
-        headerName: '商品名',
-        headerAlign: 'center',
-        flex: 1,
-      },
-      {
-        field: 'quantity',
-        headerName: '数量',
-        headerAlign: 'center',
-        flex: 1,
-        editable: true,
-      },
-      {
-        field: 'price',
-        headerName: '単価',
-        type: 'number',
-        headerAlign: 'center',
-        flex: 1,
-        editable: true,
-        valueFormatter: value => formatJPY(Number(value)),
-      },
-      {
-        field: 'totalPrice',
-        headerName: '金額',
-        type: 'number',
-        headerAlign: 'center',
-        flex: 1,
-        valueFormatter: value => formatJPY(Number(value)),
-        valueGetter: (value, row) => {
-          return row.quantity * row.price
-        },
-      },
-      {
-        field: 'actions',
-        type: 'actions',
-        headerName: 'Actions',
-        width: 100,
-        cellClassName: 'actions',
-      },
-    ],
-    []
-  )
-
   const getUserList = async () => {
     const result = await api.user.getUserList(0, 100)
     if (result.code === 200 && result.data) {
@@ -200,7 +127,6 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
     }
   }
   return {
-    columns,
     newComponentListData,
     rowModesModel,
     processRowUpdate,

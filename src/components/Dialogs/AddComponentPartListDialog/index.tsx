@@ -56,13 +56,13 @@ export default function AddComponentPartListDialog({
   const { notificationModal } = useNotification()
   const { api } = useHttp()
   const submitProduct = async (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     const selectedComponent = componentList.find(item => item.id === formData.id)
     if (selectedComponent && selectedComponent?.inStock < formData.quantity) {
       notificationModal.warning('部品の在庫が足りません。在庫を確認してください。')
       return
     }
-    e.preventDefault()
-    e.stopPropagation()
     onSubmit(formData)
   }
 

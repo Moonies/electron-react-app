@@ -47,6 +47,7 @@ import { OrderStatus } from 'api/order'
 import { SaleStatus } from 'api/sale'
 import AddNewMemoDialog from 'components/Dialogs/AddNewMemoDialog'
 import { useConfirmModal } from 'hooks/useConfirmModal'
+import CustomColumn from './components/CustomColumn'
 interface Option {
   label: string
   id: number
@@ -112,7 +113,6 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
   const { openConfirmModal } = useConfirmModal()
 
   const {
-    columns,
     newProductListData,
     rowModesModel,
     processRowUpdate,
@@ -129,59 +129,20 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
     customerListData,
   } = useAddProductOrder(formData)
 
+  const columns = CustomColumn({
+    cancle: handleCancelClick,
+    edit: handleEditClick,
+    save: handleSaveClick,
+    remove: handleDeleteClick,
+    rowModesModel,
+  })
+
   useEffect(() => {
     //when have new function or condition should to move loading
     setLoading(true)
     getUserList()
     getCustomerList().finally(() => setLoading(false))
   }, [])
-
-  const updatedColumns = columns.map(column => {
-    if (column.field === 'actions') {
-      return {
-        ...column,
-        getActions: ({ id }: GridRowParams) => {
-          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
-          if (isInEditMode) {
-            return [
-              <GridActionsCellItem
-                icon={<SaveIcon />}
-                label='Save'
-                sx={{
-                  color: 'primary.main',
-                }}
-                onClick={handleSaveClick(id)}
-              />,
-              <GridActionsCellItem
-                icon={<CancelIcon />}
-                label='Cancel'
-                className='textPrimary'
-                onClick={handleCancelClick(id)}
-                color='inherit'
-              />,
-            ]
-          }
-
-          return [
-            <GridActionsCellItem
-              icon={<EditIcon />}
-              label='Edit'
-              className='textPrimary'
-              onClick={handleEditClick(id)}
-              color='inherit'
-            />,
-            <GridActionsCellItem
-              icon={<DeleteIcon />}
-              label='Delete'
-              onClick={handleDeleteClick(id)}
-              color='inherit'
-            />,
-          ]
-        },
-      }
-    }
-    return column
-  })
 
   const handleChange = async (field: keyof SaleModalDataProps, value: string | number) => {
     if (field === 'status' && value === 'CONFIRMED') {
@@ -532,7 +493,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
             </Box>
             <DataTable
               data={newProductListData}
-              columns={updatedColumns}
+              columns={columns}
               apiref={addNewProductDataGridRef}
               // getRowId={row => (modalMode === 'add' ? row.id : `${row.name}${row.number}`)}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
