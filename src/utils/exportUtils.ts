@@ -7,6 +7,7 @@ import JsBarcode from 'jsbarcode'
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer'
 
 import '../asset/fonts/NotoSansJP-normal'
+import { formatJPY } from './formatUtils'
 
 export enum PrintType {
   SALE = 'quotation',
@@ -70,7 +71,7 @@ const getCellValue = (row: any, col: GridColDef): string => {
     col.field !== 'orderId' &&
     col.field !== 'invoiceNumber'
   ) {
-    return formatCurrency(row[col.field])
+    return formatJPY(row[col.field])
   }
   return row[col.field]?.toString() || ''
 }
@@ -78,10 +79,6 @@ const getCellValue = (row: any, col: GridColDef): string => {
 const sumCellValue = (row: any[]): number => {
   let total = row.reduce((accumulator, current) => accumulator + current.totalPrice, 0)
   return total
-}
-
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(value)
 }
 
 const reverseNumberFormat = (stringNumber: string) => {
@@ -437,18 +434,11 @@ export const exportToPdf = (
     const totalSectionWidth = 90
     const totalSectionX = pageWidth - margin - totalSectionWidth
 
-    drawAlignedPair(
-      doc,
-      '小計：',
-      formatCurrency(total),
-      totalSectionX,
-      finalY + 10,
-      totalSectionWidth
-    )
+    drawAlignedPair(doc, '小計：', formatJPY(total), totalSectionX, finalY + 10, totalSectionWidth)
     drawAlignedPair(
       doc,
       '消費税 (10%):',
-      formatCurrency(tax),
+      formatJPY(tax),
       totalSectionX,
       finalY + 20,
       totalSectionWidth
@@ -458,7 +448,7 @@ export const exportToPdf = (
     drawAlignedPair(
       doc,
       '合計：',
-      formatCurrency(total + tax),
+      formatJPY(total + tax),
       totalSectionX,
       finalY + 33,
       totalSectionWidth

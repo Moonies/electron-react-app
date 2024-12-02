@@ -1,25 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Box, TextField, MenuItem, Typography, Divider } from '@mui/material'
+import { useGridApiRef, GridRowSelectionModel } from '@mui/x-data-grid'
 import {
-  Box,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-  InputAdornment,
-  IconButton,
-  Divider,
-  Button,
-} from '@mui/material'
-import { useGridApiRef, GridRowProps, GridRowSelectionModel } from '@mui/x-data-grid'
-import {
-  Delete as DeleteIcon,
   Search as SearchIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
   Print as PrintIcon,
-  UploadFile as UploadFileIcon,
   ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -27,10 +11,8 @@ import { StyledButton } from 'styles/styles'
 import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
 import usePurchase from './hooks/usePurchase'
-import { PurchaseData } from 'api/purchase/getPurchaseList'
 import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
 import useExportPurchase from './hooks/useExportPurchase'
 
@@ -74,49 +56,6 @@ export default function PurchasePage() {
   useEffect(() => {
     prepareCategorySearch
   }, [])
-
-  const handleAddClick = () => {
-    setSelectedPurchase(undefined)
-    setModalMode('add')
-    setModalOpen(true)
-  }
-
-  const handleEditClick = useCallback(() => {
-    // if (selectionModel.length === 1) {
-    //   const selectedId = selectionModel[0]
-    //   const selectedData = purchaseData.find(item => item.id === selectedId)
-    //   if (selectedData) {
-    //     setModalMode('edit')
-    //     setSelectedPurchase(selectedData)
-    //     setModalOpen(true)
-    //   }
-    // } else {
-    //   notificationModal.error('編集する表の行を選択してください。')
-    // }
-  }, [selectionModel])
-
-  const handleDeleteClick = useCallback(async () => {
-    // if (selectionModel.length === 1) {
-    //   const selectedId = selectionModel[0]
-    //   const selectedData = purchaseData.find(item => item.id === selectedId)
-    //   if (selectedData) {
-    //     const confirmed = await openConfirmModal({
-    //       title: '確認してください',
-    //       message: `この選ばれたの注番　 ${selectedData.invoiceNumber}　を削除してもよろしいですか?`,
-    //       // message:
-    //       //   'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
-    //     })
-    //     if (confirmed) {
-    //       // Perform delete operation
-    //       console.log('Delete confirmed')
-    //     } else {
-    //       console.log('Delete cancelled')
-    //     }
-    //   }
-    // } else {
-    //   notificationModal.error('削除する行をテーブルから選択してください')
-    // }
-  }, [selectionModel])
 
   const handleViewDetailClick = useCallback(async () => {
     if (selectionModel.length === 1) {
