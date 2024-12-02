@@ -49,6 +49,7 @@ export default function ProductHistoryModal({
     setOpenDialog(true)
   }, [])
 
+  //when action is more than one should be change to child component
   const updatedColumns = columns.map(column => {
     if (column.field === 'actions') {
       return {
