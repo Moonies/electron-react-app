@@ -177,7 +177,6 @@ export default function useKpi() {
 
   const getKpiCurrentYear = async (year: number) => {
     const result = await api.kpi.getKpiData(year)
-    console.log(result)
     if (result.code === 200 && result.data) {
       return {
         actualSalesRevenue: result.data.plannedSales,
