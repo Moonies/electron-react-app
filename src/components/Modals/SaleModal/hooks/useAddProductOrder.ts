@@ -1,7 +1,4 @@
-import { debounce } from '@mui/material'
 import {
-  GridColDef,
-  GridActionsCellItem,
   GridRowModes,
   GridRowModesModel,
   GridRowId,
@@ -9,19 +6,16 @@ import {
   GridRowsProp,
   GridEventListener,
   GridRowEditStopReasons,
-  GridValidRowModel,
 } from '@mui/x-data-grid'
 import { CustomerData } from 'api/customer/getCustomerList'
-import { OrderData } from 'api/order/getOrderList'
 import { ProductDetail as ProductDetailList } from 'api/product/getProductData'
 import { UserData } from 'api/user/getUserList'
 import { ProductDetail } from 'components/Dialogs/AddNewProductListDialog'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 
-import { useCallback, useMemo, useState } from 'react'
-import { formatJPY } from 'utils/formatUtils'
-import { SaleModalDataProps } from '..'
+import { useState } from 'react'
+import { SaleModalDataProps } from 'components/Modals/SaleModal'
 
 export default function useAddOrder(saleData: SaleModalDataProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
@@ -93,74 +87,6 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
     setRowModesModel(newRowModesModel)
   }
 
-  // const debouncedFetchOptions = useCallback(
-  //   debounce(async (query: string) => {
-  //     if (query.length >= 2) {
-  //       setLoading(true)
-  //       try {
-  //         const fetchedOptions = await api.product.getProductData(query)
-  //         setProductData(fetchedOptions.data?.data ?? [])
-  //       } catch (error) {
-  //         console.error('Error fetching options:', error)
-  //       } finally {
-  //         setLoading(false)
-  //       }
-  //     }
-  //   }, 300),
-  //   []
-  // )
-
-  const columns: GridColDef[] = useMemo(
-    () => [
-      {
-        field: 'number',
-        headerName: '商品番号',
-        headerAlign: 'center',
-        flex: 1,
-      },
-      {
-        field: 'name',
-        headerName: '商品名',
-        headerAlign: 'center',
-        flex: 1,
-      },
-      {
-        field: 'quantity',
-        headerName: '数量',
-        headerAlign: 'center',
-        flex: 1,
-        editable: true,
-      },
-      {
-        field: 'price',
-        headerName: '単価',
-        type: 'number',
-        headerAlign: 'center',
-        flex: 1,
-        valueFormatter: value => formatJPY(Number(value)),
-      },
-      {
-        field: 'totalPrice',
-        headerName: '金額',
-        type: 'number',
-        headerAlign: 'center',
-        flex: 1,
-        valueFormatter: value => formatJPY(Number(value)),
-        valueGetter: (value, row) => {
-          return row.quantity * row.price
-        },
-      },
-      {
-        field: 'actions',
-        type: 'actions',
-        headerName: 'Actions',
-        width: 100,
-        cellClassName: 'actions',
-      },
-    ],
-    [rowModesModel, handleSaveClick, handleCancelClick, handleEditClick, handleDeleteClick]
-  )
-
   const getUserList = async () => {
     const result = await api.user.getUserList(0, 100)
     if (result.code === 200 && result.data) {
@@ -174,7 +100,6 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
     }
   }
   return {
-    columns,
     newProductListData,
     rowModesModel,
     processRowUpdate,
