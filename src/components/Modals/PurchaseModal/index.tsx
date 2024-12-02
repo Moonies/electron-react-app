@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, forwardRef, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -6,42 +6,19 @@ import {
   DialogActions,
   TextField,
   Button,
-  CircularProgress,
-  Select,
   MenuItem,
-  FormControl,
-  InputLabel,
   Autocomplete,
   Box,
   Typography,
   IconButton,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Slide,
 } from '@mui/material'
-import {
-  Close as CloseIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
-  Close as CancelIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material'
-import { debounce } from '@mui/material/utils'
+import { Close as CloseIcon } from '@mui/icons-material'
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
-import { PurchaseData } from 'api/purchase/getPurchaseList'
-import { api } from 'api/index'
-import { TransitionProps } from '@mui/material/transitions'
 import useAddComponent from './hooks/useAddComponent'
 import DataTable from 'components/DataTable'
-import {
-  GridActionsCellItem,
-  GridRowModes,
-  GridRowSelectionModel,
-  useGridApiRef,
-} from '@mui/x-data-grid'
+import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import useLoading from 'hooks/useLoading'
 import CustomFooter from './components/CustomerFooter'
@@ -50,6 +27,7 @@ import SlideTransition from 'components/Transition/Slide'
 import { PurchaseStatus } from 'api/purchase'
 import useNotification from 'hooks/useNotification'
 import { useConfirmModal } from 'hooks/useConfirmModal'
+import CustomColumn from './components/CustomColumn'
 interface Option {
   label: string
   id: number
@@ -134,7 +112,6 @@ export default function PurchaseModal({
   const { openConfirmModal } = useConfirmModal()
 
   const {
-    columns,
     componentData,
     getCustomerList,
     getUserList,
@@ -151,6 +128,14 @@ export default function PurchaseModal({
     newComponentListData,
     handleAddNewComponent,
   } = useAddComponent(formData)
+
+  const columns = CustomColumn({
+    cancle: handleCancelClick,
+    edit: handleEditClick,
+    save: handleSaveClick,
+    remove: handleDeleteClick,
+    rowModesModel,
+  })
 
   useEffect(() => {
     //when have new function or condition should to move loading
@@ -215,54 +200,6 @@ export default function PurchaseModal({
         (currentStatus === undefined || currentStatus === 'PENDING'),
     }
   }, [modalMode])
-
-  const updatedColumns = columns.map(column => {
-    if (column.field === 'actions') {
-      return {
-        ...column,
-        getActions: ({ id }: any) => {
-          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
-
-          if (isInEditMode) {
-            return [
-              <GridActionsCellItem
-                icon={<SaveIcon />}
-                label='Save'
-                sx={{
-                  color: 'primary.main',
-                }}
-                onClick={handleSaveClick(id)}
-              />,
-              <GridActionsCellItem
-                icon={<CancelIcon />}
-                label='Cancel'
-                className='textPrimary'
-                onClick={handleCancelClick(id)}
-                color='inherit'
-              />,
-            ]
-          }
-
-          return [
-            <GridActionsCellItem
-              icon={<EditIcon />}
-              label='Edit'
-              className='textPrimary'
-              onClick={handleEditClick(id)}
-              color='inherit'
-            />,
-            <GridActionsCellItem
-              icon={<DeleteIcon />}
-              label='Delete'
-              onClick={handleDeleteClick(id)}
-              color='inherit'
-            />,
-          ]
-        },
-      }
-    }
-    return column
-  })
 
   const findUserById = (userId: string | null) => {
     return userListData?.find(user => user.id === userId) || null
@@ -544,7 +481,7 @@ export default function PurchaseModal({
             </Box>
             <DataTable
               data={newComponentListData}
-              columns={updatedColumns}
+              columns={columns}
               apiref={addNewComponentDataGridRef}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
               sx={{ height: 450, mt: 2 }}

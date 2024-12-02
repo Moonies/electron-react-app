@@ -42,7 +42,7 @@ import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog
 import useNotification from 'hooks/useNotification'
 import ImageViewerModal from '../ImageViewerModal'
 import useProductImage, { UploadedImage } from './hooks/useProductImage'
-import CustomerColumn from './components/CustomColumn'
+import CustomColumn from './components/CustomColumn'
 
 export type ProductDetailModalProps = {
   id?: string
@@ -113,7 +113,7 @@ export default function ProductModal({
     getProductUnit,
   } = useAddComponent(formData)
 
-  const columns = CustomerColumn({
+  const columns = CustomColumn({
     cancle: handleCancelClick,
     edit: handleEditClick,
     save: handleSaveClick,

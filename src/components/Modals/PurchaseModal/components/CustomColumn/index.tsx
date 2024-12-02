@@ -20,23 +20,24 @@ interface CustomColumn {
   cancle(id: GridRowId): () => void
   rowModesModel: GridRowModesModel
 }
+
 export default function CustomColumn({
   cancle,
   edit,
-  save,
   remove,
   rowModesModel,
+  save,
 }: CustomColumn): GridColDef[] {
   return [
     {
       field: 'number',
-      headerName: '部品番号',
+      headerName: '商品番号',
       headerAlign: 'center',
       flex: 1,
     },
     {
       field: 'name',
-      headerName: '部品名',
+      headerName: '商品名',
       headerAlign: 'center',
       flex: 1,
     },
@@ -44,22 +45,16 @@ export default function CustomColumn({
       field: 'quantity',
       headerName: '数量',
       headerAlign: 'center',
-      type: 'number',
       flex: 1,
       editable: true,
     },
-    // {
-    //   field: 'totalQuantity',
-    //   headerName: '合計残り',
-    //   headerAlign: 'center',
-    //   flex: 1,
-    // },
     {
       field: 'price',
       headerName: '単価',
       type: 'number',
       headerAlign: 'center',
       flex: 1,
+      editable: true,
       valueFormatter: value => formatJPY(Number(value)),
     },
     {
