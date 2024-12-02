@@ -40,3 +40,18 @@ export const formatJPY = (amount: number): string => {
 export const deConvertPostalCode = (postalCode: string) => {
   return postalCode.replace(/[〒\-]/g, '')
 }
+
+export const addCommasToNumber = (num: number | string): string => {
+  const numStr = String(num)
+  const [integerPart, decimalPart] = numStr.split('.')
+
+  // Add commas to the integer part
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+  return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger
+}
+
+export const removeCommasToNumber = (formattedNum: string): number => {
+  // Remove commas and convert to number
+  return Number(formattedNum.replace(/,/g, ''))
+}

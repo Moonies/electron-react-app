@@ -15,11 +15,13 @@ import {
 import { StyledCard, StyledCardContent } from './styles'
 import useKpi, { FinancialKpiData, SettingPlanFinancialKpiData } from './hooks/useKpi'
 import useKpiGrpah from './hooks/useKpiGraph'
-import BarChart, { DataPoint } from 'components/Chart/BarChart'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import KpiSettingModal from 'components/Modals/KpiSettingModal'
 import { isShrink } from 'utils/inputUtils'
 import useNotification from 'hooks/useNotification'
+import NumericFormatCustom from 'components/NumericFormat'
+import { addCommasToNumber } from 'utils/formatUtils'
+import SummaryResultChart, { DataPoint } from './components/SummaryResultChart'
 
 export default function KpiPage() {
   const [errors, setErrors] = useState<Partial<FinancialKpiData>>({})
@@ -47,13 +49,11 @@ export default function KpiPage() {
   const { openConfirmModal } = useConfirmModal()
   const { notificationModal } = useNotification()
 
-  useEffect(() => console.log(kpiData), [kpiData])
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
     setFormData(prev => ({
       ...prev,
-      [name]: event.target.type === 'number' ? (value === '' ? null : Number(value)) : value,
+      [name]: Number(value),
     }))
     if (value) {
       setErrors(prev => ({ ...prev, [name]: undefined }))
@@ -64,7 +64,7 @@ export default function KpiPage() {
     const { name, value } = event.target
     setFormSetting(prev => ({
       ...prev,
-      [name]: event.target.type === 'number' ? (value === '' ? null : Number(value)) : value,
+      [name]: Number(value),
     }))
     settingPlanCalculate({ ...formSetting, [name]: Number(value) })
   }
@@ -90,7 +90,7 @@ export default function KpiPage() {
 
   const formatDisplayValue = (value: number | string | undefined | null): string => {
     if (typeof value === 'number') {
-      return value.toFixed(2)
+      return addCommasToNumber(value.toFixed(2))
     }
     return value ?? ''
   }
@@ -103,11 +103,11 @@ export default function KpiPage() {
     const chartData: DataPoint[] = [
       { name: '限界利益', value: reverseResultFormat(formData.resultOrdinaryProfit) ?? 0 },
       { name: '固定費', value: reverseResultFormat(formData.resultFixedCosts) ?? 0 },
-      { name: '外収益', value: reverseResultFormat(formData.resultOperatingExpenses) ?? 0 },
+      { name: '外収益', value: reverseResultFormat(formData.resultOperatingIncome) ?? 0 },
       { name: '外費用', value: reverseResultFormat(formData.resultOperatingExpenses) ?? 0 },
       { name: '売上', value: reverseResultFormat(formData.resultSalesRevenue) ?? 0 },
     ]
-    openWindow(BarChart, { data: chartData })
+    openWindow(SummaryResultChart, { data: chartData })
   }
 
   const handleReset = async () => {
@@ -146,6 +146,7 @@ export default function KpiPage() {
     setPlanHeaderText(currentYear - 1 + ' 年実績')
     setActualHeaderText(currentYear + ' 年実績')
   }, [])
+
   useEffect(() => {
     setFormData({ ...kpiData })
     setErrors({})
@@ -191,7 +192,6 @@ export default function KpiPage() {
               value={formData.planSalesRevenue ?? ''}
               onChange={handleChange}
               fullWidth
-              type={'number'}
               required
               error={!!errors.planSalesRevenue}
               helperText={errors.planSalesRevenue}
@@ -199,6 +199,9 @@ export default function KpiPage() {
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='planVariableCosts'
@@ -206,7 +209,6 @@ export default function KpiPage() {
               value={formData.planVariableCosts ?? ''}
               onChange={handleChange}
               fullWidth
-              type={'number'}
               required
               error={!!errors.planVariableCosts}
               helperText={errors.planVariableCosts}
@@ -214,13 +216,16 @@ export default function KpiPage() {
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='planMarginalProfit'
               label='限界利益'
               value={formatDisplayValue(formData.planMarginalProfit)}
-              onChange={handleChange}
-              type={'number'}
+              // onChange={handleChange}
+              // type={'number'}
               fullWidth
               InputProps={{
                 readOnly: true,
@@ -236,9 +241,9 @@ export default function KpiPage() {
               name='planMarginalProfitRate'
               label='限界利益率'
               value={formData.planMarginalProfitRate ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
-              type={'text'}
+              // type={'text'}
               InputProps={{
                 readOnly: true,
               }}
@@ -256,13 +261,16 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               required
-              type={'number'}
+              // type={'number'}
               error={!!errors.planFixedCosts}
               helperText={errors.planFixedCosts}
               InputLabelProps={{ shrink: isShrink(formData.planFixedCosts) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='planOperatingIncome'
@@ -271,13 +279,16 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               required
-              type={'number'}
+              // type={'number'}
               error={!!errors.planOperatingIncome}
               helperText={errors.planOperatingIncome}
               InputLabelProps={{ shrink: isShrink(formData.planOperatingIncome) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='planOperatingExpenses'
@@ -286,13 +297,16 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               required
-              type={'number'}
+              // type={'number'}
               error={!!errors.planOperatingExpenses}
               helperText={errors.planOperatingExpenses}
               InputLabelProps={{ shrink: isShrink(formData.planOperatingExpenses) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='planOrdinaryProfit'
@@ -300,7 +314,7 @@ export default function KpiPage() {
               value={formatDisplayValue(formData.planOrdinaryProfit)}
               onChange={handleChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formData.planOrdinaryProfit) }}
               margin='normal'
               InputProps={{
@@ -327,7 +341,7 @@ export default function KpiPage() {
               value={formData.actualSalesRevenue ?? ''}
               onChange={handleChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               required
               error={!!errors.actualSalesRevenue}
               helperText={errors.actualSalesRevenue}
@@ -335,6 +349,9 @@ export default function KpiPage() {
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='actualVariableCosts'
@@ -342,7 +359,7 @@ export default function KpiPage() {
               value={formData.actualVariableCosts ?? ''}
               onChange={handleChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               required
               error={!!errors.actualVariableCosts}
               helperText={errors.actualVariableCosts}
@@ -352,13 +369,16 @@ export default function KpiPage() {
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='actualMarginalProfit'
               label='限界利益'
               value={formatDisplayValue(formData.actualMarginalProfit)}
-              onChange={handleChange}
-              type={'number'}
+              // onChange={handleChange}
+              // type={'number'}
               fullWidth
               InputProps={{
                 readOnly: true,
@@ -373,7 +393,7 @@ export default function KpiPage() {
               name='actualMarginalProfitRate'
               label='限界利益率'
               value={formData.actualMarginalProfitRate ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
               type={'text'}
               InputProps={{
@@ -392,13 +412,16 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               required
-              type={'number'}
+              // type={'number'}
               error={!!errors.actualFixedCosts}
               helperText={errors.actualFixedCosts}
               InputLabelProps={{ shrink: isShrink(formData.actualFixedCosts) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='actualOperatingIncome'
@@ -407,13 +430,16 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               required
-              type={'number'}
+              // type={'number'}
               error={!!errors.actualOperatingIncome}
               helperText={errors.actualOperatingIncome}
               InputLabelProps={{ shrink: isShrink(formData.actualOperatingIncome) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='actualOperatingExpenses'
@@ -422,21 +448,24 @@ export default function KpiPage() {
               onChange={handleChange}
               fullWidth
               required
-              type={'number'}
+              // type={'number'}
               error={!!errors.actualOperatingExpenses}
               helperText={errors.actualOperatingExpenses}
               InputLabelProps={{ shrink: isShrink(formData.actualOperatingExpenses) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='actualOrdinaryProfit'
               label='経常利益'
               value={formatDisplayValue(formData.actualOrdinaryProfit)}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formData.actualOrdinaryProfit) }}
               margin='normal'
               InputProps={{
@@ -458,7 +487,7 @@ export default function KpiPage() {
               name='resultOrdinaryProfit'
               label='経常利益増減額'
               value={formData.resultOrdinaryProfit ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
               type={'text'}
               InputLabelProps={{
@@ -477,7 +506,7 @@ export default function KpiPage() {
               name='resultSalesRevenue'
               label='売上高増減要因'
               value={formData.resultSalesRevenue ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
               type={'text'}
               InputLabelProps={{ shrink: isShrink(formData.resultSalesRevenue) }}
@@ -494,7 +523,7 @@ export default function KpiPage() {
               name='resultSalesRevenueIncreaseRate'
               label='限界利益率増減要因'
               value={formData.resultSalesRevenueIncreaseRate ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
               type={'text'}
               InputLabelProps={{ shrink: isShrink(formData.resultSalesRevenueIncreaseRate) }}
@@ -511,7 +540,7 @@ export default function KpiPage() {
               name='resultFixedCosts'
               label='固定費増減要因'
               value={formData.resultFixedCosts ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
               type={'text'}
               InputLabelProps={{ shrink: isShrink(formData.resultFixedCosts) }}
@@ -528,7 +557,7 @@ export default function KpiPage() {
               name='resultOperatingIncome'
               label='営業外収益増減要因'
               value={formData.resultOperatingIncome ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
               type={'text'}
               InputLabelProps={{ shrink: isShrink(formData.resultOperatingIncome) }}
@@ -545,7 +574,7 @@ export default function KpiPage() {
               name='resultOperatingExpenses'
               label='営業外費用増減要因'
               value={formData.resultOperatingExpenses ?? ''}
-              onChange={handleChange}
+              // onChange={handleChange}
               fullWidth
               type={'text'}
               InputLabelProps={{ shrink: isShrink(formData.resultOperatingExpenses) }}
@@ -581,11 +610,14 @@ export default function KpiPage() {
               value={formSetting.settingSalesRevenue ?? ''}
               onChange={settingChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formSetting.settingSalesRevenue) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='settingVariableCosts'
@@ -593,33 +625,37 @@ export default function KpiPage() {
               value={formSetting.settingVariableCosts ?? ''}
               onChange={settingChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formSetting.settingVariableCosts) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='settingMarginalProfit'
               label='限界利益'
               value={formSetting.settingMarginalProfit ?? ''}
-              onChange={settingChange}
-              type={'number'}
+              // onChange={settingChange}
+              // type={'number'}
               fullWidth
-              InputProps={{
-                readOnly: true,
-              }}
               InputLabelProps={{ shrink: isShrink(formSetting.settingMarginalProfit) }}
               margin='normal'
               variant='standard'
               size='small'
               color='info'
+              InputProps={{
+                readOnly: true,
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='settingMarginalProfitRate'
               label='限界利益率'
               value={formSetting.settingMarginalProfitRate ?? ''}
-              onChange={settingChange}
+              // onChange={settingChange}
               fullWidth
               type={'text'}
               InputProps={{
@@ -637,11 +673,14 @@ export default function KpiPage() {
               value={formSetting.settingFixedCosts ?? ''}
               onChange={settingChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formSetting.settingFixedCosts) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='settingOperatingIncome'
@@ -649,11 +688,14 @@ export default function KpiPage() {
               value={formSetting.settingOperatingIncome ?? ''}
               onChange={settingChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formSetting.settingOperatingIncome) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='settingOperatingExpenses'
@@ -661,27 +703,31 @@ export default function KpiPage() {
               value={formSetting.settingOperatingExpenses ?? ''}
               onChange={settingChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formSetting.settingOperatingExpenses) }}
               margin='normal'
               size='small'
               color='info'
+              InputProps={{
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
             <TextField
               name='settingOrdinaryProfit'
               label='経常利益'
               value={formSetting.settingOrdinaryProfit ?? ''}
-              onChange={settingChange}
+              // onChange={settingChange}
               fullWidth
-              type={'number'}
+              // type={'number'}
               InputLabelProps={{ shrink: isShrink(formSetting.settingOrdinaryProfit) }}
               margin='normal'
-              InputProps={{
-                readOnly: true,
-              }}
               variant='standard'
               size='small'
               color='info'
+              InputProps={{
+                readOnly: true,
+                inputComponent: NumericFormatCustom as any,
+              }}
             />
           </StyledCardContent>
         </StyledCard>
