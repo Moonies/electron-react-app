@@ -6,6 +6,7 @@ import { AddNewKpiData } from 'api/kpi/addNewKpiData'
 import useNotification from 'hooks/useNotification'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import useHttp from 'hooks/useHttp'
+import { addCommasToNumber, removeCommasToNumber } from 'utils/formatUtils'
 
 export interface FinancialKpiData {
   planSalesRevenue: number | null
@@ -102,10 +103,14 @@ export default function useKpi() {
     }).format(rawData * 100)}%`
 
   const convertResultFormat = (value: number): string => {
-    return value >= 0 ? `${value.toFixed(2)}` : `▲${Math.abs(value).toFixed(2)}`
+    return value >= 0
+      ? `${addCommasToNumber(value.toFixed(2))}`
+      : `▲${addCommasToNumber(Math.abs(value).toFixed(2))}`
   }
   const reverseResultFormat = (value = '0'): number => {
-    return value.includes('▲') ? Number(value.replace('▲', '-')) : Number(value)
+    return value.includes('▲')
+      ? -Number(value.slice(1).replace(/,/g, ''))
+      : Number(removeCommasToNumber(value))
   }
 
   const saveSettingKpi = async (inputYear: number, settingInput: SettingPlanFinancialKpiData) => {
@@ -172,7 +177,6 @@ export default function useKpi() {
 
   const getKpiCurrentYear = async (year: number) => {
     const result = await api.kpi.getKpiData(year)
-    console.log(result)
     if (result.code === 200 && result.data) {
       return {
         actualSalesRevenue: result.data.plannedSales,

@@ -1,48 +1,43 @@
-import { HashRouter as Router, Route, Routes } from 'react-router-dom'
-import { ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import Header from './components/Header'
-import DashboardPage from './pages/DashboardPage'
-import SideMenu from './components/SideMenu'
-import SalePage from './pages/SalePage'
-import KpiPage from './pages/KpiPage'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { Box } from '@mui/system'
-import theme from './styles/theme'
+import { ConfirmModalProvider } from 'components/Modals/ConfirmModal'
+import { HashRouter as Router, Route, Routes } from 'react-router-dom'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { RootState } from './store'
+import { ThemeProvider } from '@mui/material/styles'
+import { Toolbar } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { RootState } from './store'
-import LoginModal from 'components/Modals/LoginModal'
-import LoadingOverlay from 'components/LoadingOverlay'
-import useLoadingRedux from './hooks/useLoading'
-import Notification from 'components/Notification'
-import { Toolbar } from '@mui/material'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { ConfirmModalProvider } from 'components/Modals/ConfirmModal'
-import ProductPage from 'pages/ProductPage'
-import ReportPage from 'pages/ReportPage'
 import AccountManagementPage from 'pages/SettingPage/pages/AccountManagementPage'
-import MyCompanyManagementPage from 'pages/SettingPage/pages/MyCompanyManagementPage'
-import CustomerManagementPage from 'pages/SettingPage/pages/CustomerManagementPage'
-import SupplierManagementPage from 'pages/SettingPage/pages/SupplierManagementPage'
 import ComponentManagementPage from 'pages/ComponentPage'
-import IpSettingModal from 'components/Modals/IpSettingModal'
-import useApiConfig from 'hooks/useApiConfig'
-import IpConfigManegementPage from 'pages/SettingPage/pages/IpConfigManagementPage'
-import PurchasePage from 'pages/PurchasePage'
-import OrderPage from 'pages/OrderPage'
+import CssBaseline from '@mui/material/CssBaseline'
+import CustomerManagementPage from 'pages/SettingPage/pages/CustomerManagementPage'
+import DashboardPage from './pages/DashboardPage'
 import electronBridge from './electronBridge'
+import Header from './components/Header'
+import IpConfigManegementPage from 'pages/SettingPage/pages/IpConfigManagementPage'
+import IpSettingModal from 'components/Modals/IpSettingModal'
+import KpiPage from './pages/KpiPage'
+import LoadingOverlay from 'components/LoadingOverlay'
+import LoginModal from 'components/Modals/LoginModal'
+import MyCompanyManagementPage from 'pages/SettingPage/pages/MyCompanyManagementPage'
+import Notification from 'components/Notification'
+import OrderPage from 'pages/OrderPage'
+import ProductPage from 'pages/ProductPage'
+import PurchasePage from 'pages/PurchasePage'
+import ReportPage from 'pages/ReportPage'
+import SalePage from './pages/SalePage'
+import SideMenu from './components/SideMenu'
+import SupplierManagementPage from 'pages/SettingPage/pages/SupplierManagementPage'
+import theme from './styles/theme'
+import useApiConfig from 'hooks/useApiConfig'
 import useLoading from './hooks/useLoading'
+import useLoadingRedux from './hooks/useLoading'
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
 console.error = (...args: any) => {
   if (/defaultProps/.test(args[0])) return
   error(...args)
-}
-
-interface ApiConfig {
-  baseUrl: string
-  // apiKey?: string
 }
 
 export default function App() {
@@ -131,8 +126,6 @@ export default function App() {
                   <Route path='/settings/customer' element={<CustomerManagementPage />} />
                   <Route path='/settings/supplier' element={<SupplierManagementPage />} />
                   <Route path='/settings/server' element={<IpConfigManegementPage />} />
-
-                  {/* <Route path="/settings" element={<SettingPage />} /> */}
                 </Routes>
               </Box>
               <LoginModal

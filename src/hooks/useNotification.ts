@@ -1,7 +1,7 @@
 import { useDispatch } from 'react-redux'
 import { showNotification, clearNotification } from 'store/notificationSlice'
 
-type NotificationType = 'snackbar' | 'modal'
+type NotificationType = 'snackbar' | 'modal' | 'alert'
 type NotificationSeverity = 'error' | 'success' | 'info' | 'warning'
 
 const useNotification = () => {

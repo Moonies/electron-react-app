@@ -24,7 +24,8 @@ const Header: React.FC<HeaderProps> = ({ loginStatus }) => {
   const handleLogout = async () => {
     const confirmed = await openConfirmModal({
       title: '確認してください',
-      message: 'Confirm to Logout \n logout is not close or exit program, should be careful',
+      message:
+        'ログアウトを確認します \n ログアウトはプログラムを閉じたり終了したりしませ。\n ご注意してください。',
     })
     if (confirmed) {
       removeUserLogin()
@@ -42,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ loginStatus }) => {
           <Typography alignContent={'center'}>
             user: {userDetail?.number}- {userDetail?.name}
           </Typography>
-          <Button onClick={handleLogout}>Logout</Button>
+          <Button onClick={handleLogout}>ロックアウト</Button>
         </Box>
       </Toolbar>
     </AppBar>

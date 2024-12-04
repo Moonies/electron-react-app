@@ -31,6 +31,7 @@ export interface ProductData {
     name: string
   }
   productUnitId: string
+  createdAt: string
 }
 
 export default async function getProductList(

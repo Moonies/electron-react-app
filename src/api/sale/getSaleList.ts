@@ -40,6 +40,7 @@ type ProductDetail = {
   number: string
   price: number
   quantity: number
+  useCanBeMadeInQuantity: boolean
 }
 type OwnerDetail = {
   id: string

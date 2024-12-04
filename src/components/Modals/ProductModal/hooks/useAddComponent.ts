@@ -1,6 +1,4 @@
-import { debounce } from '@mui/material'
 import {
-  GridColDef,
   GridEventListener,
   GridRowEditStopReasons,
   GridRowId,
@@ -9,13 +7,11 @@ import {
   GridRowModesModel,
   GridRowsProp,
 } from '@mui/x-data-grid'
-import { ComponentData } from 'api/component/getComponentData'
 import { ProductUnitDetail } from 'api/product/getProductUnitList'
 import { NewComponentDetail } from 'components/Dialogs/AddNewComponentListDialog'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { formatJPY } from 'utils/formatUtils'
+import { useCallback, useState } from 'react'
 import { ProductDetailModalProps } from '..'
 
 export default function useAddComponent(productData: ProductDetailModalProps) {
@@ -26,10 +22,6 @@ export default function useAddComponent(productData: ProductDetailModalProps) {
   const [productUnitList, setProductUnitList] = useState<ProductUnitDetail[]>([])
   const { setLoading } = useLoading()
   const { api } = useHttp()
-
-  // useEffect(() => {
-  //   prepareComponent()
-  // }, [productData])
 
   const handleAddNewComponent = async (newComponent: NewComponentDetail) => {
     setLoading(true)
@@ -62,6 +54,7 @@ export default function useAddComponent(productData: ProductDetailModalProps) {
     }
     setLoading(false)
   }
+
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true
@@ -69,6 +62,7 @@ export default function useAddComponent(productData: ProductDetailModalProps) {
   }
 
   const handleEditClick = (id: GridRowId) => () => {
+    console.log('edit', id)
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } })
   }
 
@@ -134,63 +128,7 @@ export default function useAddComponent(productData: ProductDetailModalProps) {
       setProductUnitList(response.data)
     }
   }
-  const columns: GridColDef[] = useMemo(
-    () => [
-      {
-        field: 'number',
-        headerName: '部品番号',
-        headerAlign: 'center',
-        flex: 1,
-      },
-      {
-        field: 'name',
-        headerName: '部品名',
-        headerAlign: 'center',
-        flex: 1,
-      },
-      {
-        field: 'quantity',
-        headerName: '数量',
-        headerAlign: 'center',
-        type: 'number',
-        flex: 1,
-        editable: true,
-      },
-      // {
-      //   field: 'totalQuantity',
-      //   headerName: '合計残り',
-      //   headerAlign: 'center',
-      //   flex: 1,
-      // },
-      {
-        field: 'price',
-        headerName: '単価',
-        type: 'number',
-        headerAlign: 'center',
-        flex: 1,
-        valueFormatter: value => formatJPY(Number(value)),
-      },
-      {
-        field: 'totalPrice',
-        headerName: '金額',
-        type: 'number',
-        headerAlign: 'center',
-        flex: 1,
-        valueFormatter: value => formatJPY(Number(value)),
-        valueGetter: (value, row) => {
-          return row.quantity * row.price
-        },
-      },
-      {
-        field: 'actions',
-        type: 'actions',
-        headerName: 'Actions',
-        width: 100,
-        cellClassName: 'actions',
-      },
-    ],
-    []
-  )
+
   return {
     handleAddNewComponent,
     handleRowEditStop,
@@ -202,8 +140,8 @@ export default function useAddComponent(productData: ProductDetailModalProps) {
     handleRowModesModelChange,
     newComponentListData,
     rowModesModel,
-    columns,
     productUnitList,
     getProductUnit,
+    setNewComponentListData,
   }
 }

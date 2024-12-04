@@ -33,7 +33,7 @@ type NewProductDetail = {
 export default async function addNewProduct(
   httpRequest: HttpRequest,
   data: AddNewProductProps
-): Promise<ApiResponse<{}>> {
+): Promise<ApiResponse<{ id: string }>> {
   const response = await httpRequest(() => axiosInstance.post('/api/products', { ...data }))
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }

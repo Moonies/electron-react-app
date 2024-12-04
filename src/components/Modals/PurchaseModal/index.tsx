@@ -12,32 +12,22 @@ import {
   Typography,
   IconButton,
 } from '@mui/material'
-import {
-  Close as CloseIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
-  Close as CancelIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material'
+import { Close as CloseIcon } from '@mui/icons-material'
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
 import useAddComponent from './hooks/useAddComponent'
 import DataTable from 'components/DataTable'
-import {
-  GridActionsCellItem,
-  GridRowModes,
-  GridRowSelectionModel,
-  useGridApiRef,
-} from '@mui/x-data-grid'
+import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
 import AddNewComponentListDialog from 'components/Dialogs/AddNewComponentListDialog'
 import useLoading from 'hooks/useLoading'
-import CustomFooter from './components/CustomerFooter'
+import CustomFooter from './components/CustomFooter'
 import AddNewMemoDialog from 'components/Dialogs/AddNewMemoDialog'
 import SlideTransition from 'components/Transition/Slide'
 import { PurchaseStatus } from 'api/purchase'
 import useNotification from 'hooks/useNotification'
 import { useConfirmModal } from 'hooks/useConfirmModal'
+import CustomColumn from './components/CustomColumn'
 interface Option {
   label: string
   id: number
@@ -122,7 +112,6 @@ export default function PurchaseModal({
   const { openConfirmModal } = useConfirmModal()
 
   const {
-    columns,
     componentData,
     getCustomerList,
     getUserList,
@@ -139,6 +128,14 @@ export default function PurchaseModal({
     newComponentListData,
     handleAddNewComponent,
   } = useAddComponent(formData)
+
+  const columns = CustomColumn({
+    cancle: handleCancelClick,
+    edit: handleEditClick,
+    save: handleSaveClick,
+    remove: handleDeleteClick,
+    rowModesModel,
+  })
 
   useEffect(() => {
     //when have new function or condition should to move loading
@@ -169,7 +166,6 @@ export default function PurchaseModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     try {
       const rows = addNewComponentDataGridRef.current.getRowModels()
       const totalAmount = Array.from(rows.values()).reduce((sum, row) => {
@@ -205,54 +201,6 @@ export default function PurchaseModal({
     }
   }, [modalMode])
 
-  const updatedColumns = columns.map(column => {
-    if (column.field === 'actions') {
-      return {
-        ...column,
-        getActions: ({ id }: any) => {
-          const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit
-
-          if (isInEditMode) {
-            return [
-              <GridActionsCellItem
-                icon={<SaveIcon />}
-                label='Save'
-                sx={{
-                  color: 'primary.main',
-                }}
-                onClick={handleSaveClick(id)}
-              />,
-              <GridActionsCellItem
-                icon={<CancelIcon />}
-                label='Cancel'
-                className='textPrimary'
-                onClick={handleCancelClick(id)}
-                color='inherit'
-              />,
-            ]
-          }
-
-          return [
-            <GridActionsCellItem
-              icon={<EditIcon />}
-              label='Edit'
-              className='textPrimary'
-              onClick={handleEditClick(id)}
-              color='inherit'
-            />,
-            <GridActionsCellItem
-              icon={<DeleteIcon />}
-              label='Delete'
-              onClick={handleDeleteClick(id)}
-              color='inherit'
-            />,
-          ]
-        },
-      }
-    }
-    return column
-  })
-
   const findUserById = (userId: string | null) => {
     return userListData?.find(user => user.id === userId) || null
   }
@@ -286,9 +234,9 @@ export default function PurchaseModal({
 
   const getTextHeader = () =>
     modalMode === 'add'
-      ? '追加モーダルウィンドウ'
+      ? '仕入追加モーダルウィンドウ'
       : currentStatus
-        ? '編集モーダルウィンドウ'
+        ? '仕入編集モーダルウィンドウ'
         : '仕入詳細'
 
   return (
@@ -300,8 +248,6 @@ export default function PurchaseModal({
         }
       }}
       disableEscapeKeyDown
-      // fullWidth
-      // maxWidth='md'
       fullScreen
       TransitionComponent={Slide}
       // keepMounted
@@ -311,14 +257,7 @@ export default function PurchaseModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>
-            {getTextHeader()}
-            {/* {modalMode === 'view'
-              ? '仕入詳細'
-              : modalMode === 'edit'
-                ? '編集モーダルウィンドウ'
-                : '追加モーダルウィンドウ'} */}
-          </Typography>
+          <Typography variant='h6'>{getTextHeader()}</Typography>
           <Box display={'flex'} gap={4}>
             <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
               <CloseIcon />
@@ -542,7 +481,7 @@ export default function PurchaseModal({
             </Box>
             <DataTable
               data={newComponentListData}
-              columns={updatedColumns}
+              columns={columns}
               apiref={addNewComponentDataGridRef}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
               sx={{ height: 450, mt: 2 }}
@@ -601,6 +540,7 @@ export default function PurchaseModal({
               // sx={theme => ({
               //   color: 'white',
               // })}
+              aria-hidden='true'
             >
               キャンセル
             </Button>
@@ -616,6 +556,7 @@ export default function PurchaseModal({
                 sx={theme => ({
                   color: 'white',
                 })}
+                aria-hidden='true'
               >
                 保存
               </Button>

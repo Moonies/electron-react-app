@@ -92,7 +92,7 @@ export default function AddNewComponentListDialog({
         }
       }}
     >
-      <DialogTitle>Please Select Component</DialogTitle>
+      <DialogTitle>部品を選んでください。</DialogTitle>
       <form onSubmit={submitProduct}>
         <DialogContent>
           <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-between'}>
@@ -187,7 +187,7 @@ export default function AddNewComponentListDialog({
                   }
                   InputProps={{
                     inputComponent: NumericFormatCustom as any,
-                    readOnly: !isNewValue,
+                    // readOnly: !isNewValue,
                   }}
                   required
                 />

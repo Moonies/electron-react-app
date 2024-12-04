@@ -1,18 +1,18 @@
 import axios from 'axios'
 import { axiosInstance, ApiResponse } from 'api'
 import { HttpRequest } from 'hooks/useHttp'
-export interface UpdateMyCompanySeal {
+export interface UpdateProductImage {
   id: string
-  seal: File
+  image: File
 }
-export default async function updateMyCompanySeal(
+export default async function updateProductImage(
   httpRequest: HttpRequest,
-  { id, seal }: UpdateMyCompanySeal
+  { id, image }: UpdateProductImage
 ): Promise<ApiResponse<{}>> {
   const response = await httpRequest(() =>
     axiosInstance.put(
-      '/api/company/' + id + '/seal',
-      { file: seal },
+      '/api/products/' + id + '/productPhoto',
+      { file: image },
       {
         headers: {
           'Access-Control-Allow-Origin': '*',

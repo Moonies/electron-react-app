@@ -6,6 +6,7 @@ import { WorstProductReportData } from 'api/report/getWorstSaleProductReportData
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import { useState } from 'react'
+import { formatJPY } from 'utils/formatUtils'
 
 export interface SummaryData {
   totalSale: number
@@ -77,10 +78,7 @@ export default function useReport() {
   const currencyFormatter = (value = 0, typeValue: 'percent' | 'currency' | '') => {
     switch (typeValue) {
       case 'currency':
-        return new Intl.NumberFormat('ja-JP', {
-          style: 'currency',
-          currency: 'JPY',
-        }).format(value)
+        return formatJPY(value)
       case 'percent':
         return `${value}%`
       default:

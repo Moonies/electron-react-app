@@ -74,6 +74,7 @@ export default function ComponentManagementModal({
     setOpenDialog(true)
   }, [])
 
+  //when action is more than one should be change to child component
   const updatedColumns = columns.map(column => {
     if (column.field === 'actions') {
       return {
@@ -157,6 +158,7 @@ export default function ComponentManagementModal({
                 inputProps={{ readOnly: modalMode === 'view' }}
                 // sx={{ flex: 1 }}
                 onChange={e => handleChange('componentNumber', e.target.value)}
+                required
               />
               <TextField
                 label='部品名'
@@ -165,7 +167,7 @@ export default function ComponentManagementModal({
                 margin='normal'
                 inputProps={{ readOnly: modalMode === 'view' }}
                 onChange={e => handleChange('componentName', e.target.value)}
-
+                required
                 // sx={{ flex: 1 }}
               />
               <TextField
@@ -181,7 +183,7 @@ export default function ComponentManagementModal({
                   handleChange('price', e.target.value ? parseFloat(e.target.value) : 0)
                 }
                 helperText={
-                  modalMode === 'view' ? `latestPrice edit ${formData.lastestPriceDate}` : ''
+                  modalMode !== 'add' ? `latestPrice edit ${formData.lastestPriceDate}` : ''
                 }
 
                 // sx={{ flex: 1 }}

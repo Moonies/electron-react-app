@@ -16,6 +16,8 @@ import { useCallback, useMemo, useState } from 'react'
 import { SaleStatus } from 'api/sale'
 import { NewSaleDetailProps } from 'api/sale/updateSaleDetail'
 import { StatusDetail } from 'api/status/getStatusList'
+import { SaleOrderData } from 'api/order/getSaleOrderList'
+import { PurchaseOrderData } from 'api/order/getPurchaseOrderList'
 
 interface CategorySaleSearch {
   value: string
@@ -429,6 +431,37 @@ export default function useOrder() {
     }
   }
 
+  const getSaleOrderList = async () => {
+    const [orderType, status] = searchCriteria.status.split('.')
+
+    let newSearhCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+      status: status,
+      pageSize: totalRows,
+    }
+    const response = await api.order.getSaleOrderList(newSearhCriteria)
+    if (response.code === 200 && response.data) return response.data
+    return undefined
+  }
+
+  const getPurchaseOrderList = async () => {
+    const [orderType, status] = searchCriteria.status.split('.')
+
+    let newSearhCriteria = {
+      ...searchCriteria,
+      startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
+      endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
+      status: status,
+      pageSize: totalRows,
+    }
+
+    const response = await api.order.getPurchaseOrderList(newSearhCriteria)
+    if (response.code === 200 && response.data) return response.data
+    return undefined
+  }
+
   const getOrderListData = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
     const [orderType, status] = searchCriteria.status.split('.')
@@ -480,5 +513,8 @@ export default function useOrder() {
     handleSelectedPurchaseDetail,
     totalRows,
     handleSelectedSaleDetail,
+    getSaleOrderList,
+    getPurchaseOrderList,
+    convertOrderType,
   }
 }

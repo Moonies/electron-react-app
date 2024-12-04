@@ -36,7 +36,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
       const resultUser = await api.user.getUserDetail(username)
       if (resultUser.code === 200 && resultUser.data) {
         setUserLogin(resultUser.data)
-        notificationSnackbar.success(result.message)
+        notificationSnackbar.success('ログイン完了')
         navigate('/')
         onSuccess()
       } else {
@@ -73,23 +73,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
   }
   return (
     <Dialog open={open} onClose={handleClose} disableEscapeKeyDown={true}>
-      <DialogTitle>Login</DialogTitle>
+      <DialogTitle>ロクイン</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <TextField
             autoFocus
-            margin='dense'
+            margin='normal'
             id='username'
-            label='Username'
+            label='ユーザーネーム'
             type='text'
             fullWidth
             value={username}
             onChange={e => setUsername(e.target.value)}
           />
           <TextField
-            margin='dense'
+            margin='normal'
             id='password'
-            label='Password'
+            label='パスワード'
             type='password'
             fullWidth
             value={password}
@@ -97,8 +97,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button type='submit'>Login</Button>
+          <Button onClick={onClose}>キャンセル</Button>
+          <Button type='submit'>ロックイン</Button>
         </DialogActions>
       </form>
     </Dialog>

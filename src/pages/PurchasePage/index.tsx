@@ -1,25 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Box, TextField, MenuItem, Typography, Divider } from '@mui/material'
+import { useGridApiRef, GridRowSelectionModel } from '@mui/x-data-grid'
 import {
-  Box,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-  InputAdornment,
-  IconButton,
-  Divider,
-  Button,
-} from '@mui/material'
-import { useGridApiRef, GridRowProps, GridRowSelectionModel } from '@mui/x-data-grid'
-import {
-  Delete as DeleteIcon,
   Search as SearchIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
   Print as PrintIcon,
-  UploadFile as UploadFileIcon,
   ContentPasteSearch as DetailIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -27,11 +11,10 @@ import { StyledButton } from 'styles/styles'
 import dayjs, { Dayjs } from 'dayjs'
 import DataTable from 'components/DataTable'
 import { useConfirmModal } from 'hooks/useConfirmModal'
-import { exportToPdf, exportToXlsx } from 'utils/exportUtils'
 import useNotification from 'hooks/useNotification'
 import usePurchase from './hooks/usePurchase'
-import { PurchaseData } from 'api/purchase/getPurchaseList'
 import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
+import useExportPurchase from './hooks/useExportPurchase'
 
 export default function PurchasePage() {
   const {
@@ -48,7 +31,9 @@ export default function PurchasePage() {
     convertStatus,
     dateTypeList,
     totalRows,
+    getAllPurchaseData,
   } = usePurchase()
+  const { exportPurchaseSelected } = useExportPurchase()
   const purchaseDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedPurchase, setSelectedPurchase] = useState<PurchaseModalDataProps>()
@@ -71,49 +56,6 @@ export default function PurchasePage() {
   useEffect(() => {
     prepareCategorySearch
   }, [])
-
-  const handleAddClick = () => {
-    setSelectedPurchase(undefined)
-    setModalMode('add')
-    setModalOpen(true)
-  }
-
-  const handleEditClick = useCallback(() => {
-    // if (selectionModel.length === 1) {
-    //   const selectedId = selectionModel[0]
-    //   const selectedData = purchaseData.find(item => item.id === selectedId)
-    //   if (selectedData) {
-    //     setModalMode('edit')
-    //     setSelectedPurchase(selectedData)
-    //     setModalOpen(true)
-    //   }
-    // } else {
-    //   notificationModal.error('編集する表の行を選択してください。')
-    // }
-  }, [selectionModel])
-
-  const handleDeleteClick = useCallback(async () => {
-    // if (selectionModel.length === 1) {
-    //   const selectedId = selectionModel[0]
-    //   const selectedData = purchaseData.find(item => item.id === selectedId)
-    //   if (selectedData) {
-    //     const confirmed = await openConfirmModal({
-    //       title: '確認してください',
-    //       message: `この選ばれたの注番　 ${selectedData.invoiceNumber}　を削除してもよろしいですか?`,
-    //       // message:
-    //       //   'Are you sure you want to delete this Invoice Number: ' + selectedData.invoiceNumber,
-    //     })
-    //     if (confirmed) {
-    //       // Perform delete operation
-    //       console.log('Delete confirmed')
-    //     } else {
-    //       console.log('Delete cancelled')
-    //     }
-    //   }
-    // } else {
-    //   notificationModal.error('削除する行をテーブルから選択してください')
-    // }
-  }, [selectionModel])
 
   const handleViewDetailClick = useCallback(async () => {
     if (selectionModel.length === 1) {
@@ -155,6 +97,16 @@ export default function PurchasePage() {
     }
   }, [selectionModel])
 
+  const handleExportPurchase = async () => {
+    //now version is xlsx only
+    if (totalRows < purchaseData.length) {
+      const response = await getAllPurchaseData()
+      exportPurchaseSelected(response)
+    } else {
+      exportPurchaseSelected(purchaseData)
+    }
+  }
+
   const handleModalConfirm = async (data: PurchaseModalDataProps) => {
     // Implement add/edit functionality
     console.log('Confirmed data:', data)
@@ -162,8 +114,6 @@ export default function PurchasePage() {
       // addNewSaleData()
     } else {
     }
-    // After successful add/edit, refetch the data
-    // await fetchSalesData(paginationModel);
   }
 
   const handleStartDateChange = (date: Dayjs | null) => {
@@ -176,9 +126,7 @@ export default function PurchasePage() {
       newStartDate &&
       dayjs(newStartDate).isAfter(dayjs(searchCriteria.endDate), 'day')
     ) {
-      notificationModal.warning(
-        'Start date cannot be after the end date. End date has been cleared.'
-      )
+      notificationModal.warning('開始日は終了日より後にはできません。終了日はクリアされています。')
       handleChange('endDate', null)
     }
   }
@@ -194,7 +142,7 @@ export default function PurchasePage() {
       dayjs(newEndDate).isBefore(dayjs(searchCriteria.startDate), 'day')
     ) {
       notificationModal.warning(
-        'End date cannot be before the start date. Start date has been cleared.'
+        '終了日は開始日より前に設定できません。開始日はクリアされています。'
       )
       handleChange('startDate', null)
     }
@@ -380,8 +328,8 @@ export default function PurchasePage() {
                 variant='outlined'
                 startIcon={<PrintIcon />}
                 size='large'
-                // onClick={handleExportPdf}
-                sx={{ visibility: 'hidden' }}
+                onClick={handleExportPurchase}
+                // sx={{ visibility: 'hidden' }}
               >
                 データ出力
               </StyledButton>

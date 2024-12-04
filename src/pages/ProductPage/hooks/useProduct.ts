@@ -152,7 +152,11 @@ export default function useProduct() {
       })),
     }
     const response = await addNewProduct(newProduct)
-    if (response) return response
+    if (formData.image?.file && response?.id) {
+      const result = await updateProductImage(formData.image.file, response.id)
+      return result
+    }
+    return response?.id !== undefined
   }
 
   const handleUpdateProductDetail = async (
@@ -178,6 +182,16 @@ export default function useProduct() {
       const response = await updateProductInStock(newProductDetail.id, formData.stockQuantity)
       return response
     } else {
+      return response
+    }
+  }
+
+  const handleProductImage = async (productId: string, imageFile?: File) => {
+    if (imageFile) {
+      const response = await updateProductImage(imageFile, productId)
+      return response
+    } else {
+      const response = await deleteProductImage(productId)
       return response
     }
   }
@@ -236,11 +250,22 @@ export default function useProduct() {
     }
   }
 
+  const getAllProductData = async () => {
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      pageSize: totalRows,
+    }
+    const result = await api.product.getProductList(prepareSearhCriteria)
+    if (result.code === 200 && result.data) {
+      return result.data
+    }
+  }
+
   const addNewProduct = async (data: AddNewProductProps) => {
     const result = await api.product.addNewProduct(data)
     if (result.code === 200 && result.data) {
       notificationSnackbar.success('追加完了しました。')
-      return true
+      return result.data
     } else {
       notificationSnackbar.error(result.message)
     }
@@ -261,6 +286,16 @@ export default function useProduct() {
     if (result.code === 200) {
       return true
     }
+  }
+
+  const updateProductImage = async (productImage: File, productId: string) => {
+    const result = await api.product.updateProductImage({ id: productId, image: productImage })
+    if (result.code === 200) return true
+  }
+
+  const deleteProductImage = async (productId: string) => {
+    const result = await api.product.deleteProductImage(productId)
+    if (result.code === 200) return true
   }
 
   const deleteProduct = async (productId: string) => {
@@ -290,5 +325,7 @@ export default function useProduct() {
     deleteProduct,
     prepareProductDetail,
     handleOrderProductHistory,
+    getAllProductData,
+    handleProductImage,
   }
 }
