@@ -69,7 +69,7 @@ export default function useMyCompany() {
         ['city']: result.data?.city,
       }))
     } else {
-      notificationSnackbar.error(result.message)
+      notificationSnackbar.error('postalCode not found')
       setFormCompanyDetail(prev => ({
         ...prev,
         ['postalCode']: postCode,

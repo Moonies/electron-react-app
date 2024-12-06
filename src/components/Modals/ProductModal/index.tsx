@@ -131,7 +131,8 @@ export default function ProductModal({
     // debouncedUpdate(field as keyof ProductDetailModalProps, value)
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     try {
       await onConfirm({
         ...formData,

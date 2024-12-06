@@ -33,12 +33,12 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
     }
 
     const existingComponent = currentProductData.find(
-      item => item.number === newProduct.number && item.id === newProduct.id
+      item => item.number === newProduct.number && item.id === newProduct.productId
     )
     if (existingComponent) {
       let newRow = currentProductData.map(item =>
-        item.id === newProduct.id
-          ? { ...item, quantity: item.quantity + newProduct.quantity }
+        item.id === newProduct.productId
+          ? { ...item, productId: item.id, quantity: item.quantity + newProduct.quantity }
           : item
       )
       setNewProductListData(newRow)

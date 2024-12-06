@@ -61,7 +61,7 @@ export default function AddComponentPartListDialog({
     const selectedComponent = componentList.find(item => item.id === formData.id)
     if (selectedComponent && selectedComponent?.inStock < formData.quantity) {
       notificationModal.warning('部品の在庫が足りません。在庫を確認してください。')
-      return
+      // return
     }
     onSubmit(formData)
   }
