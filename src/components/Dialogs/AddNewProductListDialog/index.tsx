@@ -17,7 +17,7 @@ import useHttp from 'hooks/useHttp'
 import React, { useCallback, useEffect, useState } from 'react'
 
 export type ProductDetail = {
-  id?: string
+  productId?: string
   number: string | null
   name: string | null
   quantity: number
@@ -78,7 +78,7 @@ export default function AddnewProductDialog({
     <Dialog
       open={open}
       disableEscapeKeyDown={true}
-      maxWidth={formData.id ? 'lg' : 'sm'}
+      maxWidth={formData.productId ? 'lg' : 'sm'}
       fullWidth
       onClose={(event, reason) => {
         if (reason !== 'backdropClick') {
@@ -135,14 +135,14 @@ export default function AddnewProductDialog({
                 if (typeof newValue === 'object' && newValue !== null) {
                   setFormData(prev => ({
                     ...prev,
-                    id: newValue.id,
+                    productId: newValue.id,
                     number: newValue.number || null,
                     name: newValue.name || null,
                     price: newValue.price || 0,
                   }))
                 } else {
                   setFormData({
-                    id: undefined,
+                    productId: undefined,
                     number: null,
                     name: null,
                     price: 0,
@@ -153,7 +153,7 @@ export default function AddnewProductDialog({
               isOptionEqualToValue={option => option.number === formData?.number}
               // value={formData?.productNumber}
             />
-            {formData.id && (
+            {formData.productId && (
               <>
                 <TextField
                   label='商品名'

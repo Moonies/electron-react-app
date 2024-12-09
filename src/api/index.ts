@@ -1,4 +1,3 @@
-import { default as reportApi } from './report'
 import axios, { AxiosInstance } from 'axios'
 import { getCurrentToken } from 'store/authSlice'
 import { getBaseUrl } from 'store/apiConfigSlice'
@@ -46,7 +45,4 @@ axiosInstance.interceptors.request.use(
 // Function to update the axios instance
 export const updateAxiosBaseUrl = () => {
   axiosInstance.defaults.baseURL = getBaseUrl()
-}
-export const api = {
-  report: reportApi(),
 }

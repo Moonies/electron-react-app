@@ -36,7 +36,7 @@ export default function usePurchase() {
   })
   const dateTypeList = [
     { value: 'registrationDate', display: '登録日付' },
-    { value: 'deliveryDate', display: '出荷日付' },
+    { value: 'deliveryDate', display: '入庫日付' },
   ]
 
   const handleChange = (name: string, value: string | Date | null) => {

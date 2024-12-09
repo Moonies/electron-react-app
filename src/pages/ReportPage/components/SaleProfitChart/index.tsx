@@ -36,7 +36,7 @@ export default function SaleProfitChart({
       >
         <CartesianGrid strokeDasharray='3 3' />
         <XAxis dataKey='label' tick={{ fill: '#ffffff' }} />
-        <YAxis tick={{ fill: '#ffffff' }} tickFormatter={value => (value / 1000000).toFixed(2)} />
+        <YAxis tick={{ fill: '#ffffff' }} />
         <Tooltip content={<CustomTooltip />} />
         <Legend
           verticalAlign='top'

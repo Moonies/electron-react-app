@@ -540,7 +540,7 @@ export default function PurchaseModal({
               // sx={theme => ({
               //   color: 'white',
               // })}
-              aria-hidden='true'
+              aria-label='close'
             >
               キャンセル
             </Button>
@@ -556,7 +556,7 @@ export default function PurchaseModal({
                 sx={theme => ({
                   color: 'white',
                 })}
-                aria-hidden='true'
+                aria-label='close'
               >
                 保存
               </Button>

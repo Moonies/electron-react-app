@@ -31,7 +31,7 @@ export default function SaleChart({ customLegendFormatter, saleChartData }: Sale
       >
         <CartesianGrid stroke='#f5f5f5' />
         <XAxis dataKey='label' tick={{ fill: '#ffffff' }} />
-        <YAxis tick={{ fill: '#ffffff' }} tickFormatter={value => (value / 1000000).toFixed(2)} />
+        <YAxis tick={{ fill: '#ffffff' }} />
         <Tooltip content={<CustomTooltip />} />
         <Legend formatter={customLegendFormatter} verticalAlign='top' />
         <Bar dataKey='totalSale' barSize={40} fill='#2196f3' />

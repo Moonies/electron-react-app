@@ -53,7 +53,7 @@ interface Option {
   id: number
 }
 export type SaleNewProductList = {
-  id?: string
+  productId?: string
   name: string
   number: string
   price: number
@@ -166,7 +166,6 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     // setLoading(true)
     try {
       const rows = addNewProductDataGridRef.current.getRowModels()
@@ -495,7 +494,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
               data={newProductListData}
               columns={columns}
               apiref={addNewProductDataGridRef}
-              // getRowId={row => (modalMode === 'add' ? row.id : `${row.name}${row.number}`)}
+              getRowId={row => row.productId}
               onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
               sx={{ height: 475, mt: 2 }}
               editMode='row'

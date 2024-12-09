@@ -1,6 +1,7 @@
 import axios from 'axios'
-import { ApiResponse } from 'api'
-import { ReportSearchCriteria } from './'
+import { ApiResponse, axiosInstance } from 'api'
+import { ReportSearchCriteria } from 'api/report'
+import { HttpRequest } from 'hooks/useHttp'
 
 export interface SaleReportData {
   label: string
@@ -8,6 +9,7 @@ export interface SaleReportData {
   totalOrder: number
   totalPreSale: number
   totalTarget: number
+  totalCost: number
 }
 
 const mockSaleChartData = [
@@ -19,31 +21,16 @@ const mockSaleChartData = [
 ]
 
 export default async function GetSaleReportData(
-  searchCriteria: ReportSearchCriteria
+  httpRequest: HttpRequest,
+  { category, endDate, startDate }: ReportSearchCriteria
 ): Promise<ApiResponse<SaleReportData[]>> {
-  //for beta:test
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  return {
-    code: 200,
-    message: 'Success',
-    data: mockSaleChartData,
+  const response = await httpRequest(() =>
+    axiosInstance.get(
+      `/api/reports/sales?size=60&label=${category}&from=${startDate}&to=${endDate}`
+    )
+  )
+  if (axios.isAxiosError(response)) {
+    return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  // when use real API
-  // try {
-  //     const response = await axios.post<ApiResponse<AuthData>>('/api/auth', { username, password });
-  //     return response.data;
-  // } catch (error) {
-  //     if (axios.isAxiosError(error) && error.response) {
-  //         return {
-  //             code: error.response.status,
-  //             message: error.response.data.message || 'An error occurred during authentication',
-  //             data: null
-  //         };
-  //     }
-  //     return {
-  //         code: 500,
-  //         message: 'An unexpected error occurred',
-  //         data: null
-  //     };
-  // }
+  return { code: 200, message: 'success', data: response?.data.content }
 }

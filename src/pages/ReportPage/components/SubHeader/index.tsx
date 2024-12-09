@@ -12,6 +12,7 @@ interface SubHeader {
 
 export default function SubHeader({ handleChange, searchCriteria, handleSearch }: SubHeader) {
   const { notificationModal } = useNotification()
+
   const handleStartDateChange = (date: Dayjs | null) => {
     const newStartDate = date ? date.startOf('day').toDate() : null
 
@@ -50,7 +51,7 @@ export default function SubHeader({ handleChange, searchCriteria, handleSearch }
     <AppBar position='static' sx={{ padding: 1 }}>
       <Box display={'flex'} flexDirection={'row'} gap={2} flex={1} alignItems='center'>
         <DatePicker
-          label='Start Date'
+          label='売上開始日'
           value={dayjs(searchCriteria.startDate)}
           format='YYYY/MM/DD'
           // onChange={(date: Dayjs | null) => handleChange('startDate', date?.toDate() || new Date())}
@@ -63,7 +64,7 @@ export default function SubHeader({ handleChange, searchCriteria, handleSearch }
           }}
         />
         <DatePicker
-          label='End Date'
+          label='売上終了日'
           format='YYYY/MM/DD'
           value={dayjs(searchCriteria.endDate)}
           // onChange={(date: Dayjs | null) => handleChange('endDate', date?.toDate() || new Date())}
@@ -78,16 +79,16 @@ export default function SubHeader({ handleChange, searchCriteria, handleSearch }
         <TextField
           id='report-type'
           select
-          label='Select'
+          label='フィルター'
           sx={{ width: 125 }}
           value={searchCriteria.category}
           onChange={e => handleChange('category', e.target.value as string)}
           size='small'
-          defaultValue={0}
+          defaultValue={'YEAR'}
         >
-          <MenuItem value={0}>Year</MenuItem>
-          <MenuItem value={1}>Month</MenuItem>
-          <MenuItem value={2}>Week</MenuItem>
+          <MenuItem value={'YEAR'}>年</MenuItem>
+          <MenuItem value={'MONTH'}>月</MenuItem>
+          {/* <MenuItem value={'WEEK'}>週</MenuItem> */}
         </TextField>
         <Button
           variant='outlined'

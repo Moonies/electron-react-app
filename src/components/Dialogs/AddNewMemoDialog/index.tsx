@@ -47,11 +47,17 @@ export default function AddNewMemoDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant='contained'>
+        <Button onClick={onClose} variant='contained' aria-label='close'>
           キャンセル
         </Button>
         {editable && (
-          <Button onClick={handleSubmit} color='primary' variant='outlined' sx={{ color: 'white' }}>
+          <Button
+            onClick={handleSubmit}
+            color='primary'
+            variant='outlined'
+            sx={{ color: 'white' }}
+            aria-label='close'
+          >
             確認
           </Button>
         )}

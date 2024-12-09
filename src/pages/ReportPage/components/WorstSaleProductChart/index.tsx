@@ -34,11 +34,11 @@ export default function WorstSaleProductChart({
       >
         <CartesianGrid strokeDasharray='3 3' />
         <XAxis type='number' tick={{ fill: '#ffffff' }} />
-        <YAxis dataKey='productName' type='category' tick={{ fill: '#ffffff' }} />
+        <YAxis dataKey='name' type='category' tick={{ fill: '#ffffff' }} />
         <Tooltip content={<CustomTooltip typeFormatValue='percent' />} />
         <Legend formatter={customLegendFormatter} />
-        <Bar dataKey='quantityPercent' fill='#8884d8' />
-        <Bar dataKey='profitPercent' fill='#82ca9d' />
+        <Bar dataKey='quantityPercentage' fill='#8884d8' />
+        <Bar dataKey='profitPercentage' fill='#82ca9d' />
       </BarChart>
     </ResponsiveContainer>
   )
