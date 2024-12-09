@@ -14,9 +14,9 @@ import {
 export enum SaleStatus {
   INVOICE_PENDING = 'invoice_pending',
   PENDING = 'PENDING',
-  CONFIRM = 'CONFIRMED',
-  ON_DELIVERY = 'SHIPPED',
-  DELIVERED = 'COMPLETED',
+  CONFIRM = 'CONFIRM',
+  ON_DELIVERY = 'SHIP',
+  DELIVERED = 'COMPLETE',
   CANCEL = 'CANCEL',
 }
 

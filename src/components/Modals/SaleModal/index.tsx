@@ -48,6 +48,7 @@ import { SaleStatus } from 'api/sale'
 import AddNewMemoDialog from 'components/Dialogs/AddNewMemoDialog'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import CustomColumn from './components/CustomColumn'
+import { StatusDetail } from 'api/status/getStatusList'
 interface Option {
   label: string
   id: number
@@ -127,6 +128,8 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
     getCustomerList,
     userListData,
     customerListData,
+    getStatus,
+    statusList,
   } = useAddProductOrder(formData)
 
   const columns = CustomColumn({
@@ -140,6 +143,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
   useEffect(() => {
     //when have new function or condition should to move loading
     setLoading(true)
+    getStatus()
     getUserList()
     getCustomerList().finally(() => setLoading(false))
   }, [])
@@ -194,31 +198,17 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
     return customerListData?.find(customer => customer.id === customerId) || null
   }
 
-  const statusList = [
-    { label: '見積', value: 'PENDING' },
-    { label: '受注', value: 'CONFIRMED' },
-    { label: '出荷', value: 'SHIPPED' },
-    { label: '出荷済', value: 'COMPLETED' }, //売上
-    { label: '返品', value: 'rejected' },
-    { label: 'キャンセル', value: 'CANCELLED' },
-  ]
-
-  const getAvailableStatuses = (
-    currentStatus: SaleStatus | string,
-    statusList: { label: string; value: string }[]
-  ) => {
+  const getAvailableStatuses = (currentStatus: SaleStatus | string, statusList: StatusDetail[]) => {
     switch (currentStatus) {
       case 'PENDING':
+        return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.name))
+      case 'CONFIRM':
         return statusList.filter(status =>
-          ['PENDING', 'CONFIRMED', 'CANCEL'].includes(status.value)
+          ['CONFIRM', 'SHIP', 'CANCEL', 'REJECT'].includes(status.name)
         )
-      case 'CONFIRMED':
+      case 'SHIP':
         return statusList.filter(status =>
-          ['CONFIRMED', 'SHIPPED', 'CANCEL', 'rejected'].includes(status.value)
-        )
-      case 'SHIPPED':
-        return statusList.filter(status =>
-          ['SHIPPED', 'COMPLETED', 'rejected', 'CANCEL'].includes(status.value)
+          ['SHIP', 'COMPLET', 'REJECT', 'CANCEL'].includes(status.name)
         )
 
       default:
@@ -391,20 +381,11 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                   )
                 }
               />
-              {/* <DatePicker
-                label='支払期限'
-                value={dayjs(formData.paymentDueDate)}
-                format='YYYY/MM/DD'
-                onChange={newValue =>
-                  handleChange('paymentDueDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-                }
-                sx={{ marginTop: 2, width: '25%' }}
-                readOnly={modalMode === 'view'}
-              /> */}
-              {modalMode !== 'add' && (
+              {/* check length for waiting state and reload */}
+              {modalMode !== 'add' && statusList.length > 0 && (
                 <TextField
                   label='状態'
-                  value={formData.status ?? ''}
+                  value={statusList ? formData.status : ''}
                   onChange={e => handleChange('status', e.target.value)}
                   margin='normal'
                   select
@@ -417,7 +398,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                   }}
                 >
                   {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
-                    <MenuItem key={item.value} value={item.value}>
+                    <MenuItem key={item.name} value={item.name}>
                       {item.label}
                     </MenuItem>
                   ))}

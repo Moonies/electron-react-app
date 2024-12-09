@@ -28,6 +28,7 @@ import { PurchaseStatus } from 'api/purchase'
 import useNotification from 'hooks/useNotification'
 import { useConfirmModal } from 'hooks/useConfirmModal'
 import CustomColumn from './components/CustomColumn'
+import { StatusDetail } from 'api/status/getStatusList'
 interface Option {
   label: string
   id: number
@@ -127,6 +128,8 @@ export default function PurchaseModal({
     handleDeleteClick,
     newComponentListData,
     handleAddNewComponent,
+    getStatus,
+    statusList,
   } = useAddComponent(formData)
 
   const columns = CustomColumn({
@@ -141,11 +144,12 @@ export default function PurchaseModal({
     //when have new function or condition should to move loading
     setLoading(true)
     getUserList()
+    getStatus()
     getCustomerList().finally(() => setLoading(false))
   }, [])
 
   const handleChange = async (field: keyof PurchaseModalDataProps, value: string | number) => {
-    if (field === 'status' && value === 'CONFIRMED') {
+    if (field === 'status' && value === 'CONFIRM') {
       const confirmed = await openConfirmModal({
         title: 'ご注意ください',
         message:
@@ -184,15 +188,6 @@ export default function PurchaseModal({
     }
   }
 
-  const statusList = [
-    { label: '未発注', value: 'PENDING' },
-    { label: '発注', value: 'CONFIRMED' },
-    { label: '配達中', value: 'SHIPPED' },
-    { label: '入庫済', value: 'COMPLETED' },
-    { label: '返品中', value: 'rejected' },
-    { label: 'キャンセル', value: 'CANCELLED' },
-  ]
-
   const columnVisibilityModel = useMemo(() => {
     return {
       actions:
@@ -211,20 +206,18 @@ export default function PurchaseModal({
 
   const getAvailableStatuses = (
     currentStatus: PurchaseStatus | string,
-    statusList: { label: string; value: string }[]
+    statusList: StatusDetail[]
   ) => {
     switch (currentStatus) {
       case 'PENDING':
+        return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.name))
+      case 'CONFIRM':
         return statusList.filter(status =>
-          ['PENDING', 'CONFIRMED', 'CANCEL'].includes(status.value)
+          ['CONFIRM', 'SHIP', 'CANCEL', 'REJECT'].includes(status.name)
         )
-      case 'CONFIRMED':
+      case 'SHIP':
         return statusList.filter(status =>
-          ['CONFIRMED', 'SHIPPED', 'CANCEL', 'rejected'].includes(status.value)
-        )
-      case 'SHIPPED':
-        return statusList.filter(status =>
-          ['SHIPPED', 'COMPLETED', 'rejected', 'CANCEL'].includes(status.value)
+          ['SHIP', 'COMPLETE', 'REJECT', 'CANCEL'].includes(status.name)
         )
 
       default:
@@ -390,10 +383,11 @@ export default function PurchaseModal({
                   )
                 }
               />
-              {modalMode !== 'add' && (
+              {/* check length for waiting state and reload */}
+              {modalMode !== 'add' && statusList.length > 0 && (
                 <TextField
                   label='状態'
-                  value={formData.status ?? ''}
+                  value={formData.status || ''}
                   onChange={e => handleChange('status', e.target.value)}
                   margin='normal'
                   select
@@ -406,7 +400,7 @@ export default function PurchaseModal({
                   }}
                 >
                   {getAvailableStatuses(currentStatus ?? '', statusList).map(item => (
-                    <MenuItem key={item.value} value={item.value}>
+                    <MenuItem key={item.name} value={item.name}>
                       {item.label}
                     </MenuItem>
                   ))}

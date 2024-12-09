@@ -16,12 +16,15 @@ import useLoading from 'hooks/useLoading'
 
 import { useState } from 'react'
 import { SaleModalDataProps } from 'components/Modals/SaleModal'
+import { OrderType } from 'api/order'
+import { StatusDetail } from 'api/status/getStatusList'
 
 export default function useAddOrder(saleData: SaleModalDataProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
   const [newProductListData, setNewProductListData] = useState<GridRowsProp>(saleData.product)
   const [productData, setProductData] = useState<ProductDetailList[]>([])
   const [userListData, setUserListData] = useState<UserData[]>([])
+  const [statusList, setStatusList] = useState<StatusDetail[]>([])
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
   const { withLoading, setLoading } = useLoading()
   const { api } = useHttp()
@@ -78,8 +81,6 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
   }
 
   const processRowUpdate = (newRow: GridRowModel) => {
-    console.log(newRow)
-    // console.log(first)
     const updatedRow = { ...newRow, isNew: false }
     setNewProductListData(
       newProductListData.map(row => (row.productId === newRow.productId ? updatedRow : row))
@@ -103,6 +104,17 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
       setCustomerListData(result.data)
     }
   }
+
+  const getStatus = async () => {
+    const result = await api.status.getStatusList()
+    if (result.code === 200 && result.data) {
+      let status = result.data.filter(
+        status => status.orderType === OrderType.SALE || status.orderType === OrderType.ALL
+      )
+      setStatusList(status)
+    }
+    return []
+  }
   return {
     newProductListData,
     rowModesModel,
@@ -121,5 +133,7 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
     customerListData,
     getUserList,
     getCustomerList,
+    getStatus,
+    statusList,
   }
 }

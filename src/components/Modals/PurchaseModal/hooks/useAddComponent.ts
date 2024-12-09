@@ -18,6 +18,8 @@ import useLoading from 'hooks/useLoading'
 
 import { useCallback, useMemo, useState } from 'react'
 import { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
+import { StatusDetail } from 'api/status/getStatusList'
+import { OrderType } from 'api/order'
 
 export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({})
@@ -27,6 +29,7 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
   const [componentData, setComponentData] = useState<ComponentData[]>([])
   const [userListData, setUserListData] = useState<UserData[]>([])
   const [supplierCompanyListData, setSupplierCompanyListData] = useState<SupplierData[]>([])
+  const [statusList, setStatusList] = useState<StatusDetail[]>([])
 
   const { withLoading, setLoading } = useLoading()
   const { api } = useHttp()
@@ -126,6 +129,18 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
       setSupplierCompanyListData(result.data)
     }
   }
+
+  const getStatus = async () => {
+    const result = await api.status.getStatusList()
+    if (result.code === 200 && result.data) {
+      let status = result.data.filter(
+        status => status.orderType === OrderType.PURCHASE || status.orderType === OrderType.ALL
+      )
+      setStatusList(status)
+    }
+    return []
+  }
+
   return {
     newComponentListData,
     rowModesModel,
@@ -145,5 +160,7 @@ export default function useAddComponent(purchaseData: PurchaseModalDataProps) {
     supplierCompanyListData,
     getUserList,
     getCustomerList,
+    getStatus,
+    statusList,
   }
 }
