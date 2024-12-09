@@ -13,19 +13,6 @@ import { ApiResponse } from 'api'
 import { HttpRequest } from 'hooks/useHttp'
 
 export enum OrderStatus {
-  //basic status
-  // PENDING = 'PENDING',
-  // CANCEL = 'CANCELLED',
-  //to sale order
-  // ORDERED = 'ordered',
-  // PROCESSING = 'processing',
-  // DELIVERY = 'delivery',
-  // DELAY = 'delay',
-  // //to purchase order
-  // CONFIRM = 'CONFIRMED',
-  // RECEIVED = 'received',
-  // IN_STORE = 'in_store',
-
   //v2 orderStatus
   PENDING = 'PENDING',
   CONFIRM = 'CONFIRMED',

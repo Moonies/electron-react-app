@@ -79,7 +79,7 @@ export default async function getOrderList(
     response = await httpRequest(() =>
       dateType && dateType !== ''
         ? axiosInstance.get(
-            `/api/sales?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
+            `/api/sales?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
           )
         : axiosInstance.get(
             `/api/sales?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED&page=${page}&size=${pageSize}`
@@ -90,7 +90,7 @@ export default async function getOrderList(
     response = await httpRequest(() =>
       dateType && dateType !== ''
         ? axiosInstance.get(
-            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
+            `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED&${dateType}.from=${startDate}&${dateType}.to=${endDate}&page=${page}&size=${pageSize}`
           )
         : axiosInstance.get(
             `/api/purchases?${category}.contains=${keyword}&status.contains=${status}&status.notEqual=COMPLETED&page=${page}&size=${pageSize}`

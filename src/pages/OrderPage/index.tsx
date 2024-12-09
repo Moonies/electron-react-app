@@ -434,8 +434,7 @@ export default function OrderPage() {
                     component: 'span',
                   }}
                 >
-                  {/* <MenuItem value={''}>None</MenuItem> */}
-
+                  {searchCriteria.orderType && <MenuItem value={'All'}>全て</MenuItem>}
                   {filteredStatuses?.map((item, index) => (
                     <MenuItem key={index} value={`${item.orderType}.${item.name}`}>
                       {item.label}
