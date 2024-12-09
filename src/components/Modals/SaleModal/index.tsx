@@ -166,7 +166,6 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     // setLoading(true)
     try {
       const rows = addNewProductDataGridRef.current.getRowModels()

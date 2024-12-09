@@ -48,6 +48,7 @@ export default function CustomColumn({
       headerAlign: 'center',
       flex: 1,
       editable: true,
+      type: 'number',
     },
     {
       field: 'price',

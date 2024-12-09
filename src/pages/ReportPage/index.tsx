@@ -32,6 +32,7 @@ export default function ReportPage() {
     formatTextCompare,
     summaryCompareData,
     checkTextColor,
+    calculateDateDifference,
   } = useReport()
   const [searchCriteria, setSearchCriteria] = useState({
     category: 'YEAR',
@@ -44,7 +45,6 @@ export default function ReportPage() {
   )
 
   const handleChange = (name: string, value: string | Date | null) => {
-    console.log(name, value)
     setSearchCriteria(prev => ({ ...prev, [name]: value }))
   }
 
@@ -54,16 +54,18 @@ export default function ReportPage() {
       startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
       endDate: dayjs(searchCriteria.endDate).format('YYYY-MM-DD'),
     }
+    const previousDate = calculateDateDifference(
+      newSearchCriteria.startDate,
+      newSearchCriteria.endDate
+    )
     getSaleReport(newSearchCriteria)
     getBestSaleProductReport(newSearchCriteria)
     getWorstSaleProductReport(newSearchCriteria)
     getProfitReport(newSearchCriteria)
     getSummary(newSearchCriteria)
-    setLabelCompare(
-      `${dayjs(searchCriteria.startDate).subtract(1, 'year').format('YYYY-MM-DD')} ~ ${dayjs(searchCriteria.endDate).subtract(1, 'year').format('YYYY-MM-DD')}との比較`
-    )
+    setLabelCompare(`${previousDate.startDate} ~ ${previousDate.endDate}との比較`)
     setLabelSelectedYear(
-      `${dayjs(searchCriteria.startDate).subtract(1, 'year').format('YYYY')} ~ ${dayjs(searchCriteria.startDate).format('YYYY')}`
+      `${dayjs(searchCriteria.startDate).format('YYYY')} ~ ${dayjs(searchCriteria.endDate).format('YYYY')}`
     )
   }
 
@@ -123,13 +125,13 @@ export default function ReportPage() {
                 売上数量
               </Typography>
             }
-            subheader={summaryData?.totalAmountSale}
+            subheader={summaryData?.totalUnit}
             avatar={<CustomIcon name='boxesStacked' color='action' fontSize='large' />}
           />
           <CardContent>
             <Typography>{labelCompare}</Typography>
-            <Typography color={checkTextColor(summaryCompareData?.amountSaleData)}>
-              {formatTextCompare(summaryCompareData?.amountSaleData, 'amount')}
+            <Typography color={checkTextColor(summaryCompareData?.unitData)}>
+              {formatTextCompare(summaryCompareData?.unitData, 'quantity')}
             </Typography>
           </CardContent>
         </StyledCard>
@@ -178,8 +180,9 @@ export default function ReportPage() {
           />
           <CardContent>
             <Typography variant='h4' color='text.secondary'>
-              {formatTextDisplay(summaryData?.totalTarget ?? 0)}
+              {formatTextDisplay(summaryData?.totalTarget ?? 0, true)}
             </Typography>
+            <Typography>(平均)</Typography>
           </CardContent>
         </StyledCard>
       </Box>

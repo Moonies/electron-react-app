@@ -79,7 +79,7 @@ export default function SubHeader({ handleChange, searchCriteria, handleSearch }
         <TextField
           id='report-type'
           select
-          label='filter'
+          label='フィルター'
           sx={{ width: 125 }}
           value={searchCriteria.category}
           onChange={e => handleChange('category', e.target.value as string)}

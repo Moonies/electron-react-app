@@ -4,10 +4,10 @@ import { ReportSearchCriteria } from 'api/report'
 import { HttpRequest } from 'hooks/useHttp'
 
 export interface WorstProductReportData {
-  productCode: string
-  productName: string
-  quantityPercent: number
-  profitPercent: number
+  number: string
+  name: string
+  quantityPercentage: number
+  profitPercentage: number
 }
 
 const mockWorstProductList = [
@@ -49,11 +49,11 @@ export default async function GetWorstSaleProductReportData(
 ): Promise<ApiResponse<WorstProductReportData[]>> {
   const response = await httpRequest(() =>
     axiosInstance.get(
-      `/api/reports/sales?size=60&label=${category}&from=${startDate}&to=${endDate}`
+      `/api/reports/worst-products?status.equal=COMPLETED&shipmentDate.from=${startDate}&shipmentDate.to=${endDate}`
     )
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content }
+  return { code: 200, message: 'success', data: response?.data }
 }

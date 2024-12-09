@@ -62,7 +62,7 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
   }
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    setNewProductListData(newProductListData.filter(row => row.id !== id))
+    setNewProductListData(newProductListData.filter(row => row.productId !== id))
   }
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -71,15 +71,19 @@ export default function useAddOrder(saleData: SaleModalDataProps) {
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     })
 
-    const editedRow = newProductListData.find(row => row.id === id)
+    const editedRow = newProductListData.find(row => row.productId === id)
     if (editedRow!.isNew) {
-      setNewProductListData(newProductListData.filter(row => row.id !== id))
+      setNewProductListData(newProductListData.filter(row => row.productId !== id))
     }
   }
 
   const processRowUpdate = (newRow: GridRowModel) => {
+    console.log(newRow)
+    // console.log(first)
     const updatedRow = { ...newRow, isNew: false }
-    setNewProductListData(newProductListData.map(row => (row.id === newRow.id ? updatedRow : row)))
+    setNewProductListData(
+      newProductListData.map(row => (row.productId === newRow.productId ? updatedRow : row))
+    )
     return updatedRow
   }
 

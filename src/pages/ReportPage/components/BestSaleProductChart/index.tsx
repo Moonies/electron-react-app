@@ -74,9 +74,9 @@ export default function BestSaleProductChart({
           label={renderCustomizedLabel}
           outerRadius={outerRadius}
           fill='#8884d8'
-          dataKey='profitPercent'
+          dataKey='profitPercentage'
           id='bestSaleProductChart'
-          nameKey={'productName'}
+          nameKey={'name'}
         >
           {bestSaleProductChartData &&
             bestSaleProductChartData.map((entry, index) => (

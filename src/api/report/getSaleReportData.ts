@@ -9,6 +9,7 @@ export interface SaleReportData {
   totalOrder: number
   totalPreSale: number
   totalTarget: number
+  totalCost: number
 }
 
 const mockSaleChartData = [
