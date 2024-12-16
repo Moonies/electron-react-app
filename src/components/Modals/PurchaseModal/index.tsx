@@ -226,11 +226,7 @@ export default function PurchaseModal({
   }
 
   const getTextHeader = () =>
-    modalMode === 'add'
-      ? '仕入追加モーダルウィンドウ'
-      : currentStatus
-        ? '仕入編集モーダルウィンドウ'
-        : '仕入詳細'
+    modalMode === 'add' ? '仕入追加' : currentStatus ? '仕入編集' : '仕入詳細'
 
   return (
     <Dialog

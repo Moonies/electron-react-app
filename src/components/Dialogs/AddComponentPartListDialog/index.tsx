@@ -120,7 +120,7 @@ export default function AddComponentPartListDialog({
               renderInput={params => (
                 <TextField
                   {...params}
-                  label='商品番号'
+                  label='部品番号'
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -155,7 +155,7 @@ export default function AddComponentPartListDialog({
             {formData.id !== '' && (
               <>
                 <TextField
-                  label='商品名'
+                  label='部品名'
                   value={formData.name}
                   onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   required

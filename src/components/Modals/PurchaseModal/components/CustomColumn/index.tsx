@@ -31,13 +31,13 @@ export default function CustomColumn({
   return [
     {
       field: 'number',
-      headerName: '商品番号',
+      headerName: '部品番号',
       headerAlign: 'center',
       flex: 1,
     },
     {
       field: 'name',
-      headerName: '商品名',
+      headerName: '部品名',
       headerAlign: 'center',
       flex: 1,
     },

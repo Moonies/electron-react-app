@@ -242,12 +242,8 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Typography variant='h6'>
-            {/* {modalMode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'} */}
-            {modalMode === 'view'
-              ? '受注詳細'
-              : modalMode === 'edit'
-                ? '受注編集モーダルウィンドウ'
-                : '受注追加モーダルウィンドウ'}
+            {/* {modalMode === 'add' ? '追加' : '編集'} */}
+            {modalMode === 'view' ? '受注詳細' : modalMode === 'edit' ? '受注編集' : '受注追加'}
           </Typography>
           <Box display={'flex'} gap={4}>
             {/* {modalMode === 'view' && (

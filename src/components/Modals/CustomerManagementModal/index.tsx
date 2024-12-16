@@ -160,9 +160,7 @@ export default function CustomerManagementModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>
-            {mode === 'add' ? '顧客追加モーダルウィンドウ' : '顧客編集モーダルウィンドウ'}
-          </Typography>
+          <Typography variant='h6'>{mode === 'add' ? '顧客追加' : '顧客編集'}</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>

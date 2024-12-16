@@ -93,9 +93,7 @@ export default function AccountManagementModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>
-            {mode === 'add' ? '追加モーダルウィンドウ' : '編集モーダルウィンドウ'}
-          </Typography>
+          <Typography variant='h6'>{mode === 'add' ? '追加' : '編集'}</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>
