@@ -73,7 +73,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
   }
   return (
     <Dialog open={open} onClose={handleClose} disableEscapeKeyDown={true}>
-      <DialogTitle>ロクイン</DialogTitle>
+      <DialogTitle>ログイン</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <TextField
@@ -98,7 +98,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>キャンセル</Button>
-          <Button type='submit'>ロックイン</Button>
+          <Button type='submit'>ログイン</Button>
         </DialogActions>
       </form>
     </Dialog>

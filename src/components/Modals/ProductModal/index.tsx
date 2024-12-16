@@ -224,9 +224,7 @@ export default function ProductModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>
-            {modalMode === 'add' ? '商品追加モーダルウィンドウ' : '商品編集モーダルウィンドウ'}
-          </Typography>
+          <Typography variant='h6'>{modalMode === 'add' ? '商品追加' : '商品編集'}</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>
@@ -249,7 +247,7 @@ export default function ProductModal({
                 // sx={{ flex: 1 }}
               />
               <TextField
-                label='商品品名'
+                label='商品名'
                 type='text'
                 value={formData.productName}
                 onChange={e => handleChange('productName', e.target.value)}

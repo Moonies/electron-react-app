@@ -141,9 +141,7 @@ export default function SupplierManagementModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>
-            {mode === 'add' ? '仕入先追加モーダルウィンドウ' : '仕入先編集モーダルウィンドウ'}
-          </Typography>
+          <Typography variant='h6'>{mode === 'add' ? '仕入先追加' : '仕入先編集'}</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>

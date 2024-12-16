@@ -118,7 +118,7 @@ export default function AddNewComponentListDialog({
               renderInput={params => (
                 <TextField
                   {...params}
-                  label='商品番号'
+                  label='部品番号'
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (

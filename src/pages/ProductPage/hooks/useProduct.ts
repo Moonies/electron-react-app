@@ -49,8 +49,8 @@ export default function useProduct() {
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'number', headerName: '図番', flex: 1, headerAlign: 'center' },
-      { field: 'name', headerName: '品名', flex: 1, headerAlign: 'center' },
+      { field: 'number', headerName: '商品番号', flex: 1, headerAlign: 'center' },
+      { field: 'name', headerName: '商品名', flex: 1, headerAlign: 'center' },
       {
         field: 'price',
         headerName: '単価',
