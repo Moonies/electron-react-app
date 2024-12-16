@@ -126,6 +126,18 @@ export default function ComponentManagementModal({
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const modalTitle = () => {
+    switch (modalMode) {
+      case 'add':
+        return '部品追加'
+      case 'edit':
+        return '部品編集'
+      case 'view':
+      default:
+        return '部品詳細'
+    }
+  }
+
   return (
     <Dialog
       open={open}
@@ -140,7 +152,7 @@ export default function ComponentManagementModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>部品詳細</Typography>
+          <Typography variant='h6'>{modalTitle()}</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>

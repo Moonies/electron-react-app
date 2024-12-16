@@ -62,7 +62,7 @@ export default function useMenu() {
     { text: 'レポート', icon: Assessment, path: '/reports' },
     { text: '商品管理', icon: Category, path: '/products' },
     {
-      text: '仕入単価管理',
+      text: '部品管理',
       icon: PrecisionManufacturing,
       path: '/component',
     },

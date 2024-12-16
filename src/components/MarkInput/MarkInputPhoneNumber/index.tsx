@@ -13,7 +13,7 @@ const MarkInputPhoneNumber = React.forwardRef<HTMLInputElement, CustomProps>(
     return (
       <IMaskInput
         {...other}
-        mask='000-000-0000'
+        mask='000-0000-0000'
         definitions={{
           '#': /[1-9]/,
         }}
@@ -24,5 +24,4 @@ const MarkInputPhoneNumber = React.forwardRef<HTMLInputElement, CustomProps>(
     )
   }
 )
-
 export default MarkInputPhoneNumber

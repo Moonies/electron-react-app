@@ -36,9 +36,9 @@ export default function useComponent() {
   const { notificationSnackbar } = useNotification()
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: 'number', headerName: '商品番号', headerAlign: 'center', flex: 1 },
+      { field: 'number', headerName: '部品番号', headerAlign: 'center', flex: 1 },
 
-      { field: 'name', headerName: '商品名', headerAlign: 'center', flex: 1 },
+      { field: 'name', headerName: '部品名', headerAlign: 'center', flex: 1 },
       {
         field: 'price',
         headerName: '単価',

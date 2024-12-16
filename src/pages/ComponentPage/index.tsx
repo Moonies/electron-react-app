@@ -192,7 +192,7 @@ export default function ComponentManagementPage() {
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>仕入単価管理</Divider>
+          <Divider textAlign='left'>部品管理</Divider>
         </Typography>
       </Box>
       <Box
