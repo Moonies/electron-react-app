@@ -1,7 +1,9 @@
 import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+import { OrderStatus } from 'api/order'
 // import { api } from 'api/index'
 import { PurchaseStatus } from 'api/purchase'
 import { PurchaseData, SearchCriteria } from 'api/purchase/getPurchaseList'
+import { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
 import dayjs from 'dayjs'
 import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
@@ -49,23 +51,6 @@ export default function usePurchase() {
     //if condition when search put in here
     getPurchaseListData(paginationModel)
   }, [searchCriteria, withLoading])
-
-  const convertStatus = (status: string) => {
-    switch (status) {
-      case PurchaseStatus.INVOICE_PENDING:
-        return '見積書依頼'
-      case PurchaseStatus.ON_DELIVERY:
-        return '配達中'
-      case PurchaseStatus.DELIVERED:
-        return '入庫済'
-      // case PurchaseStatus.REJECTED:
-      //   return '返品中'
-      case PurchaseStatus.CANCEL:
-        return 'キャンセル'
-      default:
-        return ''
-    }
-  }
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -133,6 +118,48 @@ export default function usePurchase() {
     setCategorySearch(result)
   }, [])
 
+  const mappingStatus = (status: string) => {
+    switch (status) {
+      case OrderStatus.PENDING:
+        return 'PENDING'
+      case OrderStatus.CONFIRM:
+        return 'CONFIRM'
+      case OrderStatus.SHIP:
+        return 'SHIP'
+      case OrderStatus.COMPLETE:
+        return 'COMPLETE'
+      case OrderStatus.CANCEL:
+        return 'CANCEL'
+      case OrderStatus.REJECT:
+        return 'REJECT'
+
+      default:
+        return ''
+    }
+  }
+
+  const handleSelectedSaleDetail = (selectedData: PurchaseData) => {
+    let purchaseDetail: PurchaseModalDataProps = {
+      id: selectedData.id,
+      orderCode: selectedData.orderCode,
+      purchaseCode: selectedData.purchaseCode,
+      invoiceNumber: selectedData.invoiceNumber,
+      supplierCompanyId: selectedData.companyId ?? '',
+      supplierCompanyName: selectedData.company?.companyInfo.name ?? '',
+      component: selectedData.components.map(item => ({
+        ...item,
+        id: item.number + item.name,
+      })),
+      orderRequestEmployeeId: selectedData.createdBy,
+      memo: selectedData.memo,
+      registrationDate: selectedData.registrationDate,
+      totalAmount: selectedData.totalAmount,
+      status: mappingStatus(selectedData.status),
+      owners: selectedData.owners,
+      deliveryDate: selectedData.deliveryDate,
+    }
+    return purchaseDetail
+  }
   const getPurchaseListData = async ({ page, pageSize }: GridPaginationModel) => {
     setLoading(true)
     let prepareSearhCriteria = {
@@ -195,9 +222,9 @@ export default function usePurchase() {
     prepareCategorySearch,
     categorySearch,
     statusPurchase,
-    convertStatus,
     dateTypeList,
     totalRows,
     getAllPurchaseData,
+    handleSelectedSaleDetail,
   }
 }
