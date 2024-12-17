@@ -200,13 +200,13 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
 
   const getAvailableStatuses = (currentStatus: SaleStatus | string, statusList: StatusDetail[]) => {
     switch (currentStatus) {
-      case 'PENDING':
+      case SaleStatus.PENDING:
         return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.name))
-      case 'CONFIRM':
+      case SaleStatus.CONFIRM:
         return statusList.filter(status =>
           ['CONFIRM', 'SHIP', 'CANCEL', 'REJECT'].includes(status.name)
         )
-      case 'SHIP':
+      case SaleStatus.ON_DELIVERY:
         return statusList.filter(status =>
           ['SHIP', 'COMPLET', 'REJECT', 'CANCEL'].includes(status.name)
         )
@@ -274,7 +274,12 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                   handleChange('registrationDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                 }
                 sx={{ marginTop: 2, width: '100%' }}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
               />
               <TextField
                 label='受注番号'

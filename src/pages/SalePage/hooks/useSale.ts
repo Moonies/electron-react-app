@@ -5,6 +5,7 @@ import { GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { SaleData, SalesSummary, SearchCriteria } from 'api/sale/getSaleList'
 import useHttp from 'hooks/useHttp'
 import { SaleModalDataProps } from 'components/Modals/SaleModal'
+import { OrderStatus } from 'api/order'
 
 interface CategorySaleSearch {
   value: string
@@ -109,6 +110,26 @@ export default function useSales() {
     setCategorySearch(result)
   }, [])
 
+  const mappingStatus = (status: string) => {
+    switch (status) {
+      case OrderStatus.PENDING:
+        return 'PENDING'
+      case OrderStatus.CONFIRM:
+        return 'CONFIRM'
+      case OrderStatus.SHIP:
+        return 'SHIP'
+      case OrderStatus.COMPLETE:
+        return 'COMPLETE'
+      case OrderStatus.CANCEL:
+        return 'CANCEL'
+      case OrderStatus.REJECT:
+        return 'REJECT'
+
+      default:
+        return ''
+    }
+  }
+
   const handleSelectedSaleDetail = (selectedSaleOrder: SaleData) => {
     let saleDetail: SaleModalDataProps = {
       id: selectedSaleOrder.id,
@@ -120,7 +141,7 @@ export default function useSales() {
       product: selectedSaleOrder.products,
       registrationDate: selectedSaleOrder.registrationDate,
       shippingmentDate: selectedSaleOrder.shipmentDate,
-      status: selectedSaleOrder.status,
+      status: mappingStatus(selectedSaleOrder.status),
       totalAmount: selectedSaleOrder.totalAmount,
       owners: selectedSaleOrder.owners,
       memo: selectedSaleOrder.memo,

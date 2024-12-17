@@ -52,9 +52,9 @@ export type PurchaseModalDataProps = {
   supplierCompanyName: string
   component: PurchaseNewComponentList[]
   orderRequestEmployeeId: string
-  orderRequestEmployeeName: string
-  orderApprovedEmployeeId: string
-  orderApprovedEmployeeName: string
+  // orderRequestEmployeeName: string
+  // orderApprovedEmployeeId: string
+  // orderApprovedEmployeeName: string
   registrationDate: string | Dayjs
   deliveryDate: string | Dayjs
   // quotationRequestDate: string | Dayjs
@@ -80,9 +80,9 @@ const defaultFormData: PurchaseModalDataProps = {
   supplierCompanyName: '',
   component: [],
   orderRequestEmployeeId: '',
-  orderRequestEmployeeName: '',
-  orderApprovedEmployeeId: '',
-  orderApprovedEmployeeName: '',
+  // orderRequestEmployeeName: '',
+  // orderApprovedEmployeeId: '',
+  // orderApprovedEmployeeName: '',
   // quotationRequestDate: dayjs(),
   // purchaseApprovedDate: dayjs(),
   // stockApprovalDate: dayjs(),
@@ -209,13 +209,13 @@ export default function PurchaseModal({
     statusList: StatusDetail[]
   ) => {
     switch (currentStatus) {
-      case 'PENDING':
+      case PurchaseStatus.PENDING:
         return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.name))
-      case 'CONFIRM':
+      case PurchaseStatus.CONFIRM:
         return statusList.filter(status =>
           ['CONFIRM', 'SHIP', 'CANCEL', 'REJECT'].includes(status.name)
         )
-      case 'SHIP':
+      case PurchaseStatus.ON_DELIVERY:
         return statusList.filter(status =>
           ['SHIP', 'COMPLETE', 'REJECT', 'CANCEL'].includes(status.name)
         )

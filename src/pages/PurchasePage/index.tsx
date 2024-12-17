@@ -28,10 +28,10 @@ export default function PurchasePage() {
     prepareCategorySearch,
     categorySearch,
     statusPurchase,
-    convertStatus,
     dateTypeList,
     totalRows,
     getAllPurchaseData,
+    handleSelectedSaleDetail,
   } = usePurchase()
   const { exportPurchaseSelected } = useExportPurchase()
   const purchaseDataGridRef = useGridApiRef()
@@ -62,35 +62,10 @@ export default function PurchasePage() {
       const selectedId = selectionModel[0]
       const selectedData = purchaseData.find(item => item.id === selectedId)
       if (selectedData) {
-        let purchaseDetail: PurchaseModalDataProps = {
-          id: selectedData.id,
-          orderCode: selectedData.orderCode,
-          purchaseCode: selectedData.purchaseCode,
-          invoiceNumber: selectedData.invoiceNumber,
-          supplierCompanyId: selectedData.companyId ?? '',
-          supplierCompanyName: selectedData.company?.companyInfo.name ?? '',
-          component: selectedData.components.map(item => ({
-            id: item.number + item.name,
-            name: item.name,
-            number: item.number,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-          orderRequestEmployeeId: selectedData.createdBy,
-          orderRequestEmployeeName: '',
-          orderApprovedEmployeeId: '',
-          orderApprovedEmployeeName: '',
-          memo: selectedData.memo,
-          registrationDate: selectedData.registrationDate,
-          totalAmount: selectedData.totalAmount,
-          status: selectedData.status,
-          owners: selectedData.owners,
-          deliveryDate: selectedData.deliveryDate,
-        }
+        const purchaseDetail = handleSelectedSaleDetail(selectedData)
         setSelectedPurchase(purchaseDetail)
         setModalMode('view')
         setModalOpen(true)
-        console.log(selectedData)
       }
     } else {
       notificationModal.error('詳細を表示するには、表の行を選択してください。')

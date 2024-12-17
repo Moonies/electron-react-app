@@ -233,6 +233,26 @@ export default function useOrder() {
     }
   }
 
+  const mappingStatus = (status: string) => {
+    switch (status) {
+      case OrderStatus.PENDING:
+        return 'PENDING'
+      case OrderStatus.CONFIRM:
+        return 'CONFIRM'
+      case OrderStatus.SHIP:
+        return 'SHIP'
+      case OrderStatus.COMPLETE:
+        return 'COMPLETE'
+      case OrderStatus.CANCEL:
+        return 'CANCEL'
+      case OrderStatus.REJECT:
+        return 'REJECT'
+
+      default:
+        return ''
+    }
+  }
+
   const handleSelectedSaleDetail = async (saleId: string) => {
     const result = await getSaleDetail(saleId)
     if (result) {
@@ -246,7 +266,7 @@ export default function useOrder() {
         product: result.products,
         registrationDate: result.registrationDate,
         shippingmentDate: result.shipmentDate,
-        status: result.status,
+        status: mappingStatus(result.status),
         totalAmount: result.totalAmount,
         owners: result.owners,
         memo: result.memo,
@@ -270,13 +290,13 @@ export default function useOrder() {
           id: item.number + item.name,
         })),
         orderRequestEmployeeId: result.createdBy,
-        orderRequestEmployeeName: '',
-        orderApprovedEmployeeId: '',
-        orderApprovedEmployeeName: '',
+        // orderRequestEmployeeName: '',
+        // orderApprovedEmployeeId: '',
+        // orderApprovedEmployeeName: '',
         memo: result.memo,
         registrationDate: result.registrationDate,
         totalAmount: result.totalAmount,
-        status: result.status,
+        status: mappingStatus(result.status),
         owners: result.owners,
         deliveryDate: result.deliveryDate,
       }
