@@ -128,11 +128,11 @@ export default function CustomerManagementModal({
       api.postCode.getPostCode(deConvertPostalCode(formData.postalCode))
     )
     if (result.code === 200 && result.data) {
-      //data is now for test and mock
+      let fullCity = result.data.city + result.data.streetAddress
       setFormData(prev => ({
         ...prev,
         ['prefecture']: result.data?.prefecture ?? '',
-        ['city']: result.data?.city ?? '',
+        ['city']: fullCity,
         ['postalCode']: result.data?.postCode ?? deConvertPostalCode(formData.postalCode),
       }))
     } else {
@@ -292,7 +292,7 @@ export default function CustomerManagementModal({
                 onChange={e => handleChange('city', e.target.value)}
                 // fullWidth
                 margin='normal'
-                // sx={{ width: '40%' }}
+                sx={{ width: '40%' }}
               />
               <TextField
                 label='番地'
@@ -302,13 +302,15 @@ export default function CustomerManagementModal({
                 // fullWidth
                 margin='normal'
               />
+            </Box>
+            <Box display={'flex'} flexDirection={'row'} gap={2}>
               <TextField
                 label='建物名・部屋番号'
                 type='text'
                 value={formData.buildingName}
                 defaultValue={undefined}
                 onChange={e => handleChange('buildingName', e.target.value)}
-                // fullWidth
+                sx={{ width: '40%' }}
                 margin='normal'
               />
             </Box>

@@ -62,11 +62,12 @@ export default function useMyCompany() {
   const getPostCode = async (postCode: string) => {
     const result = await withLoading(api.postCode.getPostCode(postCode))
     if (result.code === 200 && result.data) {
+      let fullCity = result.data.city + result.data.streetAddress
       setFormCompanyDetail(prev => ({
         ...prev,
         ['postalCode']: postCode,
         ['prefecture']: result.data?.prefecture ?? '',
-        ['city']: result.data?.city,
+        ['city']: fullCity,
       }))
     } else {
       notificationSnackbar.error('postalCode not found')
