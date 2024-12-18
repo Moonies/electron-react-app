@@ -10,6 +10,7 @@ import {
   UploadFile as UploadFileIcon,
   ContentPasteSearch as DetailIcon,
   FileDownload as FileDownloadIcon,
+  Redo as RedoIcon,
 } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { StyledButton } from 'styles/styles'
@@ -29,6 +30,9 @@ import SelectTypeOrderDialog from 'components/Dialogs/SelectTypeOrderDialog'
 import PurchaseModal, { PurchaseModalDataProps } from 'components/Modals/PurchaseModal'
 import { PurchaseData } from 'api/purchase/getPurchaseList'
 import { SaleData } from 'api/sale/getSaleList'
+import AdvanceOrderStatusDialog from 'components/Dialogs/AdvanceOrderStatusDialog'
+import { PurchaseStatus } from 'api/purchase'
+import { SaleStatus } from 'api/sale'
 
 export default function OrderPage() {
   const {
@@ -57,11 +61,14 @@ export default function OrderPage() {
     handleSelectedSaleDetail,
     getSaleOrderList,
     getPurchaseOrderList,
+    updateSaleStatus,
+    updatePurchaseStatus,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [selectedSale, setSelectedSale] = useState<SaleModalDataProps>()
   const [selectedPurchase, setSelectedPurchase] = useState<PurchaseModalDataProps>()
+  const [selectedOrder, setSelectedOrder] = useState<OrderData>()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add')
   const { openConfirmModal } = useConfirmModal()
@@ -69,6 +76,7 @@ export default function OrderPage() {
   const { exportSaleSelected, prepareSlipData, exportOrder } = useExportOrder()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [orderType, setOrderType] = useState<'Sale' | 'Purchase'>()
+  const [dialogType, setDialogType] = useState<'order' | 'status'>()
   const [showPDF, setShowPDF] = useState(false)
   const { setLoading } = useLoading()
 
@@ -102,7 +110,7 @@ export default function OrderPage() {
       const selectedData = orderData.find(order => order.id === selectedId)
       if (selectedData) {
         if (selectedData.status === OrderStatus.CANCEL) {
-          notificationModal.warning('Status is Cancel, cannot edit data.')
+          notificationModal.warning('状態はキャンセルですから, データを編集できません。')
           return
         }
         if (selectedData.orderType === 'Sale') {
@@ -195,7 +203,7 @@ export default function OrderPage() {
               if (response) {
                 setModalOpen(false)
                 setLoading(false)
-                notificationSnackbar.success('Sale Order Update is Success!!')
+                // notificationSnackbar.success('Sale Order Update is Success!!')
                 handleSearch()
               }
             }
@@ -214,7 +222,6 @@ export default function OrderPage() {
             {
               const response = await addNewPurchaseOrder(data as PurchaseModalDataProps)
               if (response) {
-                notificationSnackbar.success('Purchase Order is Success!!')
                 setLoading(false)
                 setModalOpen(false)
               }
@@ -225,19 +232,18 @@ export default function OrderPage() {
             if (response) {
               setModalOpen(false)
               setLoading(false)
-              notificationSnackbar.success('Purchase Order Update is Success!!')
               handleSearch()
-              if (data.status === OrderStatus.CONFIRM) {
-                const confirmed = await openConfirmModal({
-                  title: '確認してください',
-                  message: `Do you want to print 3連納品書?`,
-                })
-                if (confirmed) {
-                  // Perform delete operation
-                  //print condition
-                }
-              } else {
-              }
+              // if (data.status === OrderStatus.CONFIRM) {
+              //   const confirmed = await openConfirmModal({
+              //     title: '確認してください',
+              //     message: `Do you want to print 3連納品書?`,
+              //   })
+              //   if (confirmed) {
+              //     // Perform delete operation
+              //     //print condition
+              //   }
+              // } else {
+              // }
             }
             break
           }
@@ -293,6 +299,23 @@ export default function OrderPage() {
     }
   }
 
+  const handleAdvanceStatusConfirm = async (status: PurchaseStatus | SaleStatus) => {
+    setLoading(true)
+    if (selectedOrder && selectedOrder.orderType === OrderType.SALE) {
+      const response = await updateSaleStatus(selectedOrder.id, status as SaleStatus)
+      if (response) notificationSnackbar.success('編集完了しました。')
+
+      handleSearch()
+      setLoading(false)
+    } else if (selectedOrder && selectedOrder.orderType === OrderType.PURCHASE) {
+      const response = await updatePurchaseStatus(selectedOrder.id, status as PurchaseStatus)
+      if (response) notificationSnackbar.success('編集完了しました。')
+
+      handleSearch()
+      setLoading(false)
+    }
+  }
+
   const handleExport = async () => {
     if (searchCriteria.orderType === OrderType.SALE) {
       const saleOrder = await getSaleOrderList()
@@ -338,6 +361,24 @@ export default function OrderPage() {
         '終了日は開始日より前に設定できません。開始日はクリアされています。'
       )
       handleChange('startDate', null)
+    }
+  }
+
+  const handleAdvanceStatus = () => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = orderData.find(order => order.id === selectedId)
+      if (selectedData) {
+        if (selectedData.status === OrderStatus.CANCEL) {
+          notificationModal.warning('状態はキャンセルですから, 状態を編集できません。')
+          return
+        }
+        setDialogType('status')
+        setSelectedOrder(selectedData)
+        setDialogOpen(true)
+      }
+    } else {
+      notificationModal.error('編集する表の行を選択してください。')
     }
   }
 
@@ -528,7 +569,10 @@ export default function OrderPage() {
                 startIcon={<AddIcon />}
                 size='large'
                 // onClick={handleAddClick}
-                onClick={() => setDialogOpen(true)}
+                onClick={() => {
+                  setDialogType('order')
+                  setDialogOpen(true)
+                }}
               >
                 追加
               </StyledButton>
@@ -550,15 +594,23 @@ export default function OrderPage() {
               >
                 編集
               </StyledButton>
-              {/* // current version is not support  */}
               <StyledButton
+                variant='outlined'
+                startIcon={<RedoIcon />}
+                size='large'
+                onClick={handleAdvanceStatus}
+              >
+                前進状態
+              </StyledButton>
+              {/* // current version is not support  */}
+              {/* <StyledButton
                 variant='outlined'
                 startIcon={<UploadFileIcon />}
                 size='large'
                 sx={{ visibility: 'hidden' }}
               >
                 自動アプロード
-              </StyledButton>
+              </StyledButton> */}
             </Box>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'space-around'}>
               <StyledButton
@@ -617,7 +669,7 @@ export default function OrderPage() {
         />
       )}
 
-      {dialogOpen && (
+      {dialogOpen && dialogType === 'order' && (
         <SelectTypeOrderDialog
           onClose={() => setDialogOpen(false)}
           onSubmit={orderType => {
@@ -626,6 +678,22 @@ export default function OrderPage() {
             handleAddClick()
           }}
           open={dialogOpen}
+        />
+      )}
+      {dialogOpen && dialogType === 'status' && selectedOrder && (
+        <AdvanceOrderStatusDialog
+          onClose={() => setDialogOpen(false)}
+          onSubmit={newStatus => {
+            setDialogOpen(false)
+            handleAdvanceStatusConfirm(newStatus)
+          }}
+          open={dialogOpen}
+          initialData={{
+            id: selectedOrder?.id,
+            status: selectedOrder.status,
+            orderNumber: selectedOrder.orderCode,
+            orderType: selectedOrder.orderType,
+          }}
         />
       )}
       {/* to preview and check export pdf */}

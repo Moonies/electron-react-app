@@ -32,7 +32,7 @@ export interface NewSaleDetailProps {
   companyId: string
 }
 
-export default async function updatePurchaseDetail(
+export default async function updateSaleDetail(
   httpRequest: HttpRequest,
   newSaleDetail: NewSaleDetailProps
 ): Promise<ApiResponse<{}>> {
