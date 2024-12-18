@@ -6,6 +6,7 @@ export interface AddressData {
   postCode: string
   prefecture: string
   city: string
+  streetAddress: string
 }
 
 export default async function getPostCode(
