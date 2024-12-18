@@ -12,11 +12,9 @@ import updatePurchaseStatus from './updatePurchaseStatus'
 import { default as deletePurchaseOrder } from './deletePurchase'
 
 export enum PurchaseStatus {
-  INVOICE_PENDING = 'invoice_pending',
   PENDING = 'PENDING',
   CONFIRM = 'CONFIRM',
-  ON_DELIVERY = 'SHIP',
-  DELIVERED = 'COMPLETE',
+  INSTOCK = 'COMPLETE',
   CANCEL = 'CANCEL',
 }
 

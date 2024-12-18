@@ -179,19 +179,6 @@ export default function useOrder() {
     if (result.code === 200 && result.data) {
       setStatusOrder(result.data)
     }
-    // let status: StatusOption[] = [
-    //   { name: OrderStatus.ALL, label: '全て', type: OrderType.ALL },
-    //   { name: OrderStatus.PENDING, label: '見積', type: OrderType.SALE },
-    //   { name: OrderStatus.CONFIRM, label: '受注', type: OrderType.SALE },
-    //   { name: OrderStatus.SHIP, label: '出荷', type: OrderType.SALE },
-    //   // { name: OrderStatus.COMPLETE, label: '売上', type: OrderType.SALE },
-    //   { name: OrderStatus.PENDING, label: '未発注', type: OrderType.PURCHASE },
-    //   { name: OrderStatus.CONFIRM, label: '発注', type: OrderType.PURCHASE },
-    //   { name: OrderStatus.SHIP, label: '配達', type: OrderType.PURCHASE },
-    //   // { name: OrderStatus.COMPLETE, label: '入庫', type: OrderType.PURCHASE },
-    //   { name: OrderStatus.REJECT, label: '返品', type: OrderType.ALL },
-    //   { name: OrderStatus.CANCEL, label: 'キャンセル', type: OrderType.ALL },
-    // ]
   }, [])
 
   const handleChange = (name: string, value?: string | Date | null) => {
@@ -358,8 +345,8 @@ export default function useOrder() {
       case SaleStatus.CANCEL:
         {
           if (formData.id) {
-            const response = await api.sale.updateSaleStatus(formData.id, formData.status)
-            if (response.code === 200) {
+            const response = await updateSaleStatus(formData.id, formData.status)
+            if (response) {
               notificationSnackbar.success('編集完了しました。')
               return true
             }
@@ -408,15 +395,20 @@ export default function useOrder() {
           owners: formData.owners,
         }
         const response = await api.purchase.updatePurchaseDetail(data)
-        if (response.code === 200) return true
+        if (response.code === 200) {
+          notificationSnackbar.success('編集完了しました。')
+          return true
+        }
         break
       case PurchaseStatus.CONFIRM:
-      case PurchaseStatus.ON_DELIVERY:
-      case PurchaseStatus.DELIVERED:
+      case PurchaseStatus.INSTOCK:
       case PurchaseStatus.CANCEL:
         if (formData.id) {
-          const response = await api.purchase.updatePurchaseStatus(formData.id, formData.status)
-          if (response.code === 200) return true
+          const response = await updatePurchaseStatus(formData.id, formData.status)
+          if (response) {
+            notificationSnackbar.success('編集完了しました。')
+            return true
+          }
         }
         break
 
@@ -451,6 +443,16 @@ export default function useOrder() {
     }
   }
 
+  const updateSaleStatus = async (saleId: string, status: SaleStatus) => {
+    const response = await api.sale.updateSaleStatus(saleId, status)
+    if (response.code === 200) {
+      return true
+    }
+  }
+  const updatePurchaseStatus = async (purchaseId: string, status: PurchaseStatus) => {
+    const response = await api.purchase.updatePurchaseStatus(purchaseId, status)
+    if (response.code === 200) return true
+  }
   const getSaleOrderList = async () => {
     const [orderType, status] = searchCriteria.status.split('.')
 
@@ -486,7 +488,6 @@ export default function useOrder() {
     setLoading(true)
     const [orderType, status] = searchCriteria.status.split('.')
 
-    //call api
     let prepareSearhCriteria = {
       ...searchCriteria,
       startDate: dayjs(searchCriteria.startDate).format('YYYY-MM-DD'),
@@ -536,5 +537,7 @@ export default function useOrder() {
     getSaleOrderList,
     getPurchaseOrderList,
     convertOrderType,
+    updateSaleStatus,
+    updatePurchaseStatus,
   }
 }

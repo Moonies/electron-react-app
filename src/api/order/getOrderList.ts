@@ -47,8 +47,8 @@ export interface OrderData {
   shipmentDate: string | Dayjs
   deliveryDate: string | Dayjs
   paymentDueDate: string | Dayjs
-  status: string | null
-  orderType: string
+  status: string
+  orderType: OrderType
 }
 //for implement case only when apprved should be remove it
 function chunkArray(mockdata: OrderData[], pageSize: number, page: number) {

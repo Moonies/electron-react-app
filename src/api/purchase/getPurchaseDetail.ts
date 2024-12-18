@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ApiResponse, axiosInstance } from 'api'
 import dayjs, { Dayjs } from 'dayjs'
 import { mockData } from './_mockdata'
-import { PurchaseStatus } from '.'
+import { PurchaseStatus } from 'api/purchase'
 import { HttpRequest } from 'hooks/useHttp'
 export interface SearchCriteria {
   category: string
