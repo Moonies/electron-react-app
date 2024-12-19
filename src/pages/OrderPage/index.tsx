@@ -95,7 +95,7 @@ export default function OrderPage() {
 
   useEffect(() => {
     prepareCategorySearch
-    prepareCategoryStatus
+    prepareCategoryStatus()
   }, [])
 
   const handleAddClick = () => {

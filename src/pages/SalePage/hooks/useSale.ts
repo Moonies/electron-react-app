@@ -116,8 +116,6 @@ export default function useSales() {
         return 'PENDING'
       case OrderStatus.CONFIRM:
         return 'CONFIRM'
-      case OrderStatus.SHIP:
-        return 'SHIP'
       case OrderStatus.COMPLETE:
         return 'COMPLETE'
       case OrderStatus.CANCEL:
