@@ -80,7 +80,7 @@ export default function useProduct() {
         headerName: '単位',
         type: 'number',
         headerAlign: 'center',
-        valueGetter: (value: { id: string; label: string; name: string }) => value.label,
+        valueGetter: (value?: { id: string; label: string; name: string }) => value?.label,
       },
       {
         field: 'inStock',
@@ -223,8 +223,9 @@ export default function useProduct() {
     if (cachedData[cacheKey]) {
       setProductData(cachedData[cacheKey])
       return
+    } else if (productData.length !== 0) {
+      getProductList(newModel)
     }
-    getProductList(newModel)
   }
 
   const getProductOrderHistoryList = async (productId: string) => {

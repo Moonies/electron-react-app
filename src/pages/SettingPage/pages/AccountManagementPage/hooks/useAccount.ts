@@ -102,8 +102,9 @@ export default function useAccount() {
     if (cachedData[cacheKey]) {
       setUserListData(cachedData[cacheKey])
       return
+    } else if (userListData.length !== 0) {
+      getUserList(newModel)
     }
-    getUserList(newModel)
     //call APi
   }
   return {

@@ -180,8 +180,9 @@ export default function useComponent() {
     if (cachedData[cacheKey]) {
       setComponentListData(cachedData[cacheKey])
       return
+    } else if (componentListData.length !== 0) {
+      getComponentListData(newModel)
     }
-    getComponentListData(newModel)
   }
   return {
     paginationModel,
