@@ -132,8 +132,9 @@ export default function useProduct() {
 
   const handleSearch = useCallback(async () => {
     //condition and prepare data put here
+    setCachedData({})
     getProductList(paginationModel)
-  }, [searchCriteria, withLoading])
+  }, [searchCriteria, withLoading, paginationModel])
 
   const handleAddNewProduct = async (formData: ProductDetailModalProps) => {
     let newProduct: AddNewProductProps = {
@@ -215,7 +216,7 @@ export default function useProduct() {
       // Clear the cache when page size changes
       setCachedData({})
     } else {
-      setPaginationModel(newModel)
+      setPaginationModel({ ...newModel })
     }
     const cacheKey = `${newModel.page}-${newModel.pageSize}`
 

@@ -89,7 +89,7 @@ export default function ProductHistoryModal({
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography variant='h6'>部品歴史</Typography>
+          <Typography variant='h6'>部品履歴</Typography>
           <IconButton edge='end' color='inherit' onClick={onClose} aria-label='close'>
             <CloseIcon />
           </IconButton>
@@ -115,7 +115,7 @@ export default function ProductHistoryModal({
           </Box>
           <Box p={2}>
             <Typography variant='h5' noWrap>
-              <Divider textAlign='left'>発注歴史</Divider>
+              <Divider textAlign='left'>発注履歴</Divider>
             </Typography>
           </Box>
           <DataTable
