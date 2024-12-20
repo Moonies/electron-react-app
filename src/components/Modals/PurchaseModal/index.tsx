@@ -212,7 +212,9 @@ export default function PurchaseModal({
       case PurchaseStatus.PENDING:
         return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.name))
       case PurchaseStatus.CONFIRM:
-        return statusList.filter(status => ['CONFIRM', 'CANCEL', 'REJECT'].includes(status.name))
+        return statusList.filter(status =>
+          ['CONFIRM', 'COMPLETE', 'CANCEL', 'REJECT'].includes(status.name)
+        )
       // case PurchaseStatus.ON_DELIVERY:
       //   return statusList.filter(status =>
       //     ['SHIP', 'COMPLETE', 'REJECT', 'CANCEL'].includes(status.name)

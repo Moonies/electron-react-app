@@ -334,7 +334,7 @@ export default function useOrder() {
           return true
         }
         break
-      case SaleStatus.ON_DELIVERY:
+      // case SaleStatus.ON_DELIVERY:
       case SaleStatus.CONFIRM:
       case SaleStatus.DELIVERED:
       case SaleStatus.CANCEL:

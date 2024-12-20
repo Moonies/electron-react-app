@@ -199,7 +199,7 @@ export default function useExportOrder() {
       let title = convertTitle(orderSelectedData.status)
       let printType = convertPrintType(orderSelectedData.orderType, orderSelectedData.status)
       const [customer, myCompany] = await Promise.all([
-        getCustomerDetail(orderSelectedData.companyId),
+        getCustomerDetail(orderSelectedData.companyId ?? orderSelectedData.company.id),
         getMyCompanyDetail(),
       ])
       let item
@@ -218,6 +218,7 @@ export default function useExportOrder() {
         sender: myCompany || ({} as SenderDetail),
       }
       //watiting re check export task
+      // console.log(newExportDetail) // for check detail
       exportToPdf(printColumnList, item ?? [], newExportDetail, printType)
     } catch (error) {
       notificationModal.error(`Error exporting : ${error}`)

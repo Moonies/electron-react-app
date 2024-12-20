@@ -15,7 +15,7 @@ export enum SaleStatus {
   INVOICE_PENDING = 'invoice_pending',
   PENDING = 'PENDING',
   CONFIRM = 'CONFIRM',
-  ON_DELIVERY = 'SHIP',
+  // ON_DELIVERY = 'SHIP',
   DELIVERED = 'COMPLETE',
   CANCEL = 'CANCEL',
 }
