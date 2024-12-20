@@ -74,16 +74,11 @@ export default function useOrder() {
       //   return '納期超過'
       case OrderStatus.CONFIRM:
         return orderType === OrderType.SALE ? '受注' : '発注'
-      case OrderStatus.SHIP:
-        return orderType === OrderType.SALE ? '出荷' : '配達'
-      // case OrderStatus.RECEIVED:
-      //   return '発注'
-      // case OrderStatus.PROCESSING:
-      //   return 'processing'
-      // case OrderStatus.INSTORE:　//completed in purchase order should be can see purchase page only
-      //   return '入庫済'
-      // case OrderStatus.DELIVERED: //completed in sale order should be can see sale page only
-      //   return '出荷済'
+      // case OrderStatus.SHIP:
+      //   return orderType === OrderType.SALE ? '出荷' : '配達'
+      //completed in purchase order should be can see purchase page only
+      //completed in sale order should be can see sale page only
+
       case OrderStatus.CANCEL:
         return 'キャンセル'
       default:
@@ -174,10 +169,11 @@ export default function useOrder() {
     setCategorySearch(result)
   }, [])
 
-  const prepareCategoryStatus = useMemo(async () => {
+  const prepareCategoryStatus = useCallback(async () => {
     const result = await api.status.getStatusList()
     if (result.code === 200 && result.data) {
-      setStatusOrder(result.data)
+      let newResult = result.data.filter(item => item.name !== 'COMPLETE')
+      setStatusOrder(newResult)
     }
   }, [])
 
@@ -227,8 +223,6 @@ export default function useOrder() {
         return 'PENDING'
       case OrderStatus.CONFIRM:
         return 'CONFIRM'
-      case OrderStatus.SHIP:
-        return 'SHIP'
       case OrderStatus.COMPLETE:
         return 'COMPLETE'
       case OrderStatus.CANCEL:
@@ -340,7 +334,7 @@ export default function useOrder() {
           return true
         }
         break
-      case SaleStatus.ON_DELIVERY:
+      // case SaleStatus.ON_DELIVERY:
       case SaleStatus.CONFIRM:
       case SaleStatus.DELIVERED:
       case SaleStatus.CANCEL:

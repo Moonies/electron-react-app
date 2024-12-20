@@ -170,7 +170,6 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // setLoading(true)
     try {
       const rows = addNewProductDataGridRef.current.getRowModels()
       const totalAmount = Array.from(rows.values()).reduce((sum, row) => {
@@ -204,12 +203,12 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
         return statusList.filter(status => ['PENDING', 'CONFIRM', 'CANCEL'].includes(status.name))
       case SaleStatus.CONFIRM:
         return statusList.filter(status =>
-          ['CONFIRM', 'SHIP', 'CANCEL', 'REJECT'].includes(status.name)
+          ['CONFIRM', 'COMPLETE', 'SHIP', 'CANCEL', 'REJECT'].includes(status.name)
         )
-      case SaleStatus.ON_DELIVERY:
-        return statusList.filter(status =>
-          ['SHIP', 'COMPLET', 'REJECT', 'CANCEL'].includes(status.name)
-        )
+      // case SaleStatus.ON_DELIVERY:
+      //   return statusList.filter(status =>
+      //     ['SHIP', 'COMPLETE', 'REJECT', 'CANCEL'].includes(status.name)
+      //   )
 
       default:
         return statusList
@@ -338,7 +337,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                 getOptionLabel={option => option.companyInfo.name}
                 renderInput={params => <TextField {...params} label='顧客名' />}
                 readOnly={modalMode === 'view'}
-                isOptionEqualToValue={(option, value) => option.companyCode === value.companyCode}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
                     setFormData(prev => ({

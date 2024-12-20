@@ -16,7 +16,7 @@ export enum OrderStatus {
   //v2 orderStatus
   PENDING = 'PENDING',
   CONFIRM = 'CONFIRMED',
-  SHIP = 'SHIPPED',
+  // SHIP = 'SHIPPED',
   COMPLETE = 'COMPLETED',
   REJECT = 'REJECTED',
   CANCEL = 'CANCELLED',

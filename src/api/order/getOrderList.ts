@@ -17,6 +17,7 @@ export interface OrderSearchCriteria {
   dateType?: string
 }
 type Company = {
+  id: string
   companyType: string
   companyInfo: {
     name: string
