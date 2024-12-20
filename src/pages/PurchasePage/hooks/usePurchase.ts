@@ -49,8 +49,9 @@ export default function usePurchase() {
 
   const handleSearch = useCallback(async () => {
     //if condition when search put in here
+    setCachedData({})
     getPurchaseListData(paginationModel)
-  }, [searchCriteria, withLoading])
+  }, [searchCriteria, withLoading, paginationModel])
 
   const columns: GridColDef[] = useMemo(
     () => [

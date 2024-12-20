@@ -98,8 +98,9 @@ export default function useComponent() {
 
   const handleSearch = useCallback(async () => {
     //if have another event
+    setCachedData({})
     getComponentListData(paginationModel)
-  }, [searchCriteria, withLoading])
+  }, [searchCriteria, withLoading, paginationModel])
 
   const handleComponentPurchaseHistoryList = async (componentName: string) => {
     const purchaseHistoryResponse = await getComponentPurchaseHistory(componentName)
