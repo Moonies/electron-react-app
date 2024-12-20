@@ -203,8 +203,9 @@ export default function useOrder() {
     if (cachedData[cacheKey]) {
       setOrderData(cachedData[cacheKey])
       return
+    } else if (orderData.length !== 0) {
+      getOrderListData(newModel)
     }
-    getOrderListData(newModel)
   }
 
   const handleDeleteOrder = async (selectedOrder: OrderData) => {

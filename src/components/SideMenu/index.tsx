@@ -9,16 +9,17 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
 import useMenu, { MenuItem } from './hooks/useMenu'
 import packageInfo from '../../../package.json'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export default function SideMenu({}: React.HTMLProps<HTMLInputElement>) {
   const { menuItem, handleListItemClick, selectedMenu } = useMenu()
   const [open, setOpen] = useState<{ [key: string]: boolean }>({})
+  const location = useLocation()
   const drawerWidth = 240
 
   const handleClick = (item: MenuItem) => {
@@ -41,7 +42,7 @@ export default function SideMenu({}: React.HTMLProps<HTMLInputElement>) {
               handleListItemClick(item.path || '')
             }
           }}
-          selected={item.path === selectedMenu}
+          selected={item.path === location.pathname}
           sx={{ pl: 2 + depth * 2 }}
         >
           <ListItemIcon>

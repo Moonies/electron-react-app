@@ -207,8 +207,9 @@ export default function usePurchase() {
     if (cachedData[cacheKey]) {
       setPurchaseData(cachedData[cacheKey])
       return
+    } else if (purchaseData.length !== 0) {
+      getPurchaseListData(newModel)
     }
-    getPurchaseListData(newModel)
   }
   return {
     searchCriteria,

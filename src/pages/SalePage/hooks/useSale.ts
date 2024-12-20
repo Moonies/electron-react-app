@@ -167,8 +167,9 @@ export default function useSales() {
     if (cachedData[cacheKey]) {
       setSaleData(cachedData[cacheKey])
       return
+    } else if (saleData.length !== 0) {
+      getSaleList(newModel)
     }
-    getSaleList(newModel)
   }
 
   const getSaleList = async ({ page, pageSize }: GridPaginationModel) => {

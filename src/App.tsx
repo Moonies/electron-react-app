@@ -26,13 +26,16 @@ import OrderPage from 'pages/OrderPage'
 import ProductPage from 'pages/ProductPage'
 import PurchasePage from 'pages/PurchasePage'
 import ReportPage from 'pages/ReportPage'
-import SalePage from './pages/SalePage'
-import SideMenu from './components/SideMenu'
+import SalePage from 'pages/SalePage'
+import SideMenu from 'components/SideMenu'
 import SupplierManagementPage from 'pages/SettingPage/pages/SupplierManagementPage'
 import theme from './styles/theme'
 import useApiConfig from 'hooks/useApiConfig'
-import useLoading from './hooks/useLoading'
-import useLoadingRedux from './hooks/useLoading'
+import useLoading from 'hooks/useLoading'
+import useLoadingRedux from 'hooks/useLoading'
+import { ErrorBoundary } from 'react-error-boundary'
+import ErrorFallback from 'components/ErrorHandle'
+
 //now recharts and not implement in react ^18.x.x use disable default props just only recharts
 const error = console.error
 console.error = (...args: any) => {
@@ -100,52 +103,60 @@ export default function App() {
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Router>
           <Box display={'flex'} flex={1} minHeight={'100vh'}>
-            <ConfirmModalProvider>
-              <Header loginStatus={loginSuccess} />
-              <SideMenu />
-              <Box
-                component={'main'}
-                sx={{ backgroundColor: theme => theme.palette.secondary.Main }}
-                flexGrow={1}
-                display={'flex'}
-                flexDirection={'column'}
-                overflow={'hidden'}
-              >
-                <Toolbar />
-                <Routes>
-                  <Route path='/' element={<DashboardPage />} />
-                  <Route path='/sales' element={<SalePage />} />
-                  <Route path='/orders' element={<OrderPage />} />
-                  <Route path='/purchase' element={<PurchasePage />} />
-                  <Route path='/kpi' element={<KpiPage />} />
-                  <Route path='/reports' element={<ReportPage />} />
-                  <Route path='/products' element={<ProductPage />} />
-                  <Route path='/component' element={<ComponentManagementPage />} />
-                  <Route path='/settings/account' element={<AccountManagementPage />} />
-                  <Route path='/settings/mycompany' element={<MyCompanyManagementPage />} />
-                  <Route path='/settings/customer' element={<CustomerManagementPage />} />
-                  <Route path='/settings/supplier' element={<SupplierManagementPage />} />
-                  <Route path='/settings/server' element={<IpConfigManegementPage />} />
-                </Routes>
-              </Box>
-              <LoginModal
-                open={loginOpen}
-                onClose={() => {
-                  //exit programe etc.
-                  electronBridge.closeApp()
-                }}
-                onError={handleError}
-                //when success is keep user to local storage
-                onSuccess={() => {
-                  setLoading(false)
-                  setLoginOpen(false)
-                  setLoginSuccess(true)
-                }}
-              />
-              <IpSettingModal open={apiConfigModal} onClose={() => handleCloseApiConfig()} />
-              <LoadingOverlay open={isLoading} />
-              <Notification />
-            </ConfirmModalProvider>
+            <ErrorBoundary
+              FallbackComponent={ErrorFallback}
+              onReset={() => {
+                // Optional: Reset any application state here
+                console.log('Error boundary reset!')
+              }}
+            >
+              <ConfirmModalProvider>
+                <Header loginStatus={loginSuccess} />
+                <SideMenu />
+                <Box
+                  component={'main'}
+                  sx={{ backgroundColor: theme => theme.palette.secondary.Main }}
+                  flexGrow={1}
+                  display={'flex'}
+                  flexDirection={'column'}
+                  overflow={'hidden'}
+                >
+                  <Toolbar />
+                  <Routes>
+                    <Route path='/' element={<DashboardPage />} />
+                    <Route path='/sales' element={<SalePage />} />
+                    <Route path='/orders' element={<OrderPage />} />
+                    <Route path='/purchase' element={<PurchasePage />} />
+                    <Route path='/kpi' element={<KpiPage />} />
+                    <Route path='/reports' element={<ReportPage />} />
+                    <Route path='/products' element={<ProductPage />} />
+                    <Route path='/component' element={<ComponentManagementPage />} />
+                    <Route path='/settings/account' element={<AccountManagementPage />} />
+                    <Route path='/settings/mycompany' element={<MyCompanyManagementPage />} />
+                    <Route path='/settings/customer' element={<CustomerManagementPage />} />
+                    <Route path='/settings/supplier' element={<SupplierManagementPage />} />
+                    <Route path='/settings/server' element={<IpConfigManegementPage />} />
+                  </Routes>
+                </Box>
+                <LoginModal
+                  open={loginOpen}
+                  onClose={() => {
+                    //exit programe etc.
+                    electronBridge.closeApp()
+                  }}
+                  onError={handleError}
+                  //when success is keep user to local storage
+                  onSuccess={() => {
+                    setLoading(false)
+                    setLoginOpen(false)
+                    setLoginSuccess(true)
+                  }}
+                />
+                <IpSettingModal open={apiConfigModal} onClose={() => handleCloseApiConfig()} />
+                <LoadingOverlay open={isLoading} />
+                <Notification />
+              </ConfirmModalProvider>
+            </ErrorBoundary>
           </Box>
         </Router>
       </LocalizationProvider>
