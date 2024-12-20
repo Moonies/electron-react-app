@@ -149,9 +149,10 @@ export default function useSales() {
 
   const handleSearch = useCallback(async () => {
     //if condition when search put in here
+    setCachedData({})
     getSaleList(paginationModel)
     getSaleTotalAmount()
-  }, [searchCriteria, withLoading])
+  }, [searchCriteria, withLoading, paginationModel])
 
   const handlePaginationModelChange = async (newModel: GridPaginationModel) => {
     if (newModel.pageSize !== paginationModel.pageSize) {

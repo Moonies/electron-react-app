@@ -180,7 +180,6 @@ export default function ProductPage() {
       let productHistoryData: ProductHistoryData
       if (selectedData) {
         const result = await handleOrderProductHistory(selectedData.id)
-        console.log(result)
         if (result) {
           productHistoryData = {
             id: selectedData.id,

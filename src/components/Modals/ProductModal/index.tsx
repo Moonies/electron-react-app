@@ -133,9 +133,15 @@ export default function ProductModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    let rawProductCost = newComponentListData.reduce((sum, row) => {
+      const rowTotalPrice = row.quantity * row.price
+      return sum + rowTotalPrice
+    }, 0)
     try {
       await onConfirm({
         ...formData,
+        productCost: rawProductCost,
+        productPriceMargin: formData.productPrice - rawProductCost,
         components: newComponentListData as NewComponentDetail[],
         image: uploadedImage,
       })
@@ -170,7 +176,6 @@ export default function ProductModal({
           file,
           previewUrl: URL.createObjectURL(file),
         }
-        console.log(newImage.previewUrl)
         setUploadedImage(newImage)
       } catch (error) {
         // setPreviewUrl(null)
@@ -284,7 +289,7 @@ export default function ProductModal({
               </TextField>
             </Box>
             <Box display={'flex'} flexDirection={'row'} gap={2}>
-              <TextField
+              {/* <TextField
                 label='原価'
                 value={formData.productCost}
                 onChange={e =>
@@ -302,7 +307,7 @@ export default function ProductModal({
                 onContextMenu={e => e.preventDefault()} // Optionally prevent context menu
                 variant='outlined'
                 // sx={{ width: '20%' }}
-              />
+              /> */}
               <TextField
                 label='単価'
                 value={formData.productPrice}
@@ -322,7 +327,7 @@ export default function ProductModal({
 
                 // sx={{ width: '20%' }}
               />
-              <TextField
+              {/* <TextField
                 label='粗利益'
                 value={calculateProfitMargin(formData.productCost, formData.productPrice)}
                 // onChange={e => handleChange('productPriceMargin', parseFloat(e.target.value))}
@@ -332,8 +337,7 @@ export default function ProductModal({
                   inputComponent: NumericFormatCustom as any,
                 }}
                 margin='normal'
-                // sx={{ width: '20%' }}
-              />
+              /> */}
               {modalMode !== 'add' && (
                 <TextField
                   label='在庫数'

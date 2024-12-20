@@ -185,8 +185,9 @@ export default function useOrder() {
 
   const handleSearch = useCallback(async () => {
     //if condition when search put in here
+    setCachedData({})
     getOrderListData(paginationModel)
-  }, [searchCriteria, withLoading])
+  }, [searchCriteria, withLoading, paginationModel])
 
   const handlePaginationModelChange = async (newModel: GridPaginationModel) => {
     if (newModel.pageSize !== paginationModel.pageSize) {
