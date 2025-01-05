@@ -122,7 +122,7 @@ export default function SupplierManagementPage() {
   const handleModalConfirm = async (data: ModalSupplierProps) => {
     const confirmed = await openConfirmModal({
       title: '確認してください',
-      message: 'Are you sure you want to save data.',
+      message: 'このデータを保存しますか。',
     })
     if (confirmed) {
       let newSupplierData = {
