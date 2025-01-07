@@ -370,7 +370,10 @@ export default function useOrder() {
       owners: formData.owners,
     }
     const result = await api.purchase.addNewPurchase(data)
-    if (result.code === 200) return true
+    if (result.code === 200) {
+      notificationSnackbar.success('追加完了しました。')
+      return true
+    }
   }
 
   const editPurchaseOrder = async (formData: PurchaseModalDataProps) => {

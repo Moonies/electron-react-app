@@ -6,6 +6,8 @@ import { HttpRequest } from 'hooks/useHttp'
 export interface SearchCriteriaComponentList {
   category?: string
   keyword?: string
+  page?: number
+  pageSize?: number
 }
 
 export interface ComponentData {
@@ -20,13 +22,15 @@ export interface ComponentData {
 
 export default async function getComponentList(
   httpRequest: HttpRequest,
-  { category = '', keyword = '' }: SearchCriteriaComponentList
+  { category = '', keyword = '', page = 0, pageSize = 10 }: SearchCriteriaComponentList
 ): Promise<ApiResponse<ComponentData[]>> {
   const response = await httpRequest(() =>
-    axiosInstance.get('/api/components?' + category + '.contains=' + keyword)
+    axiosInstance.get(
+      `/api/components?${category}.contains=${keyword}&page=${page}&size=${pageSize}`
+    )
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content }
+  return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
 }

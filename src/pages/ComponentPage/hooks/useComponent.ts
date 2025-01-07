@@ -23,6 +23,8 @@ export default function useComponent() {
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteriaComponentList>({
     category: '',
     keyword: '',
+    page: 0,
+    pageSize: 10,
   })
   const [componentListData, setComponentListData] = useState<ComponentData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -118,9 +120,19 @@ export default function useComponent() {
     }
   }
   const getComponentListData = async ({ page, pageSize }: GridPaginationModel) => {
-    const result = await withLoading(api.component.getComponentList(searchCriteria))
+    let prepareSearhCriteria = {
+      ...searchCriteria,
+      page: page,
+      pageSize: pageSize,
+    }
+    const result = await withLoading(api.component.getComponentList(prepareSearhCriteria))
     if (result.code === 200 && result.data) {
       setComponentListData(result.data)
+      setTotalRows(result.page?.totalElements ?? 0)
+      setCachedData(prevCache => ({
+        ...prevCache,
+        [`${page}-${pageSize}`]: result.data ? result.data : [],
+      }))
     }
   }
 
@@ -174,7 +186,7 @@ export default function useComponent() {
       // Clear the cache when page size changes
       setCachedData({})
     } else {
-      setPaginationModel(newModel)
+      setPaginationModel({ ...newModel })
     }
     const cacheKey = `${newModel.page}-${newModel.pageSize}`
     if (cachedData[cacheKey]) {
