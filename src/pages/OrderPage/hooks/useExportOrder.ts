@@ -121,9 +121,9 @@ export default function useExportOrder() {
     { key: 'totalPrice', header: '金額' },
     { key: 'orderNumber', header: '注番' },
     { key: 'owner', header: '担当者名' },
-    { key: 'registrationDate', header: '登録日付' },
-    { key: 'deliveryDate', header: '配達日付' },
-    { key: 'shipmentDate', header: '出荷日付' },
+    { key: 'registrationDate', header: '登録日' },
+    { key: 'deliveryDate', header: '配達日' },
+    { key: 'shipmentDate', header: '出荷日' },
   ]
 
   const getCustomerDetail = async (customerId: string) => {

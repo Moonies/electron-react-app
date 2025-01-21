@@ -236,6 +236,11 @@ export default function ReportPage() {
               <Divider textAlign='left'>売上目標達成率</Divider>
             </Typography>
             <ProgressChart dataPieChart={progressChartData} inProgressValue={inProgessValue} />
+            {progressChartData && progressChartData[0].value === 0 && (
+              <Typography align='center' variant='subtitle1'>
+                ***グラフが 0 の場合、KPI が設定されていないか、売上総額が 0 です。***
+              </Typography>
+            )}
             <Typography align='left' variant='subtitle1'>
               <Divider textAlign='left'>粗利に影響する商品</Divider>
             </Typography>

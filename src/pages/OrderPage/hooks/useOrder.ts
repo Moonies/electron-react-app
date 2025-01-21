@@ -57,9 +57,9 @@ export default function useOrder() {
 
   const [categorySearch, setCategorySearch] = useState<CategorySaleSearch[]>()
   const dateTypeList = [
-    { value: 'registrationDate', display: '登録日付' },
-    { value: 'deliveryDate', display: '配達日付' },
-    { value: 'shipmentDate', display: '出荷日付' },
+    { value: 'registrationDate', display: '登録日' },
+    { value: 'deliveryDate', display: '配達日' },
+    { value: 'shipmentDate', display: '出荷日' },
   ]
   const orderTypeList = [
     { value: 'All', display: '全て' },
@@ -116,7 +116,7 @@ export default function useOrder() {
         valueGetter: (value, row: OrderData) => (row.company ? row.company.companyInfo.name : ''),
       },
       // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
-      { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
+      { field: 'registrationDate', headerName: '登録日', headerAlign: 'center' },
       {
         field: 'owners',
         headerName: '担当者',
@@ -125,10 +125,10 @@ export default function useOrder() {
           value.length > 0 ? value[0].name : '',
       },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
-      // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
+      // { field: 'quotationRequestDate', headerName: '見積日', headerAlign: 'center' },
       {
         field: 'deliveryDate',
-        headerName: '出荷 / 配達日付',
+        headerName: '出荷 / 配達日',
         headerAlign: 'center',
         valueGetter: (value, row: OrderData) =>
           row.orderType === OrderType.SALE ? row.shipmentDate : row.deliveryDate,

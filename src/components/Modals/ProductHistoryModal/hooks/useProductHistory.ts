@@ -35,7 +35,7 @@ export default function useProductHistory() {
 
       {
         field: 'shipmentDate',
-        headerName: '出荷日付',
+        headerName: '出荷日',
         headerAlign: 'center',
         flex: 1,
       },

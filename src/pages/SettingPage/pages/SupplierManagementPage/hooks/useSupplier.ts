@@ -7,6 +7,10 @@ import useLoading from 'hooks/useLoading'
 import useNotification from 'hooks/useNotification'
 import { useMemo, useState } from 'react'
 
+interface CachedData {
+  [key: string]: SupplierData[]
+}
+
 export default function useSupplier() {
   const [supplierListData, setSupplierListData] = useState<SupplierData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -16,6 +20,9 @@ export default function useSupplier() {
   const { api } = useHttp()
   const { withLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
+  const [cachedData, setCachedData] = useState<CachedData>({})
+  const [totalRows, setTotalRows] = useState(0)
+
   const columns: GridColDef[] = useMemo(
     () => [
       {
@@ -57,7 +64,7 @@ export default function useSupplier() {
       },
       {
         field: 'city',
-        headerName: '地区町村',
+        headerName: '市区町村',
         headerAlign: 'center',
         valueGetter: (value, row: SupplierData) => row.companyInfo.address.city,
       },
@@ -73,15 +80,31 @@ export default function useSupplier() {
         headerAlign: 'center',
         valueGetter: (value, row: SupplierData) => row.companyInfo.buildingName,
       },
-      { field: 'closingDay', headerName: '締日', headerAlign: 'center' },
+      // { field: 'closingDay', headerName: '締日', headerAlign: 'center' },
     ],
     []
   )
 
-  const handlePaginationModelChange = (newModel: GridPaginationModel) => {}
+  const handlePaginationModelChange = (newModel: GridPaginationModel) => {
+    if (newModel.pageSize !== paginationModel.pageSize) {
+      // If page size has changed, reset to the first page
+      setPaginationModel({ page: 0, pageSize: newModel.pageSize })
+      // Clear the cache when page size changes
+      setCachedData({})
+    } else {
+      setPaginationModel(newModel)
+    }
+    const cacheKey = `${newModel.page}-${newModel.pageSize}`
+    if (cachedData[cacheKey]) {
+      setSupplierListData(cachedData[cacheKey])
+      return
+    } else if (supplierListData.length !== 0) {
+      getSupplierListData(newModel)
+    }
+  }
 
-  const getSupplierListData = async () => {
-    const result = await withLoading(api.supplier.getSupplierList())
+  const getSupplierListData = async ({ page, pageSize }: GridPaginationModel) => {
+    const result = await withLoading(api.supplier.getSupplierList(page, pageSize))
     if (result.code === 200 && result.data) {
       setSupplierListData(result.data)
     }

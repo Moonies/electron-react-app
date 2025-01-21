@@ -194,9 +194,7 @@ export default function ComponentManagementModal({
                 onChange={e =>
                   handleChange('price', e.target.value ? parseFloat(e.target.value) : 0)
                 }
-                helperText={
-                  modalMode !== 'add' ? `latestPrice edit ${formData.lastestPriceDate}` : ''
-                }
+                helperText={modalMode !== 'add' ? `最終編集 ${formData.lastestPriceDate}` : ''}
 
                 // sx={{ flex: 1 }}
               />

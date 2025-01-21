@@ -41,7 +41,7 @@ export default function useExportProduct() {
     { key: 'cost', header: '評価' },
     { key: 'price', header: '単価' },
     { key: 'totalPrice', header: '小計' },
-    { key: 'registrationDate', header: '登録日付' },
+    { key: 'registrationDate', header: '登録日' },
   ]
 
   const exportProduct = async (dataToExport: ExportAllProductData[]) => {

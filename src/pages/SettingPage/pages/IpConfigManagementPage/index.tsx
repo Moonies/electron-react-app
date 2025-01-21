@@ -29,7 +29,7 @@ export default function IpConfigManegementPage() {
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
         <Typography variant='h5' noWrap>
-          <Divider textAlign='left'>サーバ情報</Divider>
+          <Divider textAlign='left'>サーバー情報</Divider>
         </Typography>
       </Box>
       <Container

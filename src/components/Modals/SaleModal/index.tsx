@@ -266,7 +266,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
           <Box display={'flex'} flexDirection={'column'} flexGrow={1}>
             <Box display={'flex'} flexDirection={'row'} gap={2}>
               <DatePicker
-                label='登録日付'
+                label='登録日'
                 value={dayjs(formData.registrationDate)}
                 format='YYYY/MM/DD'
                 onChange={newValue =>
@@ -354,7 +354,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
             </Box>
             <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent='space-between'>
               {/* <DatePicker
-                label='見積書日付'
+                label='見積日'
                 value={dayjs(formData.quotationRequestDate)}
                 format='YYYY/MM/DD'
                 onChange={newValue =>
@@ -367,7 +367,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                 readOnly={modalMode === 'view'}
               /> */}
               <DatePicker
-                label='出荷日付'
+                label='出荷日'
                 value={dayjs(formData.shippingmentDate)}
                 format='YYYY/MM/DD'
                 onChange={newValue =>

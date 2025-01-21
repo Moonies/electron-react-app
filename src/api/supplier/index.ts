@@ -8,7 +8,7 @@ import { default as getSupplierDetailWithId, SupplierDetail } from './getSupplie
 export interface SupplierApi {
   addNewSupplier: (params: AddNewSupplierProps) => Promise<ApiResponse<{}>>
   deleteSupplier: (supplierId: string) => Promise<ApiResponse<{}>>
-  getSupplierList: () => Promise<ApiResponse<SupplierData[]>>
+  getSupplierList: (page?: number, pageSize?: number) => Promise<ApiResponse<SupplierData[]>>
   updateSupplierDetail: (params: UpdateSupplierDetailProps) => Promise<ApiResponse<{}>>
   getSupplierDetailWithId: (supplierId: string) => Promise<ApiResponse<SupplierDetail>>
 }
@@ -17,7 +17,7 @@ export default function supplier(httpRequest: HttpRequest): SupplierApi {
   return {
     addNewSupplier: params => addNewSupplier(httpRequest, params),
     deleteSupplier: supplierId => deleteSupplier(httpRequest, supplierId),
-    getSupplierList: () => getSupplierList(httpRequest),
+    getSupplierList: (page, pageSize) => getSupplierList(httpRequest, { page, pageSize }),
     updateSupplierDetail: params => updateSupplierDetail(httpRequest, params),
     getSupplierDetailWithId: supplierId => getSupplierDetailWithId(httpRequest, supplierId),
   }

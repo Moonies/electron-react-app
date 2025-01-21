@@ -13,7 +13,7 @@ const MarkInputCorporateNumber = React.forwardRef<HTMLInputElement, CustomProps>
     return (
       <IMaskInput
         {...other}
-        mask='0000-00-000000'
+        mask='T0-0000-0000-0000'
         definitions={{
           '#': /[1-9]/,
         }}

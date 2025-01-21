@@ -155,7 +155,7 @@ export default function MyCompanyManagementPage() {
           <TextField
             fullWidth
             name='name'
-            label='企業名称'
+            label='企業名'
             value={formCompanyDetail.name ?? ''}
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.name) }}
             // onChange={e => handleChange('companyName', e.target.value)}
@@ -195,12 +195,11 @@ export default function MyCompanyManagementPage() {
             onChange={handleChange}
             InputProps={{
               inputComponent: MarkInputCorporateNumber as any,
-              inputProps: {
-                maxLength: 12,
-              },
             }}
           />
-          <TextField
+          <TextField fullWidth sx={{ visibility: 'hidden' }} />
+          {/* need discuss */}
+          {/* <TextField
             fullWidth
             name='accountNumber'
             label='口座番号'
@@ -208,7 +207,7 @@ export default function MyCompanyManagementPage() {
             InputLabelProps={{ shrink: isShrink(formCompanyDetail.accountNumber) }}
             // onChange={e => handleChange('companyBankAccount', e.target.value)}
             onChange={handleChange}
-          />
+          /> */}
         </Box>
         <Box display={'flex'} flexDirection='row' gap={2} justifyContent='space-between'>
           <Box display={'flex'} sx={{ width: '30%' }}>

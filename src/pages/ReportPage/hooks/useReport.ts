@@ -8,6 +8,7 @@ import useHttp from 'hooks/useHttp'
 import useLoading from 'hooks/useLoading'
 import { useState } from 'react'
 import { addCommasToNumber, formatJPY } from 'utils/formatUtils'
+import { isValidNumber } from 'utils/inputUtils'
 
 export interface SummaryData {
   totalSale: number
@@ -182,7 +183,7 @@ export default function useReport() {
     //###performace chart
     // this value from API totalSale(form Sale Table) / resultSumKpi(form KPI Table)
     let totalSale = resultFromApi.totalAmountSale / resultFromApi.totalTarget
-    totalSale = isNaN(totalSale) ? 0 : totalSale
+    totalSale = isValidNumber(totalSale) ? totalSale : 0
     setInProgressValue(totalSale)
     setProgressChartData([
       { name: 'Completed', value: totalSale },

@@ -36,5 +36,5 @@ export default async function getCustomerList(
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
-  return { code: 200, message: 'success', data: response?.data.content }
+  return { code: 200, message: 'success', data: response?.data.content, page: response?.data.page }
 }

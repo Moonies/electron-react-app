@@ -24,7 +24,7 @@ export default function ProgressChart({ dataPieChart, inProgressValue }: Progres
           endAngle={-270}
           dataKey='value'
         >
-          <Cell fill={'#8884d8'} />
+          <Cell fill='#8884d8' />
           <Cell fill='#e0e0e0' /> {/* Light gray for the unfilled portion */}
         </Pie>
         <text

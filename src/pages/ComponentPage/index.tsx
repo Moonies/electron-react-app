@@ -218,7 +218,7 @@ export default function ComponentManagementPage() {
                 name='category'
                 value={searchCriteria.category}
                 select
-                label='範疇項目'
+                label='検索項目'
                 id='category-sale'
                 onChange={e => handleChange('category', e.target.value as string)}
                 sx={{ width: '30%' }}

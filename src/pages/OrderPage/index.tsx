@@ -415,7 +415,7 @@ export default function OrderPage() {
                 name='category'
                 value={searchCriteria.category}
                 select
-                label='範疇項目'
+                label='検索項目'
                 id='category-order'
                 onChange={e => handleChange('category', e.target.value as string)}
                 sx={{ width: '30%' }}
@@ -552,7 +552,7 @@ export default function OrderPage() {
                 // sx={{ visibility: 'hidden' }}
               >
                 検索
-              </StyledButton>{' '}
+              </StyledButton>
               <StyledButton
                 variant='outlined'
                 startIcon={<DetailIcon />}

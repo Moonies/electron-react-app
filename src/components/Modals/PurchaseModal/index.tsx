@@ -259,7 +259,7 @@ export default function PurchaseModal({
           <Box display={'flex'} flexDirection={'column'}>
             <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent={'space-around'}>
               <DatePicker
-                label='登録日付'
+                label='登録日'
                 value={dayjs(formData.registrationDate)}
                 format='YYYY-MM-DD'
                 onChange={newValue =>
