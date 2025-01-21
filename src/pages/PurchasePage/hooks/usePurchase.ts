@@ -37,7 +37,7 @@ export default function usePurchase() {
     dateType: '',
   })
   const dateTypeList = [
-    { value: 'registrationDate', display: '登録日付' },
+    { value: 'registrationDate', display: '登録日' },
     { value: 'deliveryDate', display: '入庫日付' },
   ]
 
@@ -73,7 +73,7 @@ export default function usePurchase() {
         valueGetter: (value, row: any) => (row.company ? row.company.companyInfo.name : ''),
       },
       // { field: 'orderId', headerName: '注番', headerAlign: 'center' },
-      { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
+      { field: 'registrationDate', headerName: '登録日', headerAlign: 'center' },
       {
         field: 'owners',
         headerName: '担当者',
@@ -82,7 +82,7 @@ export default function usePurchase() {
           value.length > 0 ? value[0].name : '',
       },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
-      // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
+      // { field: 'quotationRequestDate', headerName: '見積日', headerAlign: 'center' },
       { field: 'deliveryDate', headerName: '入庫日付', headerAlign: 'center' },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
       // { field: 'purchaseApprovedDate', headerName: '見積書依頼', headerAlign: 'center' },

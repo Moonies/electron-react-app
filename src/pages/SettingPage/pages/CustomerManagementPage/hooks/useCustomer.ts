@@ -67,7 +67,7 @@ export default function useCustomer() {
       },
       {
         field: 'city',
-        headerName: '地区町村',
+        headerName: '市区町村',
         headerAlign: 'center',
         valueGetter: (value, row: CustomerData) => row.companyInfo.address.city,
       },
@@ -83,7 +83,7 @@ export default function useCustomer() {
         headerAlign: 'center',
         valueGetter: (value, row: CustomerData) => row.companyInfo.buildingName,
       },
-      { field: 'closingDay', headerName: '締日', headerAlign: 'center' },
+      // { field: 'closingDay', headerName: '締日', headerAlign: 'center' },
     ],
     []
   )

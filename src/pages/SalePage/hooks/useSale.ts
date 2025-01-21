@@ -39,8 +39,8 @@ export default function useSales() {
   const { withLoading, setLoading } = useLoading()
   const { api } = useHttp()
   const dateTypeList = [
-    { value: 'registrationDate', display: '登録日付' },
-    { value: 'shipmentDate', display: '出荷日付' },
+    { value: 'registrationDate', display: '登録日' },
+    { value: 'shipmentDate', display: '出荷日' },
   ]
 
   const handleChange = (name: string, value: string | Date | null) => {
@@ -67,7 +67,7 @@ export default function useSales() {
         valueGetter: (value, row: any) => (row.company ? row.company.companyInfo.name : ''),
       },
       { field: 'totalAmount', headerName: '合計', type: 'number', headerAlign: 'center' },
-      { field: 'registrationDate', headerName: '登録日付', headerAlign: 'center' },
+      { field: 'registrationDate', headerName: '登録日', headerAlign: 'center' },
       {
         field: 'owners',
         headerName: '担当者',
@@ -76,8 +76,8 @@ export default function useSales() {
           value.length > 0 ? value[0].name : '',
       },
       // { field: 'orderApprovedEmployeeName', headerName: '承認者', headerAlign: 'center' },
-      // { field: 'quotationRequestDate', headerName: '見積書日付', headerAlign: 'center' },
-      { field: 'shipmentDate', headerName: '出荷日付', headerAlign: 'center' },
+      // { field: 'quotationRequestDate', headerName: '見積日', headerAlign: 'center' },
+      { field: 'shipmentDate', headerName: '出荷日', headerAlign: 'center' },
     ],
     []
   )

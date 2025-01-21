@@ -57,7 +57,7 @@ export default function useComponent() {
         type: 'number',
         valueFormatter: value => (value === null ? 0 : value),
       },
-      { field: 'latestPriceDecisionDate', headerName: '単価時点', headerAlign: 'center', flex: 1 },
+      { field: 'latestPriceDecisionDate', headerName: '最終編集', headerAlign: 'center', flex: 1 },
     ],
     []
   )
