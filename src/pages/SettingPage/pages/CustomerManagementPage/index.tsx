@@ -46,6 +46,7 @@ export default function CustomerManagementPage() {
     updateSelectedCustomer,
     createNewCustomer,
     deleteSelectedCustomer,
+    totalRows,
   } = useCustomer()
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export default function CustomerManagementPage() {
   }, [customerListData])
 
   useEffect(() => {
-    getCusomerListData()
+    getCusomerListData(paginationModel)
   }, [])
 
   const handleAddClick = () => {
@@ -110,7 +111,7 @@ export default function CustomerManagementPage() {
         if (confirmed) {
           // Perform delete operation
           const result = await deleteSelectedCustomer(selectedData.id)
-          if (result) getCusomerListData()
+          if (result) getCusomerListData(paginationModel)
         } else {
           console.log('Delete cancelled')
         }
@@ -151,7 +152,7 @@ export default function CustomerManagementPage() {
         // console.log(newCustomerData)
         const result = await createNewCustomer(newCustomerData)
         if (result) {
-          getCusomerListData()
+          getCusomerListData(paginationModel)
           setModalOpen(false)
         }
       } else {
@@ -159,7 +160,7 @@ export default function CustomerManagementPage() {
           //check id again when modalMode !== 'add'
           const result = await updateSelectedCustomer({ id: data.id, ...newCustomerData })
           if (result) {
-            getCusomerListData()
+            getCusomerListData(paginationModel)
             setModalOpen(false)
           }
         }
@@ -282,6 +283,8 @@ export default function CustomerManagementPage() {
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           apiref={customerDataGridRef}
+          totalRows={totalRows}
+          paginationMode='server'
           getRowId={row => row.id}
           onSelected={newSelectionModel => setSelectionModel(newSelectionModel)}
         />

@@ -9,6 +9,10 @@ import { ModalCustomerProps } from 'components/Modals/CustomerManagementModal'
 import { UpdateCustomerDetailProps } from 'api/customer/updateCustomerDetail'
 import { useMemo, useState } from 'react'
 
+interface CachedData {
+  [key: string]: CustomerData[]
+}
+
 export default function useCustomer() {
   const [customerListData, setCustomerListData] = useState<CustomerData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
@@ -19,6 +23,8 @@ export default function useCustomer() {
 
   const { withLoading } = useLoading()
   const { notificationSnackbar } = useNotification()
+  const [cachedData, setCachedData] = useState<CachedData>({})
+  const [totalRows, setTotalRows] = useState(0)
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -106,10 +112,17 @@ export default function useCustomer() {
     updateSelectedCustomer(updateCustomerData)
   }
 
-  const getCusomerListData = async () => {
-    const result = await withLoading(api.customer.getCustomerList())
+  const getCusomerListData = async ({ page, pageSize }: GridPaginationModel) => {
+    const result = await withLoading(api.customer.getCustomerList(page, pageSize))
     if (result.code === 200 && result.data) {
+      // setCustomerListData(result.data)
       setCustomerListData(result.data)
+      setTotalRows(result.page?.totalElements ?? 0)
+      // Cache the fetched data
+      setCachedData(prevCache => ({
+        ...prevCache,
+        [`${page}-${pageSize}`]: result.data ? result.data : [],
+      }))
     }
   }
 
@@ -148,7 +161,24 @@ export default function useCustomer() {
     }
   }
 
-  const handlePaginationModelChange = (newModel: GridPaginationModel) => {}
+  const handlePaginationModelChange = async (newModel: GridPaginationModel) => {
+    if (newModel.pageSize !== paginationModel.pageSize) {
+      // If page size has changed, reset to the first page
+      setPaginationModel({ page: 0, pageSize: newModel.pageSize })
+      // Clear the cache when page size changes
+      setCachedData({})
+    } else {
+      setPaginationModel(newModel)
+    }
+    const cacheKey = `${newModel.page}-${newModel.pageSize}`
+    if (cachedData[cacheKey]) {
+      setCustomerListData(cachedData[cacheKey])
+      return
+    } else if (customerListData.length !== 0) {
+      getCusomerListData(newModel)
+    }
+  }
+
   return {
     paginationModel,
     columns,
@@ -158,5 +188,6 @@ export default function useCustomer() {
     updateSelectedCustomer,
     createNewCustomer,
     deleteSelectedCustomer,
+    totalRows,
   }
 }
