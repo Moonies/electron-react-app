@@ -58,7 +58,7 @@ export default function SupplierManagementPage() {
   }, [supplierListData])
 
   useEffect(() => {
-    getSupplierListData()
+    getSupplierListData(paginationModel)
   }, [])
 
   const handleAddClick = () => {
@@ -109,7 +109,7 @@ export default function SupplierManagementPage() {
         })
         if (confirmed) {
           const result = await deleteSelectedSupplier(selectedData.id)
-          if (result) getSupplierListData()
+          if (result) getSupplierListData(paginationModel)
         } else {
           console.log('Delete cancelled')
         }
@@ -147,7 +147,7 @@ export default function SupplierManagementPage() {
       if (modalMode === 'add') {
         const result = await createNewSupplier(newSupplierData)
         if (result) {
-          getSupplierListData()
+          getSupplierListData(paginationModel)
           setModalOpen(false)
         }
       } else {
@@ -155,7 +155,7 @@ export default function SupplierManagementPage() {
         if (data.id) {
           const result = await updateSelectedSupplier({ id: data.id, ...newSupplierData })
           if (result) {
-            getSupplierListData()
+            getSupplierListData(paginationModel)
             setModalOpen(false)
           }
         }

@@ -27,10 +27,11 @@ export interface SupplierData {
 }
 
 export default async function getSupplierList(
-  httpRequest: HttpRequest
+  httpRequest: HttpRequest,
+  { page = 0, pageSize = 100 }
 ): Promise<ApiResponse<SupplierData[]>> {
   const response = await httpRequest(() =>
-    axiosInstance.get('/api/companies?companyType.equal=supplier')
+    axiosInstance.get(`/api/companies?companyType.equal=supplier&page=${page}&size=${pageSize}`)
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
