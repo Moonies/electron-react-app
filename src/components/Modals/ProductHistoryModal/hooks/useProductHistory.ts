@@ -6,7 +6,7 @@ import { formatJPY } from 'utils/formatUtils'
 export default function useProductHistory() {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
 
   const columns: GridColDef[] = useMemo(

@@ -27,7 +27,7 @@ export default function usePurchase() {
   const { api } = useHttp()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
   const [searchCriteria, setSearchCriteria] = useState({
     category: '',

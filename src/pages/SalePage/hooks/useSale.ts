@@ -33,7 +33,7 @@ export default function useSales() {
   const [saleData, setSaleData] = useState<SaleData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
   const [totalRows, setTotalRows] = useState(0)
   const { withLoading, setLoading } = useLoading()
