@@ -24,12 +24,12 @@ export default function useComponent() {
     category: '',
     keyword: '',
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
   const [componentListData, setComponentListData] = useState<ComponentData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
   const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)

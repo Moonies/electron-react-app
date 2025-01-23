@@ -58,7 +58,7 @@ const DataTable = React.memo<TableProps>(
           // autoHeight
           disableColumnMenu
           getRowClassName={params => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
-          pageSizeOptions={[10, 50, 100]}
+          pageSizeOptions={[25, 50, 100]}
           paginationModel={paginationModel}
           onPaginationModelChange={onPaginationModelChange}
           checkboxSelection={checkboxSelection}

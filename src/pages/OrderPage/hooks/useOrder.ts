@@ -41,7 +41,7 @@ export default function useOrder() {
   const [statusOrder, setStatusOrder] = useState<StatusDetail[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
   const [searchCriteria, setSearchCriteria] = useState({
     category: '',

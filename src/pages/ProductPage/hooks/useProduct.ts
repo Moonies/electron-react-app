@@ -30,12 +30,12 @@ export default function useProduct() {
     category: '',
     keyword: '',
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
   const [productData, setProductData] = useState<ProductData[]>([])
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
   })
   const [cachedData, setCachedData] = useState<CachedData>({})
   const [totalRows, setTotalRows] = useState(0)
