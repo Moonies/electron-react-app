@@ -310,7 +310,7 @@ export default function useOrder() {
     }
   }
 
-  const editSaleOrder = async (formData: SaleModalDataProps) => {
+  const editSaleOrder = async (formData: SaleModalDataProps, skipUpdateOrderStatus: boolean) => {
     switch (formData.status) {
       case SaleStatus.PENDING:
         let data: NewSaleDetailProps = {
@@ -338,6 +338,25 @@ export default function useOrder() {
       // case SaleStatus.ON_DELIVERY:
       case SaleStatus.CONFIRM:
       case SaleStatus.DELIVERED:
+        {
+          if (formData.id) {
+            await updateShippingDate(
+              formData.id,
+              dayjs(formData.shippingmentDate).format('YYYY-MM-DD')
+            )
+            if (skipUpdateOrderStatus) {
+              notificationSnackbar.success('編集完了しました。')
+              return true
+            }
+
+            const response = await updateSaleStatus(formData.id, formData.status)
+            if (response) {
+              notificationSnackbar.success('編集完了しました。')
+              return true
+            }
+          }
+        }
+        break
       case SaleStatus.CANCEL:
         {
           if (formData.id) {
@@ -442,6 +461,13 @@ export default function useOrder() {
     }
   }
 
+  const updateShippingDate = async (saleId: string, newShippingDate: string) => {
+    const result = await api.sale.updateShippingDate(saleId, newShippingDate)
+    if (result.code === 200) {
+      return true
+    }
+  }
+
   const updateSaleStatus = async (saleId: string, status: SaleStatus) => {
     const response = await api.sale.updateSaleStatus(saleId, status)
     if (response.code === 200) {
@@ -538,5 +564,6 @@ export default function useOrder() {
     convertOrderType,
     updateSaleStatus,
     updatePurchaseStatus,
+    updateShippingDate,
   }
 }

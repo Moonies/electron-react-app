@@ -63,6 +63,7 @@ export default function OrderPage() {
     getPurchaseOrderList,
     updateSaleStatus,
     updatePurchaseStatus,
+    updateShippingDate,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -199,7 +200,9 @@ export default function OrderPage() {
             break
           case 'edit':
             {
-              const response = await editSaleOrder(data)
+              const skipUpdateStatus = selectedSale?.status === data.status
+              console.log(skipUpdateStatus)
+              const response = await editSaleOrder(data, skipUpdateStatus)
               if (response) {
                 setModalOpen(false)
                 setLoading(false)
@@ -299,9 +302,16 @@ export default function OrderPage() {
     }
   }
 
-  const handleAdvanceStatusConfirm = async (status: PurchaseStatus | SaleStatus) => {
+  const handleAdvanceStatusConfirm = async (
+    status: PurchaseStatus | SaleStatus,
+    commitDate?: string | Dayjs
+  ) => {
     setLoading(true)
     if (selectedOrder && selectedOrder.orderType === OrderType.SALE) {
+      console.log(commitDate)
+      if (commitDate) {
+        await updateShippingDate(selectedOrder.id, dayjs(commitDate).format('YYYY-MM-DD'))
+      }
       const response = await updateSaleStatus(selectedOrder.id, status as SaleStatus)
       if (response) notificationSnackbar.success('編集完了しました。')
 
@@ -385,6 +395,10 @@ export default function OrderPage() {
   const filteredStatuses = statusOrder.filter(
     status => status.orderType === searchCriteria.orderType || status.orderType === 'All'
   )
+
+  const getCommitDate = (orderType: OrderType, selectedData: OrderData): string | dayjs.Dayjs =>
+    orderType === OrderType.SALE ? selectedData.shipmentDate : selectedData.deliveryDate
+
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>
       <Box p={2}>
@@ -683,9 +697,9 @@ export default function OrderPage() {
       {dialogOpen && dialogType === 'status' && selectedOrder && (
         <AdvanceOrderStatusDialog
           onClose={() => setDialogOpen(false)}
-          onSubmit={newStatus => {
+          onSubmit={(newStatus, commitDate) => {
             setDialogOpen(false)
-            handleAdvanceStatusConfirm(newStatus)
+            handleAdvanceStatusConfirm(newStatus, commitDate)
           }}
           open={dialogOpen}
           initialData={{
@@ -693,6 +707,10 @@ export default function OrderPage() {
             status: selectedOrder.status,
             orderNumber: selectedOrder.orderCode,
             orderType: selectedOrder.orderType,
+            commitDate:
+              selectedOrder.status === OrderStatus.CONFIRM
+                ? getCommitDate(selectedOrder.orderType, selectedOrder)
+                : undefined,
           }}
         />
       )}

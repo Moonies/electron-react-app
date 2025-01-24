@@ -310,7 +310,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                 }}
                 required
               />
-              <TextField
+              {/* <TextField
                 label='伝票番号'
                 value={formData.invoiceNumber}
                 onChange={e => handleChange('invoiceNumber', e.target.value)}
@@ -323,7 +323,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                     (currentStatus === undefined || currentStatus === 'PENDING')
                   ),
                 }}
-              />
+              /> */}
               <Autocomplete
                 options={customerListData}
                 renderOption={(props, option) => {
@@ -336,7 +336,12 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                 }}
                 getOptionLabel={option => option.companyInfo.name}
                 renderInput={params => <TextField {...params} label='顧客名' />}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
@@ -353,34 +358,44 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
               />
             </Box>
             <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent='space-between'>
-              {/* <DatePicker
-                label='見積日'
-                value={dayjs(formData.quotationRequestDate)}
-                format='YYYY/MM/DD'
-                onChange={newValue =>
-                  handleChange(
-                    'quotationRequestDate',
-                    newValue ? newValue.format('YYYY-MM-DD') : ''
-                  )
-                }
-                sx={{ marginTop: 2, width: '25%' }}
-                readOnly={modalMode === 'view'}
-              /> */}
-              <DatePicker
-                label='出荷日'
-                value={dayjs(formData.shippingmentDate)}
-                format='YYYY/MM/DD'
-                onChange={newValue =>
-                  handleChange('shippingmentDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-                }
-                sx={{ marginTop: 2, width: '25%' }}
-                readOnly={
-                  !(
-                    (modalMode === 'add' || modalMode === 'edit') &&
-                    (currentStatus === undefined || currentStatus === 'PENDING')
-                  )
-                }
-              />
+              <Box display={'flex'} flexDirection={'row'} gap={3}>
+                {/* plan shipping date */}
+                {/* <DatePicker
+                  label='出荷予定日'
+                  value={dayjs(formData.shippingmentDate)}
+                  format='YYYY/MM/DD'
+                  onChange={newValue =>
+                    handleChange('shippingmentDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+                  }
+                  sx={{ marginTop: 2 }}
+                  readOnly={
+                    !(
+                      (modalMode === 'add' || modalMode === 'edit') &&
+                      (currentStatus === undefined || currentStatus === 'PENDING')
+                    )
+                  }
+                  // readOnly={modalMode === 'view' && currentStatus === ''}
+                /> */}
+                {/* real shipping */}
+                {/* {(currentStatus === SaleStatus.CONFIRM || modalMode === 'view') && ( */}
+                <DatePicker
+                  label='出荷日'
+                  value={dayjs(formData.shippingmentDate)}
+                  format='YYYY/MM/DD'
+                  onChange={newValue =>
+                    handleChange('shippingmentDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+                  }
+                  sx={{ marginTop: 2 }}
+                  readOnly={
+                    !(
+                      (modalMode === 'add' || modalMode === 'edit') &&
+                      (currentStatus === undefined || currentStatus === 'PENDING')
+                    )
+                  }
+                  // readOnly={modalMode === 'view' && currentStatus === ''}
+                />
+                {/* )} */}
+              </Box>
               {/* check length for waiting state and reload */}
               {modalMode !== 'add' && statusList.length > 0 && (
                 <TextField
@@ -453,7 +468,12 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                 getOptionLabel={option => option.name}
                 sx={{ width: '35%' }}
                 renderInput={params => <TextField {...params} label='担当者' />}
-                readOnly={modalMode === 'view'}
+                readOnly={
+                  !(
+                    (modalMode === 'add' || modalMode === 'edit') &&
+                    (currentStatus === undefined || currentStatus === 'PENDING')
+                  )
+                }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(event, newValue) => {
                   if (typeof newValue === 'object' && newValue !== null) {
@@ -528,7 +548,17 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
             <Button onClick={onClose} variant='contained'>
               キャンセル
             </Button>
-            {(!currentStatus ||
+            <Button
+              type='submit'
+              // onClick={handleSubmit}
+              variant='outlined'
+              sx={theme => ({
+                color: 'white',
+              })}
+            >
+              保存
+            </Button>
+            {/* {(!currentStatus ||
               (currentStatus === OrderStatus.PENDING && formData.status === OrderStatus.PENDING) ||
               (formData.status !== currentStatus && formData.status !== OrderStatus.PENDING)) && (
               <Button
@@ -541,7 +571,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
               >
                 保存
               </Button>
-            )}
+            )} */}
           </DialogActions>
         )}
       </form>

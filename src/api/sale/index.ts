@@ -10,6 +10,7 @@ import {
   default as getSaleTotalAmount,
   SearchCriteria as TotalAmountSerachCriteria,
 } from './getSaleTotalAmount'
+import { default as updateShippingDate } from './updateShippingDate'
 
 export enum SaleStatus {
   INVOICE_PENDING = 'invoice_pending',
@@ -28,6 +29,7 @@ export interface SaleApi {
   updateSaleDetail: (params: NewSaleDetailProps) => Promise<ApiResponse<{}>>
   deleteSale: (saleId: string) => Promise<ApiResponse<{}>>
   updateSaleStatus: (saleId: string, status: SaleStatus) => Promise<ApiResponse<{}>>
+  updateShippingDate: (saleId: string, newShippingDate: string) => Promise<ApiResponse<{}>>
 }
 
 export default function sale(httpRequest: HttpRequest): SaleApi {
@@ -39,5 +41,7 @@ export default function sale(httpRequest: HttpRequest): SaleApi {
     updateSaleDetail: params => updateSaleDetail(httpRequest, params),
     deleteSale: saleId => deleteSale(httpRequest, saleId),
     updateSaleStatus: (saleId, status) => updateSaleStatus(httpRequest, saleId, status),
+    updateShippingDate: (saleId, newShippingDate) =>
+      updateShippingDate(httpRequest, saleId, newShippingDate),
   }
 }
