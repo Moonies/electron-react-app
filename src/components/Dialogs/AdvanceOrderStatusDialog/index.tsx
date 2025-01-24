@@ -2,20 +2,23 @@ import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } fr
 import { Close as CloseIcon } from '@mui/icons-material'
 import { Box } from '@mui/system'
 import { OrderStatus, OrderType } from 'api/order'
-import React from 'react'
+import React, { useState } from 'react'
 import { PurchaseStatus } from 'api/purchase'
 import { SaleStatus } from 'api/sale'
 import { useConfirmModal } from 'hooks/useConfirmModal'
+import { DatePicker } from '@mui/x-date-pickers'
+import dayjs, { Dayjs } from 'dayjs'
 
 interface DialogAdvanceStatus {
   open: boolean
   onClose: () => void
-  onSubmit: (advanceStatus: PurchaseStatus | SaleStatus) => void
+  onSubmit: (advanceStatus: PurchaseStatus | SaleStatus, commitDate?: string | Dayjs) => void
   initialData: {
     id: string
     orderNumber: string
     status: OrderStatus | string
     orderType: OrderType
+    commitDate?: string | Dayjs
   }
 }
 
@@ -25,8 +28,8 @@ export default function AdvanceOrderStatusDialog({
   onSubmit,
   initialData,
 }: DialogAdvanceStatus) {
-  // const [advanceStatus, setAdvanceStatus] = useState<'Next' | 'Cancel'>('Next')
   const { openConfirmModal } = useConfirmModal()
+  const [commitDate, setCommitDate] = useState(initialData.commitDate)
 
   const onCancelButton = async (e: React.FormEvent) => {
     //status is cancle
@@ -53,7 +56,8 @@ export default function AdvanceOrderStatusDialog({
       case OrderStatus.CONFIRM:
         //next step is COMPLETE
         onSubmit(
-          initialData.orderType === OrderType.SALE ? SaleStatus.DELIVERED : PurchaseStatus.INSTOCK
+          initialData.orderType === OrderType.SALE ? SaleStatus.DELIVERED : PurchaseStatus.INSTOCK,
+          commitDate
         )
         break
 
@@ -90,6 +94,7 @@ export default function AdvanceOrderStatusDialog({
           onClose()
         }
       }}
+      scroll={'paper'}
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -102,6 +107,19 @@ export default function AdvanceOrderStatusDialog({
         </Box>
       </DialogTitle>
       <DialogContent>
+        <Box display={'flex'} justifyContent={'space-between'} mb={1}>
+          {commitDate && (
+            <DatePicker
+              label={initialData.orderType === OrderType.SALE ? '出荷日' : '配達日'}
+              value={dayjs(commitDate)}
+              format='YYYY/MM/DD'
+              onAccept={newvalue => newvalue && setCommitDate(newvalue)}
+              views={['year', 'month', 'day']}
+              slotProps={{ textField: { size: 'small' } }}
+            />
+          )}
+        </Box>
+
         <Box display={'flex'} justifyContent={'space-between'} gap={2}>
           <Button onClick={onCancelButton} variant='contained' size='large'>
             受注をキャンセル
@@ -117,8 +135,14 @@ export default function AdvanceOrderStatusDialog({
           </Button>
         </Box>
         <Typography variant='caption' gutterBottom>
-          ***クリックする前に現在の状態を確認してください***
+          *クリックする前に現在の状態を確認してください*
         </Typography>
+        <br />
+        {commitDate && (
+          <Typography variant='caption' gutterBottom>
+            **クリックする前に出荷日と配達日を確認してください**
+          </Typography>
+        )}
       </DialogContent>
     </Dialog>
   )
