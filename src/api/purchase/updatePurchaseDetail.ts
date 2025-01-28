@@ -18,7 +18,8 @@ export interface NewPurchaseDetail {
   orderCode: string //may be auto create from database
   totalAmount: number
   registrationDate: string
-  deliveryDate: string
+  // deliveryDate: string
+  planDeliveryDate: string
   invoiceNumber: string
   memo?: string
   purchaseCode: string
@@ -27,7 +28,6 @@ export interface NewPurchaseDetail {
   // stockApprovalDate: string //may be auto update when update event
   components: componentList[]
   companyId: string
-  // createdBy: string // can auto with token header?
   owners: OwnerList[]
 }
 
@@ -36,7 +36,7 @@ export default async function updatePurchaseDetail(
   newPurchaseDetail: NewPurchaseDetail
 ): Promise<ApiResponse<{}>> {
   const response = await httpRequest(() =>
-    axiosInstance.put('/api/purchases', { ...newPurchaseDetail })
+    axiosInstance.put(`/api/purchases/${newPurchaseDetail.id}`, { ...newPurchaseDetail })
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }

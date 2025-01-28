@@ -8,8 +8,9 @@ import { HttpRequest } from 'hooks/useHttp'
 import { ApiResponse } from 'api'
 import { default as getPurchaseDetail, PurchaseDetail } from './getPurchaseDetail'
 import { default as updatePurchaseDetail, NewPurchaseDetail } from './updatePurchaseDetail'
-import updatePurchaseStatus from './updatePurchaseStatus'
+import { default as updatePurchaseStatus } from './updatePurchaseStatus'
 import { default as deletePurchaseOrder } from './deletePurchase'
+import { default as updateDeliveryDate } from './updateDeliveryDate'
 
 export enum PurchaseStatus {
   PENDING = 'PENDING',
@@ -25,6 +26,7 @@ export interface PurchaseApi {
   getPurchaseDetail: (orderId: string) => Promise<ApiResponse<PurchaseDetail>>
   updatePurchaseDetail: (params: NewPurchaseDetail) => Promise<ApiResponse<{}>>
   updatePurchaseStatus: (purchaseId: string, status: PurchaseStatus) => Promise<ApiResponse<{}>>
+  updateDeliveryDate: (purchaseId: string, newDeliveryDate: string) => Promise<ApiResponse<{}>>
 }
 
 export default function purchase(httpRequest: HttpRequest): PurchaseApi {
@@ -36,5 +38,7 @@ export default function purchase(httpRequest: HttpRequest): PurchaseApi {
     updatePurchaseStatus: (purchaseId, status) =>
       updatePurchaseStatus(httpRequest, purchaseId, status),
     deletePurchaseOrder: purchaseId => deletePurchaseOrder(httpRequest, purchaseId),
+    updateDeliveryDate: (purchaseId, newDelivierDate) =>
+      updateDeliveryDate(httpRequest, purchaseId, newDelivierDate),
   }
 }

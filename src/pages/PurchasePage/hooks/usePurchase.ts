@@ -137,7 +137,7 @@ export default function usePurchase() {
     }
   }
 
-  const handleSelectedSaleDetail = (selectedData: PurchaseData) => {
+  const handleSelectedPurchaseDetail = (selectedData: PurchaseData) => {
     let purchaseDetail: PurchaseModalDataProps = {
       id: selectedData.id,
       orderCode: selectedData.orderCode,
@@ -156,6 +156,7 @@ export default function usePurchase() {
       status: mappingStatus(selectedData.status),
       owners: selectedData.owners,
       deliveryDate: selectedData.deliveryDate,
+      planDeliveryDate: selectedData.planDeliveryDate,
     }
     return purchaseDetail
   }
@@ -225,6 +226,6 @@ export default function usePurchase() {
     dateTypeList,
     totalRows,
     getAllPurchaseData,
-    handleSelectedSaleDetail,
+    handleSelectedPurchaseDetail,
   }
 }

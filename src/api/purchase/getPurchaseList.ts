@@ -53,6 +53,7 @@ export interface PurchaseData {
   totalAmount: number
   registrationDate: string
   deliveryDate: string | Dayjs
+  planDeliveryDate: string | Dayjs
   invoiceNumber: string
   memo: string
   status: string

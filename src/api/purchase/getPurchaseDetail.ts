@@ -52,16 +52,17 @@ export interface PurchaseDetail {
   totalAmount: number
   registrationDate: string
   deliveryDate: string | Dayjs
+  planDeliveryDate: string | Dayjs
   invoiceNumber: string
   memo: string
   status: string
   orderType: string
   purchaseCode: string
-  quotationRequestDate: string
-  orderApprovalPendingDate: null
-  orderApprovalDate: string
-  stockApprovalPendingDate: null
-  stockApprovalDate: string
+  // quotationRequestDate: string
+  // orderApprovalPendingDate: null
+  // orderApprovalDate: string
+  // stockApprovalPendingDate: null
+  // stockApprovalDate: string
   components: ComponentList[]
   companyId: string
   owners: OwnerList[]
