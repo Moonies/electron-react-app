@@ -131,7 +131,9 @@ export default function useOrder() {
         headerName: '出荷 / 配達日',
         headerAlign: 'center',
         valueGetter: (value, row: OrderData) =>
-          row.orderType === OrderType.SALE ? row.shipmentDate : row.deliveryDate,
+          row.orderType === OrderType.SALE
+            ? row.shipmentDate ?? row.planShipmentDate
+            : row.deliveryDate ?? row.planDeliveryDate,
       },
       // { field: 'paymentDueDate', headerName: '支払期限', headerAlign: 'center' },
     ],
@@ -282,6 +284,7 @@ export default function useOrder() {
         status: mappingStatus(result.status),
         owners: result.owners,
         deliveryDate: result.deliveryDate,
+        planDeliveryDate: result.planDeliveryDate,
       }
       return purchaseDetail
     }
@@ -380,7 +383,7 @@ export default function useOrder() {
       orderCode: formData.orderCode,
       totalAmount: formData.totalAmount,
       registrationDate: dayjs(formData.registrationDate).format('YYYY-MM-DD'),
-      deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
+      planDeliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
       invoiceNumber: formData.invoiceNumber ?? '',
       memo: formData.memo,
       purchaseCode: formData.purchaseCode ?? '',
@@ -395,7 +398,10 @@ export default function useOrder() {
     }
   }
 
-  const editPurchaseOrder = async (formData: PurchaseModalDataProps) => {
+  const editPurchaseOrder = async (
+    formData: PurchaseModalDataProps,
+    skipUpdateOrderStatus: boolean
+  ) => {
     //call update api
     switch (formData.status) {
       case PurchaseStatus.PENDING:
@@ -404,7 +410,8 @@ export default function useOrder() {
           orderCode: formData.orderCode,
           totalAmount: formData.totalAmount,
           registrationDate: dayjs(formData.registrationDate).format('YYYY-MM-DD'),
-          deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
+          planDeliveryDate: dayjs(formData.planDeliveryDate).format('YYYY-MM-DD'),
+          // deliveryDate: dayjs(formData.deliveryDate).format('YYYY-MM-DD'),
           invoiceNumber: formData.invoiceNumber ?? '',
           memo: formData.memo,
           purchaseCode: formData.purchaseCode ?? '',
@@ -420,6 +427,21 @@ export default function useOrder() {
         break
       case PurchaseStatus.CONFIRM:
       case PurchaseStatus.INSTOCK:
+        {
+          if (formData.id) {
+            await updateDeliveryDate(formData.id, dayjs(formData.deliveryDate).format('YYYY-MM-DD'))
+            if (skipUpdateOrderStatus) {
+              notificationSnackbar.success('編集完了しました。')
+              return true
+            }
+            const response = await updatePurchaseStatus(formData.id, formData.status)
+            if (response) {
+              notificationSnackbar.success('編集完了しました。')
+              return true
+            }
+          }
+        }
+        break
       case PurchaseStatus.CANCEL:
         if (formData.id) {
           const response = await updatePurchaseStatus(formData.id, formData.status)
@@ -470,6 +492,13 @@ export default function useOrder() {
 
   const updateSaleStatus = async (saleId: string, status: SaleStatus) => {
     const response = await api.sale.updateSaleStatus(saleId, status)
+    if (response.code === 200) {
+      return true
+    }
+  }
+
+  const updateDeliveryDate = async (purchaseId: string, newDeliveryDate: string) => {
+    const response = await api.purchase.updateDeliveryDate(purchaseId, newDeliveryDate)
     if (response.code === 200) {
       return true
     }
@@ -565,5 +594,6 @@ export default function useOrder() {
     updateSaleStatus,
     updatePurchaseStatus,
     updateShippingDate,
+    updateDeliveryDate,
   }
 }

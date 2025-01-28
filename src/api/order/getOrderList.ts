@@ -45,7 +45,9 @@ export interface OrderData {
   orderApprovedEmployeeName: string
   quotationRequestDate: string | Dayjs
   registDate: string | Dayjs
+  planShipmentDate: string | Dayjs
   shipmentDate: string | Dayjs
+  planDeliveryDate: string | Dayjs
   deliveryDate: string | Dayjs
   paymentDueDate: string | Dayjs
   status: string

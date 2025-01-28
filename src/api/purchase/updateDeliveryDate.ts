@@ -1,15 +1,17 @@
+import axios from 'axios'
 import { HttpRequest } from 'hooks/useHttp'
 import { ApiResponse, axiosInstance } from 'api'
-import axios from 'axios'
-import { PurchaseStatus } from 'api/purchase'
 
-export default async function updatePurchaseStatus(
+export default async function updateDeliveryDate(
   httpRequest: HttpRequest,
   purchaseId: string,
-  status: PurchaseStatus
+  newDeliveryDate: string
 ): Promise<ApiResponse<{}>> {
   const response = await httpRequest(() =>
-    axiosInstance.patch(`/api/purchases/${purchaseId}/${status}`, { id: purchaseId })
+    axiosInstance.patch(`/api/purchases/${purchaseId}`, {
+      id: purchaseId,
+      deliveryDate: newDeliveryDate,
+    })
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }

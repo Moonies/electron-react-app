@@ -31,7 +31,7 @@ export default function PurchasePage() {
     dateTypeList,
     totalRows,
     getAllPurchaseData,
-    handleSelectedSaleDetail,
+    handleSelectedPurchaseDetail,
   } = usePurchase()
   const { exportPurchaseSelected } = useExportPurchase()
   const purchaseDataGridRef = useGridApiRef()
@@ -62,7 +62,7 @@ export default function PurchasePage() {
       const selectedId = selectionModel[0]
       const selectedData = purchaseData.find(item => item.id === selectedId)
       if (selectedData) {
-        const purchaseDetail = handleSelectedSaleDetail(selectedData)
+        const purchaseDetail = handleSelectedPurchaseDetail(selectedData)
         setSelectedPurchase(purchaseDetail)
         setModalMode('view')
         setModalOpen(true)

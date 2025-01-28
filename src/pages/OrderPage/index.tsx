@@ -64,6 +64,7 @@ export default function OrderPage() {
     updateSaleStatus,
     updatePurchaseStatus,
     updateShippingDate,
+    updateDeliveryDate,
   } = useOrder()
   const orderDataGridRef = useGridApiRef()
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
@@ -187,6 +188,7 @@ export default function OrderPage() {
       message: `このデータを保存しますか。`,
     })
     if (confirmed) {
+      setLoading(true)
       if ('saleCode' in data) {
         switch (modalMode) {
           case 'add':
@@ -231,7 +233,11 @@ export default function OrderPage() {
             }
             break
           case 'edit': {
-            const response = await editPurchaseOrder(data as PurchaseModalDataProps)
+            const skipUpdateStatus = selectedPurchase?.status === data.status
+            const response = await editPurchaseOrder(
+              data as PurchaseModalDataProps,
+              skipUpdateStatus
+            )
             if (response) {
               setModalOpen(false)
               setLoading(false)
@@ -308,7 +314,6 @@ export default function OrderPage() {
   ) => {
     setLoading(true)
     if (selectedOrder && selectedOrder.orderType === OrderType.SALE) {
-      console.log(commitDate)
       if (commitDate) {
         await updateShippingDate(selectedOrder.id, dayjs(commitDate).format('YYYY-MM-DD'))
       }
@@ -318,6 +323,9 @@ export default function OrderPage() {
       handleSearch()
       setLoading(false)
     } else if (selectedOrder && selectedOrder.orderType === OrderType.PURCHASE) {
+      if (commitDate) {
+        await updateDeliveryDate(selectedOrder.id, dayjs(commitDate).format('YYYY-MM-DD'))
+      }
       const response = await updatePurchaseStatus(selectedOrder.id, status as PurchaseStatus)
       if (response) notificationSnackbar.success('編集完了しました。')
 
@@ -397,7 +405,9 @@ export default function OrderPage() {
   )
 
   const getCommitDate = (orderType: OrderType, selectedData: OrderData): string | dayjs.Dayjs =>
-    orderType === OrderType.SALE ? selectedData.shipmentDate : selectedData.deliveryDate
+    orderType === OrderType.SALE
+      ? selectedData.shipmentDate ?? selectedData.planShipmentDate
+      : selectedData.deliveryDate ?? selectedData.planDeliveryDate
 
   return (
     <Box flexGrow={1} display={'flex'} flexDirection={'column'}>

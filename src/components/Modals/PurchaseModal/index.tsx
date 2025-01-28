@@ -57,6 +57,7 @@ export type PurchaseModalDataProps = {
   // orderApprovedEmployeeName: string
   registrationDate: string | Dayjs
   deliveryDate: string | Dayjs
+  planDeliveryDate: string | Dayjs
   // quotationRequestDate: string | Dayjs
   // purchaseApprovedDate: string | Dayjs
   // stockApprovalDate: string | Dayjs
@@ -90,6 +91,7 @@ const defaultFormData: PurchaseModalDataProps = {
   memo: '',
   registrationDate: dayjs(),
   deliveryDate: dayjs(),
+  planDeliveryDate: dayjs(),
   totalAmount: 0,
   status: PurchaseStatus.PENDING,
 }
@@ -181,7 +183,6 @@ export default function PurchaseModal({
         totalAmount: totalAmount,
         component: newComponentListData as PurchaseNewComponentList[],
       })
-      // onClose()
     } catch (error) {
       console.error('Error submitting data:', error)
       // Handle error (e.g., show error message)
@@ -239,10 +240,10 @@ export default function PurchaseModal({
       disableEscapeKeyDown
       fullScreen
       TransitionComponent={Slide}
-      // keepMounted
       scroll={'paper'}
-      // aria-labelledby='purchase-modal-title'
-      // aria-describedby='purchase-modal-description'
+      disableEnforceFocus
+      aria-labelledby='purchase-modal-title'
+      aria-describedby='purchase-modal-description'
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -301,7 +302,7 @@ export default function PurchaseModal({
                   ),
                 }}
               />
-              <TextField
+              {/* <TextField
                 label='伝票番号'
                 value={formData.invoiceNumber}
                 onChange={e => handleChange('invoiceNumber', e.target.value)}
@@ -314,7 +315,7 @@ export default function PurchaseModal({
                     (currentStatus === undefined || currentStatus === 'PENDING')
                   ),
                 }}
-              />
+              /> */}
               <Autocomplete
                 options={supplierCompanyListData}
                 renderOption={(props, option) => {
@@ -348,37 +349,36 @@ export default function PurchaseModal({
                 fullWidth
               />
             </Box>
-            {/* waiting for confirm */}
             <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent='space-between'>
-              {/* <DatePicker
-                label='発注承認済'
-                value={dayjs(formData.purchaseApprovedDate)}
-                format='YYYY/MM/DD'
-                onChange={newValue =>
-                  handleChange(
-                    'purchaseApprovedDate',
-                    newValue ? newValue.format('YYYY-MM-DD') : ''
-                  )
-                }
-                sx={{ marginTop: 2, width: '25%' }}
-                readOnly={(modalMode === 'add' || modalMode === 'edit') &&
-        (currentStatus === undefined || currentStatus === 'PENDING')}
-              /> */}
-              <DatePicker
-                label='配達納期'
-                value={dayjs(formData.deliveryDate) ?? ''}
-                format='YYYY-MM-DD'
-                onChange={newValue =>
-                  handleChange('deliveryDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-                }
-                sx={{ marginTop: 2, width: '25%' }}
-                readOnly={
-                  !(
-                    (modalMode === 'add' || modalMode === 'edit') &&
-                    (currentStatus === undefined || currentStatus === 'PENDING')
-                  )
-                }
-              />
+              <Box display={'flex'} flexDirection={'row'} gap={3}>
+                <DatePicker
+                  label='配達納期'
+                  value={dayjs(formData.planDeliveryDate) ?? ''}
+                  format='YYYY-MM-DD'
+                  onChange={newValue =>
+                    handleChange('planDeliveryDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+                  }
+                  sx={{ marginTop: 2 }}
+                  readOnly={
+                    !(
+                      (modalMode === 'add' || modalMode === 'edit') &&
+                      (currentStatus === undefined || currentStatus === 'PENDING')
+                    )
+                  }
+                />
+                {(currentStatus === PurchaseStatus.CONFIRM || modalMode === 'view') && (
+                  <DatePicker
+                    label='配達日'
+                    value={dayjs(formData.deliveryDate) ?? ''}
+                    format='YYYY-MM-DD'
+                    onChange={newValue =>
+                      handleChange('deliveryDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+                    }
+                    sx={{ marginTop: 2 }}
+                    readOnly={modalMode === 'view' && currentStatus === ''}
+                  />
+                )}
+              </Box>
               {/* check length for waiting state and reload */}
               {modalMode !== 'add' && statusList.length > 0 && (
                 <TextField
@@ -534,7 +534,17 @@ export default function PurchaseModal({
             >
               キャンセル
             </Button>
-            {(!currentStatus ||
+            <Button
+              variant='outlined'
+              type='submit'
+              sx={theme => ({
+                color: 'white',
+              })}
+              aria-label='close'
+            >
+              保存
+            </Button>
+            {/* {(!currentStatus ||
               (currentStatus === PurchaseStatus.PENDING &&
                 formData.status === PurchaseStatus.PENDING) ||
               (formData.status !== currentStatus &&
@@ -550,7 +560,7 @@ export default function PurchaseModal({
               >
                 保存
               </Button>
-            )}
+            )} */}
           </DialogActions>
         )}
       </form>

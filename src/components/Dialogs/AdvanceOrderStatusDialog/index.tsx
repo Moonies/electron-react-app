@@ -108,7 +108,7 @@ export default function AdvanceOrderStatusDialog({
       </DialogTitle>
       <DialogContent>
         <Box display={'flex'} justifyContent={'space-between'} mb={1}>
-          {commitDate && (
+          {initialData.status === OrderStatus.CONFIRM && (
             <DatePicker
               label={initialData.orderType === OrderType.SALE ? '出荷日' : '配達日'}
               value={dayjs(commitDate)}
@@ -138,7 +138,7 @@ export default function AdvanceOrderStatusDialog({
           *クリックする前に現在の状態を確認してください*
         </Typography>
         <br />
-        {commitDate && (
+        {initialData.status === OrderStatus.CONFIRM && (
           <Typography variant='caption' gutterBottom>
             **クリックする前に出荷日と配達日を確認してください**
           </Typography>

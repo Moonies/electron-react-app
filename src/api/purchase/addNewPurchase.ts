@@ -18,7 +18,8 @@ export interface AddNewPurchase {
   orderCode: string //may be auto create from database
   totalAmount: number
   registrationDate: string
-  deliveryDate: string
+  // deliveryDate: string
+  planDeliveryDate: string
   invoiceNumber: string
   memo?: string
   purchaseCode: string
@@ -39,12 +40,4 @@ export default async function addNewPurchase(
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
   return { code: 200, message: 'success', data: response?.data }
-  //for beta:test
-  // let newMock = chunkArray(mockData, pageSize, page)
-
-  // await new Promise(resolve => setTimeout(resolve, 1000))
-  // return {
-  //   code: 200,
-  //   message: 'Success',
-  //   data: {},
 }
