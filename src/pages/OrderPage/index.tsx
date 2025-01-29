@@ -203,7 +203,6 @@ export default function OrderPage() {
           case 'edit':
             {
               const skipUpdateStatus = selectedSale?.status === data.status
-              console.log(skipUpdateStatus)
               const response = await editSaleOrder(data, skipUpdateStatus)
               if (response) {
                 setModalOpen(false)

@@ -26,7 +26,8 @@ export interface NewSaleDetailProps {
   // allocation: string
   // quotationDate: string
   // billingDate: string
-  shipmentDate: string
+  planShipmentDate: string
+  // shipmentDate: string
   products: ProductDetail[]
   owners: OwnerDetail[]
   companyId: string

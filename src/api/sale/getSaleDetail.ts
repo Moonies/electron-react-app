@@ -44,8 +44,9 @@ export interface SaleDetail {
   orderCode: string
   totalAmount: number
   registrationDate: string
-  deliveryDate: string | Dayjs
+  // deliveryDate: string | Dayjs
   shipmentDate: string | Dayjs
+  planShipmentDate: string | Dayjs
   invoiceNumber: string
   memo: string
   status: string

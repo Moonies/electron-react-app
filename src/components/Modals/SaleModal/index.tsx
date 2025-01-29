@@ -73,6 +73,7 @@ export type SaleModalDataProps = {
   // paymentDueDate: Dayjs | string
   registrationDate: Dayjs | string
   shippingmentDate: Dayjs | string
+  planShipmentDate: Dayjs | string
   status: string
   totalAmount: number
   owners: {
@@ -98,6 +99,7 @@ const defaultFormData = {
   totalAmount: 0,
   registrationDate: dayjs(),
   shippingmentDate: dayjs(),
+  planShipmentDate: dayjs(),
   status: OrderStatus.PENDING,
   owners: [],
 }
@@ -149,7 +151,7 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
   }, [])
 
   const handleChange = async (field: keyof SaleModalDataProps, value: string | number) => {
-    if (field === 'status' && value === 'CONFIRMED') {
+    if (field === 'status' && value === 'CONFIRM') {
       const confirmed = await openConfirmModal({
         title: 'ご注意ください',
         message:
@@ -234,9 +236,11 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
       disableEscapeKeyDown
       fullScreen
       TransitionComponent={Slide}
-      keepMounted
+      // keepMounted
       scroll={'paper'}
       fullWidth
+      aria-labelledby='sale-modal-title'
+      aria-describedby='sale-modal-description'
     >
       <DialogTitle>
         <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -360,30 +364,12 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
             <Box display={'flex'} flexDirection={'row'} gap={2} justifyContent='space-between'>
               <Box display={'flex'} flexDirection={'row'} gap={3}>
                 {/* plan shipping date */}
-                {/* <DatePicker
-                  label='出荷予定日'
-                  value={dayjs(formData.shippingmentDate)}
-                  format='YYYY/MM/DD'
-                  onChange={newValue =>
-                    handleChange('shippingmentDate', newValue ? newValue.format('YYYY-MM-DD') : '')
-                  }
-                  sx={{ marginTop: 2 }}
-                  readOnly={
-                    !(
-                      (modalMode === 'add' || modalMode === 'edit') &&
-                      (currentStatus === undefined || currentStatus === 'PENDING')
-                    )
-                  }
-                  // readOnly={modalMode === 'view' && currentStatus === ''}
-                /> */}
-                {/* real shipping */}
-                {/* {(currentStatus === SaleStatus.CONFIRM || modalMode === 'view') && ( */}
                 <DatePicker
-                  label='出荷日'
-                  value={dayjs(formData.shippingmentDate)}
+                  label='出荷予定日'
+                  value={dayjs(formData.planShipmentDate)}
                   format='YYYY/MM/DD'
                   onChange={newValue =>
-                    handleChange('shippingmentDate', newValue ? newValue.format('YYYY-MM-DD') : '')
+                    handleChange('planShipmentDate', newValue ? newValue.format('YYYY-MM-DD') : '')
                   }
                   sx={{ marginTop: 2 }}
                   readOnly={
@@ -392,9 +378,23 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
                       (currentStatus === undefined || currentStatus === 'PENDING')
                     )
                   }
-                  // readOnly={modalMode === 'view' && currentStatus === ''}
                 />
-                {/* )} */}
+                {/* real shipping */}
+                {(currentStatus === SaleStatus.CONFIRM || modalMode === 'view') && (
+                  <DatePicker
+                    label='出荷日'
+                    value={dayjs(formData.shippingmentDate)}
+                    format='YYYY/MM/DD'
+                    onChange={newValue =>
+                      handleChange(
+                        'shippingmentDate',
+                        newValue ? newValue.format('YYYY-MM-DD') : ''
+                      )
+                    }
+                    sx={{ marginTop: 2 }}
+                    readOnly={modalMode === 'view' && currentStatus === ''}
+                  />
+                )}
               </Box>
               {/* check length for waiting state and reload */}
               {modalMode !== 'add' && statusList.length > 0 && (
@@ -545,16 +545,16 @@ export default function SaleModal({ open, onClose, onConfirm, initialData, mode 
         </DialogContent>
         {(currentStatus !== '' || modalMode !== 'view') && (
           <DialogActions>
-            <Button onClick={onClose} variant='contained'>
+            <Button onClick={onClose} variant='contained' aria-label='close'>
               キャンセル
             </Button>
             <Button
               type='submit'
-              // onClick={handleSubmit}
               variant='outlined'
               sx={theme => ({
                 color: 'white',
               })}
+              aria-label='close'
             >
               保存
             </Button>
