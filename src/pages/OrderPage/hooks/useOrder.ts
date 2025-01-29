@@ -251,6 +251,7 @@ export default function useOrder() {
         product: result.products,
         registrationDate: result.registrationDate,
         shippingmentDate: result.shipmentDate,
+        planShipmentDate: result.planShipmentDate,
         status: mappingStatus(result.status),
         totalAmount: result.totalAmount,
         owners: result.owners,
@@ -299,7 +300,8 @@ export default function useOrder() {
         useCanBeMadeInQuantity: true,
       })),
       registrationDate: dayjs().format('YYYY-MM-DD'),
-      shipmentDate: dayjs(formData.shippingmentDate).format('YYYY-MM-DD'),
+      // shipmentDate: dayjs(formData.shippingmentDate).format('YYYY-MM-DD'),
+      planShipmentDate: dayjs(formData.planShipmentDate).format('YYYY-MM-DD'),
       invoiceNumber: formData.invoiceNumber,
       owners: formData.owners,
       saleCode: formData.saleCode,
@@ -321,7 +323,9 @@ export default function useOrder() {
           orderCode: formData.orderCode,
           totalAmount: formData.totalAmount,
           registrationDate: dayjs(formData.registrationDate).format('YYYY-MM-DD'),
-          shipmentDate: dayjs(formData.shippingmentDate).format('YYYY-MM-DD'),
+          // shipmentDate: dayjs(formData.shippingmentDate).format('YYYY-MM-DD'),
+          planShipmentDate: dayjs(formData.planShipmentDate).format('YYYY-MM-DD'),
+
           invoiceNumber: formData.invoiceNumber ?? '',
           memo: formData.memo,
           saleCode: formData.saleCode ?? '',
@@ -338,7 +342,6 @@ export default function useOrder() {
           return true
         }
         break
-      // case SaleStatus.ON_DELIVERY:
       case SaleStatus.CONFIRM:
       case SaleStatus.DELIVERED:
         {
@@ -402,7 +405,6 @@ export default function useOrder() {
     formData: PurchaseModalDataProps,
     skipUpdateOrderStatus: boolean
   ) => {
-    //call update api
     switch (formData.status) {
       case PurchaseStatus.PENDING:
         let data: NewPurchaseDetail = {

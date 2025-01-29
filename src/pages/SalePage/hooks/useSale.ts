@@ -139,6 +139,7 @@ export default function useSales() {
       product: selectedSaleOrder.products,
       registrationDate: selectedSaleOrder.registrationDate,
       shippingmentDate: selectedSaleOrder.shipmentDate,
+      planShipmentDate: selectedSaleOrder.planShipmentDate,
       status: mappingStatus(selectedSaleOrder.status),
       totalAmount: selectedSaleOrder.totalAmount,
       owners: selectedSaleOrder.owners,
