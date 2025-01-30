@@ -2,23 +2,23 @@ import { axiosInstance, ApiResponse } from 'api'
 import axios from 'axios'
 import { HttpRequest } from 'hooks/useHttp'
 
-export interface UpdateUserData {
+export interface UpdatePasswordData {
   username: string
-  id: string
-  password?: string
-  name: string
-  roleId: string
-  number: string
-  mail: string
+  password: string
+  rePasswordCode: string
 }
 
-export default async function updateUser(
+export default async function updatePassword(
   httpRequest: HttpRequest,
-  newDataUser: UpdateUserData
-): Promise<ApiResponse<null>> {
+  { username, password, rePasswordCode }: UpdatePasswordData
+): Promise<ApiResponse<{}>> {
   // when use real API
   const response = await httpRequest(() =>
-    axiosInstance.patch('/api/users/' + newDataUser.id, { ...newDataUser })
+    axiosInstance.put('/api/users/update-password', {
+      username: username,
+      newPassword: password,
+      resetPassword: rePasswordCode,
+    })
   )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }

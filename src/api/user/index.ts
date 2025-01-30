@@ -5,6 +5,8 @@ import { default as addNewUser, AddNewUserData } from './addNewUser'
 import { default as deleteUser } from './deleteUser'
 import { default as updateUser, UpdateUserData } from './updateUser'
 import { default as getNewToken } from './getNewToken'
+import { default as getResetPasswordCode } from './getResetPasswordCode'
+import { default as updatePassword, UpdatePasswordData } from './updatePassword'
 import { HttpRequest } from 'hooks/useHttp'
 import { ApiResponse } from 'api'
 
@@ -16,6 +18,8 @@ export interface UserApi {
   getUserDetail: (username: string) => Promise<ApiResponse<UserDetail>>
   getUserList: (page?: number, pageSize?: number) => Promise<ApiResponse<UserData[]>>
   updateUser: (params: UpdateUserData) => Promise<ApiResponse<null>>
+  getResetPasswordCode: (email: string) => Promise<ApiResponse<{}>>
+  updatePassword: (params: UpdatePasswordData) => Promise<ApiResponse<{}>>
 }
 
 export default function user(httpRequest: HttpRequest): UserApi {
@@ -27,5 +31,7 @@ export default function user(httpRequest: HttpRequest): UserApi {
     getUserDetail: username => getUserDetail(httpRequest, username),
     getUserList: (page, pageSize) => getUserList(httpRequest, page, pageSize),
     updateUser: params => updateUser(httpRequest, params),
+    getResetPasswordCode: email => getResetPasswordCode(httpRequest, email),
+    updatePassword: params => updatePassword(httpRequest, params),
   }
 }

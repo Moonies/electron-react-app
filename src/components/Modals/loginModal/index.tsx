@@ -1,11 +1,20 @@
 import React, { useState } from 'react'
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material'
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Box,
+} from '@mui/material'
 import useLoading from 'hooks/useLoading'
 import { useNavigate } from 'react-router-dom'
 import useNotification from 'hooks/useNotification'
 import useAuth from 'hooks/useAuth'
 import useApiConfig from 'hooks/useApiConfig'
 import useApi from 'hooks/useHttp'
+import ResetPasswordDialog from 'components/Dialogs/ResetPasswordDialog'
 
 interface LoginModalProps {
   open: boolean
@@ -21,8 +30,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
   const { setUserLogin, removeUserLogin, setToken } = useAuth()
   const { resetConfig } = useApiConfig()
   const { withLoading, setLoading } = useLoading()
+  const [openDialog, setOpenDialog] = useState(false)
   const { api } = useApi()
   const navigate = useNavigate()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     // navigate('/')
@@ -71,6 +82,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
       onClose
     }
   }
+
+  const handleForgotPassword = async (email: string) => {
+    const result = await withLoading(api.user.getResetPasswordCode(email))
+    if (result.code === 200) {
+      notificationModal.info('reset password Effective for 20 minutes.')
+      setOpenDialog(false)
+    }
+  }
   return (
     <Dialog open={open} onClose={handleClose} disableEscapeKeyDown={true}>
       <DialogTitle>ログイン</DialogTitle>
@@ -95,10 +114,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onSuccess, onErr
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
+          <ResetPasswordDialog
+            onClose={() => setOpenDialog(false)}
+            onSubmit={handleForgotPassword}
+            open={openDialog}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>キャンセル</Button>
-          <Button type='submit'>ログイン</Button>
+          <Box display={'flex'} marginRight={'auto'}>
+            <Button onClick={() => setOpenDialog(true)}>forgot password</Button>
+          </Box>
+          <Box display={'flex'}>
+            <Button onClick={onClose}>キャンセル</Button>
+            <Button type='submit'>ログイン</Button>
+          </Box>
         </DialogActions>
       </form>
     </Dialog>

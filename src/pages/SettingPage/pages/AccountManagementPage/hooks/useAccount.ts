@@ -23,7 +23,7 @@ export default function useAccount() {
     pageSize: 100,
   })
   const [cachedData, setCachedData] = useState<CachedData>({})
-  const { notificationModal } = useNotification()
+  const { notificationModal, notificationSnackbar } = useNotification()
   const { api } = useHttp()
   const { withLoading, setLoading } = useLoading()
 
@@ -43,7 +43,7 @@ export default function useAccount() {
         headerName: '役柄',
         headerAlign: 'center',
         // minWidth: 200,
-        valueGetter: (value: { id: string; label: string }) => value.label, //now backend is progressing
+        valueGetter: (value: { id: string; label: string }) => value?.label, //now backend is progressing
       },
     ],
     []
@@ -88,6 +88,19 @@ export default function useAccount() {
     // setLoading(false)
   }
 
+  const handleUpdatePassword = async (
+    password: string,
+    rePasswordCode: string,
+    username: string
+  ) => {
+    const result = await api.user.updatePassword({ username, password, rePasswordCode })
+    if (result.code === 200) {
+      notificationSnackbar.success('パスワードを編集完了しました!!')
+      setLoading(false)
+      return true
+    }
+  }
+
   const handlePaginationModelChange = (newModel: PaginationModel) => {
     setPaginationModel(newModel)
     if (newModel.pageSize !== paginationModel.pageSize) {
@@ -116,5 +129,6 @@ export default function useAccount() {
     addNewUser,
     deleteUser,
     updateUser,
+    handleUpdatePassword,
   }
 }
