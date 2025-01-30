@@ -14,6 +14,7 @@ import {
   // Search as SearchIcon,
   Add as AddIcon,
   Edit as EditIcon,
+  Key as KeyIcon,
 } from '@mui/icons-material'
 import DataTable from 'components/DataTable'
 import { GridRowSelectionModel, useGridApiRef } from '@mui/x-data-grid'
@@ -22,11 +23,13 @@ import useNotification from 'hooks/useNotification'
 import useAccount from './hooks/useAccount'
 import AccountManagementModal, { ModalInitalData } from 'components/Modals/AccountManagementModal'
 import { UserData } from 'api/user/getUserList'
+import ResetPasswordModal from 'components/Modals/ResetPasswordModal'
 
 export default function AccountManagementPage() {
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>([])
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false)
   const { notificationModal } = useNotification()
   const { openConfirmModal } = useConfirmModal()
   const accountDataGridRef = useGridApiRef()
@@ -42,6 +45,7 @@ export default function AccountManagementPage() {
     addNewUser,
     deleteUser,
     updateUser,
+    handleUpdatePassword,
   } = useAccount()
 
   useEffect(() => {
@@ -147,6 +151,37 @@ export default function AccountManagementPage() {
     }
   }
 
+  const handleResetPassword = useCallback(() => {
+    if (selectionModel.length === 1) {
+      const selectedId = selectionModel[0]
+      const selectedData = userListData.find(user => user.id === selectedId)
+      if (selectedData) {
+        setSelectedUser(selectedData)
+        setResetPasswordModalOpen(true)
+      }
+    } else {
+      notificationModal.error('リセットする表の行を選択してください。')
+    }
+  }, [selectionModel])
+
+  const handleSubmitResetPassword = async (newPassword: string, rePasswordCode: string) => {
+    const confirmed = await openConfirmModal({
+      title: '確認してください',
+      message: 'このデータを保存しますか。',
+    })
+    if (confirmed) {
+      const response = await handleUpdatePassword(
+        newPassword,
+        rePasswordCode,
+        selectedUser?.username ?? ''
+      )
+      if (response) {
+        setResetPasswordModalOpen(false)
+        getUserList(paginationModel)
+      }
+    }
+  }
+
   const filteredRows = () => {
     return userListData.filter(row =>
       Object.values(row).some(value =>
@@ -230,11 +265,11 @@ export default function AccountManagementPage() {
               </StyledButton>
               <StyledButton
                 variant='outlined'
-                startIcon={<EditIcon />}
+                startIcon={<KeyIcon />}
                 size='large'
-                sx={{ visibility: 'hidden' }}
+                onClick={handleResetPassword}
               >
-                visible
+                パスリセット
               </StyledButton>
             </Box>
           </Box>
@@ -257,6 +292,13 @@ export default function AccountManagementPage() {
           onConfirm={handleModalConfirm}
           initialData={selectedUser}
           mode={modalMode}
+        />
+      )}
+      {resetPasswordModalOpen && (
+        <ResetPasswordModal
+          open={resetPasswordModalOpen}
+          onSubmit={handleSubmitResetPassword}
+          onClose={() => setResetPasswordModalOpen(false)}
         />
       )}
     </Box>
