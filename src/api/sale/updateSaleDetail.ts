@@ -37,7 +37,9 @@ export default async function updateSaleDetail(
   httpRequest: HttpRequest,
   newSaleDetail: NewSaleDetailProps
 ): Promise<ApiResponse<{}>> {
-  const response = await httpRequest(() => axiosInstance.put('/api/sales', { ...newSaleDetail }))
+  const response = await httpRequest(() =>
+    axiosInstance.put(`/api/sales/${newSaleDetail.id}`, { ...newSaleDetail })
+  )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }

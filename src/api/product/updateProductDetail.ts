@@ -26,7 +26,9 @@ export default async function updateProductDetail(
   httpRequest: HttpRequest,
   data: NewProductDetailProps
 ): Promise<ApiResponse<{}>> {
-  const response = await httpRequest(() => axiosInstance.put('/api/products', { ...data }))
+  const response = await httpRequest(() =>
+    axiosInstance.put(`/api/products/${data.id}`, { ...data })
+  )
   if (axios.isAxiosError(response)) {
     return { code: response?.code ?? 500, message: response.message, data: undefined }
   }
